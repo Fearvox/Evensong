@@ -51,7 +51,7 @@ Plans:
 
 Plans:
 - [x] 02-01-PLAN.md — Shared ToolUseContext test factory + BashTool integration tests (error propagation, exit codes)
-- [ ] 02-02-PLAN.md — FileEditTool (atomic write, corruption prevention) + GrepTool (binary skip, large results) integration tests
+- [x] 02-02-PLAN.md — FileEditTool (atomic write, corruption prevention) + GrepTool (binary skip, large results) integration tests
 - [x] 02-03-PLAN.md — AgentTool context propagation tests + full tool test suite verification
 
 ### Phase 3: API & Streaming Resilience
