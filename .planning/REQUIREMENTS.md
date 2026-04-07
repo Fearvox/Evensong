@@ -17,11 +17,11 @@ Requirements for engineering maturity milestone. Each maps to roadmap phases.
 
 ### Tool Reliability
 
-- [ ] **TOOL-01**: BashTool correctly propagates errors, handles timeouts, and reports exit codes
+- [x] **TOOL-01**: BashTool correctly propagates errors, handles timeouts, and reports exit codes
 - [ ] **TOOL-02**: FileEditTool applies diffs without file corruption under partial writes
 - [ ] **TOOL-03**: GrepTool handles large result sets and binary file detection
 - [ ] **TOOL-04**: AgentTool subagent recursion works with correct ToolUseContext propagation
-- [ ] **TOOL-05**: Each core tool has integration tests covering happy path and error cases
+- [x] **TOOL-05**: Each core tool has integration tests covering happy path and error cases
 
 ### API & Streaming
 
@@ -47,7 +47,7 @@ Requirements for engineering maturity milestone. Each maps to roadmap phases.
 ### Testing
 
 - [x] **TEST-01**: ink-testing-library installed and verified working with Bun runtime
-- [ ] **TEST-02**: Core tool modules have integration test suites (BashTool, FileEditTool, GrepTool)
+- [x] **TEST-02**: Core tool modules have integration test suites (BashTool, FileEditTool, GrepTool)
 - [ ] **TEST-03**: API streaming has tests covering retry, timeout, abort, and provider switching
 - [ ] **TEST-04**: Query loop has tests covering multi-turn, compaction, and abort scenarios
 - [x] **TEST-05**: Test coverage tracking established for recovered modules
@@ -112,12 +112,12 @@ Requirements for engineering maturity milestone. Each maps to roadmap phases.
 | TYPE-05 | Phase 1 | Complete |
 | TEST-01 | Phase 1 | Complete |
 | TEST-05 | Phase 1 | Complete |
-| TOOL-01 | Phase 2 | Pending |
+| TOOL-01 | Phase 2 | Complete |
 | TOOL-02 | Phase 2 | Pending |
 | TOOL-03 | Phase 2 | Pending |
 | TOOL-04 | Phase 2 | Pending |
-| TOOL-05 | Phase 2 | Pending |
-| TEST-02 | Phase 2 | Pending |
+| TOOL-05 | Phase 2 | Complete |
+| TEST-02 | Phase 2 | Complete |
 | API-01 | Phase 3 | Pending |
 | API-02 | Phase 3 | Pending |
 | API-03 | Phase 3 | Pending |
