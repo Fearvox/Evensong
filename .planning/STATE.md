@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: Completed 01-01-PLAN.md
-last_updated: "2026-04-07T17:12:25.688Z"
+stopped_at: Completed 01-02-PLAN.md
+last_updated: "2026-04-07T17:18:00.526Z"
 last_activity: 2026-04-07 -- Phase 1 planning complete
 progress:
   total_phases: 6
-  completed_phases: 0
+  completed_phases: 1
   total_plans: 2
-  completed_plans: 1
-  percent: 50
+  completed_plans: 2
+  percent: 100
 ---
 
 # Project State
@@ -53,6 +53,7 @@ Progress: [░░░░░░░░░░] 0%
 
 *Updated after each plan completion*
 | Phase 01 P01 | 6min | 2 tasks | 5 files |
+| Phase 01 P02 | 4min | 2 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -66,6 +67,7 @@ Recent decisions affecting current work:
 - Init: Tests start from pure functions (lowest-risk entry for decompiled code)
 - [Phase 01]: Created strict-shims.d.ts with minimal structural types for Bun-resolved packages
 - [Phase 01]: noUncheckedIndexedAccess disabled for Phase 1 -- too aggressive for decompiled code
+- [Phase 01]: Zod schema covers exactly 7 event types from claude.ts switch -- parse what we use, passthrough what we don't
 
 ### Pending Todos
 
@@ -78,6 +80,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-07T17:12:25.686Z
-Stopped at: Completed 01-01-PLAN.md
+Last session: 2026-04-07T17:18:00.524Z
+Stopped at: Completed 01-02-PLAN.md
 Resume file: None

@@ -35,7 +35,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 
 Plans:
 - [x] 01-01-PLAN.md — Strict-mode tsconfig overlay + core type hardening (message.ts, permissions.ts, state layer) + type shape test scaffolding
-- [ ] 01-02-PLAN.md — Zod stream event schema at API boundary + coverage tracking established
+- [x] 01-02-PLAN.md — Zod stream event schema at API boundary + coverage tracking established
 
 ### Phase 2: Core Tool Reliability
 **Goal**: The four core tools (Bash, FileEdit, Grep, Agent) handle their failure modes correctly and have integration tests proving it
