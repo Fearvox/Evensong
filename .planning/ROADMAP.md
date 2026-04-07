@@ -47,7 +47,12 @@ Plans:
   3. GrepTool run against a directory containing binary files returns text matches and skips binaries without crashing
   4. AgentTool nested subagent invocation receives the correct `ToolUseContext` — the subagent can call tools
   5. `bun test` includes integration test suites for all four tools, covering happy path and at least one error case each
-**Plans**: TBD
+**Plans**: 3 plans
+
+Plans:
+- [ ] 02-01-PLAN.md — Shared ToolUseContext test factory + BashTool integration tests (error propagation, exit codes)
+- [ ] 02-02-PLAN.md — FileEditTool (atomic write, corruption prevention) + GrepTool (binary skip, large results) integration tests
+- [ ] 02-03-PLAN.md — AgentTool context propagation tests + full tool test suite verification
 
 ### Phase 3: API & Streaming Resilience
 **Goal**: The streaming layer recovers from network errors automatically; provider switching requires no code changes; aborted streams leave history intact
@@ -105,8 +110,8 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Foundation Hardening | 0/2 | Planned | - |
-| 2. Core Tool Reliability | 0/TBD | Not started | - |
+| 1. Foundation Hardening | 2/2 | Complete | 2026-04-07 |
+| 2. Core Tool Reliability | 0/3 | Planned | - |
 | 3. API & Streaming Resilience | 0/TBD | Not started | - |
 | 4. Query Loop & Permission System | 0/TBD | Not started | - |
 | 5. Feature Flags & MCP Transport | 0/TBD | Not started | - |
