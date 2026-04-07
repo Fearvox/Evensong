@@ -13,8 +13,8 @@
  * - head_limit truncation: large result sets are bounded
  * - No matches: graceful empty result (not a crash)
  */
-import { describe, test, expect, beforeEach, afterEach } from 'bun:test'
-import { mkdtemp, rm, writeFile } from 'fs/promises'
+import { describe, test, expect, beforeEach, afterEach, mock } from 'bun:test'
+import { mkdtemp, rm } from 'fs/promises'
 import { writeFileSync } from 'fs'
 import { tmpdir } from 'os'
 import { join } from 'path'
@@ -25,25 +25,21 @@ process.env.USE_BUILTIN_RIPGREP = 'false'
 // Test mode for deterministic sort order
 process.env.NODE_ENV = 'test'
 
-// Lazy import to avoid circular dependency (GlobTool.UI references GrepTool at load time)
+// Break circular dependency: GlobTool/UI.tsx eagerly imports GrepTool at module
+// level (line 10) and accesses GrepTool.renderToolResultMessage (line 53) before
+// GrepTool finishes initializing. Mock GlobTool/UI to prevent the cycle.
+mock.module('../../GlobTool/UI.js', () => ({
+  userFacingName: () => 'Glob',
+  renderToolResultMessage: () => null,
+  getToolUseSummary: () => null,
+  renderToolUseMessage: () => null,
+  renderToolUseErrorMessage: () => null,
+}))
+
+// Lazy import after mock is registered
 async function getGrepTool() {
   const mod = await import('../GrepTool.js')
   return mod.GrepTool
-}
-
-// Mock canUseTool: always allow
-const mockCanUseTool = async () => ({ result: 'allow' as const })
-
-// Mock parent assistant message
-const mockParentMessage = {
-  type: 'assistant' as const,
-  content: [
-    { type: 'tool_use', id: 'test-grep-id', name: 'Grep', input: {} },
-  ],
-  message: { role: 'assistant' as const, content: [] },
-  costUSD: 0,
-  durationMs: 0,
-  uuid: 'test-grep-uuid',
 }
 
 let testDir: string
@@ -65,20 +61,19 @@ describe('GrepTool', () => {
 
     const ctx = createTestToolUseContext()
 
-    const result = await GrepTool.call(
+    // GrepTool.call() takes (input, context) — 2 args
+    const result = await (GrepTool as any).call(
       {
         pattern: 'World',
         path: testDir,
         output_mode: 'files_with_matches',
       },
-      ctx as any,
-      mockCanUseTool as any,
-      mockParentMessage as any,
+      ctx,
     )
 
     expect(result.data.numFiles).toBe(2)
     // Both files contain "World"
-    const filenames = result.data.filenames.join('\n')
+    const filenames = (result.data.filenames as string[]).join('\n')
     expect(filenames).toContain('alpha.txt')
     expect(filenames).toContain('beta.txt')
   })
@@ -89,16 +84,14 @@ describe('GrepTool', () => {
 
     const ctx = createTestToolUseContext()
 
-    const result = await GrepTool.call(
+    const result = await (GrepTool as any).call(
       {
         pattern: 'MATCH',
         path: testDir,
         output_mode: 'content',
         '-n': true,
       },
-      ctx as any,
-      mockCanUseTool as any,
-      mockParentMessage as any,
+      ctx,
     )
 
     expect(result.data.mode).toBe('content')
@@ -113,7 +106,7 @@ describe('GrepTool', () => {
     writeFileSync(join(testDir, 'text.txt'), 'SearchPattern in text\n')
 
     // Create a binary file with null bytes (ripgrep classifies as binary)
-    const binaryContent = Buffer.from([
+    const binaryContent = new Uint8Array([
       0x00, 0x01, 0x02, 0xff,
       // "SearchPattern" in ASCII, but preceded by null bytes
       0x53, 0x65, 0x61, 0x72, 0x63, 0x68,
@@ -124,22 +117,20 @@ describe('GrepTool', () => {
 
     const ctx = createTestToolUseContext()
 
-    const result = await GrepTool.call(
+    const result = await (GrepTool as any).call(
       {
         pattern: 'SearchPattern',
         path: testDir,
         output_mode: 'files_with_matches',
       },
-      ctx as any,
-      mockCanUseTool as any,
-      mockParentMessage as any,
+      ctx,
     )
 
     // Only the text file should match, binary should be skipped
     expect(result.data.numFiles).toBe(1)
     expect(result.data.filenames[0]).toContain('text.txt')
     // Binary file should NOT appear in results
-    const allFilenames = result.data.filenames.join('\n')
+    const allFilenames = (result.data.filenames as string[]).join('\n')
     expect(allFilenames).not.toContain('binary.bin')
   })
 
@@ -153,16 +144,14 @@ describe('GrepTool', () => {
 
     const ctx = createTestToolUseContext()
 
-    const result = await GrepTool.call(
+    const result = await (GrepTool as any).call(
       {
         pattern: 'MATCHME',
         path: testDir,
         output_mode: 'files_with_matches',
         head_limit: 5,
       },
-      ctx as any,
-      mockCanUseTool as any,
-      mockParentMessage as any,
+      ctx,
     )
 
     // Should have at most 5 results despite 20 files matching
@@ -178,15 +167,13 @@ describe('GrepTool', () => {
 
     const ctx = createTestToolUseContext()
 
-    const result = await GrepTool.call(
+    const result = await (GrepTool as any).call(
       {
         pattern: 'ZZZZNONEXISTENT',
         path: testDir,
         output_mode: 'files_with_matches',
       },
-      ctx as any,
-      mockCanUseTool as any,
-      mockParentMessage as any,
+      ctx,
     )
 
     expect(result.data.numFiles).toBe(0)
