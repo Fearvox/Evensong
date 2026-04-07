@@ -20,7 +20,7 @@ Requirements for engineering maturity milestone. Each maps to roadmap phases.
 - [x] **TOOL-01**: BashTool correctly propagates errors, handles timeouts, and reports exit codes
 - [ ] **TOOL-02**: FileEditTool applies diffs without file corruption under partial writes
 - [ ] **TOOL-03**: GrepTool handles large result sets and binary file detection
-- [ ] **TOOL-04**: AgentTool subagent recursion works with correct ToolUseContext propagation
+- [x] **TOOL-04**: AgentTool subagent recursion works with correct ToolUseContext propagation
 - [x] **TOOL-05**: Each core tool has integration tests covering happy path and error cases
 
 ### API & Streaming
@@ -115,7 +115,7 @@ Requirements for engineering maturity milestone. Each maps to roadmap phases.
 | TOOL-01 | Phase 2 | Complete |
 | TOOL-02 | Phase 2 | Pending |
 | TOOL-03 | Phase 2 | Pending |
-| TOOL-04 | Phase 2 | Pending |
+| TOOL-04 | Phase 2 | Complete |
 | TOOL-05 | Phase 2 | Complete |
 | TEST-02 | Phase 2 | Complete |
 | API-01 | Phase 3 | Pending |
