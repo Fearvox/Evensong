@@ -27,6 +27,7 @@
     "src/types/strict-shims.d.ts",
     "src/tools/__tests__/createTestToolUseContext.ts",
     "src/tools/BashTool/__tests__/BashTool.test.ts",
-    "src/tools/FileEditTool/__tests__/FileEditTool.test.ts"
+    "src/tools/FileEditTool/__tests__/FileEditTool.test.ts",
+    "src/tools/AgentTool/__tests__/AgentTool.test.ts"
   ]
 }
