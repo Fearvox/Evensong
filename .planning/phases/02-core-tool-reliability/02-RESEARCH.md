@@ -276,17 +276,15 @@ context.readFileState.set(filePath, {
 | A2 | bun test supports beforeEach/afterEach for test isolation | Architecture Patterns | If not supported, use setup/teardown inside each test; very likely supported based on existing test patterns |
 | A3 | createSubagentContext can be imported and tested independently without pulling entire query loop | Pitfall 5 | If import fails, may need to extract into a testable module; medium risk |
 
-## Open Questions
+## Open Questions (RESOLVED)
 
-1. **Mock depth for AgentTool**
+1. **Mock depth for AgentTool** — RESOLVED: test createSubagentContext directly; use mock.module() if import fails due to transitive side effects.
    - What we know: `createSubagentContext()` is the key function for TOOL-04. It's in `forkedAgent.ts` which imports from many modules.
-   - What's unclear: Whether importing `forkedAgent.ts` in a test triggers side effects that break.
-   - Recommendation: Try direct import first. If it fails, create a focused test that manually constructs ToolUseContext objects and verifies the transformation logic.
+   - Decision: Try direct import first. If it fails, create a focused test that manually constructs ToolUseContext objects and verifies the transformation logic.
 
-2. **BashTool sandbox interaction**
+2. **BashTool sandbox interaction** — RESOLVED: set CLAUDE_CODE_DISABLE_SANDBOX=1 in test environment.
    - What we know: BashTool uses `SandboxManager` which may affect test execution.
-   - What's unclear: Whether sandbox is active in test mode.
-   - Recommendation: Set `CLAUDE_CODE_DISABLE_SANDBOX=1` in test environment if sandbox interferes.
+   - Decision: Set `CLAUDE_CODE_DISABLE_SANDBOX=1` in test environment if sandbox interferes.
 
 ## Validation Architecture
 
