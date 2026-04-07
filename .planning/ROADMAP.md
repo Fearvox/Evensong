@@ -34,7 +34,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 **Plans**: 2 plans
 
 Plans:
-- [ ] 01-01-PLAN.md — Strict-mode tsconfig overlay + core type hardening (message.ts, permissions.ts, state layer) + type shape test scaffolding
+- [x] 01-01-PLAN.md — Strict-mode tsconfig overlay + core type hardening (message.ts, permissions.ts, state layer) + type shape test scaffolding
 - [ ] 01-02-PLAN.md — Zod stream event schema at API boundary + coverage tracking established
 
 ### Phase 2: Core Tool Reliability

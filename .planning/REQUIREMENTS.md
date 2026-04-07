@@ -9,9 +9,9 @@ Requirements for engineering maturity milestone. Each maps to roadmap phases.
 
 ### Type Safety
 
-- [ ] **TYPE-01**: Core type definitions (message.ts, permissions.ts) have correct, non-decompiled types
-- [ ] **TYPE-02**: tsconfig.strict.json overlay enforces strict mode on all new/recovered files
-- [ ] **TYPE-03**: State layer types (AppStateStore, bootstrap singletons) are correctly annotated
+- [x] **TYPE-01**: Core type definitions (message.ts, permissions.ts) have correct, non-decompiled types
+- [x] **TYPE-02**: tsconfig.strict.json overlay enforces strict mode on all new/recovered files
+- [x] **TYPE-03**: State layer types (AppStateStore, bootstrap singletons) are correctly annotated
 - [ ] **TYPE-04**: Tool interface type (Tool.ts) uses precise generics instead of unknown/never/{}
 - [ ] **TYPE-05**: API client boundary types match Anthropic SDK BetaRawMessageStreamEvent shape (verified with Zod)
 
@@ -46,7 +46,7 @@ Requirements for engineering maturity milestone. Each maps to roadmap phases.
 
 ### Testing
 
-- [ ] **TEST-01**: ink-testing-library installed and verified working with Bun runtime
+- [x] **TEST-01**: ink-testing-library installed and verified working with Bun runtime
 - [ ] **TEST-02**: Core tool modules have integration test suites (BashTool, FileEditTool, GrepTool)
 - [ ] **TEST-03**: API streaming has tests covering retry, timeout, abort, and provider switching
 - [ ] **TEST-04**: Query loop has tests covering multi-turn, compaction, and abort scenarios
@@ -105,12 +105,12 @@ Requirements for engineering maturity milestone. Each maps to roadmap phases.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| TYPE-01 | Phase 1 | Pending |
-| TYPE-02 | Phase 1 | Pending |
-| TYPE-03 | Phase 1 | Pending |
+| TYPE-01 | Phase 1 | Complete |
+| TYPE-02 | Phase 1 | Complete |
+| TYPE-03 | Phase 1 | Complete |
 | TYPE-04 | Phase 1 | Pending |
 | TYPE-05 | Phase 1 | Pending |
-| TEST-01 | Phase 1 | Pending |
+| TEST-01 | Phase 1 | Complete |
 | TEST-05 | Phase 1 | Pending |
 | TOOL-01 | Phase 2 | Pending |
 | TOOL-02 | Phase 2 | Pending |
