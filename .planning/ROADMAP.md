@@ -64,7 +64,12 @@ Plans:
   3. Setting the provider env var to Bedrock or Vertex results in successful API calls without editing source code
   4. Aborting a response mid-stream produces a complete, readable history file with no partial or corrupted entries
   5. `bun test` includes streaming tests covering retry, timeout, abort, and provider switching scenarios
-**Plans**: TBD
+**Plans**: 3 plans
+
+Plans:
+- [ ] 03-01-PLAN.md — withRetry utility tests + provider switching tests (API-01, API-03)
+- [ ] 03-02-PLAN.md — Atomic history writes + finalizeHistoryOnAbort (API-04)
+- [ ] 03-03-PLAN.md — Unconditional watchdog + Zod schema wiring in claude.ts (API-02, API-05)
 
 ### Phase 4: Query Loop & Permission System
 **Goal**: The multi-turn query loop correctly handles tool-use responses; permission prompts appear before execution; permission state persists correctly across turns
@@ -77,7 +82,12 @@ Plans:
   4. Cancelling a response mid-turn leaves the CLI in a state where the next user message succeeds
   5. A tool configured for "ask" permission mode displays a prompt before executing — it does not execute silently
   6. Permission grants and denials from earlier in the session are honored in later turns without re-prompting for the same tool
-**Plans**: TBD
+**Plans**: 3 plans
+
+Plans:
+- [ ] 03-01-PLAN.md — withRetry utility tests + provider switching tests (API-01, API-03)
+- [ ] 03-02-PLAN.md — Atomic history writes + finalizeHistoryOnAbort (API-04)
+- [ ] 03-03-PLAN.md — Unconditional watchdog + Zod schema wiring in claude.ts (API-02, API-05)
 
 ### Phase 5: Feature Flags & MCP Transport
 **Goal**: The feature flag system is documented, CI-verified, and validated at runtime; MCP stdio and SSE transports connect and exchange messages correctly
@@ -89,7 +99,12 @@ Plans:
   3. Enabling a flag that requires an unavailable module produces a clear error at startup rather than a crash at call time
   4. An MCP server connected via stdio receives and responds to tool list and tool call requests from the CLI
   5. MCP-provided tools appear alongside built-in tools in the tool list the CLI sends to the API
-**Plans**: TBD
+**Plans**: 3 plans
+
+Plans:
+- [ ] 03-01-PLAN.md — withRetry utility tests + provider switching tests (API-01, API-03)
+- [ ] 03-02-PLAN.md — Atomic history writes + finalizeHistoryOnAbort (API-04)
+- [ ] 03-03-PLAN.md — Unconditional watchdog + Zod schema wiring in claude.ts (API-02, API-05)
 
 ### Phase 6: REPL/UI Cleanup
 **Goal**: React Compiler decompilation boilerplate is removed from core components; REPL.tsx is decomposed into focused units; Ink snapshot tests establish a regression baseline
@@ -100,7 +115,12 @@ Plans:
   2. REPL.tsx is split into at least 3 focused components, each with a single identifiable responsibility
   3. `bun test` includes Ink snapshot tests for message rendering and prompt input that fail if the output changes unexpectedly
   4. Component imports from any single file reference fewer than 20 modules (down from 80+)
-**Plans**: TBD
+**Plans**: 3 plans
+
+Plans:
+- [ ] 03-01-PLAN.md — withRetry utility tests + provider switching tests (API-01, API-03)
+- [ ] 03-02-PLAN.md — Atomic history writes + finalizeHistoryOnAbort (API-04)
+- [ ] 03-03-PLAN.md — Unconditional watchdog + Zod schema wiring in claude.ts (API-02, API-05)
 **UI hint**: yes
 
 ## Progress
@@ -112,7 +132,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6
 |-------|----------------|--------|-----------|
 | 1. Foundation Hardening | 2/2 | Complete | 2026-04-07 |
 | 2. Core Tool Reliability | 0/3 | Planned | - |
-| 3. API & Streaming Resilience | 0/TBD | Not started | - |
+| 3. API & Streaming Resilience | 0/3 | Planned | - |
 | 4. Query Loop & Permission System | 0/TBD | Not started | - |
 | 5. Feature Flags & MCP Transport | 0/TBD | Not started | - |
 | 6. REPL/UI Cleanup | 0/TBD | Not started | - |
