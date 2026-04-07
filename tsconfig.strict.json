@@ -21,6 +21,7 @@
     "src/types/__tests__/message.test.ts",
     "src/types/__tests__/permissions.test.ts",
     "src/services/api/streamEventSchema.ts",
+    "src/services/api/__tests__/streamEvents.test.ts",
     "src/types/global.d.ts",
     "src/types/internal-modules.d.ts",
     "src/types/strict-shims.d.ts"
