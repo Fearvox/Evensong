@@ -31,6 +31,7 @@
     "src/tools/AgentTool/__tests__/AgentTool.test.ts",
     "src/tools/GrepTool/__tests__/GrepTool.test.ts",
     "src/services/api/__tests__/withRetry.test.ts",
-    "src/services/api/__tests__/providers.test.ts"
+    "src/services/api/__tests__/providers.test.ts",
+    "src/utils/__tests__/sessionStorageAtomic.test.ts"
   ]
 }
