@@ -30,6 +30,11 @@ Deliver correct, non-decompiled type annotations for core type definitions (mess
 - **D-08:** Files entering strict in Phase 1: `src/types/message.ts`, `src/types/permissions.ts`, `src/state/AppState.tsx`, `src/state/AppStateStore.ts`, `src/state/store.ts`, `src/bootstrap/state.ts`, `src/Tool.ts`. All other files remain under base tsconfig (strict: false).
 - **D-09:** Every NEW file created during this project must be added to tsconfig.strict.json from creation. No exceptions.
 
+### Quality Constraints (User-Specified)
+- **D-10:** Code patterns MUST reference best-in-class GitHub repos and align with Anthropic's internal coding style (explicit types, functional patterns, no magic, clear naming)
+- **D-11:** All changes MUST lay infrastructure for future feature implementation — type definitions should be extensible, not just correct for current usage
+- **D-12:** Debug-friendly code: meaningful error messages, clear stack traces, no swallowed errors, type narrowing that helps VS Code intellisense
+
 ### Claude's Discretion
 - Internal type naming conventions and utility type patterns
 - Whether to use branded types or plain type aliases for message IDs
