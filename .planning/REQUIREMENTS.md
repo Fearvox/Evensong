@@ -105,50 +105,50 @@ Requirements for engineering maturity milestone. Each maps to roadmap phases.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| TYPE-01 | — | Pending |
-| TYPE-02 | — | Pending |
-| TYPE-03 | — | Pending |
-| TYPE-04 | — | Pending |
-| TYPE-05 | — | Pending |
-| TOOL-01 | — | Pending |
-| TOOL-02 | — | Pending |
-| TOOL-03 | — | Pending |
-| TOOL-04 | — | Pending |
-| TOOL-05 | — | Pending |
-| API-01 | — | Pending |
-| API-02 | — | Pending |
-| API-03 | — | Pending |
-| API-04 | — | Pending |
-| API-05 | — | Pending |
-| QUERY-01 | — | Pending |
-| QUERY-02 | — | Pending |
-| QUERY-03 | — | Pending |
-| QUERY-04 | — | Pending |
-| PERM-01 | — | Pending |
-| PERM-02 | — | Pending |
-| PERM-03 | — | Pending |
-| TEST-01 | — | Pending |
-| TEST-02 | — | Pending |
-| TEST-03 | — | Pending |
-| TEST-04 | — | Pending |
-| TEST-05 | — | Pending |
-| FLAG-01 | — | Pending |
-| FLAG-02 | — | Pending |
-| FLAG-03 | — | Pending |
-| MCP-01 | — | Pending |
-| MCP-02 | — | Pending |
-| MCP-03 | — | Pending |
-| MCP-04 | — | Pending |
-| UI-01 | — | Pending |
-| UI-02 | — | Pending |
-| UI-03 | — | Pending |
-| UI-04 | — | Pending |
+| TYPE-01 | Phase 1 | Pending |
+| TYPE-02 | Phase 1 | Pending |
+| TYPE-03 | Phase 1 | Pending |
+| TYPE-04 | Phase 1 | Pending |
+| TYPE-05 | Phase 1 | Pending |
+| TEST-01 | Phase 1 | Pending |
+| TEST-05 | Phase 1 | Pending |
+| TOOL-01 | Phase 2 | Pending |
+| TOOL-02 | Phase 2 | Pending |
+| TOOL-03 | Phase 2 | Pending |
+| TOOL-04 | Phase 2 | Pending |
+| TOOL-05 | Phase 2 | Pending |
+| TEST-02 | Phase 2 | Pending |
+| API-01 | Phase 3 | Pending |
+| API-02 | Phase 3 | Pending |
+| API-03 | Phase 3 | Pending |
+| API-04 | Phase 3 | Pending |
+| API-05 | Phase 3 | Pending |
+| TEST-03 | Phase 3 | Pending |
+| QUERY-01 | Phase 4 | Pending |
+| QUERY-02 | Phase 4 | Pending |
+| QUERY-03 | Phase 4 | Pending |
+| QUERY-04 | Phase 4 | Pending |
+| PERM-01 | Phase 4 | Pending |
+| PERM-02 | Phase 4 | Pending |
+| PERM-03 | Phase 4 | Pending |
+| TEST-04 | Phase 4 | Pending |
+| FLAG-01 | Phase 5 | Pending |
+| FLAG-02 | Phase 5 | Pending |
+| FLAG-03 | Phase 5 | Pending |
+| MCP-01 | Phase 5 | Pending |
+| MCP-02 | Phase 5 | Pending |
+| MCP-03 | Phase 5 | Pending |
+| MCP-04 | Phase 5 | Pending |
+| UI-01 | Phase 6 | Pending |
+| UI-02 | Phase 6 | Pending |
+| UI-03 | Phase 6 | Pending |
+| UI-04 | Phase 6 | Pending |
 
 **Coverage:**
 - v1 requirements: 38 total
-- Mapped to phases: 0
-- Unmapped: 38 (pending roadmap creation)
+- Mapped to phases: 38
+- Unmapped: 0
 
 ---
 *Requirements defined: 2026-04-06*
-*Last updated: 2026-04-06 after initial definition*
+*Last updated: 2026-04-06 after roadmap creation*
