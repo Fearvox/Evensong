@@ -13,6 +13,8 @@
         "build": "bun build src/entrypoints/cli.tsx --outdir dist --target bun",
         "dev": "bun run src/entrypoints/cli.tsx",
         "test": "bun test",
+        "lint": "bunx @biomejs/biome check src/",
+        "lint:fix": "bunx @biomejs/biome check --fix src/",
         "prepublishOnly": "bun run build"
     },
     "dependencies": {

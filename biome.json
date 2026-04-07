@@ -1,0 +1,45 @@
+{
+  "$schema": "https://biomejs.dev/schemas/2.0.0/schema.json",
+  "files": {
+    "includes": ["src/**/*.ts", "src/**/*.tsx", "packages/**/*.ts"]
+  },
+  "linter": {
+    "enabled": true,
+    "rules": {
+      "recommended": false,
+      "correctness": {
+        "noUnusedImports": "warn",
+        "noUndeclaredVariables": "warn",
+        "noUnreachable": "error",
+        "noInvalidUseBeforeDeclaration": "off",
+        "useHookAtTopLevel": "off",
+        "useExhaustiveDependencies": "off"
+      },
+      "suspicious": {
+        "noDuplicateCase": "error",
+        "noDuplicateObjectKeys": "error",
+        "noFallthroughSwitchClause": "warn",
+        "noDoubleEquals": "warn",
+        "noDebugger": "error",
+        "noSelfCompare": "error"
+      },
+      "security": {
+        "noDangerouslySetInnerHtml": "error"
+      }
+    }
+  },
+  "formatter": {
+    "enabled": false
+  },
+  "javascript": {
+    "globals": [
+      "MACRO",
+      "BUILD_TARGET",
+      "BUILD_ENV",
+      "INTERFACE_TYPE",
+      "globalThis",
+      "_c",
+      "Bun"
+    ]
+  }
+}
