@@ -68,7 +68,7 @@ Plans:
 
 Plans:
 - [x] 03-01-PLAN.md — withRetry utility tests + provider switching tests (API-01, API-03)
-- [ ] 03-02-PLAN.md — Atomic history writes + finalizeHistoryOnAbort (API-04)
+- [x] 03-02-PLAN.md — Atomic history writes + finalizeHistoryOnAbort (API-04)
 - [ ] 03-03-PLAN.md — Unconditional watchdog + Zod schema wiring in claude.ts (API-02, API-05)
 
 ### Phase 4: Query Loop & Permission System
@@ -85,7 +85,7 @@ Plans:
 **Plans**: 3 plans
 
 Plans:
-- [ ] 03-01-PLAN.md — withRetry utility tests + provider switching tests (API-01, API-03)
+- [x] 03-01-PLAN.md — withRetry utility tests + provider switching tests (API-01, API-03)
 - [ ] 03-02-PLAN.md — Atomic history writes + finalizeHistoryOnAbort (API-04)
 - [ ] 03-03-PLAN.md — Unconditional watchdog + Zod schema wiring in claude.ts (API-02, API-05)
 
