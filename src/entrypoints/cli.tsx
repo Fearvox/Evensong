@@ -1,5 +1,25 @@
 // Runtime polyfill for bun:bundle (build-time macros)
-const feature = (_name: string) => false;
+// Feature flags: configurable via env vars or ~/.claude/feature-flags.json
+const _flagCache: Record<string, boolean> = (() => {
+  try {
+    const path = require('path')
+    const fs = require('fs')
+    const flagFile = path.join(process.env.HOME || '', '.claude', 'feature-flags.json')
+    if (fs.existsSync(flagFile)) {
+      return JSON.parse(fs.readFileSync(flagFile, 'utf-8'))
+    }
+  } catch {}
+  return {}
+})()
+const feature = (name: string): boolean => {
+  // CLAUDE_FEATURE_ALL=true enables everything (debug only)
+  if (process.env.CLAUDE_FEATURE_ALL === 'true') return true
+  // Per-flag env var: CLAUDE_FEATURE_KAIROS=true
+  const envVal = process.env[`CLAUDE_FEATURE_${name}`]
+  if (envVal !== undefined) return envVal === 'true' || envVal === '1'
+  // Config file fallback
+  return _flagCache[name] ?? false
+};
 if (typeof globalThis.MACRO === "undefined") {
     (globalThis as any).MACRO = {
         VERSION: "2.1.888",
