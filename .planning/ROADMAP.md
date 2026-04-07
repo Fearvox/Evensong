@@ -31,7 +31,11 @@ Decimal phases appear between their surrounding integers in numeric order.
   3. `AppStateStore` and bootstrap singletons are annotated so TypeScript can infer their shapes without casting
   4. `Tool.ts` input/output generics are precise — a new tool definition triggers a type error if required fields are missing
   5. Importing the Anthropic SDK `BetaRawMessageStreamEvent` type and a Zod schema that validates it both compile without suppression
-**Plans**: TBD
+**Plans**: 2 plans
+
+Plans:
+- [ ] 01-01-PLAN.md — Strict-mode tsconfig overlay + core type hardening (message.ts, permissions.ts, state layer) + type shape test scaffolding
+- [ ] 01-02-PLAN.md — Zod stream event schema at API boundary + coverage tracking established
 
 ### Phase 2: Core Tool Reliability
 **Goal**: The four core tools (Bash, FileEdit, Grep, Agent) handle their failure modes correctly and have integration tests proving it
@@ -101,7 +105,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Foundation Hardening | 0/TBD | Not started | - |
+| 1. Foundation Hardening | 0/2 | Planned | - |
 | 2. Core Tool Reliability | 0/TBD | Not started | - |
 | 3. API & Streaming Resilience | 0/TBD | Not started | - |
 | 4. Query Loop & Permission System | 0/TBD | Not started | - |
