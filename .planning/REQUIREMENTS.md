@@ -25,9 +25,9 @@ Requirements for engineering maturity milestone. Each maps to roadmap phases.
 
 ### API & Streaming
 
-- [ ] **API-01**: Streaming handles ECONNRESET/EPIPE/ETIMEDOUT with automatic retry (p-retry)
+- [x] **API-01**: Streaming handles ECONNRESET/EPIPE/ETIMEDOUT with automatic retry (p-retry)
 - [ ] **API-02**: Idle timeout wrapper detects and recovers from frozen streams (thinking block hang)
-- [ ] **API-03**: Provider switching (Anthropic/Bedrock/Vertex) works without code changes
+- [x] **API-03**: Provider switching (Anthropic/Bedrock/Vertex) works without code changes
 - [ ] **API-04**: Stream abort path writes history atomically (temp file + rename, no partial state)
 - [ ] **API-05**: claude.ts type annotations match SDK event types without unsafe casts
 
@@ -48,7 +48,7 @@ Requirements for engineering maturity milestone. Each maps to roadmap phases.
 
 - [x] **TEST-01**: ink-testing-library installed and verified working with Bun runtime
 - [x] **TEST-02**: Core tool modules have integration test suites (BashTool, FileEditTool, GrepTool)
-- [ ] **TEST-03**: API streaming has tests covering retry, timeout, abort, and provider switching
+- [x] **TEST-03**: API streaming has tests covering retry, timeout, abort, and provider switching
 - [ ] **TEST-04**: Query loop has tests covering multi-turn, compaction, and abort scenarios
 - [x] **TEST-05**: Test coverage tracking established for recovered modules
 
@@ -118,12 +118,12 @@ Requirements for engineering maturity milestone. Each maps to roadmap phases.
 | TOOL-04 | Phase 2 | Complete |
 | TOOL-05 | Phase 2 | Complete |
 | TEST-02 | Phase 2 | Complete |
-| API-01 | Phase 3 | Pending |
+| API-01 | Phase 3 | Complete |
 | API-02 | Phase 3 | Pending |
-| API-03 | Phase 3 | Pending |
+| API-03 | Phase 3 | Complete |
 | API-04 | Phase 3 | Pending |
 | API-05 | Phase 3 | Pending |
-| TEST-03 | Phase 3 | Pending |
+| TEST-03 | Phase 3 | Complete |
 | QUERY-01 | Phase 4 | Pending |
 | QUERY-02 | Phase 4 | Pending |
 | QUERY-03 | Phase 4 | Pending |
