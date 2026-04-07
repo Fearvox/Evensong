@@ -1,0 +1,252 @@
+CLAUDE.md:40:   - `feature()` always returns `false` (all feature flags disabled, skipping unimplemented branches).
+CLAUDE.md:61:- **`src/tools.ts`** — Tool registry. Assembles the tool list; some tools are conditionally loaded via `feature()` flags or `process.env.USER_TYPE`.
+CLAUDE.md:89:All `feature('FLAG_NAME')` calls come from `bun:bundle` (a build-time API). In this decompiled version, `feature()` is polyfilled to always return `false` in `cli.tsx`. This means all Anthropic-internal features (COORDINATOR_MODE, KAIROS, PROACTIVE, etc.) are disabled.
+CLAUDE.md:112:- **`feature()` is always `false`** — any code behind a feature flag is dead code in this build.
+README.md:340:- `feature()` — 所有 feature flag 返回 `false`，跳过未实现分支
+README.md:349:原版 Claude Code 通过 `bun:bundle` 的 `feature()` 在构建时注入 feature flag，由 GrowthBook 等 A/B 实验平台控制灰度发布。本项目中 `feature()` 被 polyfill 为始终返回 `false`，因此以下 30 个 flag 全部关闭。
+src/bootstrap/state.ts:1102:// 'SendUserMessage' — case-insensitive). All callers are inside feature()
+src/commands/context/context-noninteractive.ts:50:  if (feature('CONTEXT_COLLAPSE')) {
+src/commands/context/context-noninteractive.ts:113:  if (feature('CONTEXT_COLLAPSE')) {
+src/commands/context/context.tsx:20:  if (feature('CONTEXT_COLLAPSE')) {
+src/commands/init.ts:230:    return feature('NEW_INIT') &&
+src/commands/init.ts:246:          feature('NEW_INIT') &&
+src/commands/bridge/bridge.tsx:487:  if (feature('KAIROS') && useV2) {
+src/commands/bridge/index.ts:6:  if (!feature('BRIDGE_MODE')) {
+src/commands/reload-plugins/reload-plugins.ts:25:    feature('DOWNLOAD_USER_SETTINGS') &&
+src/query/stopHooks.ts:42:const extractMemoriesModule = feature('EXTRACT_MEMORIES')
+src/query/stopHooks.ts:45:const jobClassifierModule = feature('TEMPLATES')
+src/query/stopHooks.ts:109:    feature('TEMPLATES') &&
+src/query/stopHooks.ts:142:      feature('EXTRACT_MEMORIES') &&
+src/query/stopHooks.ts:164:  if (feature('CHICAGO_MCP') && !toolUseContext.agentId) {
+src/query/config.ts:13:// Intentionally excludes feature() gates — those are tree-shaking boundaries
+src/query/config.ts:18:  // Runtime gates (env/statsig). NOT feature() gates — see above.
+src/main.tsx:76:const coordinatorModeModule = feature('COORDINATOR_MODE') ? require('./coordinator/coordinatorMode.js') as typeof import('./coordinator/coordinatorMode.js') : null;
+src/main.tsx:80:const assistantModule = feature('KAIROS') ? require('./assistant/index.js') as typeof import('./assistant/index.js') : null;
+src/main.tsx:81:const kairosGate = feature('KAIROS') ? require('./assistant/gate.js') as typeof import('./assistant/gate.js') : null;
+src/main.tsx:171:const autoModeStateModule = feature('TRANSCRIPT_CLASSIFIER') ? require('./utils/permissions/autoModeState.js') as typeof import('./utils/permissions/autoModeState.js') : null;
+src/main.tsx:337:    if (feature('TRANSCRIPT_CLASSIFIER')) {
+src/main.tsx:548:const _pendingConnect: PendingConnect | undefined = feature('DIRECT_CONNECT') ? {
+src/main.tsx:559:const _pendingAssistantChat: PendingAssistantChat | undefined = feature('KAIROS') ? {
+src/main.tsx:577:const _pendingSSH: PendingSSH | undefined = feature('SSH_REMOTE') ? {
+src/main.tsx:612:  if (feature('DIRECT_CONNECT')) {
+src/main.tsx:647:  if (feature('LODESTONE')) {
+src/main.tsx:685:  if (feature('KAIROS') && _pendingAssistantChat) {
+src/main.tsx:706:  if (feature('SSH_REMOTE') && _pendingSSH) {
+src/main.tsx:963:    if (feature('UPLOAD_USER_SETTINGS')) {
+src/main.tsx:1050:    if (feature('KAIROS') && (options as {
+src/main.tsx:1058:    if (feature('KAIROS') && assistantModule?.isAssistantMode() &&
+src/main.tsx:1116:    if (feature('BG_SESSIONS') && agentCli) {
+src/main.tsx:1399:    if (feature('TRANSCRIPT_CLASSIFIER')) {
+src/main.tsx:1477:        } else if (feature('CHICAGO_MCP')) {
+src/main.tsx:1571:        const hint = feature('WEB_BROWSER_TOOL') && typeof Bun !== 'undefined' && 'WebView' in Bun ? CLAUDE_IN_CHROME_SKILL_HINT_WITH_WEBBROWSER : CLAUDE_IN_CHROME_SKILL_HINT;
+src/main.tsx:1608:    if (feature('CHICAGO_MCP') && getPlatform() === 'macos' && !getIsNonInteractiveSession()) {
+src/main.tsx:1637:    // is added inside a feature() block so TS doesn't know about it
+src/main.tsx:1642:    if (feature('KAIROS') || feature('KAIROS_CHANNELS')) {
+src/main.tsx:1728:    if ((feature('KAIROS') || feature('KAIROS_BRIEF')) && baseTools.length > 0) {
+src/main.tsx:1769:    if (feature('TRANSCRIPT_CLASSIFIER') && dangerousPermissions.length > 0) {
+src/main.tsx:1872:    if (feature('COORDINATOR_MODE') && isEnvTruthy(process.env.CLAUDE_CODE_COORDINATOR_MODE)) {
+src/main.tsx:1910:    const messagingSocketPath = feature('UDS_INBOX') ? (options as {
+src/main.tsx:1945:    if (feature('UDS_INBOX')) {
+src/main.tsx:2184:    if ((feature('KAIROS') || feature('KAIROS_BRIEF')) && !getIsNonInteractiveSession() && !getUserMsgOptIn() && getInitialSettings().defaultView === 'chat') {
+src/main.tsx:2197:    if ((feature('PROACTIVE') || feature('KAIROS')) && ((options as {
+src/main.tsx:2201:      const briefVisibility = feature('KAIROS') || feature('KAIROS_BRIEF') ? (require('./tools/BriefTool/BriefTool.js') as typeof import('./tools/BriefTool/BriefTool.js')).isBriefEnabled() ? 'Call SendUserMessage at checkpoints to mark where things stand.' : 'The user will see any text you output.' : 'The user will see any text you output.';
+src/main.tsx:2206:    if (feature('KAIROS') && kairosEnabled && assistantModule) {
+src/main.tsx:2246:      if (feature('BRIDGE_MODE') && remoteControlOption !== undefined) {
+src/main.tsx:2258:      if (feature('AGENT_MEMORY_SNAPSHOT') && mainThreadAgentDefinition && isCustomAgent(mainThreadAgentDefinition) && mainThreadAgentDefinition.memory && mainThreadAgentDefinition.pendingSnapshotUpdate) {
+src/main.tsx:2518:      assistantActivationPath: feature('KAIROS') && kairosEnabled ? assistantModule?.getAssistantActivationPath() : undefined
+src/main.tsx:2647:        ...(feature('KAIROS') ? {
+src/main.tsx:2663:      if (feature('TRANSCRIPT_CLASSIFIER')) {
+src/main.tsx:2915:    const initialIsBriefOnly = feature('KAIROS') || feature('KAIROS_BRIEF') ? getUserMsgOptIn() : false;
+src/main.tsx:2918:    if (feature('CCR_MIRROR') && !fullRemoteControl) {
+src/main.tsx:3035:      teamContext: (feature('KAIROS') ? assistantTeamContext ?? computeInitialTeamContext?.() : computeInitialTeamContext?.()) || undefined
+src/main.tsx:3156:    } else if (feature('DIRECT_CONNECT') && _pendingConnect?.url) {
+src/main.tsx:3193:    } else if (feature('SSH_REMOTE') && _pendingSSH?.host) {
+src/main.tsx:3259:    } else if (feature('KAIROS') && _pendingAssistantChat && (_pendingAssistantChat.sessionId || _pendingAssistantChat.discover)) {
+src/main.tsx:3770:      if (feature('COORDINATOR_MODE')) {
+src/main.tsx:3781:      if (feature('LODESTONE')) {
+src/main.tsx:3829:  if (feature('TRANSCRIPT_CLASSIFIER')) {
+src/main.tsx:3832:  if (feature('PROACTIVE') || feature('KAIROS')) {
+src/main.tsx:3835:  if (feature('UDS_INBOX')) {
+src/main.tsx:3838:  if (feature('KAIROS') || feature('KAIROS_BRIEF')) {
+src/main.tsx:3841:  if (feature('KAIROS')) {
+src/main.tsx:3844:  if (feature('KAIROS') || feature('KAIROS_CHANNELS')) {
+src/main.tsx:3866:  if (feature('BRIDGE_MODE')) {
+src/main.tsx:3870:  if (feature('HARD_FAIL')) {
+src/main.tsx:3961:  if (feature('DIRECT_CONNECT')) {
+src/main.tsx:4045:  if (feature('SSH_REMOTE')) {
+src/main.tsx:4058:  if (feature('DIRECT_CONNECT')) {
+src/main.tsx:4285:  if (feature('TRANSCRIPT_CLASSIFIER')) {
+src/main.tsx:4322:  if (feature('BRIDGE_MODE')) {
+src/main.tsx:4334:  if (feature('KAIROS')) {
+src/main.tsx:4593:      is_coordinator: feature('COORDINATOR_MODE') && coordinatorModeModule?.isCoordinatorMode() ? true : undefined,
+src/main.tsx:4612:  if ((feature('PROACTIVE') || feature('KAIROS')) && ((options as {
+src/main.tsx:4623:  if (!(feature('KAIROS') || feature('KAIROS_BRIEF'))) return;
+src/voice/voiceModeEnabled.ts:18:  // Negative pattern (if (!feature(...)) return) does not eliminate
+src/voice/voiceModeEnabled.ts:20:  return feature('VOICE_MODE')
+src/commands/login/login.tsx:47:      if (feature('TRANSCRIPT_CLASSIFIER')) {
+src/commands/branch/index.ts:8:  aliases: feature('FORK_SUBAGENT') ? [] : ['fork'],
+src/tasks/LocalShellTask/LocalShellTask.tsx:129:  if (feature('MONITOR_TOOL') && kind === 'monitor') {
+src/tasks/LocalShellTask/LocalShellTask.tsx:169:    priority: feature('MONITOR_TOOL') ? 'next' : 'later',
+src/tasks.ts:9:const LocalWorkflowTask: Task | null = feature('WORKFLOW_SCRIPTS')
+src/tasks.ts:12:const MonitorMcpTask: Task | null = feature('MONITOR_TOOL')
+src/services/autoDream/consolidationPrompt.ts:2:// feature flags (dream.ts is behind a feature()-gated require).
+src/skills/bundled/index.ts:35:  if (feature('KAIROS') || feature('KAIROS_DREAM')) {
+src/skills/bundled/index.ts:41:  if (feature('REVIEW_ARTIFACT')) {
+src/skills/bundled/index.ts:47:  if (feature('AGENT_TRIGGERS')) {
+src/skills/bundled/index.ts:56:  if (feature('AGENT_TRIGGERS_REMOTE')) {
+src/skills/bundled/index.ts:64:  if (feature('BUILDING_CLAUDE_APPS')) {
+src/skills/bundled/index.ts:73:  if (feature('RUN_SKILL_GENERATOR')) {
+src/services/analytics/metadata.ts:130:  feature('CHICAGO_MCP')
+src/services/analytics/metadata.ts:603:    ...(feature('COWORKER_TYPE_TELEMETRY')
+src/services/analytics/metadata.ts:735:    ...(feature('KAIROS') && getKairosActive()
+src/services/analytics/metadata.ts:846:  if (feature('COWORKER_TYPE_TELEMETRY') && envContext.coworkerType) {
+src/services/api/claude.ts:106:const autoModeStateModule = feature('TRANSCRIPT_CLASSIFIER')
+src/services/api/claude.ts:304:    feature('ANTI_DISTILLATION_CC')
+src/services/api/claude.ts:662:          (feature('CONNECTOR_TEXT') ? !isConnectorTextBlock(_) : true)
+src/services/api/claude.ts:1191:  if (feature('CACHED_MICROCOMPACT')) {
+src/services/api/claude.ts:1414:  if (feature('TRANSCRIPT_CLASSIFIER')) {
+src/services/api/claude.ts:1433:  if (feature('CACHED_MICROCOMPACT')) {
+src/services/api/claude.ts:1461:  if (feature('PROMPT_CACHE_BREAK_DETECTION')) {
+src/services/api/claude.ts:1662:    if (feature('TRANSCRIPT_CLASSIFIER')) {
+src/services/api/claude.ts:2068:              feature('CONNECTOR_TEXT') &&
+src/services/api/claude.ts:2130:                    feature('CONNECTOR_TEXT') &&
+src/services/api/claude.ts:2384:      if (feature('PROMPT_CACHE_BREAK_DETECTION')) {
+src/services/api/claude.ts:2835:  if (feature('CACHED_MICROCOMPACT') && cachedMCEnabled) {
+src/services/api/claude.ts:2971:    ...(feature('CACHED_MICROCOMPACT')
+src/services/api/claude.ts:3025:    ...(feature('CACHED_MICROCOMPACT')
+src/setup.ts:95:    if (feature('UDS_INBOX')) {
+src/setup.ts:295:    if (feature('CONTEXT_COLLAPSE')) {
+src/setup.ts:350:    if (feature('COMMIT_ATTRIBUTION')) {
+src/setup.ts:365:    if (feature('TEAMMEM')) {
+src/services/mcp/channelNotification.ts:13: * feature('KAIROS') || feature('KAIROS_CHANNELS'). Runtime gate tengu_harbor.
+src/services/mcp/channelNotification.ts:177: * feature('KAIROS') || feature('KAIROS_CHANNELS') first (build-time
+src/components/memory/MemoryFileSelector.tsx:29:const teamMemPaths = feature('TEAMMEM') ? require('../../memdir/teamMemPaths.js') as typeof import('../../memdir/teamMemPaths.js') : null;
+src/components/memory/MemoryFileSelector.tsx:127:    if (feature("TEAMMEM") && teamMemPaths.isTeamMemoryEnabled()) {
+src/components/StatusLine.tsx:33:  if (feature('KAIROS') && getKairosActive()) return false;
+src/services/mcp/client.ts:117:const fetchMcpSkillsForClient = feature('MCP_SKILLS')
+src/services/mcp/client.ts:242:const computerUseWrapper = feature('CHICAGO_MCP')
+src/services/mcp/client.ts:246:const isComputerUseMCPServer = feature('CHICAGO_MCP')
+src/services/mcp/client.ts:927:        feature('CHICAGO_MCP') &&
+src/services/mcp/client.ts:1394:        if (feature('MCP_SKILLS')) {
+src/services/mcp/client.ts:1672:  if (feature('MCP_SKILLS')) {
+src/services/mcp/client.ts:1985:            ...(feature('CHICAGO_MCP') &&
+src/services/mcp/client.ts:2176:      feature('MCP_SKILLS') && supportsResources
+src/services/mcp/client.ts:2350:        feature('MCP_SKILLS') && supportsResources
+src/services/mcp/config.ts:641:  if (feature('CHICAGO_MCP')) {
+src/services/mcp/config.ts:1513:const DEFAULT_DISABLED_BUILTIN = feature('CHICAGO_MCP')
+src/components/PromptInput/PromptInputHelpMenu.tsx:132:    t20 = feature("TERMINAL_PANEL") ? getFeatureValue_CACHED_MAY_BE_STALE("tengu_terminal_panel", false) ? <Box><Text dimColor={dimColor}>{terminalShortcut} for terminal</Text></Box> : null : null;
+src/commands/clear/conversation.ts:112:  if (feature('PROACTIVE') || feature('KAIROS')) {
+src/commands/clear/conversation.ts:230:  if (feature('COORDINATOR_MODE')) {
+src/commands/clear/caches.ts:105:  if (feature('COMMIT_ATTRIBUTION')) {
+src/services/mcp/useManageMCPConnections.ts:22:const fetchMcpSkillsForClient = feature('MCP_SKILLS')
+src/services/mcp/useManageMCPConnections.ts:27:const clearSkillIndexCache = feature('EXPERIMENTAL_SKILL_SEARCH')
+src/services/mcp/useManageMCPConnections.ts:172:    (feature('KAIROS') || feature('KAIROS_CHANNELS')) &&
+src/services/mcp/useManageMCPConnections.ts:180:    if (feature('KAIROS') || feature('KAIROS_CHANNELS')) {
+src/services/mcp/useManageMCPConnections.ts:473:          if (feature('KAIROS') || feature('KAIROS_CHANNELS')) {
+src/services/mcp/useManageMCPConnections.ts:684:                    feature('MCP_SKILLS')
+src/services/mcp/useManageMCPConnections.ts:718:                  if (feature('MCP_SKILLS')) {
+src/components/PromptInput/PromptInput.tsx:312:  } = feature('BUDDY') ? getGlobalConfig() : {
+src/components/PromptInput/PromptInput.tsx:322:  const briefOwnsGap = feature('KAIROS') || feature('KAIROS_BRIEF') ?
+src/components/PromptInput/PromptInput.tsx:323:  // biome-ignore lint/correctness/useHookAtTopLevel: feature() is a compile-time constant
+src/components/PromptInput/PromptInput.tsx:522:  const ultraplanTriggers = useMemo(() => feature('ULTRAPLAN') && !ultraplanSessionUrl && !ultraplanLaunching ? findUltraplanTriggerPositions(displayedValue) : [], [displayedValue, ultraplanSessionUrl, ultraplanLaunching]);
+src/components/PromptInput/PromptInput.tsx:534:  const tokenBudgetTriggers = useMemo(() => feature('TOKEN_BUDGET') ? findTokenBudgetPositions(displayedValue) : [], [displayedValue]);
+src/components/PromptInput/PromptInput.tsx:701:    if (feature('ULTRAPLAN')) {
+src/components/PromptInput/PromptInput.tsx:761:    if (feature('ULTRAPLAN') && ultraplanTriggers.length) {
+src/components/PromptInput/PromptInput.tsx:1458:    if (feature('TRANSCRIPT_CLASSIFIER')) {
+src/components/PromptInput/PromptInput.tsx:1461:    if (feature('TRANSCRIPT_CLASSIFIER')) {
+src/components/PromptInput/PromptInput.tsx:1500:    if (feature('TRANSCRIPT_CLASSIFIER')) {
+src/components/PromptInput/PromptInput.tsx:1560:    if (feature('TRANSCRIPT_CLASSIFIER')) {
+src/components/PromptInput/PromptInput.tsx:1589:    if (feature('TRANSCRIPT_CLASSIFIER')) {
+src/components/PromptInput/PromptInput.tsx:1699:  // the handler body is feature()-gated so the setState calls and component
+src/components/PromptInput/PromptInput.tsx:1701:  const quickSearchActive = feature('QUICK_SEARCH') ? !isModalOverlayActive : false;
+src/components/PromptInput/PromptInput.tsx:1703:    if (feature('QUICK_SEARCH')) {
+src/components/PromptInput/PromptInput.tsx:1712:    if (feature('QUICK_SEARCH')) {
+src/components/PromptInput/PromptInput.tsx:1721:    if (feature('HISTORY_PICKER')) {
+src/components/PromptInput/PromptInput.tsx:1727:    isActive: feature('HISTORY_PICKER') ? !isModalOverlayActive : false
+src/components/PromptInput/PromptInput.tsx:1789:          if (feature('BUDDY')) {
+src/components/PromptInput/PromptInput.tsx:1984:  const companionSpeaking = feature('BUDDY') ?
+src/components/PromptInput/PromptInput.tsx:1985:  // biome-ignore lint/correctness/useHookAtTopLevel: feature() is a compile-time constant
+src/components/PromptInput/PromptInput.tsx:2122:  const autoModeOptInDialog = useMemo(() => feature('TRANSCRIPT_CLASSIFIER') && showAutoModeOptIn ? <AutoModeOptInDialog onAccept={handleAutoModeOptInAccept} onDecline={handleAutoModeOptInDecline} /> : null, [showAutoModeOptIn, handleAutoModeOptInAccept, handleAutoModeOptInDecline]);
+src/components/PromptInput/PromptInput.tsx:2132:  if (feature('QUICK_SEARCH')) {
+src/components/PromptInput/PromptInput.tsx:2144:  if (feature('HISTORY_PICKER') && showHistoryPicker) {
+src/components/PromptInput/PromptInputFooterLeftSide.tsx:6:const coordinatorModule = feature('COORDINATOR_MODE') ? require('../../coordinator/coordinatorMode.js') as typeof import('../../coordinator/coordinatorMode.js') : undefined;
+src/components/PromptInput/PromptInputFooterLeftSide.tsx:47:const proactiveModule = feature('PROACTIVE') || feature('KAIROS') ? require('../../proactive/index.js') : null;
+src/components/PromptInput/PromptInputFooterLeftSide.tsx:265:  // biome-ignore lint/correctness/useHookAtTopLevel: feature() is a compile-time constant
+src/components/PromptInput/PromptInputFooterLeftSide.tsx:266:  const voiceEnabled = feature('VOICE_MODE') ? useVoiceEnabled() : false;
+src/components/PromptInput/PromptInputFooterLeftSide.tsx:267:  const voiceState = feature('VOICE_MODE') ?
+src/components/PromptInput/PromptInputFooterLeftSide.tsx:268:  // biome-ignore lint/correctness/useHookAtTopLevel: feature() is a compile-time constant
+src/components/PromptInput/PromptInputFooterLeftSide.tsx:270:  const voiceWarmingUp = feature('VOICE_MODE') ?
+src/components/PromptInput/PromptInputFooterLeftSide.tsx:271:  // biome-ignore lint/correctness/useHookAtTopLevel: feature() is a compile-time constant
+src/components/PromptInput/PromptInputFooterLeftSide.tsx:276:  const isCoordinator = feature('COORDINATOR_MODE') ? coordinatorModule?.isCoordinatorMode() === true : false;
+src/components/PromptInput/PromptInputFooterLeftSide.tsx:283:  const voiceKeyShortcut = feature('VOICE_MODE') ?
+src/components/PromptInput/PromptInputFooterLeftSide.tsx:284:  // biome-ignore lint/correctness/useHookAtTopLevel: feature() is a compile-time constant
+src/components/PromptInput/PromptInputFooterLeftSide.tsx:291:  const [voiceHintUnderCap] = feature('VOICE_MODE') ?
+src/components/PromptInput/PromptInputFooterLeftSide.tsx:292:  // biome-ignore lint/correctness/useHookAtTopLevel: feature() is a compile-time constant
+src/components/PromptInput/PromptInputFooterLeftSide.tsx:294:  // biome-ignore lint/correctness/useHookAtTopLevel: feature() is a compile-time constant
+src/components/PromptInput/PromptInputFooterLeftSide.tsx:295:  const voiceHintIncrementedRef = feature('VOICE_MODE') ? useRef(false) : null;
+src/components/PromptInput/PromptInputFooterLeftSide.tsx:297:    if (feature('VOICE_MODE')) {
+src/components/PromptInput/PromptInputFooterLeftSide.tsx:380:  } else if ((feature('PROACTIVE') || feature('KAIROS')) && hasNextTick) {
+src/components/PromptInput/PromptInputFooterLeftSide.tsx:424:  if (feature('VOICE_MODE') && voiceEnabled && voiceWarmingUp) {
+src/components/PromptInput/PromptInputFooterLeftSide.tsx:445:  } else if (feature('VOICE_MODE') && parts.length > 0 && showHint && voiceEnabled && voiceState === 'idle' && hintParts.length === 0 && voiceHintUnderCap) {
+src/commands/compact/compact.ts:35:const reactiveCompact = feature('REACTIVE_COMPACT')
+src/commands/compact/compact.ts:67:        if (feature('PROMPT_CACHE_BREAK_DETECTION')) {
+src/components/PromptInput/Notifications.tsx:37:const VoiceIndicator: typeof import('./VoiceIndicator.js').VoiceIndicator = feature('VOICE_MODE') ? require('./VoiceIndicator.js').VoiceIndicator : () => null;
+src/components/PromptInput/Notifications.tsx:269:  const voiceState = feature('VOICE_MODE') ?
+src/components/PromptInput/Notifications.tsx:270:  // biome-ignore lint/correctness/useHookAtTopLevel: feature() is a compile-time constant
+src/components/PromptInput/Notifications.tsx:272:  // biome-ignore lint/correctness/useHookAtTopLevel: feature() is a compile-time constant
+src/components/PromptInput/Notifications.tsx:273:  const voiceEnabled = feature('VOICE_MODE') ? useVoiceEnabled() : false;
+src/components/PromptInput/Notifications.tsx:274:  const voiceError = feature('VOICE_MODE') ?
+src/components/PromptInput/Notifications.tsx:275:  // biome-ignore lint/correctness/useHookAtTopLevel: feature() is a compile-time constant
+src/components/PromptInput/Notifications.tsx:277:  const isBriefOnly = feature('KAIROS') || feature('KAIROS_BRIEF') ?
+src/components/PromptInput/Notifications.tsx:278:  // biome-ignore lint/correctness/useHookAtTopLevel: feature() is a compile-time constant
+src/components/PromptInput/Notifications.tsx:283:  if (feature('VOICE_MODE') && voiceEnabled && (voiceState === 'recording' || voiceState === 'processing')) {
+src/components/PromptInput/Notifications.tsx:323:      {feature('VOICE_MODE') ? voiceEnabled && voiceError && <Box>
+src/components/PromptInput/PromptInputFooter.tsx:160:  if (!feature('BRIDGE_MODE')) return null;
+src/components/PromptInput/PromptInputFooter.tsx:162:  // biome-ignore lint/correctness/useHookAtTopLevel: feature() is a compile-time constant
+src/components/PromptInput/PromptInputFooter.tsx:164:  // biome-ignore lint/correctness/useHookAtTopLevel: feature() is a compile-time constant
+src/components/PromptInput/PromptInputFooter.tsx:166:  // biome-ignore lint/correctness/useHookAtTopLevel: feature() is a compile-time constant
+src/components/PromptInput/PromptInputFooter.tsx:168:  // biome-ignore lint/correctness/useHookAtTopLevel: feature() is a compile-time constant
+src/components/PromptInput/PromptInputFooter.tsx:170:  // biome-ignore lint/correctness/useHookAtTopLevel: feature() is a compile-time constant
+src/components/PromptInput/PromptInputQueuedCommands.tsx:78:  const useBriefLayout = feature('KAIROS') || feature('KAIROS_BRIEF') ?
+src/components/PromptInput/PromptInputQueuedCommands.tsx:79:  // biome-ignore lint/correctness/useHookAtTopLevel: feature() is a compile-time constant
+src/components/PromptInput/VoiceIndicator.tsx:26:  if (!feature("VOICE_MODE")) {
+src/components/PromptInput/VoiceIndicator.tsx:80:  if (!feature("VOICE_MODE")) {
+src/commands/brief.ts:52:    if (feature('KAIROS') || feature('KAIROS_BRIEF')) {
+src/services/teamMemorySync/watcher.ts:253:  if (!feature('TEAMMEM')) {
+src/services/teamMemorySync/watcher.ts:356: * The feature('TEAMMEM') gate at the top of startTeamMemoryWatcher() is
+src/services/teamMemorySync/watcher.ts:383: * by feature('TEAMMEM') which is false under bun test.
+src/services/teamMemorySync/teamMemSecretGuard.ts:12: * feature('TEAMMEM') guard keeps it inert when the build flag is off.
+src/services/teamMemorySync/teamMemSecretGuard.ts:19:  if (feature('TEAMMEM')) {
+src/commands/exit/exit.tsx:18:  if (feature('BG_SESSIONS') && isBgSession()) {
+src/services/api/withRetry.ts:81:  ...(feature('BASH_CLASSIFIER') ? (['bash_classifier'] as const) : []),
+src/services/api/withRetry.ts:101:  return feature('UNATTENDED_RETRY')
+src/services/api/logging.ts:558:    ...(feature('CACHED_MICROCOMPACT') &&
+src/services/api/logging.ts:664:        } else if (feature('CONNECTOR_TEXT') && isConnectorTextBlock(block)) {
+src/services/voiceStreamSTT.ts:3:// Only reachable in ant builds (gated by feature('VOICE_MODE') in useVoice.ts import).
+src/services/compact/prompt.ts:7:  feature('PROACTIVE') || feature('KAIROS')
+src/services/compact/prompt.ts:362:      (feature('PROACTIVE') || feature('KAIROS')) &&
+src/components/PromptInput/usePromptInputPlaceholder.ts:12:  feature('PROACTIVE') || feature('KAIROS')
+src/services/compact/compact.ts:6:const sessionTranscriptModule = feature('KAIROS')
+src/services/compact/compact.ts:214:  if (feature('EXPERIMENTAL_SKILL_SEARCH')) {
+src/services/compact/compact.ts:700:    if (feature('PROMPT_CACHE_BREAK_DETECTION')) {
+src/services/compact/compact.ts:717:    if (feature('KAIROS')) {
+src/services/compact/compact.ts:1049:    if (feature('PROMPT_CACHE_BREAK_DETECTION')) {
+src/services/compact/compact.ts:1061:    if (feature('KAIROS')) {
+src/services/tools/toolExecution.ts:1076:      feature('TRANSCRIPT_CLASSIFIER') &&
+src/services/compact/postCompactCleanup.ts:42:  if (feature('CONTEXT_COLLAPSE')) {
+src/services/compact/postCompactCleanup.ts:71:  if (feature('COMMIT_ATTRIBUTION')) {
+src/services/compact/microCompact.ts:52:// --- Cached microcompact state (ant-only, gated by feature('CACHED_MICROCOMPACT')) ---
+src/services/compact/microCompact.ts:55:// The imports and state live inside feature() checks for dead code elimination.
+src/services/compact/microCompact.ts:276:  if (feature('CACHED_MICROCOMPACT')) {
+src/services/compact/microCompact.ts:362:    if (feature('PROMPT_CACHE_BREAK_DETECTION')) {
+src/services/compact/microCompact.ts:525:  if (feature('PROMPT_CACHE_BREAK_DETECTION') && querySource) {
+src/services/compact/autoCompact.ts:177:  // shared across forks). Inside feature() so the string DCEs from
+src/services/compact/autoCompact.ts:179:  if (feature('CONTEXT_COLLAPSE')) {
+src/services/compact/autoCompact.ts:190:  // catch the API's prompt-too-long. feature() wrapper keeps the flag string
+src/services/compact/autoCompact.ts:195:  if (feature('REACTIVE_COMPACT')) {
+src/services/compact/autoCompact.ts:215:  if (feature('CONTEXT_COLLAPSE')) {
+src/services/compact/autoCompact.ts:302:    if (feature('PROMPT_CACHE_BREAK_DETECTION')) {
+src/services/extractMemories/prompts.ts:106:  if (!feature('TEAMMEM')) {
+src/services/extractMemories/extractMemories.ts:65:const teamMemPaths = feature('TEAMMEM')
+
+[Showing results with pagination = limit: 250]
