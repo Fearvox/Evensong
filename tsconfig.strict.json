@@ -1,0 +1,27 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "strict": true,
+    "noImplicitAny": true,
+    "strictNullChecks": true,
+    "strictFunctionTypes": true,
+    "strictPropertyInitialization": true,
+    "noImplicitReturns": true,
+    "noUncheckedIndexedAccess": false,
+    "skipLibCheck": true,
+    "types": []
+  },
+  "include": [
+    "src/types/message.ts",
+    "src/types/permissions.ts",
+    "src/state/AppStateStore.ts",
+    "src/state/store.ts",
+    "src/bootstrap/state.ts",
+    "src/Tool.ts",
+    "src/types/__tests__/message.test.ts",
+    "src/types/__tests__/permissions.test.ts",
+    "src/types/global.d.ts",
+    "src/types/internal-modules.d.ts",
+    "src/types/strict-shims.d.ts"
+  ]
+}
