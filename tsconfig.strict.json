@@ -28,6 +28,7 @@
     "src/tools/__tests__/createTestToolUseContext.ts",
     "src/tools/BashTool/__tests__/BashTool.test.ts",
     "src/tools/FileEditTool/__tests__/FileEditTool.test.ts",
-    "src/tools/AgentTool/__tests__/AgentTool.test.ts"
+    "src/tools/AgentTool/__tests__/AgentTool.test.ts",
+    "src/tools/GrepTool/__tests__/GrepTool.test.ts"
   ]
 }
