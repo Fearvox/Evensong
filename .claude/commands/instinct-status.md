@@ -13,7 +13,7 @@ Shows learned instincts for the current project plus global instincts, grouped b
 Run the instinct CLI using the plugin root path:
 
 ```bash
-python3 "${CLAUDE_PLUGIN_ROOT}/skills/continuous-learning-v2/scripts/instinct-cli.py" status
+python3 "${CLAUDE_PROJECT_DIR}/.claude/skills/everything-claude-code/continuous-learning-v2/scripts/instinct-cli.py" status
 ```
 
 Or if `CLAUDE_PLUGIN_ROOT` is not set (manual installation), use:

@@ -13,7 +13,7 @@ Remove expired pending instincts that were auto-generated but never reviewed or 
 Run the instinct CLI using the plugin root path:
 
 ```bash
-python3 "${CLAUDE_PLUGIN_ROOT}/skills/continuous-learning-v2/scripts/instinct-cli.py" prune
+python3 "${CLAUDE_PROJECT_DIR}/.claude/skills/everything-claude-code/continuous-learning-v2/scripts/instinct-cli.py" prune
 ```
 
 Or if `CLAUDE_PLUGIN_ROOT` is not set (manual installation):

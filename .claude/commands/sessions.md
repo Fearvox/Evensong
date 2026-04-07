@@ -2,6 +2,8 @@
 description: Manage Claude Code session history, aliases, and session metadata.
 ---
 
+> **Note:** This command requires the full ECC plugin runtime. When running standalone, session management commands that call `session-manager.mjs` will not work. Basic session listing via `claude --resume` still works natively.
+
 # Sessions Command
 
 Manage Claude Code session history - list, load, alias, and edit sessions stored in `~/.claude/session-data/` with legacy reads from `~/.claude/sessions/`.
