@@ -26,10 +26,10 @@ Requirements for engineering maturity milestone. Each maps to roadmap phases.
 ### API & Streaming
 
 - [x] **API-01**: Streaming handles ECONNRESET/EPIPE/ETIMEDOUT with automatic retry (p-retry)
-- [ ] **API-02**: Idle timeout wrapper detects and recovers from frozen streams (thinking block hang)
+- [x] **API-02**: Idle timeout wrapper detects and recovers from frozen streams (thinking block hang)
 - [x] **API-03**: Provider switching (Anthropic/Bedrock/Vertex) works without code changes
 - [x] **API-04**: Stream abort path writes history atomically (temp file + rename, no partial state)
-- [ ] **API-05**: claude.ts type annotations match SDK event types without unsafe casts
+- [x] **API-05**: claude.ts type annotations match SDK event types without unsafe casts
 
 ### Query Loop
 
@@ -119,10 +119,10 @@ Requirements for engineering maturity milestone. Each maps to roadmap phases.
 | TOOL-05 | Phase 2 | Complete |
 | TEST-02 | Phase 2 | Complete |
 | API-01 | Phase 3 | Complete |
-| API-02 | Phase 3 | Pending |
+| API-02 | Phase 3 | Complete |
 | API-03 | Phase 3 | Complete |
 | API-04 | Phase 3 | Complete |
-| API-05 | Phase 3 | Pending |
+| API-05 | Phase 3 | Complete |
 | TEST-03 | Phase 3 | Complete |
 | QUERY-01 | Phase 4 | Pending |
 | QUERY-02 | Phase 4 | Pending |

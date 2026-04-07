@@ -69,7 +69,7 @@ Plans:
 Plans:
 - [x] 03-01-PLAN.md — withRetry utility tests + provider switching tests (API-01, API-03)
 - [x] 03-02-PLAN.md — Atomic history writes + finalizeHistoryOnAbort (API-04)
-- [ ] 03-03-PLAN.md — Unconditional watchdog + Zod schema wiring in claude.ts (API-02, API-05)
+- [x] 03-03-PLAN.md — Unconditional watchdog + Zod schema wiring in claude.ts (API-02, API-05)
 
 ### Phase 4: Query Loop & Permission System
 **Goal**: The multi-turn query loop correctly handles tool-use responses; permission prompts appear before execution; permission state persists correctly across turns
@@ -86,7 +86,7 @@ Plans:
 
 Plans:
 - [x] 03-01-PLAN.md — withRetry utility tests + provider switching tests (API-01, API-03)
-- [ ] 03-02-PLAN.md — Atomic history writes + finalizeHistoryOnAbort (API-04)
+- [x] 03-02-PLAN.md — Atomic history writes + finalizeHistoryOnAbort (API-04)
 - [ ] 03-03-PLAN.md — Unconditional watchdog + Zod schema wiring in claude.ts (API-02, API-05)
 
 ### Phase 5: Feature Flags & MCP Transport
@@ -102,7 +102,7 @@ Plans:
 **Plans**: 3 plans
 
 Plans:
-- [ ] 03-01-PLAN.md — withRetry utility tests + provider switching tests (API-01, API-03)
+- [x] 03-01-PLAN.md — withRetry utility tests + provider switching tests (API-01, API-03)
 - [ ] 03-02-PLAN.md — Atomic history writes + finalizeHistoryOnAbort (API-04)
 - [ ] 03-03-PLAN.md — Unconditional watchdog + Zod schema wiring in claude.ts (API-02, API-05)
 
