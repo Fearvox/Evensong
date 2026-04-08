@@ -12,9 +12,11 @@
     "scripts": {
         "build": "bun build src/entrypoints/cli.tsx --outdir dist --target bun",
         "dev": "bun run src/entrypoints/cli.tsx",
+        "dev:debug": "bun --inspect run src/entrypoints/cli.tsx",
         "test": "bun test",
-        "lint": "bunx @biomejs/biome check src/",
-        "lint:fix": "bunx @biomejs/biome check --fix src/",
+        "lint": "biome check src/",
+        "lint:fix": "biome check --write src/",
+        "typecheck": "tsc --noEmit",
         "prepublishOnly": "bun run build"
     },
     "dependencies": {
