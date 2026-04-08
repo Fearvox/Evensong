@@ -1,334 +1,690 @@
-# Architecture Patterns
+# Architecture: v2.0 Agent Intelligence Enhancement Integration
 
-**Domain:** Terminal-based AI CLI tool (decompiled TypeScript, Bun runtime)
-**Researched:** 2026-04-06
-**Confidence:** HIGH (sourced from direct codebase inspection across 12 files)
+**Domain:** 6 agent intelligence capabilities integrating into existing Claude Code CLI fork (CCB)
+**Researched:** 2026-04-08
+**Confidence:** HIGH (all integration points verified via direct codebase inspection with file:line references)
 
 ---
 
-## System Overview
+## Integration Architecture Overview
+
+The 6 features organize into 3 integration tiers based on where they hook into the existing architecture:
 
 ```
-┌─────────────────────────────────────────────────────────────┐
-│                     cli.tsx (Entrypoint)                     │
-│  Injects: feature() polyfill, MACRO globals, BUILD_TARGET    │
-└────────────────────────┬────────────────────────────────────┘
-                         │ import
-                         ▼
-┌─────────────────────────────────────────────────────────────┐
-│                       main.tsx (CLI Layer)                    │
-│  Commander.js arg parsing, auth, MCP prefetch, launchRepl()  │
-└──────┬──────────────────────────────┬───────────────────────┘
-       │ interactive                  │ pipe / SDK mode
-       ▼                              ▼
-┌──────────────┐              ┌───────────────────┐
-│  REPL.tsx    │              │  QueryEngine.ts    │
-│  (Ink/React  │              │  (headless loop)   │
-│  UI layer)   │              └────────┬──────────┘
-└──────┬───────┘                       │
-       │ invokes                       │ invokes
-       ▼                               ▼
-┌─────────────────────────────────────────────────────────────┐
-│                        query.ts (Turn Loop)                  │
-│  Normalizes messages → calls API → dispatches tool_use       │
-│  blocks → collects tool_results → loops until stop_reason    │
-└──────┬──────────────────────────┬──────────────────────────┘
-       │                          │
-       ▼                          ▼
-┌──────────────────┐    ┌──────────────────────────────────┐
-│ services/api/    │    │  Tool System                      │
-│ claude.ts        │    │  tools.ts (registry)              │
-│ (Anthropic SDK   │    │  Tool.ts  (interface + buildTool) │
-│  streaming)      │    │  tools/<Name>/  (implementations) │
-└──────────────────┘    └────────────┬─────────────────────┘
-                                     │ each tool calls
-                                     ▼
-                        ┌──────────────────────────────────┐
-                        │  Permission System               │
-                        │  useCanUseTool.tsx               │
-                        │  types/permissions.ts            │
-                        │  utils/permissions/              │
-                        └──────────────────────────────────┘
+Tier 1: Query Loop Internals (modify existing hot path)
+  - CONTEXT_COLLAPSE     — hooks into query.ts turn loop
+  - Deliberation Checkpoint — inserts into toolExecution.ts permission-to-call gap
 
-STATE (shared across all layers)
-┌─────────────────────────────────────────────────────────────┐
-│  bootstrap/state.ts   — module-level singletons (sessionId,  │
-│                          CWD, token counts, hook state)       │
-│  state/store.ts       — minimal pub-sub store (no Zustand)   │
-│  state/AppStateStore.ts — AppState shape definition          │
-│  state/AppState.tsx   — React context provider for UI layer  │
-└─────────────────────────────────────────────────────────────┘
+Tier 2: Post-Query Lifecycle (fire-and-forget from existing hooks)
+  - EXTRACT_MEMORIES     — hooks into stopHooks.ts post-query lifecycle
 
-CONTEXT ASSEMBLY (feeds system prompt)
-┌─────────────────────────────────────────────────────────────┐
-│  context.ts  — git status, date, CLAUDE.md contents          │
-│  utils/claudemd.ts — discovers CLAUDE.md hierarchy           │
-│  utils/queryContext.ts — fetchSystemPromptParts              │
-└─────────────────────────────────────────────────────────────┘
-
-INTEGRATIONS
-┌─────────────────────────────────────────────────────────────┐
-│  services/mcp/  — MCP server connections (stdio/sse/http)    │
-│  services/compact/ — auto-compaction, reactive compact       │
-│  services/analytics/ — stubbed (GrowthBook, Sentry empty)   │
-└─────────────────────────────────────────────────────────────┘
+Tier 3: Parallel Modules (new top-level modules, orthogonal to REPL)
+  - COORDINATOR_MODE     — parallel to REPL, own module in coordinator/
+  - KAIROS               — parallel to REPL, own module in assistant/ with gate.ts
+  - Dynamic Permission   — extends existing permission types in permissions.ts
 ```
 
 ---
 
-## Component Responsibilities
+## Feature 1: CONTEXT_COLLAPSE
 
-| Component | File(s) | Responsibility | Communicates With |
-|-----------|---------|---------------|-------------------|
-| Entrypoint | `src/entrypoints/cli.tsx` | Injects `feature()` polyfill and build-time macros before any imports load | main.tsx (via import) |
-| CLI Layer | `src/main.tsx` | Commander.js arg parsing, auth check, MCP prefetch, selects REPL vs headless mode | REPL.tsx, QueryEngine.ts, context.ts |
-| REPL Screen | `src/screens/REPL.tsx` | Interactive terminal UI (Ink/React), handles user input, keyboard shortcuts, permission prompts, message rendering | QueryEngine.ts (via hooks), AppState, useCanUseTool |
-| QueryEngine | `src/QueryEngine.ts` | Headless conversation orchestrator: wraps query(), manages compaction, file history snapshots, attribution, turn bookkeeping | query.ts, AppState, MCP clients |
-| Turn Loop | `src/query.ts` | Core agentic loop: normalize messages → stream API call → dispatch tool_use blocks → collect results → decide to continue or stop | claude.ts (API), Tool system, compact service |
-| API Client | `src/services/api/claude.ts` | Builds BetaMessageStreamParams, calls Anthropic SDK streaming endpoint, handles multi-provider routing (Anthropic/Bedrock/Vertex/Azure) | query.ts (caller), SDK |
-| Tool Interface | `src/Tool.ts` | `Tool<Input,Output,P>` type definition, `buildTool()` factory with safe defaults, `findToolByName()`, `ToolUseContext` shape | All tools, query.ts |
-| Tool Registry | `src/tools.ts` | Assembles `Tools` array; conditional loading via `feature()` flags and `USER_TYPE` env var | All tool implementations |
-| Tool Implementations | `src/tools/<Name>/` | Each tool: Zod inputSchema, `call()`, `checkPermissions()`, `renderToolResultMessage()`, etc. | Tool.ts interface, ToolUseContext |
-| Permission System | `src/hooks/useCanUseTool.tsx`, `src/types/permissions.ts`, `src/utils/permissions/` | Checks rules (allow/deny/ask), dispatches to interactive handler / coordinator / swarm-worker handler | Tool system (called per tool_use), REPL (for UI queue) |
-| App State | `src/state/AppStateStore.ts`, `src/state/store.ts`, `src/state/AppState.tsx` | AppState shape (messages, tools, permission context, MCP connections, tasks, speculation), pub-sub store, React context provider | REPL (reads/writes), QueryEngine (reads/writes), tools (reads) |
-| Bootstrap Singletons | `src/bootstrap/state.ts` | Module-level global singletons: sessionId, CWD, token counts, turn hook duration, hook registrations. Intentionally minimal. | All layers (imported directly) |
-| Context Assembly | `src/context.ts`, `src/utils/claudemd.ts` | Builds system/user context: git status, date, CLAUDE.md file hierarchy, memory files | query.ts / QueryEngine.ts (via fetchSystemPromptParts) |
-| MCP Integration | `src/services/mcp/types.ts`, `src/services/mcp/` | MCP server config schemas (stdio/sse/http/ws/sdk), connection lifecycle, tool + resource injection | tools.ts (MCP tools added to registry), query.ts |
-| Compaction | `src/services/compact/` | Auto-compaction when context window fills, post-compact message rebuild, reactive compact (feature-flagged) | query.ts (called when token warning triggers) |
-| Feature Flags | `src/entrypoints/cli.tsx` (polyfill) | Runtime evaluation of `feature('FLAG')` via env vars (`CLAUDE_FEATURE_X`) or `~/.claude/feature-flags.json`; build-time it's `bun:bundle` | All modules (used via direct import) |
+### Current State
+
+Stub implementation exists at `src/services/contextCollapse/index.ts` (67 lines). All exports are no-ops that return identity values. The feature flag `CONTEXT_COLLAPSE` is referenced at 6 integration points in `src/query.ts`.
+
+### Integration Points (all in src/query.ts)
+
+| Location | Line | What Happens | Integration Type |
+|----------|------|-------------|-----------------|
+| Import gate | 17-19 | `feature('CONTEXT_COLLAPSE')` conditional require | Module loading |
+| Pre-autocompact projection | 440-447 | `applyCollapsesIfNeeded(messagesForQuery, toolUseContext, querySource)` mutates message list before autocompact | **PRIMARY** — message transformation |
+| Blocking limit skip | 616-620 | `isContextCollapseEnabled() && isAutoCompactEnabled()` sets `collapseOwnsIt` to bypass synthetic preempt | Control flow gate |
+| Stream withholding | 802-812 | `isWithheldPromptTooLong(message, isPromptTooLongMessage, querySource)` withholds 413 errors for recovery | Error recovery |
+| Overflow recovery | 1093-1120 | `recoverFromOverflow(messagesForQuery, querySource)` drains staged collapses on real API 413 | Recovery path |
+| Fallback when RC compiled out | 1179-1186 | Surface withheld 413 when collapse couldn't recover and reactive compact is absent | Fallback exit |
+
+### Data Flow
+
+```
+query.ts turn loop iteration
+  |
+  v
+microcompact (if enabled) -> messagesForQuery (modified)
+  |
+  v
+[CONTEXT_COLLAPSE insertion point: line 440]
+applyCollapsesIfNeeded(messagesForQuery, toolUseContext, querySource)
+  -> Returns CollapseResult { messages: Message[] }
+  -> messagesForQuery = collapseResult.messages  (projection, not mutation of REPL array)
+  |
+  v
+autocompact (existing) -> may further reduce messages
+  |
+  v
+API call with collapsed + compacted messages
+  |
+  v (on 413 error)
+[RECOVERY PATH: line 1093]
+recoverFromOverflow(messagesForQuery, querySource)
+  -> DrainResult { committed: number, messages: Message[] }
+  -> If committed > 0: continue loop with drained messages
+  -> Else: fall through to reactive compact
+```
+
+### Components Needed
+
+| Component | File | Status | Work Required |
+|-----------|------|--------|--------------|
+| `index.ts` | `src/services/contextCollapse/index.ts` | Stub exists | Replace stub functions with real collapse logic |
+| `operations.ts` | `src/services/contextCollapse/operations.ts` | Exists (unknown content) | Implement collapse span tracking |
+| `persist.ts` | `src/services/contextCollapse/persist.ts` | Exists (unknown content) | Implement cross-turn persistence |
+| `query.ts` integration | `src/query.ts` | All 6 hooks exist | **No changes needed** -- stubs become live when feature flag enabled |
+
+### Key Design Constraint
+
+Context collapse is a **read-time projection** over the REPL's full history. Summary messages live in the collapse store, not the REPL array. This is what makes collapses persist across turns: `projectView()` replays the commit log on every entry. The comment at query.ts:435-439 documents this explicitly.
+
+### Modified vs New Components
+
+- **Modified:** NONE -- query.ts integration points already exist
+- **New (replace stubs):** `contextCollapse/index.ts`, `contextCollapse/operations.ts`, `contextCollapse/persist.ts`
 
 ---
 
-## Architectural Patterns
+## Feature 2: EXTRACT_MEMORIES
 
-### Pattern 1: Layered Boot with Side-Effect Ordering
+### Current State
 
-`main.tsx` deliberately fires three side effects at the top before any other imports:
-1. `profileCheckpoint('main_tsx_entry')` — startup timing
-2. `startMdmRawRead()` — MDM policy reads (parallel subprocess)
-3. `startKeychainPrefetch()` — macOS keychain reads (parallel)
+Full implementation exists at `src/services/extractMemories/extractMemories.ts` (616 lines) with `prompts.ts` alongside it. The code uses the `runForkedAgent` pattern -- a forked copy of the main conversation that shares the parent's prompt cache.
 
-**Why it matters for recovery:** Any module reorder or import shuffle in `main.tsx` can break startup timing or cause keychain reads to serialize (65ms regression). This ordering must be preserved during type recovery work.
+### Integration Points
 
-### Pattern 2: ToolUseContext as Dependency Injection Container
+| Location | File:Line | What Happens | Integration Type |
+|----------|-----------|-------------|-----------------|
+| Import gate | `src/query/stopHooks.ts:41-43` | `feature('EXTRACT_MEMORIES')` conditional require | Module loading |
+| Fire-and-forget call | `src/query/stopHooks.ts:141-153` | `extractMemoriesModule!.executeExtractMemories(stopHookContext, toolUseContext.appendSystemMessage)` | **PRIMARY** -- post-turn lifecycle |
+| Drain on shutdown | `src/cli/print.ts` (search: `drainPendingExtraction`) | Awaits in-flight extractions before shutdown | Graceful shutdown |
+| Init on startup | `src/entrypoints/init.ts` or `main.tsx` | `initExtractMemories()` creates fresh closure state | Initialization |
 
-`ToolUseContext` (defined in `Tool.ts`) is the single object passed to every `tool.call()` invocation. It carries:
-- `options` — all session configuration (commands, model, tools, MCP clients)
-- `abortController` — cancellation signal
-- `readFileState` — LRU file state cache
-- `getAppState()` / `setAppState()` — state access
-- `setToolJSX` — UI injection callback (REPL only, undefined in headless)
-- `messages` — current conversation history
-- `updateFileHistoryState` / `updateAttributionState` — specialized updaters
-
-Tools are stateless; all session state travels through this context object. This is the correct pattern to preserve — **do not break tools into stateful classes**.
-
-### Pattern 3: Dual-Mode Architecture (REPL vs Headless)
-
-The system runs in two modes with identical query logic but different wiring:
-
-**REPL mode:** `REPL.tsx` renders Ink UI → calls QueryEngine → calls query() → streams events back to UI via `setToolJSX`, `appendSystemMessage`, state updates.
-
-**Headless/SDK mode:** `QueryEngine.ts` runs without React, wires `setAppState` to a no-op or stores to a plain object, streams `SDKMessage` events via structured output.
-
-The query loop (`query.ts`) is mode-agnostic. It receives callbacks and fires them without knowing which mode it's in. **This separation must be maintained** — never add UI-aware code to query.ts.
-
-### Pattern 4: Feature Flag Dead Code Elimination
-
-All Anthropic-internal features are guarded by `feature('FLAG_NAME')`. In dev mode, the `cli.tsx` polyfill evaluates them at runtime against env vars and a config file. At build time, Bun's bundler eliminates dead branches.
-
-Pattern in use:
-```typescript
-// Conditional module require (not import) to allow DCE
-const reactiveCompact = feature('REACTIVE_COMPACT')
-  ? require('./services/compact/reactiveCompact.js')
-  : null
-```
-
-**Recovery implication:** When enabling a feature for testing, set `CLAUDE_FEATURE_X=true` or add to `~/.claude/feature-flags.json`. Never hard-code `true` — it breaks the DCE contract.
-
-### Pattern 5: Tool Interface with buildTool() Factory
-
-Every tool goes through `buildTool(def)` which spreads safe defaults:
-- `isEnabled` → `true`
-- `isConcurrencySafe` → `false` (fail-closed)
-- `isReadOnly` → `false` (fail-closed)
-- `checkPermissions` → `allow` (defers to general permission system)
-
-Tools define a Zod `inputSchema`, a `call()` method, React render methods (`renderToolResultMessage`, `renderToolUseMessage`), and metadata methods (`description`, `userFacingName`, `isConcurrencySafe`, etc.).
-
-**Recovery implication:** When adding types to tools, use `buildTool()` rather than raw object literals. The factory preserves fail-closed security defaults.
-
-### Pattern 6: Permission Decision Pipeline
+### Data Flow
 
 ```
-tool.call() invoked by query.ts
-  └─> canUseTool(tool, input, ctx, ...) [useCanUseTool.tsx]
-        ├─ hasPermissionsToUseTool()  [rule matching: allow/deny/ask]
-        │   ├─ returns allow → proceed
-        │   ├─ returns deny  → reject, return error to model
-        │   └─ returns ask   → route to handler:
-        │       ├─ interactiveHandler  (REPL: push to confirm queue, show UI)
-        │       ├─ coordinatorHandler  (swarm leader: bridge permission)
-        │       └─ swarmWorkerHandler  (worker: send via mailbox)
-        └─> PermissionDecision returned to query.ts
+query.ts turn loop completes (stop_reason = end_turn, no tool_use)
+  |
+  v
+handleStopHooks() [src/query/stopHooks.ts:64]
+  |
+  v (after template classification, if !isBareMode())
+[EXTRACT_MEMORIES insertion point: line 141]
+Check guards: feature('EXTRACT_MEMORIES') && !agentId && isExtractModeActive()
+  |
+  v
+executeExtractMemories(stopHookContext, appendSystemMessage)  [fire-and-forget]
+  |
+  v (inside extractMemories.ts)
+  1. Check overlap guard (inProgress flag)
+  2. Check turn throttle (turnsSinceLastExtraction < threshold)
+  3. Check mutual exclusion (hasMemoryWritesSince -- if main agent already wrote memories, skip)
+  4. scanMemoryFiles() -> build manifest of existing memories
+  5. buildExtractAutoOnlyPrompt() -> prompt with conversation + existing memories
+  6. runForkedAgent({ promptMessages, canUseTool: createAutoMemCanUseTool(memoryDir) })
+     -> Forked agent has READ-ONLY tools + WRITE only to memory dir
+     -> maxTurns: 5 (hard cap)
+  7. extractWrittenPaths() -> list of files the agent wrote
+  8. appendSystemMessage(createMemorySavedMessage(memoryPaths))
+     -> Inserts system notification into REPL UI
 ```
 
-Permission modes: `default`, `acceptEdits`, `bypassPermissions`, `dontAsk`, `plan`, `auto` (feature-flagged), `bubble` (internal).
+### Components Needed
+
+| Component | File | Status | Work Required |
+|-----------|------|--------|--------------|
+| `extractMemories.ts` | `src/services/extractMemories/extractMemories.ts` | **Full implementation exists** (616 lines) | Verify runtime behavior when feature flag enabled |
+| `prompts.ts` | `src/services/extractMemories/prompts.ts` | Exists | Review prompt quality |
+| `stopHooks.ts` | `src/query/stopHooks.ts` | Integration hook exists at line 141 | **No changes needed** |
+| `memdir/` | `src/memdir/memdir.ts`, `memoryScan.ts`, `paths.ts` | Exist | Verify auto-memory path resolution |
+| `forkedAgent.ts` | `src/utils/forkedAgent.ts` | Exists | Verify runForkedAgent works with current API client |
+
+### Key Design Constraint
+
+Memory extraction uses a **sandboxed tool permission function** (`createAutoMemCanUseTool`) that restricts the forked agent to: read-only file operations, read-only bash, and write ONLY within the auto-memory directory. This is a security boundary -- do not relax it.
+
+### Modified vs New Components
+
+- **Modified:** NONE -- all integration points exist, implementation is present
+- **New:** NONE -- this is primarily a verification + feature flag enablement task
 
 ---
 
-## Data Flow
+## Feature 3: Deliberation Checkpoint
 
-### User Input → API Request → Tool Execution → Response
+### Current State
 
-```
-User types message
-  │
-  ▼
-REPL.tsx: processUserInput() → creates UserMessage
-  │
-  ▼
-QueryEngine.runQuery():
-  - fileHistoryMakeSnapshot()
-  - fetchSystemPromptParts() → context.ts (git status, CLAUDE.md, memory)
-  - buildEffectiveSystemPrompt()
-  │
-  ▼
-query() turn loop:
-  1. normalizeMessagesForAPI()     — strip UI-only messages
-  2. claude.ts streamRequest()     — Anthropic SDK streaming call
-  3. Stream events arrive:
-     - text_delta → update AssistantMessage in AppState
-     - tool_use   → collect ToolUseBlock
-  4. stop_reason = "tool_use":
-     - For each ToolUseBlock in parallel (if isConcurrencySafe) or serial:
-       a. canUseTool()             — permission check
-       b. tool.validateInput()     — schema validation
-       c. tool.call()              — execution (can spawn subagents)
-       d. tool.mapToolResultToToolResultBlockParam() — serialize result
-  5. Append tool_result UserMessage to messages
-  6. Loop back to step 1
-  7. stop_reason = "end_turn" → return messages to QueryEngine
-  │
-  ▼
-QueryEngine: recordTranscript(), flushSessionStorage(), update attribution
-  │
-  ▼
-REPL.tsx: re-render updated messages via AppState
-```
+No existing implementation. This is a new feature that inserts forced "think deeply" time between the permission check and tool execution for high-risk operations.
 
-### Type Flow Through the Tool System
+### Integration Point
+
+The insertion point is inside `checkPermissionsAndCallTool` in `src/services/tools/toolExecution.ts`.
+
+**Exact insertion location:** Between the permission resolution (line ~930) and the tool execution start. The flow is:
 
 ```
-User intent (string)
-  → UserMessage (types/message.ts)
-  → normalizeMessagesForAPI() → BetaMessageParam[] (SDK type)
-  → API streams BetaRawMessageStreamEvent
-  → normalizeContentFromAPI() → MessageContent (internal type)
-  → AssistantMessage (types/message.ts)
-  → tool_use block → findToolByName() → Tool.call(z.infer<Input>)
-  → ToolResult<Output>
-  → mapToolResultToToolResultBlockParam() → ToolResultBlockParam (SDK type)
-  → next API call as part of messages
+checkPermissionsAndCallTool() [toolExecution.ts:599]
+  |
+  v
+1. parsedInput = tool.inputSchema.safeParse(input)     [line 615]
+2. tool.validateInput(parsedInput.data)                  [line 683]
+3. runPreToolUseHooks()                                  [line 800-861]
+4. resolveHookPermissionDecision()                       [line 921-931]
+   -> permissionDecision = { behavior: 'allow' | 'deny' | 'ask' }
+   |
+   v
+   if (permissionDecision.behavior !== 'allow') -> reject [line 995]
+   |
+   v
+   *** DELIBERATION CHECKPOINT INSERTION POINT ***
+   (after permission granted, before tool.call())
+   |
+   v
+5. tool.call(callInput, toolUseContext)                  [further down]
 ```
 
-The boundary between internal types (`types/message.ts`) and SDK types (`@anthropic-ai/sdk`) is the primary site of decompilation type errors. `unknown`/`never`/`{}` errors concentrate here.
+### Data Flow
+
+```
+Permission check passes (behavior === 'allow')
+  |
+  v
+[DELIBERATION CHECKPOINT -- new code]
+  1. Classify risk level:
+     - Tool name (BashTool, FileEditTool = higher risk)
+     - Input content (destructive commands, sensitive paths)
+     - Permission mode (bypassPermissions = skip checkpoint)
+  2. If risk >= threshold:
+     a. Build deliberation prompt with:
+        - Current tool call details (name, input)
+        - Recent conversation context (last N messages)
+        - Risk classification rationale
+     b. API call with extended_thinking enabled
+        - Use lightweight model (same model, small max_tokens)
+        - Force thinking: "Before executing, verify this is the right action"
+     c. Parse thinking output:
+        - PROCEED -> continue to tool.call()
+        - ABORT -> return deny-like result to model
+        - MODIFY -> suggest input modification
+  3. If risk < threshold: pass through
+  |
+  v
+tool.call(callInput, toolUseContext)
+```
+
+### Components Needed
+
+| Component | File | Status | Work Required |
+|-----------|------|--------|--------------|
+| `deliberation.ts` | `src/services/deliberation/deliberation.ts` | **New** | Risk classification + deliberation API call |
+| `riskClassifier.ts` | `src/services/deliberation/riskClassifier.ts` | **New** | Classify tool calls by risk level |
+| `prompts.ts` | `src/services/deliberation/prompts.ts` | **New** | Deliberation prompt templates |
+| `toolExecution.ts` | `src/services/tools/toolExecution.ts` | **Modified** | Insert checkpoint call between permission check and tool.call() |
+
+### Key Design Constraints
+
+1. Must not block low-risk operations (read-only tools, grep, glob should pass through instantly)
+2. Must be skippable via `bypassPermissions` mode
+3. The deliberation API call must use the same abort signal as the parent tool execution
+4. Must NOT import React or UI code -- this runs in both REPL and headless modes
+
+### Modified vs New Components
+
+- **Modified:** `src/services/tools/toolExecution.ts` -- insert ~20 lines in `checkPermissionsAndCallTool` between permission resolution and tool.call()
+- **New:** `src/services/deliberation/` directory with 3 files
 
 ---
 
-## Anti-Patterns to Avoid
+## Feature 4: COORDINATOR_MODE
 
-### Anti-Pattern 1: Adding State to query.ts
-**What:** Storing conversation or tool state as module-level variables in query.ts.
-**Why bad:** query.ts is called recursively by subagents (AgentTool). Module-level state leaks across concurrent agent runs.
-**Instead:** All state travels through `ToolUseContext` or `AppState`. Use `bootstrap/state.ts` only for true session-level singletons.
+### Current State
 
-### Anti-Pattern 2: Mass tsc Error Fixing
-**What:** Running a bulk type fix pass across all 1341 errors.
-**Why bad:** Decompiled code has structural `unknown`/`never` types at runtime-valid boundaries. Naive fixes introduce incorrect type assertions (`as SomeType`) that hide real bugs or change runtime narrowing behavior.
-**Instead:** Fix types layer by layer, starting from pure leaf modules (no React, no SDK imports). Verify each layer compiles and tests pass before ascending.
+Partial implementation exists:
+- `src/coordinator/coordinatorMode.ts` (370 lines) -- **real implementation**, contains system prompt, mode switching, worker tool context
+- `src/coordinator/workerAgent.ts` (4 lines) -- **stub**, returns empty agent array
+- Feature flag `COORDINATOR_MODE` referenced across **35 files** (tools.ts, main.tsx, REPL.tsx, QueryEngine.ts, cli/print.ts, sessionRestore.ts, etc.)
 
-### Anti-Pattern 3: Importing React in Tool Logic
-**What:** Importing React hooks or JSX in `tool.call()` or `inputSchema` definitions.
-**Why bad:** Tools are used in both REPL (React) and headless (no React) modes. React imports in tool logic break headless execution.
-**Instead:** Render methods (`renderToolResultMessage`, `renderToolUseMessage`) are the correct React boundary. `call()` must be pure of React.
+### Integration Points (major ones)
 
-### Anti-Pattern 4: Circular Imports Through AppState
-**What:** Tool files importing from `state/AppState.tsx` or `state/AppStateStore.ts`.
-**Why bad:** AppState imports Tool types (for the `tools` field), creating a cycle. The codebase already has `types/permissions.ts` extracted specifically to break this cycle (see the comment at line 1).
-**Instead:** Tools access state only through `ToolUseContext.getAppState()`. Type-only imports from `types/` leaf files are safe.
+| Location | File:Line | What Happens | Integration Type |
+|----------|-----------|-------------|-----------------|
+| Tool registry | `src/tools.ts:120,280,292` | Adds coordinator-specific tools (TeamCreate, TeamDelete, SendMessage, TaskStop) | Tool loading |
+| Entry point | `src/main.tsx:76,1872` | Coordinator module import, mode check before REPL launch | Boot path |
+| REPL context | `src/screens/REPL.tsx:119,1747,1899` | `getCoordinatorUserContext` injected into system prompt | Context injection |
+| QueryEngine | `src/QueryEngine.ts:117` | Coordinator context function injection | Context injection |
+| System prompt | `src/utils/systemPrompt.ts:63` | Coordinator-specific system prompt addendum | Prompt modification |
+| AgentTool | `src/tools/AgentTool/AgentTool.tsx:223,553` | Coordinator mode changes agent spawning behavior | Tool behavior |
+| AgentTool agents | `src/tools/AgentTool/builtInAgents.ts:35` | Coordinator adds built-in agents via `getCoordinatorAgents()` | Agent definition |
+| Tool pool | `src/utils/toolPool.ts:22,72` | Coordinator mode modifies available tool pool for workers | Tool filtering |
+| Session restore | `src/utils/sessionRestore.ts:257,428,514` | Coordinator mode persisted/restored across session resume | State persistence |
+| Slash command | `src/utils/processUserInput/processSlashCommand.tsx:837` | `/coordinate` or auto-activate in coordinator env | User input |
+| CLI print | `src/cli/print.ts:358,4925,4974,5130,5174` | Coordinator mode affects headless output formatting | Output formatting |
 
-### Anti-Pattern 5: Hardcoding feature() to true
-**What:** Replacing `feature('FLAG')` with `true` during debugging.
-**Why bad:** Breaks the DCE contract. At build time Bun eliminates dead branches — hardcoded `true` includes all Anthropic-internal code paths that depend on unavailable infrastructure (Computer Use, Kairos, etc.) and will crash.
-**Instead:** Use `CLAUDE_FEATURE_FLAG=true` env var or the config file. The polyfill handles it cleanly.
+### Data Flow
 
----
+```
+main.tsx boot
+  |
+  v
+Check: isCoordinatorMode() (env var CLAUDE_CODE_COORDINATOR_MODE=1)
+  |
+  v (if coordinator mode)
+Replace system prompt with getCoordinatorSystemPrompt()
+  -> Coordinator persona: "You orchestrate workers, don't code directly"
+  |
+  v
+Tool registry: add TeamCreate, TeamDelete, SendMessage, TaskStop
+  Remove: direct code tools (BashTool, FileEditTool, etc.)
+  |
+  v
+REPL.tsx renders coordinator UI
+  -> User message -> query.ts -> API responds with AgentTool calls
+  -> AgentTool spawns workers (subagent pattern via runAgent)
+  -> Workers have: ASYNC_AGENT_ALLOWED_TOOLS (Bash, Read, Edit, etc.)
+  -> Worker results arrive as <task-notification> messages
+  -> Coordinator synthesizes and responds to user
+```
 
-## Suggested Build/Recovery Order
+### Components Needed
 
-This is the critical section for roadmap phase structure.
+| Component | File | Status | Work Required |
+|-----------|------|--------|--------------|
+| `coordinatorMode.ts` | `src/coordinator/coordinatorMode.ts` | **Full implementation** (370 lines, system prompt, mode logic) | Verify runtime behavior |
+| `workerAgent.ts` | `src/coordinator/workerAgent.ts` | **Stub** (empty array) | Implement worker agent definitions |
+| Tool registry hooks | `src/tools.ts:120,280,292` | Integration points exist | **No changes needed** |
+| All 35 file references | Various | All gated by `feature('COORDINATOR_MODE')` | **No changes needed** -- become live when flag enabled |
 
-### Layer 0 (Foundation) — Pure utilities, no external deps
-Files: `src/utils/uuid.ts`, `src/utils/sanitization.ts`, `src/keybindings/`
-Why first: Already tested (58 tests). These have clean types. Establish the test pipeline here.
-Type recovery: Zero decompilation errors here; focus on building test patterns.
+### Key Design Constraints
 
-### Layer 1 (Type Definitions) — Message and permission types
-Files: `src/types/message.ts`, `src/types/permissions.ts`, `src/types/tools.ts`, `src/types/ids.ts`
-Why second: Everything imports these. Correct types here eliminate cascading errors above.
-Type recovery: High-value — fixing `Message` union types eliminates ~30% of downstream errors.
-Risk: `types/message.ts` is the most imported file; changes propagate widely.
+1. Coordinator mode replaces the normal tool set -- coordinator cannot directly run bash or edit files
+2. Workers are independent subagents that communicate via `<task-notification>` XML messages
+3. The `coordinatorMode.ts` system prompt (lines 116-369) is the core design document -- it defines the entire coordinator persona, workflow phases, and synthesis requirements
+4. Worker tool pool is defined by `ASYNC_AGENT_ALLOWED_TOOLS` constant, not by the coordinator
+5. Session mode (coordinator vs normal) must be persisted and restored across session resume
 
-### Layer 2 (State Layer) — Store and bootstrap
-Files: `src/state/store.ts` (clean — 34 lines, simple pub-sub), `src/state/AppStateStore.ts`, `src/bootstrap/state.ts`
-Why third: REPL, QueryEngine, and tools all depend on AppState shape. Stable state types unblock all higher layers.
-Type recovery: `AppStateStore.ts` has moderate complexity but mostly concrete types.
+### Modified vs New Components
 
-### Layer 3 (Tool Interface) — Tool.ts and core tools
-Files: `src/Tool.ts`, then `src/tools/BashTool/`, `src/tools/FileEditTool/`, `src/tools/GrepTool/`, `src/tools/FileReadTool/`
-Why fourth: Core tools are the primary value. `Tool.ts` is already well-typed (inspected — clean interface). Core tool `call()` methods need type hardening for the Input/Output generic parameters.
-Type recovery: Zod schemas are typically intact post-decompilation. Focus on `call()` return types.
-
-### Layer 4 (API Client) — claude.ts and provider routing
-Files: `src/services/api/claude.ts`, `src/utils/model/providers.ts`
-Why fifth: The SDK boundary is the densest source of `unknown` errors. After Layer 1 types are correct, `normalizeContentFromAPI()` and event handler types become fixable.
-Type recovery: HIGH effort, HIGH payoff. SDK types are authoritative — use them as the ground truth.
-
-### Layer 5 (Query Loop) — query.ts
-Files: `src/query.ts`
-Why sixth: Depends on correct types from all lower layers. The turn loop logic itself is structurally sound; the errors are in message/event type handling.
-Type recovery: Fix after Layer 4. Many errors cascade from API event types.
-
-### Layer 6 (QueryEngine) — QueryEngine.ts
-Files: `src/QueryEngine.ts`
-Why seventh: Orchestrator layer. Depends on query.ts, AppState, and MCP types.
-
-### Layer 7 (Permission System)
-Files: `src/hooks/useCanUseTool.tsx`, `src/utils/permissions/`
-Why seventh: Permission logic is functionally correct (the decompiled output runs). Type recovery here is about safety, not correctness.
-
-### Layer 8 (REPL/UI)
-Files: `src/screens/REPL.tsx`, `src/components/`
-Why last: REPL.tsx imports 80+ modules. React Compiler decompilation artifacts (`_c()` calls) make this the hardest to clean. Do not start here.
-Strategy: Clean `_c()` boilerplate via automated transform after lower layers are stable.
+- **Modified:** NONE -- all 35 integration points exist
+- **New (replace stub):** `src/coordinator/workerAgent.ts` -- implement `getCoordinatorAgents()`
 
 ---
 
-## Scalability Considerations (Relevant to Recovery Scope)
+## Feature 5: KAIROS (Proactive Assistant Mode)
 
-| Concern | Current State | Recovery Target |
+### Current State
+
+Stub implementations exist:
+- `src/assistant/index.ts` (9 lines) -- stub with no-op exports
+- `src/assistant/gate.ts` (3 lines) -- stub returning false
+- `src/assistant/sessionDiscovery.ts`, `sessionHistory.ts`, `AssistantSessionChooser.ts` -- exist (content unknown)
+- `src/proactive/index.ts` (7 lines) -- stub with no-op exports
+- Feature flag `KAIROS` referenced across **100+ files** (the most widely integrated feature)
+
+### Integration Points (critical subset of 100+)
+
+| Location | File:Line | What Happens | Integration Type |
+|----------|-----------|-------------|-----------------|
+| Entry point | `src/main.tsx:80-81` | `assistantModule` + `kairosGate` conditional import | Module loading |
+| Activation | `src/main.tsx:2206` | `if (kairosEnabled && assistantModule) { ... }` initializes assistant team | Boot activation |
+| Pending chat | `src/main.tsx:559,685,3259` | `_pendingAssistantChat` for deferred session discovery | Session management |
+| REPL proactive | `src/screens/REPL.tsx:195-199` | `proactiveModule` + `useProactive` hook for proactive ticking | UI integration |
+| REPL channels | `src/screens/REPL.tsx:1284-1299` | Channel loading for assistant mode | Channel management |
+| Tool registry | `src/tools.ts:26,42,46,50` | Adds SendUserFileTool, BriefTool, SubscribePRTool | Tool loading |
+| Keybindings | `src/keybindings/defaultBindings.ts:45` | KAIROS-specific keyboard shortcuts | UI shortcuts |
+| System prompt | `src/utils/systemPrompt.ts:105` | Proactive/KAIROS addendum to system prompt | Prompt modification |
+| Compact | `src/services/compact/compact.ts:6,717,1061` | KAIROS session transcript handling during compaction | Data preservation |
+| Memory dir | `src/memdir/memdir.ts:319,432` | Assistant-mode daily-log prompt | Memory management |
+| Commands | `src/commands.ts:63,67,70` | Assistant slash command registration | Command system |
+| Brief tool | `src/tools/BriefTool/BriefTool.ts:91,131` | Brief mode display for assistant | UI mode |
+| Permission | `src/hooks/toolPermission/handlers/interactiveHandler.ts:317` | Channel permission routing for KAIROS | Permission routing |
+| Analytics | `src/services/analytics/metadata.ts:735` | KAIROS-specific analytics metadata | Telemetry |
+
+### Data Flow
+
+```
+main.tsx boot
+  |
+  v
+kairosGate.isKairosEnabled() -> checks entitlement/gate
+  |
+  v (if enabled)
+assistantModule.initializeAssistantTeam()
+  -> Sets up assistant mode: channels, session discovery, dream
+  |
+  v
+REPL.tsx: useProactive() hook activates proactive mode
+  -> Subscribe to proactive tick events
+  -> Handle incoming channel notifications
+  -> Manage brief mode display
+  |
+  v
+User interacts -> query.ts turn loop runs normally
+  |
+  v (between turns, proactive mode)
+proactiveModule checks for:
+  - File system changes in watched directories
+  - GitHub PR events (via SubscribePRTool)
+  - Scheduled tasks (via useScheduledTasks)
+  |
+  v (on trigger)
+Inject proactive message into conversation
+  -> Model responds proactively to the trigger
+  -> Brief mode shows concise status updates
+```
+
+### Components Needed
+
+| Component | File | Status | Work Required |
+|-----------|------|--------|--------------|
+| `assistant/index.ts` | `src/assistant/index.ts` | **Stub** (9 lines, no-op) | Full assistant mode implementation |
+| `assistant/gate.ts` | `src/assistant/gate.ts` | **Stub** (3 lines, returns false) | Entitlement/gate check logic |
+| `assistant/sessionDiscovery.ts` | `src/assistant/sessionDiscovery.ts` | Exists (unknown) | Verify/implement session discovery |
+| `assistant/sessionHistory.ts` | `src/assistant/sessionHistory.ts` | Exists (unknown) | Verify/implement session history |
+| `assistant/AssistantSessionChooser.ts` | `src/assistant/AssistantSessionChooser.ts` | Exists (unknown) | Verify/implement session chooser |
+| `proactive/index.ts` | `src/proactive/index.ts` | **Stub** (7 lines, no-op) | Full proactive mode implementation |
+| `proactive/useProactive.ts` | `src/proactive/useProactive.ts` | Referenced but may not exist | React hook for proactive ticking |
+| All 100+ integration points | Various | All gated by `feature('KAIROS')` or `feature('PROACTIVE')` | **No changes needed** |
+
+### Key Design Constraints
+
+1. KAIROS is the **largest feature by integration surface** -- 100+ files reference it
+2. It depends on `proactive/` module AND `assistant/` module working together
+3. Multiple sub-features: `KAIROS_BRIEF`, `KAIROS_CHANNELS`, `KAIROS_DREAM`, `KAIROS_PUSH_NOTIFICATION`, `KAIROS_GITHUB_WEBHOOKS` -- each with their own flag
+4. Heavily coupled to the REPL UI layer (brief mode, channels notice, proactive spinner)
+5. Interacts with compaction (session transcript preservation during compact)
+6. Interacts with memdir (daily-log prompt for assistant mode)
+7. The complexity and wide integration surface make this the **highest-risk feature to enable**
+
+### Modified vs New Components
+
+- **Modified:** NONE -- all 100+ integration points already exist and are gated
+- **New (replace stubs):** `assistant/index.ts`, `assistant/gate.ts`, `proactive/index.ts`, `proactive/useProactive.ts`
+
+---
+
+## Feature 6: Dynamic Permission Escalation
+
+### Current State
+
+The permission system is fully implemented with types in `src/types/permissions.ts` (442 lines). The current permission modes are: `default`, `acceptEdits`, `bypassPermissions`, `dontAsk`, `plan`, `auto` (feature-flagged), `bubble` (internal).
+
+### Integration Points
+
+| Location | File:Line | What Happens | Integration Type |
+|----------|-----------|-------------|-----------------|
+| Permission types | `src/types/permissions.ts:16-29` | Mode definitions, behavior types | Type system |
+| Permission rules | `src/types/permissions.ts:50-79` | Rule sources, values, and matching | Rule engine |
+| Permission decisions | `src/types/permissions.ts:167-267` | Decision types: allow, ask, deny, passthrough | Decision flow |
+| Decision reasons | `src/types/permissions.ts:271-324` | Reason taxonomy: rule, mode, hook, classifier, etc. | Audit trail |
+| Tool permission context | `src/types/permissions.ts:427-441` | `ToolPermissionContext` with mode, rules, directories | Context shape |
+| Interactive handler | `src/hooks/toolPermission/handlers/interactiveHandler.ts` | Push-to-confirm-queue flow with async classifier | User interaction |
+| Permission checking | `src/utils/permissions/permissions.ts` | `hasPermissionsToUseTool()` -- the rule matching engine | Core logic |
+| Tool execution | `src/services/tools/toolExecution.ts:918-931` | `resolveHookPermissionDecision()` -- the permission resolution point | Execution gate |
+
+### Data Flow for Dynamic Permission Escalation
+
+```
+Model requests high-risk tool call
+  |
+  v
+canUseTool(tool, input, ctx) [useCanUseTool.tsx]
+  |
+  v
+hasPermissionsToUseTool() [permissions.ts]
+  -> Returns 'deny' based on current mode
+  |
+  v
+[DYNAMIC ESCALATION -- new logic]
+  1. Check if tool call qualifies for escalation:
+     - Tool is known (not MCP/unknown)
+     - Current denial is from mode (not explicit deny rule)
+     - Model provided reasoning for why tool is needed
+  2. Build escalation request:
+     - Tool name and input summary
+     - Model's reasoning
+     - Risk level classification
+     - Suggested temporary permission scope
+  3. Route to handler:
+     - Interactive: show escalation UI (different from normal ask)
+     - Headless: deny (no escalation without human)
+  4. User decision:
+     - Approve: add temporary session-scoped allow rule
+     - Deny: return normal deny
+     - Approve + persist: add to project/user settings
+  |
+  v
+Return PermissionDecision (allow with escalation metadata, or deny)
+```
+
+### Components Needed
+
+| Component | File | Status | Work Required |
+|-----------|------|--------|--------------|
+| `PermissionDecisionReason` extension | `src/types/permissions.ts` | **Modify** | Add `'escalation'` to decision reason types |
+| `PermissionEscalation` type | `src/types/permissions.ts` | **New type** | Define escalation request/response shapes |
+| `escalationHandler.ts` | `src/hooks/toolPermission/handlers/escalationHandler.ts` | **New** | UI-facing escalation flow |
+| `escalationClassifier.ts` | `src/services/permissions/escalationClassifier.ts` | **New** | Determine if a denial qualifies for escalation |
+| Permission checking | `src/utils/permissions/permissions.ts` | **Modify** | Insert escalation check after deny decision |
+| Permission UI | `src/components/permissions/EscalationPrompt.tsx` | **New** | Ink component for escalation UI (REPL mode only) |
+
+### Key Design Constraints
+
+1. Escalation must NEVER weaken explicit deny rules -- only mode-based denials qualify
+2. Session-scoped temporary permissions must NOT persist across restarts unless user explicitly chooses
+3. The escalation UI must be visually distinct from normal permission prompts (user must know this is an escalation)
+4. Headless/SDK mode cannot support escalation without a human -- must deny
+5. Must integrate with the existing `PermissionUpdate` system for rule persistence
+
+### Modified vs New Components
+
+- **Modified:** `src/types/permissions.ts` (add types), `src/utils/permissions/permissions.ts` (add escalation check)
+- **New:** `escalationHandler.ts`, `escalationClassifier.ts`, `EscalationPrompt.tsx`
+
+---
+
+## Build Order Analysis
+
+### Dependency Graph
+
+```
+                    ┌──────────────┐
+                    │ Feature Flags │ (prerequisite for all)
+                    │ (Phase 5 v1) │
+                    └──────┬───────┘
+                           |
+          ┌────────────────┼──────────────────┐
+          |                |                   |
+          v                v                   v
+  ┌───────────────┐ ┌──────────────┐  ┌───────────────────┐
+  │ Dynamic Perm  │ │ Deliberation │  │ EXTRACT_MEMORIES   │
+  │ Escalation    │ │ Checkpoint   │  │ (verify + enable)  │
+  │ (permissions) │ │ (toolExec)   │  │                    │
+  └───────┬───────┘ └──────┬───────┘  └───────────────────┘
+          |                |
+          |    ┌───────────┘
+          |    |
+          v    v
+  ┌──────────────────┐
+  │ CONTEXT_COLLAPSE  │ (needs permissions working, benefits from deliberation)
+  │ (query.ts loop)   │
+  └────────┬─────────┘
+           |
+           v
+  ┌──────────────────┐
+  │ COORDINATOR_MODE  │ (needs all tool/permission infrastructure)
+  │ (parallel module) │
+  └────────┬─────────┘
+           |
+           v
+  ┌──────────────────┐
+  │ KAIROS            │ (needs coordinator, permissions, context collapse all working)
+  │ (proactive mode)  │
+  └──────────────────┘
+```
+
+### Recommended Build Order
+
+#### Phase A: Foundation (no feature interdependencies)
+
+**A1: Dynamic Permission Escalation**
+- Why first: Extends the permission system that every other feature depends on. Modifies `types/permissions.ts` which is a leaf type file -- low risk, high leverage.
+- Scope: ~4 new files, ~2 modified files
+- Risk: LOW -- adds to existing types, doesn't change existing behavior
+- Dependency: Feature flag system (v1.0 Phase 5) must be complete
+
+**A2: EXTRACT_MEMORIES (verify + enable)**
+- Why parallel with A1: Full implementation already exists. This is verification, not implementation.
+- Scope: Verify `extractMemories.ts` (616 lines), `prompts.ts`, `forkedAgent.ts` runtime behavior
+- Risk: LOW -- implementation is present, just need to enable flag and test
+- Dependency: None (stopHooks integration already exists)
+
+**A3: Deliberation Checkpoint**
+- Why parallel with A1/A2: Self-contained insertion into `toolExecution.ts`. No dependency on other features.
+- Scope: ~3 new files in `src/services/deliberation/`, ~20 lines modified in `toolExecution.ts`
+- Risk: MEDIUM -- modifies the hot path (tool execution), performance impact must be measured
+- Dependency: None
+
+#### Phase B: Query Loop Enhancement
+
+**B1: CONTEXT_COLLAPSE**
+- Why after Phase A: Benefits from dynamic permission and deliberation being stable. The collapse logic interacts with autocompact and reactive compact -- needs the permission system to be stable.
+- Scope: Replace 3 stubs in `src/services/contextCollapse/`
+- Risk: MEDIUM -- modifies the message pipeline in query.ts, affects what the API sees
+- Dependency: Feature flag system, stable query loop (v1.0 Phase 4)
+
+#### Phase C: Parallel Modules
+
+**C1: COORDINATOR_MODE**
+- Why after Phase B: The coordinator's workers use tools that go through the permission system and the query loop. Both must be stable.
+- Scope: Replace 1 stub (`workerAgent.ts`), verify 370-line `coordinatorMode.ts`
+- Risk: MEDIUM -- changes the entire tool set and persona, but is mode-isolated
+- Dependency: Tool system stable, AgentTool working, permission system complete
+
+**C2: KAIROS (Proactive Assistant)**
+- Why last: Largest integration surface (100+ files). Depends on proactive module, assistant module, channels, brief mode, session discovery. Touches every layer of the system.
+- Scope: Replace stubs in `assistant/` and `proactive/`, verify 100+ integration points
+- Risk: HIGH -- most complex feature, widest blast radius, heaviest UI coupling
+- Dependency: COORDINATOR_MODE (shares agent patterns), CONTEXT_COLLAPSE (proactive sessions generate long contexts), EXTRACT_MEMORIES (proactive mode needs memory persistence)
+
+---
+
+## Cross-Cutting Concerns
+
+### Feature Flag Dependencies
+
+All 6 features use the `feature()` polyfill system. The flags are:
+
+| Flag | Feature | Sub-flags |
+|------|---------|-----------|
+| `CONTEXT_COLLAPSE` | Context collapse | None |
+| `EXTRACT_MEMORIES` | Memory extraction | None |
+| `COORDINATOR_MODE` | Coordinator | None |
+| `KAIROS` | Proactive assistant | `KAIROS_BRIEF`, `KAIROS_CHANNELS`, `KAIROS_DREAM`, `KAIROS_PUSH_NOTIFICATION`, `KAIROS_GITHUB_WEBHOOKS` |
+| `PROACTIVE` | Proactive base (legacy, now merged with KAIROS) | None |
+
+Deliberation Checkpoint and Dynamic Permission do not use feature flags -- they are new features without existing dead code paths.
+
+### Shared Infrastructure
+
+| Infrastructure | Used By | Location |
+|---------------|---------|----------|
+| `runForkedAgent()` | EXTRACT_MEMORIES, potentially CONTEXT_COLLAPSE | `src/utils/forkedAgent.ts` |
+| `createAutoMemCanUseTool()` | EXTRACT_MEMORIES, autoDream | `src/services/extractMemories/extractMemories.ts` |
+| `ToolUseContext` | All features (dependency injection) | `src/Tool.ts` |
+| `AppState` | All features (state access) | `src/state/AppState.tsx` |
+| `feature()` polyfill | 4 of 6 features | `src/entrypoints/cli.tsx` |
+| `handleStopHooks()` | EXTRACT_MEMORIES lifecycle | `src/query/stopHooks.ts` |
+| `StreamingToolExecutor` | Deliberation (must not break), COORDINATOR tools | `src/services/tools/StreamingToolExecutor.ts` |
+
+### State Isolation Requirements
+
+| Feature | State Pattern | Isolation Method |
 |---------|--------------|-----------------|
-| tsc errors | ~1341, from decompilation | ~200 or fewer (residual in UI layer) |
-| Test coverage | 58 tests, layers 0 only | Cover layers 1-5 (types, state, tool execution, query) |
-| React Compiler boilerplate | `_c(N)` in all .tsx files | Automated codemod to remove after stable |
-| MCP integration | Types present, OAuth simplified | Restore stdio/sse transports, validate connection lifecycle |
-| Subagent concurrency | AgentTool calls query() recursively | ToolUseContext isolation must hold; test with nested tool calls |
+| CONTEXT_COLLAPSE | Collapse store (spans, committed collapses) | Module-level closure via init function |
+| EXTRACT_MEMORIES | Extraction cursor, overlap guard, pending context | Closure-scoped via `initExtractMemories()` |
+| Deliberation | Stateless (per-call) | No state needed |
+| COORDINATOR_MODE | Mode flag, worker tool set | Process env var + conditional tool loading |
+| KAIROS | Proactive state, channels, sessions | Module-level state in proactive/ and assistant/ |
+| Dynamic Permission | Temporary session rules | Existing `ToolPermissionContext.alwaysAllowRules` with session source |
+
+### Circular Dependency Risks
+
+The codebase already has one documented circular dependency workaround:
+
+> `coordinatorMode.ts` duplicates `isScratchpadGateEnabled()` because importing `filesystem.ts` creates a circular dependency (filesystem -> permissions -> ... -> coordinatorMode). -- Comment at `coordinatorMode.ts:20-24`
+
+New features must not introduce new cycles:
+- Deliberation MUST NOT import from `permissions/` (use only types from `types/permissions.ts`)
+- Dynamic Permission MUST NOT import from tool implementations
+- CONTEXT_COLLAPSE MUST NOT import from `compact/` (they coordinate via the query.ts caller, not direct imports)
+
+---
+
+## Component Inventory Summary
+
+### New Components (to create)
+
+| Component | Feature | File Path |
+|-----------|---------|-----------|
+| Deliberation service | Deliberation | `src/services/deliberation/deliberation.ts` |
+| Risk classifier | Deliberation | `src/services/deliberation/riskClassifier.ts` |
+| Deliberation prompts | Deliberation | `src/services/deliberation/prompts.ts` |
+| Escalation handler | Dynamic Permission | `src/hooks/toolPermission/handlers/escalationHandler.ts` |
+| Escalation classifier | Dynamic Permission | `src/services/permissions/escalationClassifier.ts` |
+| Escalation UI | Dynamic Permission | `src/components/permissions/EscalationPrompt.tsx` |
+| Proactive hook | KAIROS | `src/proactive/useProactive.ts` |
+
+### Stubs to Replace (real implementation needed)
+
+| Stub | Feature | File Path | Current Size |
+|------|---------|-----------|-------------|
+| Context collapse | CONTEXT_COLLAPSE | `src/services/contextCollapse/index.ts` | 67 lines (no-ops) |
+| Context collapse ops | CONTEXT_COLLAPSE | `src/services/contextCollapse/operations.ts` | Unknown |
+| Context collapse persist | CONTEXT_COLLAPSE | `src/services/contextCollapse/persist.ts` | Unknown |
+| Worker agent | COORDINATOR_MODE | `src/coordinator/workerAgent.ts` | 4 lines (empty array) |
+| Assistant module | KAIROS | `src/assistant/index.ts` | 9 lines (no-ops) |
+| Assistant gate | KAIROS | `src/assistant/gate.ts` | 3 lines (returns false) |
+| Proactive module | KAIROS | `src/proactive/index.ts` | 7 lines (no-ops) |
+
+### Existing Code to Verify (already implemented)
+
+| Component | Feature | File Path | Size |
+|-----------|---------|-----------|------|
+| Extract memories | EXTRACT_MEMORIES | `src/services/extractMemories/extractMemories.ts` | 616 lines |
+| Extract prompts | EXTRACT_MEMORIES | `src/services/extractMemories/prompts.ts` | Unknown |
+| Coordinator mode | COORDINATOR_MODE | `src/coordinator/coordinatorMode.ts` | 370 lines |
+
+### Existing Code to Modify
+
+| Component | Feature | File Path | Change Scope |
+|-----------|---------|-----------|-------------|
+| Tool execution | Deliberation | `src/services/tools/toolExecution.ts` | ~20 lines inserted |
+| Permission types | Dynamic Permission | `src/types/permissions.ts` | ~30 lines added |
+| Permission checking | Dynamic Permission | `src/utils/permissions/permissions.ts` | ~40 lines added |
 
 ---
 
 ## Sources
 
-- Direct inspection of: `src/entrypoints/cli.tsx`, `src/main.tsx`, `src/query.ts`, `src/QueryEngine.ts`, `src/Tool.ts`, `src/tools.ts`, `src/screens/REPL.tsx` (imports), `src/state/AppStateStore.ts`, `src/state/store.ts`, `src/state/AppState.tsx`, `src/bootstrap/state.ts`, `src/context.ts`, `src/services/api/claude.ts`, `src/services/mcp/types.ts`, `src/types/permissions.ts`, `src/hooks/useCanUseTool.tsx`
-- Confidence: HIGH — all findings from live codebase, not training data
+- `src/query.ts` -- lines 17-19 (CONTEXT_COLLAPSE import), 440-447 (collapse application), 616-620 (blocking skip), 802-812 (withholding), 1093-1120 (overflow recovery)
+- `src/query/stopHooks.ts` -- lines 41-43 (EXTRACT_MEMORIES import), 141-153 (extraction call)
+- `src/services/contextCollapse/index.ts` -- full file (67 lines, all stubs)
+- `src/services/extractMemories/extractMemories.ts` -- full file (616 lines, complete implementation)
+- `src/services/tools/toolExecution.ts` -- lines 599-931 (checkPermissionsAndCallTool, permission resolution)
+- `src/coordinator/coordinatorMode.ts` -- full file (370 lines, system prompt + mode logic)
+- `src/coordinator/workerAgent.ts` -- full file (4 lines, stub)
+- `src/assistant/index.ts` -- full file (9 lines, stub)
+- `src/assistant/gate.ts` -- full file (3 lines, stub)
+- `src/proactive/index.ts` -- full file (7 lines, stub)
+- `src/types/permissions.ts` -- full file (442 lines, permission type system)
+- `src/tools.ts` -- lines 120, 280, 292 (COORDINATOR_MODE tool loading)
+- `src/main.tsx` -- lines 76-81 (coordinator + assistant module loading)
+- `src/screens/REPL.tsx` -- lines 119, 195-201 (coordinator + proactive imports)
+- Grep results: 35 files reference COORDINATOR_MODE, 100+ files reference KAIROS
+- Confidence: HIGH -- all findings from direct codebase inspection
