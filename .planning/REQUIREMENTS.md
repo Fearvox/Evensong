@@ -40,8 +40,8 @@ Requirements for engineering maturity milestone. Each maps to roadmap phases.
 
 ### Permission System
 
-- [ ] **PERM-01**: Tool permission prompt displays before execution (fix inherited upstream bug)
-- [ ] **PERM-02**: Permission modes (ask, auto-approve, deny) enforce correctly per tool
+- [x] **PERM-01**: Tool permission prompt displays before execution (fix inherited upstream bug)
+- [x] **PERM-02**: Permission modes (ask, auto-approve, deny) enforce correctly per tool
 - [ ] **PERM-03**: Permission state persists correctly across session turns
 
 ### Testing
@@ -128,8 +128,8 @@ Requirements for engineering maturity milestone. Each maps to roadmap phases.
 | QUERY-02 | Phase 4 | Pending |
 | QUERY-03 | Phase 4 | Pending |
 | QUERY-04 | Phase 4 | Pending |
-| PERM-01 | Phase 4 | Pending |
-| PERM-02 | Phase 4 | Pending |
+| PERM-01 | Phase 4 | Complete |
+| PERM-02 | Phase 4 | Complete |
 | PERM-03 | Phase 4 | Pending |
 | TEST-04 | Phase 4 | Pending |
 | FLAG-01 | Phase 5 | Pending |
