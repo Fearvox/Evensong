@@ -183,5 +183,33 @@ Phases with standard patterns (skip research-phase):
 - React Compiler artifact interference -- theoretical risk based on codebase structure, not observed failures
 
 ---
+
+## Post-Expansion Addendum (2026-04-08, CTO Directive)
+
+**This SUMMARY was written when v2.0 was 6 features / 8 phases / 29 requirements.**
+**The scope has since expanded to 10 phases / 38 requirements / 11 categories.**
+
+### What Changed After This Summary Was Written
+
+1. **Multi-Model Provider Architecture (Phase 12):** 6 new requirements (PROV-01 through PROV-06) for OpenAI, Gemini, MiniMax, xAI, Xiaomi, and local model support via OpenAI-compatible adapter.
+2. **Evolution Pipeline (Phase 14):** 3 new requirements (EVOL-01 through EVOL-03) for adversarial evaluation, release notes, and metrics dashboard.
+3. **UI/Integration renumbered to Phase 13:** Was Phase 12, now Phase 13 to accommodate provider phase.
+4. **3 Security Requirements Promoted from Pitfalls:**
+   - SEC-01: Memory extraction MUST NOT persist credential patterns
+   - SEC-02: Permission escalations scoped to process PID
+   - SEC-03: Coordinator workers blocked from BashTool writes to reserved paths
+
+### Adversarial Review Findings Incorporated
+
+- **Codex (GPT-5.4):** Document inconsistencies fixed. Provider story acknowledged as needing Phase 12 design. Safety promoted from guidance to invariants (SEC-01/02/03).
+- **MiniMax Hermes:** Mythos findings reclassified as testable hypotheses, not ground truth. "Session" formally defined as process lifetime.
+- **Gemini 3.1 Pro:** Review pending at time of addendum.
+
+### Validity
+
+The original 6-feature analysis (EXTRACT_MEMORIES through KAIROS) remains accurate. The expansion adds scope but does not invalidate the dependency chain, pitfall analysis, or architectural integration mapping.
+
+---
 *Research completed: 2026-04-08*
+*Addendum: 2026-04-08 (CTO Directive)*
 *Ready for roadmap: yes*

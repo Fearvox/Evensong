@@ -24,10 +24,21 @@
 - [ ] **DELIB-02**: Risk scoring classifies tool calls into PROCEED/CONFIRM_ONCE/DENY tiers based on command content
 - [ ] **DELIB-03**: Deliberation memory with scope tags and TTL prevents over-refusal death spiral in multi-step workflows
 
+### Session Definition (cross-cutting)
+
+> **"Session"** = a single CLI process lifetime, from launch to exit. Identified by process PID.
+> Forked agents are child processes that do NOT inherit dynamic escalations from the parent.
+> This definition applies to all requirements that reference "session-scoped".
+
+### Security Invariants (SEC) — promoted from pitfalls per CTO Directive
+- [ ] **SEC-01**: Memory extraction MUST NOT persist any string matching known credential patterns (AWS_SECRET_ACCESS_KEY, ANTHROPIC_API_KEY, OPENAI_API_KEY, private keys, tokens with 20+ hex chars)
+- [ ] **SEC-02**: Dynamic permission escalations MUST be scoped to process PID, not session name or config key
+- [ ] **SEC-03**: Coordinator workers MUST NOT have BashTool write access to file paths reserved by other workers in the same wave
+
 ### Permissions (PERM)
-- [ ] **PERM-04**: User can grant session-scoped temporary permission escalations when agent requests elevated access
-- [ ] **PERM-05**: Dynamic escalations expire at session end and never persist to project settings
-- [ ] **PERM-06**: Forked agents (memory extraction, dream) do NOT inherit dynamic escalations from parent session
+- [ ] **PERM-04**: User can grant session-scoped (process PID) temporary permission escalations when agent requests elevated access
+- [ ] **PERM-05**: Dynamic escalations expire at process exit and never persist to project settings
+- [ ] **PERM-06**: Forked agents (memory extraction, dream) do NOT inherit dynamic escalations from parent process
 
 ### Context (CTX)
 - [ ] **CTX-01**: Context collapse identifies stale message spans and replaces them with short summaries in-place

@@ -87,7 +87,7 @@ Provider Router (src/utils/model/providers.ts)
 1. **Every bug is a training signal** -- when the agent fails, the failure pattern becomes a test case
 2. **Adversarial by default** -- every major change gets cross-model review before merge
 3. **Measure everything** -- test count, pass rate, feature coverage, destructive action rate
-4. **Anthropic Red Team as oracle** -- System Card findings are our ground truth for agent behavior
+4. **Mythos findings as testable hypotheses, NOT ground truth** -- CCB is a decompiled fork running multi-provider, not Anthropic's evaluated system. System Card findings (deliberation reduces destructive actions, positive emotion increases them, etc.) must be validated empirically in our context before being treated as safety guarantees. Per MiniMax Hermes adversarial review: applying Anthropic's Mythos data as oracle to a fundamentally different system is bad methodology.
 5. **Ship fast, iterate faster** -- weekly release cadence, daily adversarial evaluations
 
 ## Metrics Dashboard
