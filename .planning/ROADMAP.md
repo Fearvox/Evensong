@@ -3,7 +3,7 @@
 ## Milestones
 
 - v1.0 Foundation & Core Reliability (Phases 1-4, shipped 2026-04-08)
-- v2.0 Agent Intelligence Enhancement (Phases 5-12, in progress)
+- v2.0 Agent Intelligence Enhancement (Phases 5-14, in progress)
 
 ## Phases
 
@@ -103,7 +103,9 @@ Plans:
 - [ ] **Phase 9: Context Collapse** - Intelligent context folding replaces stale message spans with summaries while preserving recent fidelity
 - [ ] **Phase 10: Coordinator Mode** - Multi-agent orchestration with parallel workers, file reservation, and task notification delivery
 - [ ] **Phase 11: KAIROS Proactive** - Opt-in proactive assistant with local session storage, brief suggestions, and dream consolidation
-- [ ] **Phase 12: UI Cleanup & Integration Testing** - React Compiler artifact removal, REPL decomposition, and cross-feature integration test matrix
+- [ ] **Phase 12: Multi-Model Provider Architecture** - OpenAI-compatible adapter, provider router with difficulty-based routing, fallback chains, API key management
+- [ ] **Phase 13: UI Cleanup & Integration Testing** - React Compiler artifact removal, REPL decomposition, and cross-feature integration test matrix
+- [ ] **Phase 14: Evolution Pipeline** - Adversarial evaluation, release note generation, metrics dashboard, self-iteration cycle
 
 ## Phase Details
 
@@ -201,9 +203,24 @@ Plans:
 Plans:
 - (plans TBD -- not yet planned)
 
-### Phase 12: UI Cleanup & Integration Testing
+### Phase 12: Multi-Model Provider Architecture
+**Goal**: CCB can route requests to 8+ model providers with difficulty-based routing, graceful fallback, and unified API key management
+**Depends on**: Phase 5 (infrastructure must be stable; provider router in src/utils/model/providers.ts)
+**Requirements**: PROV-01, PROV-02, PROV-03, PROV-04, PROV-05, PROV-06
+**Success Criteria** (what must be TRUE):
+  1. A user can configure an OpenAI-compatible endpoint (MiniMax, xAI, Xiaomi, Jan) in config and the CLI sends requests to it
+  2. The provider router selects model based on task difficulty score (existing model-router hook pattern)
+  3. When a provider returns an error or times out, the fallback chain tries the next provider automatically
+  4. API keys for all providers are loaded from env vars or `~/.claude/provider-keys.json` without hardcoding
+  5. A model capability matrix declares which providers support which features (tools, streaming, thinking)
+**Plans**: TBD
+
+Plans:
+- (plans TBD -- not yet planned)
+
+### Phase 13: UI Cleanup & Integration Testing
 **Goal**: Core UI components are cleaned of decompilation artifacts, the REPL is decomposed into focused units, and a cross-feature integration test matrix validates dangerous flag combinations
-**Depends on**: Phase 10, Phase 11 (all features must be stable before integration testing)
+**Depends on**: Phase 11, Phase 12 (all features and providers must be stable before integration testing)
 **Requirements**: UI-01, UI-02, UI-03, INT-01, INT-02
 **Success Criteria** (what must be TRUE):
   1. Core components (Messages.tsx, MessageRow.tsx, PromptInput) contain no `_c()` React Compiler memoization boilerplate -- the source reads as standard React
@@ -217,10 +234,23 @@ Plans:
 Plans:
 - (plans TBD -- not yet planned)
 
+### Phase 14: Evolution Pipeline
+**Goal**: CCB has a self-iteration cycle: adversarial evaluation across models, automated release note generation, and a metrics dashboard tracking agent quality per release
+**Depends on**: Phase 12 (multi-model needed for cross-model adversarial evaluation)
+**Requirements**: EVOL-01, EVOL-02, EVOL-03
+**Success Criteria** (what must be TRUE):
+  1. Running a CLI command triggers adversarial evaluation against the current codebase using 2+ different model providers
+  2. Conventional commits since last tag are parsed into a structured changelog with categories (feat/fix/test/docs)
+  3. A metrics file tracks test count, pass rate, feature flag coverage, and destructive action rate per release
+**Plans**: TBD
+
+Plans:
+- (plans TBD -- not yet planned)
+
 ## Progress
 
 **Execution Order:**
-Phases execute in numeric order: 5 -> 6 -> 7 -> 8 -> 9 -> 10 -> 11 -> 12
+Phases execute in numeric order: 5 -> 6 -> 7 -> 8 -> 9 -> 10 -> 11 -> 12 -> 13 -> 14
 
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
@@ -235,4 +265,6 @@ Phases execute in numeric order: 5 -> 6 -> 7 -> 8 -> 9 -> 10 -> 11 -> 12
 | 9. Context Collapse | v2.0 | 0/TBD | Not started | - |
 | 10. Coordinator Mode | v2.0 | 0/TBD | Not started | - |
 | 11. KAIROS Proactive | v2.0 | 0/TBD | Not started | - |
-| 12. UI Cleanup & Integration Testing | v2.0 | 0/TBD | Not started | - |
+| 12. Multi-Model Provider Architecture | v2.0 | 0/TBD | Not started | - |
+| 13. UI Cleanup & Integration Testing | v2.0 | 0/TBD | Not started | - |
+| 14. Evolution Pipeline | v2.0 | 0/TBD | Not started | - |

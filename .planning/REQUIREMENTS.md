@@ -52,6 +52,19 @@
 - [ ] **UI-02**: REPL.tsx decomposed into focused sub-components with clear boundaries
 - [ ] **UI-03**: Ink snapshot tests established for key UI states (message rendering, permission prompts, status bar)
 
+### Multi-Model Providers (PROV)
+- [ ] **PROV-01**: OpenAI-compatible provider adapter supports GPT-5.4/Codex via native SDK or compatible endpoint
+- [ ] **PROV-02**: Google AI Studio adapter supports Gemini 3.1 Pro via @google/generative-ai or OpenAI-compatible
+- [ ] **PROV-03**: Generic OpenAI-compatible adapter supports MiniMax, xAI (Grok), Xiaomi (MiLM), and local models (Jan/llama.cpp)
+- [ ] **PROV-04**: Provider router selects model based on task difficulty, cost, and capability matrix
+- [ ] **PROV-05**: Graceful fallback chain when a provider is unavailable (e.g., Grok down -> MiniMax -> Claude)
+- [ ] **PROV-06**: API key management supports per-provider keys via env vars or config file
+
+### Evolution (EVOL)
+- [ ] **EVOL-01**: Adversarial evaluation pipeline runs cross-model reviews on major changes
+- [ ] **EVOL-02**: Release note generator produces changelog from conventional commits
+- [ ] **EVOL-03**: Metrics dashboard tracks test count, pass rate, feature coverage per release
+
 ### Integration (INT)
 - [ ] **INT-01**: 8-config test matrix covers critical feature flag combinations (collapse+compact, delib+coordinator, etc.)
 - [ ] **INT-02**: Dangerous-pair tests verify deliberation + coordinator + permission interactions don't create deadlocks
