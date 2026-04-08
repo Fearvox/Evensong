@@ -4,8 +4,6 @@ description: Show skill portfolio health dashboard with charts and analytics
 command: true
 ---
 
-> **Note:** This command auto-detects the ECC installation path. It works with both plugin-managed and vendored installations.
-
 # Skill Health Dashboard
 
 Shows a comprehensive health dashboard for all skills in the portfolio with success rate sparklines, failure pattern clustering, pending amendments, and version history.

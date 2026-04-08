@@ -11,7 +11,7 @@ command: true
 Run the instinct CLI using the plugin root path:
 
 ```bash
-python3 "${CLAUDE_PROJECT_DIR}/.claude/skills/everything-claude-code/continuous-learning-v2/scripts/instinct-cli.py" evolve [--generate]
+python3 "${CLAUDE_PLUGIN_ROOT}/skills/continuous-learning-v2/scripts/instinct-cli.py" evolve [--generate]
 ```
 
 Or if `CLAUDE_PLUGIN_ROOT` is not set (manual installation):
