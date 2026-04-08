@@ -87,7 +87,7 @@ Plans:
 Plans:
 - [x] 04-01-PLAN.md — Permission unit tests: hasPermissionsToUseTool() deny/ask/allow modes + PERM-01 resolution (PERM-01, PERM-02)
 - [x] 04-02-PLAN.md — Compaction boundary tests: calculateTokenWarningState() and isAutoCompactEnabled() with env overrides (QUERY-02)
-- [ ] 04-03-PLAN.md — Session resume tests: loadTranscriptFile() + buildConversationChain() with temp JSONL files (QUERY-03)
+- [x] 04-03-PLAN.md — Session resume tests: loadTranscriptFile() + buildConversationChain() with temp JSONL files (QUERY-03)
 - [ ] 04-04-PLAN.md — Query loop integration tests: multi-tool batching, abort exit paths, permission persistence (QUERY-01, QUERY-04, PERM-03, TEST-04)
 
 ### Phase 5: Feature Flags & MCP Transport
@@ -130,6 +130,6 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6
 | 1. Foundation Hardening | 2/2 | Complete | 2026-04-07 |
 | 2. Core Tool Reliability | 3/3 | Complete | 2026-04-07 |
 | 3. API & Streaming Resilience | 3/3 | Complete | 2026-04-07 |
-| 4. Query Loop & Permission System | 2/4 | In Progress|  |
+| 4. Query Loop & Permission System | 3/4 | In Progress|  |
 | 5. Feature Flags & MCP Transport | 0/TBD | Not started | - |
 | 6. REPL/UI Cleanup | 0/TBD | Not started | - |
