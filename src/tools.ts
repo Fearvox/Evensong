@@ -101,8 +101,8 @@ export {
   ASYNC_AGENT_ALLOWED_TOOLS,
   COORDINATOR_MODE_ALLOWED_TOOLS,
 } from './constants/tools.js'
-import { feature } from 'bun:bundle'
-// Dead code elimination: conditional import for OVERFLOW_TEST_TOOL
+import { feature } from 'src/utils/featureFlag.js'
+// Conditional tool imports — feature() reads from ~/.claude/feature-flags.json
 /* eslint-disable custom-rules/no-process-env-top-level, @typescript-eslint/no-require-imports */
 const OverflowTestTool = feature('OVERFLOW_TEST_TOOL')
   ? require('./tools/OverflowTestTool/OverflowTestTool.js').OverflowTestTool

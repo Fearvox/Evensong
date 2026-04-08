@@ -1,5 +1,7 @@
-// Runtime polyfill for bun:bundle (build-time macros)
-const feature = (_name: string) => false;
+// Feature flags: configurable via ~/.claude/feature-flags.json or env vars
+// See src/utils/featureFlag.ts for implementation
+import { feature } from 'src/utils/featureFlag.js'
+
 if (typeof globalThis.MACRO === "undefined") {
     (globalThis as any).MACRO = {
         VERSION: "2.1.888",

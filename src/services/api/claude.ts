@@ -101,13 +101,18 @@ import {
   extractQuotaStatusFromHeaders,
 } from '../claudeAiLimits.js'
 import { getAPIContextManagement } from '../compact/apiMicrocompact.js'
+import { safeParseStreamEvent } from './streamEventSchema.js'
+import {
+  finalizeHistoryOnAbort,
+  getTranscriptPath,
+} from '../../utils/sessionStorage.js'
 
 /* eslint-disable @typescript-eslint/no-require-imports */
 const autoModeStateModule = feature('TRANSCRIPT_CLASSIFIER')
   ? (require('../../utils/permissions/autoModeState.js') as typeof import('../../utils/permissions/autoModeState.js'))
   : null
 
-import { feature } from 'bun:bundle'
+import { feature } from 'src/utils/featureFlag.js'
 import type { ClientOptions } from '@anthropic-ai/sdk'
 import {
   APIConnectionTimeoutError,
@@ -1872,8 +1877,9 @@ async function* queryModel(
     // kill hung streams. Without this, a silently dropped connection can hang
     // the session indefinitely since the SDK's request timeout only covers the
     // initial fetch(), not the streaming body.
-    const streamWatchdogEnabled = isEnvTruthy(
-      process.env.CLAUDE_ENABLE_STREAM_WATCHDOG,
+    // Watchdog is always on. Set CLAUDE_DISABLE_STREAM_WATCHDOG=1 to opt out (debugging only).
+    const streamWatchdogEnabled = !isEnvTruthy(
+      process.env.CLAUDE_DISABLE_STREAM_WATCHDOG,
     )
     const STREAM_IDLE_TIMEOUT_MS =
       parseInt(process.env.CLAUDE_STREAM_IDLE_TIMEOUT_MS || '', 10) || 90_000
@@ -1941,6 +1947,21 @@ async function* queryModel(
       for await (const part of stream) {
         resetStreamIdleTimer()
         const now = Date.now()
+
+        // Validate stream event at API boundary (Phase 3 Zod schema)
+        const validated = safeParseStreamEvent(part)
+        if (!validated) {
+          logForDebugging(
+            `Unknown stream event type: ${(part as { type?: string })?.type ?? 'undefined'}`,
+            { level: 'warn' },
+          )
+          continue // Skip unknown events gracefully for forward compatibility
+        }
+
+        // The validated object confirms the shape is correct; the switch below
+        // safely uses `part` since it matches the validated type. Replacing all
+        // `part` references with `validated` would require updating ~200 lines
+        // of downstream field access — deferred to a future refactor phase.
 
         // Detect and log streaming stalls (only after first event to avoid counting TTFB)
         if (lastEventTime !== null) {
@@ -2448,6 +2469,12 @@ async function* queryModel(
               advisor_model: (advisorModel ??
                 'unknown') as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
             })
+          }
+          // Ensure history file has a complete final entry on user abort
+          try {
+            finalizeHistoryOnAbort(getTranscriptPath(), getSessionId())
+          } catch {
+            // Best-effort — process may be exiting
           }
           throw streamingError
         } else {

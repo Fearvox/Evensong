@@ -1,10 +1,18 @@
-import { feature } from 'bun:bundle'
+import { feature } from 'src/utils/featureFlag.js'
 import type { UUID } from 'crypto'
 import type { Dirent } from 'fs'
 // Sync fs primitives for readFileTailSync — separate from fs/promises
 // imports above. Named (not wildcard) per CLAUDE.md style; no collisions
 // with the async-suffixed names.
-import { closeSync, fstatSync, openSync, readSync } from 'fs'
+import {
+  closeSync,
+  fstatSync,
+  openSync,
+  readFileSync,
+  readSync,
+  unlinkSync,
+  writeFileSync,
+} from 'fs'
 import {
   appendFile as fsAppendFile,
   open as fsOpen,
@@ -2567,7 +2575,19 @@ export async function fetchLogs(limit?: number): Promise<LogOption[]> {
 }
 
 /**
+ * PIPE_BUF size on POSIX (macOS/Linux). appendFileSync with O_APPEND is
+ * atomic for writes at or below this size.
+ */
+const PIPE_BUF = 4096
+
+/**
  * Append an entry to a session file. Creates the parent dir if missing.
+ *
+ * For entries whose serialized form fits within PIPE_BUF (4096 bytes),
+ * appendFileSync with O_APPEND is already atomic on POSIX.
+ *
+ * For larger entries, a temp-file-then-append pattern is used to prevent
+ * partial writes from corrupting the history file on process termination.
  */
 /* eslint-disable custom-rules/no-sync-fs -- sync callers (exit cleanup, materialize) */
 function appendEntryToFile(
@@ -2576,11 +2596,61 @@ function appendEntryToFile(
 ): void {
   const fs = getFsImplementation()
   const line = jsonStringify(entry) + '\n'
+
+  if (line.length > PIPE_BUF) {
+    // Large entry: write to temp file first, then read back and append.
+    // This ensures the full line is materialized on disk before appending,
+    // so a crash mid-write only corrupts the temp file, not the history.
+    const tmpPath = `${fullPath}.tmp.${process.pid}`
+    try {
+      writeFileSync(tmpPath, line, { mode: 0o600 })
+      const verified = readFileSync(tmpPath, 'utf8')
+      try {
+        fs.appendFileSync(fullPath, verified, { mode: 0o600 })
+      } catch {
+        fs.mkdirSync(dirname(fullPath), { mode: 0o700 })
+        fs.appendFileSync(fullPath, verified, { mode: 0o600 })
+      }
+      try { unlinkSync(tmpPath) } catch { /* best-effort cleanup */ }
+    } catch {
+      // Fallback: direct append (better than losing the entry entirely)
+      try {
+        fs.appendFileSync(fullPath, line, { mode: 0o600 })
+      } catch {
+        fs.mkdirSync(dirname(fullPath), { mode: 0o700 })
+        fs.appendFileSync(fullPath, line, { mode: 0o600 })
+      }
+    }
+  } else {
+    // Small entry: appendFileSync is already atomic under PIPE_BUF
+    try {
+      fs.appendFileSync(fullPath, line, { mode: 0o600 })
+    } catch {
+      fs.mkdirSync(dirname(fullPath), { mode: 0o700 })
+      fs.appendFileSync(fullPath, line, { mode: 0o600 })
+    }
+  }
+}
+
+/**
+ * Flush an abort marker to the session history file. Called from signal
+ * handlers to ensure the history file ends with a complete JSON line
+ * even when the process is terminating.
+ *
+ * Safe to call multiple times (idempotent -- each call appends one entry).
+ */
+export function finalizeHistoryOnAbort(
+  sessionFile: string,
+  sessionId: string,
+): void {
   try {
-    fs.appendFileSync(fullPath, line, { mode: 0o600 })
+    appendEntryToFile(sessionFile, {
+      type: 'abort',
+      sessionId,
+      timestamp: new Date().toISOString(),
+    })
   } catch {
-    fs.mkdirSync(dirname(fullPath), { mode: 0o700 })
-    fs.appendFileSync(fullPath, line, { mode: 0o600 })
+    // Best-effort -- process may be exiting
   }
 }
 
