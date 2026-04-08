@@ -12,9 +12,9 @@ CCB begins as a working decompiled CLI and ends this milestone as a maintainable
 
 Decimal phases appear between their surrounding integers in numeric order.
 
-- [ ] **Phase 1: Foundation Hardening** - Core types and state layer carry correct annotations; test infrastructure is operational
-- [ ] **Phase 2: Core Tool Reliability** - BashTool, FileEditTool, GrepTool, and AgentTool each handle errors correctly and have integration tests
-- [ ] **Phase 3: API & Streaming Resilience** - Streaming layer recovers from network failures; provider switching works; history writes atomically
+- [x] **Phase 1: Foundation Hardening** - Core types and state layer carry correct annotations; test infrastructure is operational
+- [x] **Phase 2: Core Tool Reliability** - BashTool, FileEditTool, GrepTool, and AgentTool each handle errors correctly and have integration tests
+- [x] **Phase 3: API & Streaming Resilience** - Streaming layer recovers from network failures; provider switching works; history writes atomically
 - [ ] **Phase 4: Query Loop & Permission System** - Multi-turn query loop is correct; permission enforcement is reliable across session turns
 - [ ] **Phase 5: Feature Flags & MCP Transport** - Feature flag dependency graph is documented and CI-gated; MCP stdio and SSE transports connect correctly
 - [ ] **Phase 6: REPL/UI Cleanup** - React Compiler boilerplate removed; REPL decomposed into focused components; Ink snapshot tests established
@@ -82,12 +82,13 @@ Plans:
   4. Cancelling a response mid-turn leaves the CLI in a state where the next user message succeeds
   5. A tool configured for "ask" permission mode displays a prompt before executing — it does not execute silently
   6. Permission grants and denials from earlier in the session are honored in later turns without re-prompting for the same tool
-**Plans**: 3 plans
+**Plans**: 4 plans
 
 Plans:
-- [x] 03-01-PLAN.md — withRetry utility tests + provider switching tests (API-01, API-03)
-- [x] 03-02-PLAN.md — Atomic history writes + finalizeHistoryOnAbort (API-04)
-- [ ] 03-03-PLAN.md — Unconditional watchdog + Zod schema wiring in claude.ts (API-02, API-05)
+- [ ] 04-01-PLAN.md — Permission unit tests: hasPermissionsToUseTool() deny/ask/allow modes + PERM-01 resolution (PERM-01, PERM-02)
+- [ ] 04-02-PLAN.md — Compaction boundary tests: calculateTokenWarningState() and isAutoCompactEnabled() with env overrides (QUERY-02)
+- [ ] 04-03-PLAN.md — Session resume tests: loadTranscriptFile() + buildConversationChain() with temp JSONL files (QUERY-03)
+- [ ] 04-04-PLAN.md — Query loop integration tests: multi-tool batching, abort exit paths, permission persistence (QUERY-01, QUERY-04, PERM-03, TEST-04)
 
 ### Phase 5: Feature Flags & MCP Transport
 **Goal**: The feature flag system is documented, CI-verified, and validated at runtime; MCP stdio and SSE transports connect and exchange messages correctly
@@ -99,12 +100,10 @@ Plans:
   3. Enabling a flag that requires an unavailable module produces a clear error at startup rather than a crash at call time
   4. An MCP server connected via stdio receives and responds to tool list and tool call requests from the CLI
   5. MCP-provided tools appear alongside built-in tools in the tool list the CLI sends to the API
-**Plans**: 3 plans
+**Plans**: TBD
 
 Plans:
-- [x] 03-01-PLAN.md — withRetry utility tests + provider switching tests (API-01, API-03)
-- [ ] 03-02-PLAN.md — Atomic history writes + finalizeHistoryOnAbort (API-04)
-- [ ] 03-03-PLAN.md — Unconditional watchdog + Zod schema wiring in claude.ts (API-02, API-05)
+- (plans TBD — not yet planned)
 
 ### Phase 6: REPL/UI Cleanup
 **Goal**: React Compiler decompilation boilerplate is removed from core components; REPL.tsx is decomposed into focused units; Ink snapshot tests establish a regression baseline
@@ -118,9 +117,7 @@ Plans:
 **Plans**: 3 plans
 
 Plans:
-- [ ] 03-01-PLAN.md — withRetry utility tests + provider switching tests (API-01, API-03)
-- [ ] 03-02-PLAN.md — Atomic history writes + finalizeHistoryOnAbort (API-04)
-- [ ] 03-03-PLAN.md — Unconditional watchdog + Zod schema wiring in claude.ts (API-02, API-05)
+- (plans TBD — not yet planned)
 **UI hint**: yes
 
 ## Progress
@@ -131,8 +128,8 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Foundation Hardening | 2/2 | Complete | 2026-04-07 |
-| 2. Core Tool Reliability | 0/3 | Planned | - |
-| 3. API & Streaming Resilience | 0/3 | Planned | - |
-| 4. Query Loop & Permission System | 0/TBD | Not started | - |
+| 2. Core Tool Reliability | 3/3 | Complete | 2026-04-07 |
+| 3. API & Streaming Resilience | 3/3 | Complete | 2026-04-07 |
+| 4. Query Loop & Permission System | 0/4 | Not started | - |
 | 5. Feature Flags & MCP Transport | 0/TBD | Not started | - |
 | 6. REPL/UI Cleanup | 0/TBD | Not started | - |
