@@ -575,22 +575,13 @@ test('abort mid-stream returns aborted_streaming', async () => {
 
 ---
 
-## Open Questions
+## Open Questions (RESOLVED)
 
-1. **streamingToolExecutor gate in tests**
-   - What we know: `config.gates.streamingToolExecution` is set in `buildQueryConfig()` which reads from env/statsig at query start
-   - What's unclear: Is there an env var to disable it for test isolation?
-   - Recommendation: Check `src/query/config.ts` before planning; if no env var exists, mock `runTools` at the import level using `mock.module()`
+1. **streamingToolExecutor gate in tests** — RESOLVED: No env var found. Strategy: test through `canUseTool` boundary (shared by both `runTools` and `streamingToolExecutor` paths). Both paths call `canUseTool` before executing tools, making it the correct mock injection point regardless of which executor path is active.
 
-2. **loadTranscriptFile bootstrap dependency**
-   - What we know: `loadTranscriptFile()` is an async function that reads from disk; bootstrap state (getSessionId) is only needed for path resolution, not parsing
-   - What's unclear: Does parsing itself require bootstrap state?
-   - Recommendation: In Wave 0, write `buildConversationChain()` tests using manually constructed maps as a fallback; attempt `loadTranscriptFile()` with a temp file path first
+2. **loadTranscriptFile bootstrap dependency** — RESOLVED: Fallback strategy adopted. Plan 04-03 tests `buildConversationChain()` with manually constructed Maps (purely in-memory, no bootstrap dependency) as primary approach. `loadTranscriptFile()` tested with temp file path as secondary — if bootstrap throws, the Map-based tests prove the same resume behavior.
 
-3. **Query function Terminal return value access**
-   - What we know: `query()` is `AsyncGenerator<..., Terminal>` — the Terminal is the return value from `return { reason: ... }`
-   - What's unclear: How to capture the Terminal from a `for await` loop in bun:test
-   - Recommendation: Use `gen.return()` or collect from the generator's done value — `{ value, done }` pattern
+3. **Query function Terminal return value access** — RESOLVED: Use `while(true)` loop with `await gen.next()`, capture `value` when `done === true`. Plan 04-04 provides `drainQuery()` helper implementing this pattern. The `for-await` approach discards the return value; the explicit `gen.next()` loop preserves it.
 
 ---
 
