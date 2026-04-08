@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: Completed 04-01-PLAN.md
-last_updated: "2026-04-08T05:08:22.288Z"
+stopped_at: Completed 04-02-PLAN.md
+last_updated: "2026-04-08T05:12:03.195Z"
 last_activity: 2026-04-08
 progress:
   total_phases: 6
   completed_phases: 3
   total_plans: 12
-  completed_plans: 9
-  percent: 75
+  completed_plans: 10
+  percent: 83
 ---
 
 # Project State
@@ -26,7 +26,7 @@ See: .planning/PROJECT.md (updated 2026-04-06)
 ## Current Position
 
 Phase: 04 (query-loop-permission-system) — EXECUTING
-Plan: 2 of 4
+Plan: 3 of 4
 Status: Ready to execute
 Last activity: 2026-04-08
 
@@ -61,6 +61,7 @@ Progress: [█░░░░░░░░░] 17%
 | Phase 03 P02 | 170s | 2 tasks | 3 files |
 | Phase 03 P03 | 148s | 2 tasks | 3 files |
 | Phase 04 P01 | 4min | 2 tasks | 2 files |
+| Phase 04 P02 | 2min | 2 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -86,6 +87,8 @@ Recent decisions affecting current work:
 - [Phase 03]: finalizeHistoryOnAbort uses getTranscriptPath()/getSessionId() from bootstrap state singletons
 - [Phase 04]: Mock Tool object constructed inline rather than using buildTool() to avoid complex runtime dependencies in test context
 - [Phase 04]: 5 tests written (PERM-01 call-tracking + 4 behavior modes) — exceeds plan minimum of 4
+- [Phase 04]: CLAUDE_AUTOCOMPACT_PCT_OVERRIDE 百分比覆盖使阈值可预测，避免硬编码绝对 token 数
+- [Phase 04]: afterEach 用快照恢复 process.env 防止测试间污染（10 条 autoCompact 边界测试）
 
 ### Pending Todos
 
@@ -98,6 +101,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-08T05:08:22.285Z
-Stopped at: Completed 04-01-PLAN.md
+Last session: 2026-04-08T05:12:03.192Z
+Stopped at: Completed 04-02-PLAN.md
 Resume file: None

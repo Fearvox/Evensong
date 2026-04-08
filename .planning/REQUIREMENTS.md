@@ -34,7 +34,7 @@ Requirements for engineering maturity milestone. Each maps to roadmap phases.
 ### Query Loop
 
 - [ ] **QUERY-01**: query.ts turn loop handles multi-tool-use responses correctly
-- [ ] **QUERY-02**: Context compaction triggers at safe boundary and preserves recent context
+- [x] **QUERY-02**: Context compaction triggers at safe boundary and preserves recent context
 - [ ] **QUERY-03**: QueryEngine session resume loads correct conversation state
 - [ ] **QUERY-04**: Abort/cancel mid-turn leaves conversation in recoverable state
 
@@ -125,7 +125,7 @@ Requirements for engineering maturity milestone. Each maps to roadmap phases.
 | API-05 | Phase 3 | Complete |
 | TEST-03 | Phase 3 | Complete |
 | QUERY-01 | Phase 4 | Pending |
-| QUERY-02 | Phase 4 | Pending |
+| QUERY-02 | Phase 4 | Complete |
 | QUERY-03 | Phase 4 | Pending |
 | QUERY-04 | Phase 4 | Pending |
 | PERM-01 | Phase 4 | Complete |
