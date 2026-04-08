@@ -332,22 +332,25 @@ function getLocalOverrides(): Record<string, unknown> | undefined {
 | A2 | Bun's child_process.spawn compatibility with MCP SDK StdioClientTransport works for basic stdio communication | Pitfall 4 | MEDIUM -- if broken, INFRA-03 needs a custom transport adapter |
 | A3 | The `feature()` replacement across ~45 files is a safe mechanical find-and-replace | Architecture | LOW -- the function signature is identical; only the import source changes |
 
-## Open Questions
+## Open Questions (RESOLVED)
 
-1. **Should feature-flags.json support non-boolean values for tengu_* gates?**
+1. **Should feature-flags.json support non-boolean values for tengu_* gates?** (RESOLVED)
    - What we know: `feature()` flags are boolean-only. `tengu_*` gates can have object/string/number values (dynamic configs).
    - What's unclear: Whether to use a single file for both or separate files.
    - Recommendation: Single file, differentiate by key prefix. Boolean keys for `feature()` flags, any-typed keys with `tengu_` prefix for GrowthBook gates.
+   - **Resolution:** Single file approach adopted. Plan 01 validates boolean-only for `feature()` keys. Plan 03 reads `tengu_*` keys with any-typed values for GrowthBook gates. Both share `~/.claude/feature-flags.json`.
 
-2. **Should the feature flag module support hot-reload?**
+2. **Should the feature flag module support hot-reload?** (RESOLVED)
    - What we know: Module-level constants capture flag values at import time. Changing the file requires process restart.
    - What's unclear: Whether hot-reload within a session is desired.
    - Recommendation: No hot-reload for v2.0 -- process restart is acceptable. Document this limitation.
+   - **Resolution:** No hot-reload. The IIFE pattern in `featureFlag.ts` reads the config file once at import time. This matches the existing module-level const pattern (`const X = feature('FLAG') ? require(...) : null`) which captures values permanently. Process restart required for config changes.
 
-3. **Which MCP server to use as integration test target?**
+3. **Which MCP server to use as integration test target?** (RESOLVED)
    - What we know: `@modelcontextprotocol/server-filesystem` is the canonical example server.
    - What's unclear: Whether it works reliably on macOS under Bun's child_process.
    - Recommendation: Test with filesystem server first. Fall back to a minimal custom server if needed.
+   - **Resolution:** Minimal custom MCP server script used as test fixture (written to temp file, speaks JSON-RPC over stdio). Avoids external dependency on `@modelcontextprotocol/server-filesystem`. For SSE transport, in-process `Bun.serve()` HTTP server implements the MCP SSE protocol. Both approaches are self-contained and reproducible.
 
 ## Environment Availability
 
@@ -381,6 +384,9 @@ function getLocalOverrides(): Record<string, unknown> | undefined {
 | INFRA-02 | Flag dependency graph document exists and is parseable | smoke | `bun test src/utils/__tests__/featureFlagDeps.test.ts -x` | Wave 0 |
 | INFRA-03a | MCP stdio transport connects to test server | integration | `bun test src/services/mcp/__tests__/stdioTransport.test.ts -x` | Wave 0 |
 | INFRA-03b | MCP tools appear in assembled tool list | unit | `bun test src/services/mcp/__tests__/mcpToolAssembly.test.ts -x` | Wave 0 |
+| INFRA-03c | MCP SSE transport connects to test server | integration | `bun test src/services/mcp/__tests__/sseTransport.test.ts -x` | Wave 0 |
+| INFRA-03d | MCP tools/call round-trip works over stdio | integration | `bun test src/services/mcp/__tests__/stdioTransport.test.ts -x` | Wave 0 |
+| INFRA-03e | MCP tools/call round-trip works over SSE | integration | `bun test src/services/mcp/__tests__/sseTransport.test.ts -x` | Wave 0 |
 
 ### Sampling Rate
 - **Per task commit:** `bun test --filter "phase5"` (new tests only, <10s)
@@ -391,8 +397,9 @@ function getLocalOverrides(): Record<string, unknown> | undefined {
 - [ ] `src/utils/__tests__/featureFlag.test.ts` -- covers INFRA-01a/b/c
 - [ ] `src/services/analytics/__tests__/growthbookOverride.test.ts` -- covers INFRA-01d
 - [ ] `src/utils/__tests__/featureFlagDeps.test.ts` -- covers INFRA-02
-- [ ] `src/services/mcp/__tests__/stdioTransport.test.ts` -- covers INFRA-03a
+- [ ] `src/services/mcp/__tests__/stdioTransport.test.ts` -- covers INFRA-03a/d
 - [ ] `src/services/mcp/__tests__/mcpToolAssembly.test.ts` -- covers INFRA-03b
+- [ ] `src/services/mcp/__tests__/sseTransport.test.ts` -- covers INFRA-03c/e
 
 ## Security Domain
 
