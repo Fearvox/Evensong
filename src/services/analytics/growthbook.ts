@@ -160,7 +160,8 @@ export function onGrowthBookRefresh(
  * Parse env var overrides for GrowthBook features.
  * Set CLAUDE_INTERNAL_FC_OVERRIDES to a JSON object mapping feature keys to values
  * to bypass remote eval and disk cache. Useful for eval harnesses that need to
- * test specific feature flag configurations. Only active when USER_TYPE is 'ant'.
+ * test specific feature flag configurations. Available to all users (CCB fork
+ * removes the Anthropic-internal USER_TYPE=ant guard).
  *
  * Example: CLAUDE_INTERNAL_FC_OVERRIDES='{"my_feature": true, "my_config": {"key": "val"}}'
  */
@@ -170,25 +171,78 @@ let envOverridesParsed = false
 function getEnvOverrides(): Record<string, unknown> | null {
   if (!envOverridesParsed) {
     envOverridesParsed = true
-    if (process.env.USER_TYPE === 'ant') {
-      const raw = process.env.CLAUDE_INTERNAL_FC_OVERRIDES
-      if (raw) {
-        try {
-          envOverrides = JSON.parse(raw) as Record<string, unknown>
-          logForDebugging(
-            `GrowthBook: Using env var overrides for ${Object.keys(envOverrides!).length} features: ${Object.keys(envOverrides!).join(', ')}`,
-          )
-        } catch {
-          logError(
-            new Error(
-              `GrowthBook: Failed to parse CLAUDE_INTERNAL_FC_OVERRIDES: ${raw}`,
-            ),
-          )
-        }
+    const raw = process.env.CLAUDE_INTERNAL_FC_OVERRIDES
+    if (raw) {
+      try {
+        envOverrides = JSON.parse(raw) as Record<string, unknown>
+        logForDebugging(
+          `GrowthBook: Using env var overrides for ${Object.keys(envOverrides!).length} features: ${Object.keys(envOverrides!).join(', ')}`,
+        )
+      } catch {
+        logError(
+          new Error(
+            `GrowthBook: Failed to parse CLAUDE_INTERNAL_FC_OVERRIDES: ${raw}`,
+          ),
+        )
       }
     }
   }
   return envOverrides
+}
+
+/**
+ * Local file overrides for GrowthBook gates. Reads tengu_* keys from
+ * ~/.claude/feature-flags.json. Non-boolean values (objects, numbers, strings)
+ * are passed through as-is since GrowthBook supports dynamic configs.
+ *
+ * Priority in the override chain:
+ *   1. Env var (CLAUDE_INTERNAL_FC_OVERRIDES) -- highest
+ *   2. Config overrides (growthBookOverrides in ~/.claude.json)
+ *   3. Local file overrides (tengu_* keys here) -- NEW
+ *   4. isGrowthBookEnabled() check
+ *   5. Remote eval / disk cache / default value
+ */
+let localFlagOverrides: Record<string, unknown> | null = null
+let localFlagOverridesParsed = false
+
+export function getLocalFlagOverrides(): Record<string, unknown> | null {
+  if (!localFlagOverridesParsed) {
+    localFlagOverridesParsed = true
+    try {
+      const { existsSync, readFileSync } = require('fs')
+      const { join } = require('path')
+      const flagFile = join(
+        process.env.HOME || '',
+        '.claude',
+        'feature-flags.json',
+      )
+      if (existsSync(flagFile)) {
+        const data = JSON.parse(readFileSync(flagFile, 'utf-8'))
+        const tenguOverrides: Record<string, unknown> = {}
+        for (const [key, val] of Object.entries(data)) {
+          if (key.startsWith('tengu_')) {
+            tenguOverrides[key] = val
+          }
+        }
+        if (Object.keys(tenguOverrides).length > 0) {
+          localFlagOverrides = tenguOverrides
+        }
+      }
+    } catch {
+      // Silent fail -- fall back to null (no overrides)
+    }
+  }
+  return localFlagOverrides
+}
+
+/**
+ * Reset the local flag overrides cache so it re-reads from disk.
+ * Exposed for testing only.
+ * @internal
+ */
+export function _resetLocalFlagOverridesForTesting(): void {
+  localFlagOverrides = null
+  localFlagOverridesParsed = false
 }
 
 /**
@@ -202,14 +256,15 @@ export function hasGrowthBookEnvOverride(feature: string): boolean {
 }
 
 /**
- * Local config overrides set via /config Gates tab (ant-only). Checked after
- * env-var overrides — env wins so eval harnesses remain deterministic. Unlike
+ * Local config overrides set via /config Gates tab. Checked after env-var
+ * overrides -- env wins so eval harnesses remain deterministic. Unlike
  * getEnvOverrides this is not memoized: the user can change overrides at
  * runtime, and getGlobalConfig() is already memory-cached (pointer-chase)
  * until the next saveGlobalConfig() invalidates it.
+ *
+ * CCB fork: USER_TYPE=ant guard removed -- available to all users.
  */
 function getConfigOverrides(): Record<string, unknown> | undefined {
-  if (process.env.USER_TYPE !== 'ant') return undefined
   try {
     return getGlobalConfig().growthBookOverrides
   } catch {
@@ -246,7 +301,6 @@ export function setGrowthBookConfigOverride(
   feature: string,
   value: unknown,
 ): void {
-  if (process.env.USER_TYPE !== 'ant') return
   try {
     saveGlobalConfig(c => {
       const current = c.growthBookOverrides ?? {}
@@ -271,7 +325,6 @@ export function setGrowthBookConfigOverride(
 }
 
 export function clearGrowthBookConfigOverrides(): void {
-  if (process.env.USER_TYPE !== 'ant') return
   try {
     saveGlobalConfig(c => {
       if (
@@ -681,6 +734,10 @@ async function getFeatureValueInternal<T>(
   if (configOverrides && feature in configOverrides) {
     return configOverrides[feature] as T
   }
+  const localOverrides = getLocalFlagOverrides()
+  if (localOverrides && feature in localOverrides) {
+    return localOverrides[feature] as T
+  }
 
   if (!isGrowthBookEnabled()) {
     return defaultValue
@@ -743,6 +800,10 @@ export function getFeatureValue_CACHED_MAY_BE_STALE<T>(
   const configOverrides = getConfigOverrides()
   if (configOverrides && feature in configOverrides) {
     return configOverrides[feature] as T
+  }
+  const localOverrides = getLocalFlagOverrides()
+  if (localOverrides && feature in localOverrides) {
+    return localOverrides[feature] as T
   }
 
   if (!isGrowthBookEnabled()) {
@@ -813,6 +874,10 @@ export function checkStatsigFeatureGate_CACHED_MAY_BE_STALE(
   if (configOverrides && gate in configOverrides) {
     return Boolean(configOverrides[gate])
   }
+  const localOverrides = getLocalFlagOverrides()
+  if (localOverrides && gate in localOverrides) {
+    return Boolean(localOverrides[gate])
+  }
 
   if (!isGrowthBookEnabled()) {
     return false
@@ -859,6 +924,10 @@ export async function checkSecurityRestrictionGate(
   const configOverrides = getConfigOverrides()
   if (configOverrides && gate in configOverrides) {
     return Boolean(configOverrides[gate])
+  }
+  const localOverrides = getLocalFlagOverrides()
+  if (localOverrides && gate in localOverrides) {
+    return Boolean(localOverrides[gate])
   }
 
   if (!isGrowthBookEnabled()) {
@@ -912,6 +981,10 @@ export async function checkGate_CACHED_OR_BLOCKING(
   const configOverrides = getConfigOverrides()
   if (configOverrides && gate in configOverrides) {
     return Boolean(configOverrides[gate])
+  }
+  const localOverrides = getLocalFlagOverrides()
+  if (localOverrides && gate in localOverrides) {
+    return Boolean(localOverrides[gate])
   }
 
   if (!isGrowthBookEnabled()) {
@@ -1007,6 +1080,8 @@ export function resetGrowthBook(): void {
   initializeGrowthBook.cache?.clear?.()
   envOverrides = null
   envOverridesParsed = false
+  localFlagOverrides = null
+  localFlagOverridesParsed = false
 }
 
 // Periodic refresh interval (matches Statsig's 6-hour interval)
