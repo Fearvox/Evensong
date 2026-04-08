@@ -2,12 +2,12 @@
 gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: agent-intelligence-enhancement
-status: defining-requirements
-stopped_at: Milestone v2.0 started
-last_updated: "2026-04-08T05:40:00.000Z"
+status: ready-to-plan
+stopped_at: Roadmap created for v2.0
+last_updated: "2026-04-08T06:00:00.000Z"
 last_activity: 2026-04-08
 progress:
-  total_phases: 0
+  total_phases: 8
   completed_phases: 0
   total_plans: 0
   completed_plans: 0
@@ -21,49 +21,36 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-08)
 
 **Core value:** A working, modifiable Claude Code CLI that developers can study, extend, and customize
-**Current focus:** Milestone v2.0 — Agent Intelligence Enhancement (defining requirements)
+**Current focus:** Milestone v2.0 -- Phase 5 (Infrastructure & Gate Override) ready to plan
 
 ## Current Position
 
-Phase: Not started (defining requirements)
-Plan: —
-Status: Defining requirements
-Last activity: 2026-04-08 — Milestone v2.0 started
+Phase: 5 of 12 (Infrastructure & Gate Override)
+Plan: -- (not yet planned)
+Status: Ready to plan
+Last activity: 2026-04-08 -- v2.0 roadmap created (8 phases, 29 requirements mapped)
 
-Progress: [░░░░░░░░░░] 0%
+Progress: [####░░░░░░] 33% (v1.0 complete, v2.0 starting)
 
 ## Performance Metrics
 
 **Velocity:**
+- Total plans completed: 12 (v1.0)
+- Average duration: ~3.5 min
+- Total execution time: ~42 min
 
-- Total plans completed: 0
-- Average duration: —
-- Total execution time: 0 hours
-
-**By Phase:**
+**By Phase (v1.0):**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
-| — | — | — | — |
+| Phase 1 | 2 | 10min | 5min |
+| Phase 2 | 3 | ~12min | ~4min |
+| Phase 3 | 3 | ~8min | ~3min |
+| Phase 4 | 4 | ~18min | ~4min |
 
 **Recent Trend:**
-
-- Last 5 plans: —
-- Trend: —
-
-*Updated after each plan completion*
-| Phase 01 P01 | 6min | 2 tasks | 5 files |
-| Phase 01 P02 | 4min | 2 tasks | 3 files |
-| Phase 02 P01 | 3min | 2 tasks | 4 files |
-| Phase 02 P03 | 211s | 2 tasks | 2 files |
-| Phase 02 P02 | 5min | 2 tasks | 3 files |
-| Phase 03 P01 | 2min | 2 tasks | 3 files |
-| Phase 03 P02 | 170s | 2 tasks | 3 files |
-| Phase 03 P03 | 148s | 2 tasks | 3 files |
-| Phase 04 P01 | 4min | 2 tasks | 2 files |
-| Phase 04 P02 | 2min | 2 tasks | 2 files |
-| Phase 04 P03 | 95s | 2 tasks | 2 files |
-| Phase 04 P04 | 10min | 2 tasks | 2 files |
+- Last 5 plans: 170s, 148s, 4min, 2min, 95s
+- Trend: Stable
 
 ## Accumulated Context
 
@@ -72,30 +59,10 @@ Progress: [░░░░░░░░░░] 0%
 Decisions are logged in PROJECT.md Key Decisions table.
 Recent decisions affecting current work:
 
-- Init: feature() runtime-configurable via env var/config file (already shipped in Phase 0)
-- Init: Biome recommended:false — decompiled code can't pass recommended rules
-- Init: Tests start from pure functions (lowest-risk entry for decompiled code)
-- [Phase 01]: Created strict-shims.d.ts with minimal structural types for Bun-resolved packages
-- [Phase 01]: noUncheckedIndexedAccess disabled for Phase 1 -- too aggressive for decompiled code
-- [Phase 01]: Zod schema covers exactly 7 event types from claude.ts switch -- parse what we use, passthrough what we don't
-- [Phase 02]: Lazy dynamic import for BashTool to ensure env vars set before module-level side effects
-- [Phase 02]: createTestToolUseContext(overrides?) factory pattern for all tool integration tests
-- [Phase 02]: Test createSubagentContext() directly instead of AgentTool.call() to avoid live API dependency
-- [Phase 02]: mock.module for GlobTool/UI circular dependency in GrepTool tests
-- [Phase 03]: Range assertions for jitter-based delay tests; test existing utilities directly rather than mocking withRetry generator
-- [Phase 03]: Used native fs imports for temp-file path (FsOperations lacks writeFileSync)
-- [Phase 03]: validate-then-continue pattern: Zod validates at stream entry, part variable continues in switch body
-- [Phase 03]: Watchdog opt-out via CLAUDE_DISABLE_STREAM_WATCHDOG replaces opt-in CLAUDE_ENABLE_STREAM_WATCHDOG
-- [Phase 03]: finalizeHistoryOnAbort uses getTranscriptPath()/getSessionId() from bootstrap state singletons
-- [Phase 04]: Mock Tool object constructed inline rather than using buildTool() to avoid complex runtime dependencies in test context
-- [Phase 04]: 5 tests written (PERM-01 call-tracking + 4 behavior modes) — exceeds plan minimum of 4
-- [Phase 04]: CLAUDE_AUTOCOMPACT_PCT_OVERRIDE 百分比覆盖使阈值可预测，避免硬编码绝对 token 数
-- [Phase 04]: afterEach 用快照恢复 process.env 防止测试间污染（10 条 autoCompact 边界测试）
-- [Phase 04]: 方案A (loadTranscriptFile直接测试) 可行，无需bootstrap初始化即可读取临时JSONL文件
-- [Phase 04]: TranscriptMessage最小shape用as unknown as TranscriptMessage绕过crypto.randomUUID类型约束
-- [Phase 04]: drainQuery uses while(true)+gen.next() pattern — for-await does not capture terminal (done) value
-- [Phase 04]: makeToolUseContext factory provides complete AppState mock (mcp/fastMode/effortValue/advisorModel) for query() integration tests
-- [Phase 04]: PERM-03 단元测试 hasPermissionsToUseTool+alwaysAllowRules 附等价性注释：AppState 跨轮次传递机制
+- [v2.0 Roadmap]: 8-phase structure derived from 29 requirements across 8 categories
+- [v2.0 Roadmap]: Safety infra (Phases 7-8) ordered before stress features (Phases 10-11)
+- [v2.0 Roadmap]: GrowthBook gate override (Phase 5) is hard prerequisite for all gated features
+- [v2.0 Roadmap]: UI cleanup + integration testing combined in Phase 12 as final pass
 
 ### Pending Todos
 
@@ -103,11 +70,13 @@ None yet.
 
 ### Blockers/Concerns
 
-- ~1341 tsc errors from decompilation — do NOT attempt mass-fix; incremental approach per phase only
-- React Compiler `_c()` boilerplate throughout components — deferred to Phase 6
+- ~1341 tsc errors from decompilation -- incremental approach per phase only
+- React Compiler `_c()` boilerplate throughout components -- addressed in Phase 12
+- KAIROS cloud API replacement needs validation during Phase 11 planning
+- Forked agent Bun compatibility unverified -- smoke test needed in Phase 6
 
 ## Session Continuity
 
-Last session: 2026-04-08T05:26:31.939Z
-Stopped at: Completed 04-04-PLAN.md
+Last session: 2026-04-08
+Stopped at: v2.0 roadmap created
 Resume file: None

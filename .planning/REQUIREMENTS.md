@@ -1,7 +1,7 @@
 # Requirements: CCB v2.0 Agent Intelligence Enhancement
 
 **Defined:** 2026-04-08
-**Core Value:** A working, modifiable Claude Code CLI that developers can study, extend, and customize — now evolving into an intelligent agent platform
+**Core Value:** A working, modifiable Claude Code CLI that developers can study, extend, and customize -- now evolving into an intelligent agent platform
 
 ## Overview
 
@@ -32,7 +32,7 @@
 ### Context (CTX)
 - [ ] **CTX-01**: Context collapse identifies stale message spans and replaces them with short summaries in-place
 - [ ] **CTX-02**: Recent messages (last N turns) always retain full fidelity and are never collapse candidates
-- [ ] **CTX-03**: Collapse and autocompact coordinate via shared lock — no race condition, no orphaned metadata
+- [ ] **CTX-03**: Collapse and autocompact coordinate via shared lock -- no race condition, no orphaned metadata
 - [ ] **CTX-04**: Session restore correctly rebuilds collapsed spans from transcript commit/snapshot entries
 
 ### Coordinator (COORD)
@@ -58,48 +58,48 @@
 
 ## Future Requirements (Deferred)
 
-- Full KAIROS channel stack (push notifications, GitHub webhooks) — too many cloud API unknowns
-- File ownership enforcement in coordinator mode — needs runtime path tracking
-- Command rewriting after deliberation — requires thinking output feedback loop
-- Channel-based permission routing — depends on KAIROS channel system
+- Full KAIROS channel stack (push notifications, GitHub webhooks) -- too many cloud API unknowns
+- File ownership enforcement in coordinator mode -- needs runtime path tracking
+- Command rewriting after deliberation -- requires thinking output feedback loop
+- Channel-based permission routing -- depends on KAIROS channel system
 
 ## Out of Scope
 
-- Computer Use (@ant/* packages) — requires proprietary Anthropic infra
-- NAPI packages (audio, image, url, modifiers) — native bindings not available
-- Analytics / GrowthBook / Sentry — telemetry not needed (we bypass GrowthBook gates, not run the service)
-- Full KAIROS cloud integration — Anthropic's session API is inaccessible
+- Computer Use (@ant/* packages) -- requires proprietary Anthropic infra
+- NAPI packages (audio, image, url, modifiers) -- native bindings not available
+- Analytics / GrowthBook / Sentry -- telemetry not needed (we bypass GrowthBook gates, not run the service)
+- Full KAIROS cloud integration -- Anthropic's session API is inaccessible
 
 ## Traceability
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| INFRA-01 | TBD | Pending |
-| INFRA-02 | TBD | Pending |
-| INFRA-03 | TBD | Pending |
-| MEM-01 | TBD | Pending |
-| MEM-02 | TBD | Pending |
-| MEM-03 | TBD | Pending |
-| DELIB-01 | TBD | Pending |
-| DELIB-02 | TBD | Pending |
-| DELIB-03 | TBD | Pending |
-| PERM-04 | TBD | Pending |
-| PERM-05 | TBD | Pending |
-| PERM-06 | TBD | Pending |
-| CTX-01 | TBD | Pending |
-| CTX-02 | TBD | Pending |
-| CTX-03 | TBD | Pending |
-| CTX-04 | TBD | Pending |
-| COORD-01 | TBD | Pending |
-| COORD-02 | TBD | Pending |
-| COORD-03 | TBD | Pending |
-| COORD-04 | TBD | Pending |
-| KAIROS-01 | TBD | Pending |
-| KAIROS-02 | TBD | Pending |
-| KAIROS-03 | TBD | Pending |
-| KAIROS-04 | TBD | Pending |
-| UI-01 | TBD | Pending |
-| UI-02 | TBD | Pending |
-| UI-03 | TBD | Pending |
-| INT-01 | TBD | Pending |
-| INT-02 | TBD | Pending |
+| INFRA-01 | Phase 5 | Pending |
+| INFRA-02 | Phase 5 | Pending |
+| INFRA-03 | Phase 5 | Pending |
+| MEM-01 | Phase 6 | Pending |
+| MEM-02 | Phase 6 | Pending |
+| MEM-03 | Phase 6 | Pending |
+| DELIB-01 | Phase 7 | Pending |
+| DELIB-02 | Phase 7 | Pending |
+| DELIB-03 | Phase 7 | Pending |
+| PERM-04 | Phase 8 | Pending |
+| PERM-05 | Phase 8 | Pending |
+| PERM-06 | Phase 8 | Pending |
+| CTX-01 | Phase 9 | Pending |
+| CTX-02 | Phase 9 | Pending |
+| CTX-03 | Phase 9 | Pending |
+| CTX-04 | Phase 9 | Pending |
+| COORD-01 | Phase 10 | Pending |
+| COORD-02 | Phase 10 | Pending |
+| COORD-03 | Phase 10 | Pending |
+| COORD-04 | Phase 10 | Pending |
+| KAIROS-01 | Phase 11 | Pending |
+| KAIROS-02 | Phase 11 | Pending |
+| KAIROS-03 | Phase 11 | Pending |
+| KAIROS-04 | Phase 11 | Pending |
+| UI-01 | Phase 12 | Pending |
+| UI-02 | Phase 12 | Pending |
+| UI-03 | Phase 12 | Pending |
+| INT-01 | Phase 12 | Pending |
+| INT-02 | Phase 12 | Pending |
