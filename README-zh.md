@@ -1,6 +1,8 @@
+<p align="right"><a href="./README.md">English</a></p>
+
 # Claude Code Reimagined
 
-**Claude Code 重构版 — 从反编译到下一代开源 AI Agent 平台**
+**Claude Code 重构版，从反编译到下一代开源 AI Agent 平台**
 
 > 这不是 wrapper，不是 clone，是 Anthropic 官方 Claude Code CLI 的完整内核逆向。每一个 feature flag，每一个 tool，每一个 streaming handler，全部暴露，全部可读，全部可改。
 
@@ -9,20 +11,15 @@
 [![Tests](https://img.shields.io/badge/Tests-261_passing-green)]()
 [![Phase](https://img.shields.io/badge/Roadmap-Phase_5%2F14-orange)]()
 
----
+## 目录
 
-## 关键数据
-
-| 指标 | 数值 |
-|------|------|
-| 源码规模 | **520,630 行** TypeScript/TSX，**2,797** 个源文件 |
-| 测试覆盖 | **261** 个测试通过，**28** 个测试文件 |
-| 内置工具 | **56** 个（Bash, FileEdit, Grep, Agent, WebFetch, MCP 等） |
-| Feature Flags | **90+** 个，全部编目，全部可配置 |
-| 构建产物 | 单文件 **~25 MB** via `bun build` |
-| 运行时 | **Bun**（不是 Node.js） |
-| 多提供商 | Anthropic, AWS Bedrock, Google Vertex, Azure |
-| 演进路线 | **14 阶段**（Phase 1-5 已完成） |
+- [这个项目是什么](#这个项目是什么)
+- [快速开始](#快速开始)
+- [架构概览](#架构概览)
+- [能力清单](#能力清单)
+- [演进路线图 v2.0](#演进路线图-v20)
+- [为什么做这个](#为什么做这个)
+- [许可证](#许可证)
 
 ---
 
@@ -91,11 +88,26 @@ src/
 
 **Feature Flag 系统**，所有 `feature('FLAG_NAME')` 调用默认返回 `false`。你可以通过 `~/.claude/feature-flags.json` 选择性开启任何 flag，不需要改代码。90 多个 flag 全部编目在依赖图文档里，包括哪些 flag 需要联动开启。
 
+<p align="right"><a href="#目录">↑ 返回顶部</a></p>
+
 ---
 
 ## 能力清单
 
-### 内置工具
+### 核心能力
+
+| 能力 | 描述 |
+|------|------|
+| 流式响应 | SSE 流式，断线自动重连，idle 超时检测 |
+| 工具调用循环 | 多工具批量执行，结果自动送回 API |
+| 权限管控 | deny/ask/allow/passthrough 四级，会话内持久化 |
+| 会话管理 | 保存/恢复，上下文压缩，token 预警 |
+| MCP 协议 | stdio + SSE 传输，工具自动注册 |
+| Feature Flags | 90+ flag，JSON 配置，运行时热切换 |
+| 终端 UI | React/Ink 渲染，虚拟列表，搜索高亮 |
+
+<details>
+<summary><strong>56 个内置工具</strong>（点击展开）</summary>
 
 | 类别 | 工具 | 说明 |
 |------|------|------|
@@ -111,7 +123,10 @@ src/
 | 工作树 | EnterWorktreeTool, ExitWorktreeTool | Git worktree 隔离 |
 | 其他 | SkillTool, ToolSearchTool, ConfigTool, MonitorTool, SleepTool | 技能系统 + 配置 + 监控 |
 
-### 多提供商支持
+</details>
+
+<details>
+<summary><strong>多提供商支持</strong>（点击展开）</summary>
 
 | 提供商 | 状态 | 配置方式 |
 |--------|------|----------|
@@ -120,25 +135,18 @@ src/
 | Google Vertex | 完整支持 | GCP credentials + project |
 | Azure | 完整支持 | Azure AD + endpoint |
 
-### 核心能力
+</details>
 
-| 能力 | 描述 |
-|------|------|
-| 流式响应 | SSE 流式，断线自动重连，idle 超时检测 |
-| 工具调用循环 | 多工具批量执行，结果自动送回 API |
-| 权限管控 | deny/ask/allow/passthrough 四级，会话内持久化 |
-| 会话管理 | 保存/恢复，上下文压缩，token 预警 |
-| MCP 协议 | stdio + SSE 传输，工具自动注册 |
-| Feature Flags | 90+ flag，JSON 配置，运行时热切换 |
-| 终端 UI | React/Ink 渲染，虚拟列表，搜索高亮 |
+<p align="right"><a href="#目录">↑ 返回顶部</a></p>
 
 ---
 
 ## 演进路线图 v2.0
 
-从「能跑」到「智能」，14 个阶段，每个阶段有明确的成功标准和验证方式。
+### ✓ 已完成（Phase 1-5）
 
-### 已完成
+<details>
+<summary>5 个阶段已完成，点击展开详情</summary>
 
 | 阶段 | 名称 | 核心成果 |
 |------|------|----------|
@@ -148,25 +156,31 @@ src/
 | Phase 4 | 查询循环与权限 | 多工具批量执行，权限持久化，会话恢复 |
 | Phase 5 | 基础设施与门控覆盖 | GrowthBook 绕过，flag 依赖图，MCP 传输 |
 
-### 进行中
+</details>
 
-| 阶段 | 名称 | 目标 |
+### ▶ 下一步，Phase 6，记忆提取
+
+跨会话记忆自动提取 + 加载，带密钥扫描防止凭证泄露。提取管道的代码已经全部存在于代码库中，这个阶段的工作是启用它，接入密钥扫描，测试完整流程。
+
+### ○ 计划中（Phase 7-14）
+
+| 阶段 | 名称 | 方向 |
 |------|------|------|
-| Phase 6 | 记忆提取 | 跨会话记忆自动提取 + 加载，带密钥扫描 |
 | Phase 7 | 审议检查点 | 高风险工具调用前强制深度思考 |
-| Phase 8 | 动态权限升级 | 会话级临时权限授予，子代理隔离 |
-| Phase 9 | 上下文折叠 | 智能上下文压缩，保留近期保真度 |
+| Phase 8 | 动态权限升级 | 会话级临时权限，子代理隔离 |
+| Phase 9 | 上下文折叠 | 智能压缩，保留近期保真度 |
 | Phase 10 | 协调者模式 | 多代理编排，并行 worker，文件锁定 |
 | Phase 11 | KAIROS 主动模式 | 主动建议，梦境整合，本地存储 |
 | Phase 12 | 多模型架构 | OpenAI 适配器，难度路由，回退链 |
-| Phase 13 | UI 清理与集成测试 | React Compiler 残留清理，REPL 拆分 |
-| Phase 14 | 进化流水线 | 对抗评估，指标仪表盘，自迭代循环 |
+| Phase 13 | UI 清理与集成测试 | React Compiler 清理，REPL 拆分 |
+| Phase 14 | 进化流水线 | 对抗评估，指标仪表盘，自迭代 |
 
-你想想看，Phase 14 做完的时候，这东西就不只是一个 CLI 了，它是一个能自我评估、自我改进的 AI Agent 平台。
+<p align="right"><a href="#目录">↑ 返回顶部</a></p>
 
 ---
 
-## 技术栈
+<details>
+<summary><strong>技术栈详情</strong>（点击展开）</summary>
 
 | 层 | 技术 | 版本 |
 |----|------|------|
@@ -180,9 +194,10 @@ src/
 | 测试 | bun test（内置） | - |
 | 构建 | bun build（单文件） | - |
 
----
+</details>
 
-## 已知限制
+<details>
+<summary><strong>已知限制</strong>（点击展开）</summary>
 
 反正我觉得坦诚比包装重要，所以直接列出来。
 
@@ -192,9 +207,10 @@ src/
 - **NAPI 包** audio/image/url/modifiers 是 stub（`color-diff-napi` 除外，完整实现）
 - **不跟踪上游** 这是 fork，不同步 Anthropic 的后续发布
 
----
+</details>
 
-## 项目结构
+<details>
+<summary><strong>项目结构</strong>（点击展开）</summary>
 
 ```
 claude-code-reimagine-for-learning/
@@ -206,6 +222,8 @@ claude-code-reimagine-for-learning/
 ├── .planning/               # 项目规划（路线图、状态、计划文档）
 └── .learnings/              # 项目级知识库
 ```
+
+</details>
 
 ---
 
@@ -225,16 +243,9 @@ claude-code-reimagine-for-learning/
 
 ## 许可证
 
-本项目仅供学习和研究用途。原始代码版权归 Anthropic 所有。
-
-本仓库是 Anthropic Claude Code CLI 的逆向工程产物，旨在教育目的。请遵守 Anthropic 的服务条款和使用政策。
-
----
-
-## 链接
-
-- **仓库地址** [github.com/Fearvox/claude-code-reimagine-for-learning](https://github.com/Fearvox/claude-code-reimagine-for-learning)
-- **Anthropic Claude Code** [claude.ai/code](https://claude.ai/code)
+> [!NOTE]
+> 本项目仅供学习和研究用途。原始代码版权归 Anthropic 所有。
+> 本仓库是 Anthropic Claude Code CLI 的逆向工程产物，旨在教育目的。请遵守 Anthropic 的服务条款和使用政策。
 
 ---
 

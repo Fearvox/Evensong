@@ -1,21 +1,31 @@
+<p align="right"><a href="./README-zh.md">中文</a></p>
+
 # Claude Code Reimagined
 
-**The open, hackable next-generation AI agent platform -- reverse-engineered from Anthropic's Claude Code CLI.**
+**The AI agent you can actually read.**
 
 <p align="center">
-  <code>520,000+ lines of TypeScript</code> &nbsp;&middot;&nbsp;
-  <code>2,797 source files</code> &nbsp;&middot;&nbsp;
-  <code>261 tests passing</code> &nbsp;&middot;&nbsp;
-  <code>50+ built-in tools</code> &nbsp;&middot;&nbsp;
-  <code>90+ feature flags</code> &nbsp;&middot;&nbsp;
-  <code>~25 MB single-file build</code>
+  <img src="https://img.shields.io/badge/TypeScript-520K%2B_lines-3178C6?style=flat-square&logo=typescript&logoColor=white" alt="TypeScript 520K+ lines" />
+  <img src="https://img.shields.io/badge/Bun-Runtime-f472b6?style=flat-square&logo=bun&logoColor=white" alt="Bun Runtime" />
+  <img src="https://img.shields.io/badge/Tests-261_passing-22c55e?style=flat-square" alt="261 Tests Passing" />
+  <img src="https://img.shields.io/badge/Roadmap-Phase_5%2F14-f97316?style=flat-square" alt="Phase 5/14" />
 </p>
 
 <p align="center">
-  <b>Runtime:</b> Bun &nbsp;&middot;&nbsp;
-  <b>UI:</b> React/Ink &nbsp;&middot;&nbsp;
   <b>Providers:</b> Anthropic | AWS Bedrock | Google Vertex | Azure
 </p>
+
+---
+
+## Contents
+
+- [Why This Exists](#why-this-exists)
+- [Quick Start](#quick-start)
+- [Architecture](#architecture)
+- [What Works](#what-works-right-now)
+- [Feature Flags](#feature-flag-system)
+- [Roadmap](#evolution-roadmap-v20----agent-intelligence-enhancement)
+- [Contributing](#contributing)
 
 ---
 
@@ -115,6 +125,8 @@ That's it. No Node.js required. No Docker. No complex setup. Bun handles everyth
 | Context | `src/context.ts` | Builds system prompt from git status, CLAUDE.md hierarchy, memory files |
 | Feature Flags | `src/utils/featureFlag.ts` | 90+ flags cataloged; configurable via `~/.claude/feature-flags.json` |
 
+<p align="right"><a href="#contents">↑ top</a></p>
+
 ---
 
 ## What Works Right Now
@@ -132,7 +144,8 @@ That's it. No Node.js required. No Docker. No complex setup. Bun handles everyth
 | MCP Integration | Working | stdio + SSE transports, resource listing, tool proxying |
 | Context Building | Working | Git status, CLAUDE.md discovery, memory files |
 
-### Built-in Tools (Always Available)
+<details>
+<summary><strong>50+ Built-in Tools</strong> (click to expand)</summary>
 
 | Tool | What It Does |
 |------|-------------|
@@ -154,9 +167,16 @@ That's it. No Node.js required. No Docker. No complex setup. Bun handles everyth
 | `SyntheticOutputTool` | Structured output for non-interactive sessions |
 | ...and 30+ more | Conditional, flag-gated, or platform-specific tools |
 
-### 70+ Slash Commands
+</details>
+
+<details>
+<summary><strong>70+ Slash Commands</strong> (click to expand)</summary>
 
 Everything from `/compact` (compress conversation) to `/model` (switch models) to `/doctor` (health check) to `/vim` (vim mode). The full list is in the source at `src/commands/`.
+
+</details>
+
+<p align="right"><a href="#contents">↑ top</a></p>
 
 ---
 
@@ -169,7 +189,8 @@ The original Claude Code uses GrowthBook-powered feature flags injected at build
 - Override: Set flags in `~/.claude/feature-flags.json` to selectively enable features
 - Catalog: Every flag is documented with its purpose and dependent code paths
 
-### Flag Categories (selected)
+<details>
+<summary><strong>Flag Categories</strong> (click to expand)</summary>
 
 | Category | Flags | What They Control |
 |----------|-------|------------------|
@@ -181,34 +202,64 @@ The original Claude Code uses GrowthBook-powered feature flags injected at build
 
 This is your map to everything Anthropic is building but hasn't shipped publicly yet.
 
+</details>
+
+<p align="right"><a href="#contents">↑ top</a></p>
+
 ---
 
 ## Evolution Roadmap (v2.0 -- Agent Intelligence Enhancement)
 
 14 phases. The goal: transform this from a working decompilation into an intelligent, self-evolving agent platform.
 
-| Phase | Name | Status |
-|-------|------|--------|
-| 1 | Project Bootstrap & CI Foundation | Done |
-| 2 | Monorepo Restructure & Stub Packages | Done |
-| 3 | Build Pipeline & Dev Tooling | Done |
-| 4 | Core Test Coverage | Done |
-| 5 | Infrastructure & Feature Flag Gate Override | Done |
-| **6** | **Memory Extraction** | **Next** |
-| 7 | Deliberation Checkpoint | Planned |
-| 8 | Dynamic Permission Escalation | Planned |
-| 9 | Context Collapse | Planned |
-| 10 | Coordinator Mode (multi-agent) | Planned |
-| 11 | KAIROS Proactive | Planned |
-| 12 | Multi-Model Provider Architecture | Planned |
-| 13 | UI Cleanup & Integration Testing | Planned |
-| 14 | Evolution Pipeline | Planned |
+### Completed (Phases 1-5)
 
-**Where this is going:** Phase 10 enables multi-agent orchestration. Phase 11 gives agents the ability to act proactively. Phase 12 lets you route different tasks to different models. Phase 14 builds a self-evolution pipeline where the agent can improve its own capabilities. Each phase builds on the last.
+<details>
+<summary>5 phases complete -- foundation, tools, streaming, permissions, infrastructure</summary>
+
+| Phase | Name | Key Achievement |
+|-------|------|----------------|
+| 1 | Foundation Hardening | Type system, test infrastructure, Zod schemas |
+| 2 | Core Tool Reliability | Error handling + integration tests for 4 core tools |
+| 3 | API Streaming Resilience | Auto-retry, provider switching, atomic history |
+| 4 | Query Loop & Permissions | Multi-tool batching, permission persistence, session resume |
+| 5 | Infrastructure & Gate Override | GrowthBook bypass, 90+ flags cataloged, MCP transport |
+
+</details>
+
+### Next: Phase 6 -- Memory Extraction
+
+Cross-session memories extracted automatically after conversations, loaded in future sessions, with secret scanning to prevent credential leakage. The extraction pipeline already exists in the codebase -- this phase enables it, wires in secret scanning, and tests the full flow.
+
+### Planned (Phases 7-14)
+
+| Phase | Name | Focus |
+|-------|------|-------|
+| 7 | Deliberation Checkpoint | Visible reasoning before high-risk tool calls |
+| 8 | Dynamic Permission Escalation | Session-scoped temporary permission grants |
+| 9 | Context Collapse | Intelligent context folding with recent-message fidelity |
+| 10 | Coordinator Mode | Multi-agent orchestration with file reservation |
+| 11 | KAIROS Proactive | Opt-in proactive suggestions, dream consolidation |
+| 12 | Multi-Model Providers | OpenAI-compatible adapter, difficulty routing, fallback chains |
+| 13 | UI Cleanup & Integration | React Compiler cleanup, REPL decomposition, test matrix |
+| 14 | Evolution Pipeline | Adversarial evaluation, metrics dashboard, self-iteration |
+
+<p align="right"><a href="#contents">↑ top</a></p>
 
 ---
 
-## Monorepo Structure
+<details>
+<summary><strong>Technical Notes</strong> (tsc errors, build system, React Compiler, monorepo structure)</summary>
+
+**On the tsc errors:** There are ~1,341 TypeScript errors from decompilation -- mostly `unknown`/`never`/`{}` types and React Compiler artifacts (`_c()` memoization calls). These do not affect Bun runtime execution. We're fixing them incrementally via tsconfig islands, not mass `@ts-ignore`.
+
+**On `feature()` polyfill:** In `cli.tsx`, `feature()` is injected to always return `false`. This means all Anthropic-internal features are dead code in this build unless you override them in `~/.claude/feature-flags.json`.
+
+**On React Compiler output:** Components throughout the codebase have decompiled memoization boilerplate (`const $ = _c(N)`). This is expected output from the React Compiler and works correctly at runtime.
+
+**On the build:** `bun build src/entrypoints/cli.tsx --outdir dist --target bun` produces a single ~25 MB file. No webpack, no esbuild, no rollup. Just Bun.
+
+### Monorepo Structure
 
 ```
 claude-code-reimagined/
@@ -241,17 +292,7 @@ claude-code-reimagined/
 `-- dist/                    # Build output (single-file bundle)
 ```
 
----
-
-## Technical Notes
-
-**On the tsc errors:** There are ~1,341 TypeScript errors from decompilation -- mostly `unknown`/`never`/`{}` types and React Compiler artifacts (`_c()` memoization calls). These do not affect Bun runtime execution. We're fixing them incrementally via tsconfig islands, not mass `@ts-ignore`.
-
-**On `feature()` polyfill:** In `cli.tsx`, `feature()` is injected to always return `false`. This means all Anthropic-internal features are dead code in this build unless you override them in `~/.claude/feature-flags.json`.
-
-**On React Compiler output:** Components throughout the codebase have decompiled memoization boilerplate (`const $ = _c(N)`). This is expected output from the React Compiler and works correctly at runtime.
-
-**On the build:** `bun build src/entrypoints/cli.tsx --outdir dist --target bun` produces a single ~25 MB file. No webpack, no esbuild, no rollup. Just Bun.
+</details>
 
 ---
 
@@ -267,11 +308,8 @@ For private consulting: `claude-code-best@proton.me`
 
 ---
 
-## License
-
-This project is for **educational and research purposes only**. All rights to the original Claude Code belong to [Anthropic](https://www.anthropic.com/). This is a reverse-engineered study of their work, not an official product. Use responsibly.
-
----
+> [!NOTE]
+> This project is for **educational and research purposes only**. All rights to the original Claude Code belong to [Anthropic](https://www.anthropic.com/). This is a reverse-engineered study of their work, not an official product. Use responsibly.
 
 <p align="center">
   <a href="https://github.com/Fearvox/claude-code-reimagine-for-learning"><b>github.com/Fearvox/claude-code-reimagine-for-learning</b></a>
