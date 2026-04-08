@@ -117,10 +117,12 @@ Plans:
   1. Setting a flag in `~/.claude/feature-flags.json` causes the corresponding `tengu_*` gate to return the configured value instead of the GrowthBook default
   2. A developer can look up which modules a given feature flag gates, and which flags must be co-enabled, from a single reference document
   3. An MCP server connected via stdio receives tool-list and tool-call requests from the CLI, and MCP-provided tools appear in the tool list sent to the API
-**Plans**: TBD
+**Plans**: 3 plans
 
 Plans:
-- (plans TBD -- not yet planned)
+- [ ] 05-01-PLAN.md -- Configurable feature flag module (featureFlag.ts) + bun:bundle import migration (INFRA-01)
+- [ ] 05-02-PLAN.md -- MCP stdio transport connectivity tests + tool assembly verification (INFRA-03)
+- [ ] 05-03-PLAN.md -- GrowthBook tengu_* override + feature flag dependency graph document (INFRA-01, INFRA-02)
 
 ### Phase 6: Memory Extraction
 **Goal**: The CLI automatically extracts cross-session memories after conversations and loads them in future sessions, without leaking secrets
@@ -258,7 +260,7 @@ Phases execute in numeric order: 5 -> 6 -> 7 -> 8 -> 9 -> 10 -> 11 -> 12 -> 13 -
 | 2. Core Tool Reliability | v1.0 | 3/3 | Complete | 2026-04-07 |
 | 3. API & Streaming Resilience | v1.0 | 3/3 | Complete | 2026-04-07 |
 | 4. Query Loop & Permission System | v1.0 | 4/4 | Complete | 2026-04-08 |
-| 5. Infrastructure & Gate Override | v2.0 | 0/TBD | Not started | - |
+| 5. Infrastructure & Gate Override | v2.0 | 0/3 | In progress | - |
 | 6. Memory Extraction | v2.0 | 0/TBD | Not started | - |
 | 7. Deliberation Checkpoint | v2.0 | 0/TBD | Not started | - |
 | 8. Dynamic Permission Escalation | v2.0 | 0/TBD | Not started | - |
