@@ -120,7 +120,7 @@ Plans:
 **Plans**: 3 plans
 
 Plans:
-- [ ] 05-01-PLAN.md -- Configurable feature flag module (featureFlag.ts) + bun:bundle import migration (INFRA-01)
+- [x] 05-01-PLAN.md -- Configurable feature flag module (featureFlag.ts) + bun:bundle import migration (INFRA-01)
 - [ ] 05-02-PLAN.md -- MCP stdio transport connectivity tests + tool assembly verification (INFRA-03)
 - [ ] 05-03-PLAN.md -- GrowthBook tengu_* override + feature flag dependency graph document (INFRA-01, INFRA-02)
 
