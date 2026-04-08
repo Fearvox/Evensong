@@ -34,6 +34,7 @@
     "src/services/api/__tests__/providers.test.ts",
     "src/utils/__tests__/sessionStorageAtomic.test.ts",
     "src/services/api/__tests__/streamWatchdog.test.ts",
-    "src/utils/permissions/__tests__/permissions.test.ts"
+    "src/utils/permissions/__tests__/permissions.test.ts",
+    "src/services/compact/__tests__/autoCompact.test.ts"
   ]
 }
