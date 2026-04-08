@@ -18,6 +18,9 @@ import { AbortError } from '../utils/errors.js';
 import { logError } from '../utils/log.js';
 import type { PermissionDecision } from '../utils/permissions/PermissionResult.js';
 import { hasPermissionsToUseTool } from '../utils/permissions/permissions.js';
+import { grantEscalation, recordDeniedEscalation, wasEscalationDenied } from '../utils/permissions/escalation/EscalationStore.js';
+import type { EscalationGrant } from '../utils/permissions/escalation/types.js';
+import { getSessionId } from '../bootstrap/state.js';
 import { jsonStringify } from '../utils/slowOperations.js';
 import { handleCoordinatorPermission } from './toolPermission/handlers/coordinatorHandler.js';
 import { handleInteractivePermission } from './toolPermission/handlers/interactiveHandler.js';
@@ -64,6 +67,122 @@ function useCanUseTool(setToolUseConfirmQueue, setToolPermissionContext) {
         switch (result.behavior) {
           case "deny":
             {
+              // Dynamic escalation: if the feature is enabled and the user hasn't
+              // already rejected this escalation in this session, present an
+              // escalation prompt instead of an immediate deny.
+              if (feature('DYNAMIC_PERMISSION_ESCALATION')) {
+                // Extract ruleContent for granular escalation matching
+                let escalationRuleContent: string | undefined
+                if (tool.name === BASH_TOOL_NAME && input && 'command' in input) {
+                  escalationRuleContent = String((input as { command: string }).command)
+                } else if (input && 'file_path' in input) {
+                  escalationRuleContent = String((input as { file_path: string }).file_path)
+                }
+
+                // Skip if user already rejected this escalation in this session
+                if (!wasEscalationDenied(tool.name, escalationRuleContent)) {
+                  // Build escalation request
+                  const escalationRequest = {
+                    toolName: tool.name,
+                    ruleContent: escalationRuleContent,
+                    reason: `Permission denied for ${tool.userFacingName(input as never)}. Agent needs temporary elevated access to proceed.`,
+                    riskContext: result.decisionReason?.type === 'rule'
+                      ? `Denied by rule: ${result.message ?? 'configuration rule'}`
+                      : undefined,
+                  }
+
+                  // Push an escalation-specific entry to the confirm queue.
+                  // We reuse the ToolUseConfirm queue mechanism: the escalation
+                  // prompt will be shown via the onAllow/onReject callbacks.
+                  ctx.pushToQueue({
+                    assistantMessage: ctx.assistantMessage,
+                    tool: ctx.tool,
+                    description,
+                    input: input as Record<string, unknown>,
+                    toolUseContext: ctx.toolUseContext,
+                    toolUseID: ctx.toolUseID,
+                    permissionResult: result,
+                    permissionPromptStartTimeMs: Date.now(),
+                    // Mark this as an escalation request so the PermissionRequest
+                    // component can render the EscalationPrompt instead.
+                    escalationRequest,
+                    onUserInteraction() {},
+                    onAbort() {
+                      // Record denial to prevent re-prompting
+                      recordDeniedEscalation(tool.name, escalationRuleContent)
+                      ctx.logCancelled()
+                      resolve(ctx.cancelAndAbort(undefined, true))
+                    },
+                    onAllow(_updatedInput, _permissionUpdates, _feedback) {
+                      // Grant the escalation in the store
+                      const grant: EscalationGrant = {
+                        contextId: getSessionId(),
+                        toolName: tool.name,
+                        ruleContent: escalationRuleContent,
+                        grantedAt: Date.now(),
+                        reason: escalationRequest.reason,
+                      }
+                      grantEscalation(grant)
+
+                      logForDebugging(
+                        `Escalation granted: ${tool.name} for context ${getSessionId()}`,
+                      )
+
+                      // Recheck permission -- hasPermissionsToUseToolInner step 2c will
+                      // now find the escalation and return allow.
+                      hasPermissionsToUseTool(
+                        tool,
+                        input,
+                        toolUseContext,
+                        assistantMessage,
+                        toolUseID,
+                      ).then(freshResult => {
+                        if (freshResult.behavior === 'allow') {
+                          ctx.logDecision({
+                            decision: 'accept',
+                            source: 'escalation',
+                          })
+                          resolve(ctx.buildAllow(
+                            freshResult.updatedInput ?? (input as Record<string, unknown>),
+                            { decisionReason: freshResult.decisionReason },
+                          ))
+                        } else {
+                          // Escalation was granted but still denied (e.g., another rule
+                          // blocks it). Resolve with the denial.
+                          resolve(freshResult)
+                        }
+                      })
+                    },
+                    onReject(_feedback) {
+                      // Record denial to prevent re-prompting
+                      recordDeniedEscalation(tool.name, escalationRuleContent)
+
+                      logPermissionDecision({
+                        tool, input, toolUseContext,
+                        messageId: ctx.messageId, toolUseID,
+                      }, { decision: 'reject', source: 'escalation_denied' })
+
+                      resolve(result)
+                    },
+                    async recheckPermission() {
+                      // Standard recheck -- if someone else granted the escalation
+                      const freshResult = await hasPermissionsToUseTool(
+                        tool, input, toolUseContext, assistantMessage, toolUseID,
+                      )
+                      if (freshResult.behavior === 'allow') {
+                        ctx.logDecision({ decision: 'accept', source: 'escalation' })
+                        resolve(ctx.buildAllow(
+                          freshResult.updatedInput ?? (input as Record<string, unknown>),
+                          { decisionReason: freshResult.decisionReason },
+                        ))
+                      }
+                    },
+                  })
+                  return
+                }
+              }
+
+              // Original deny path (no escalation, or escalation already denied)
               logPermissionDecision({
                 tool,
                 input,

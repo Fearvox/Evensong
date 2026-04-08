@@ -24,6 +24,7 @@ import { BashPermissionRequest } from './BashPermissionRequest/BashPermissionReq
 import { EnterPlanModePermissionRequest } from './EnterPlanModePermissionRequest/EnterPlanModePermissionRequest.js';
 import { ExitPlanModePermissionRequest } from './ExitPlanModePermissionRequest/ExitPlanModePermissionRequest.js';
 import { FallbackPermissionRequest } from './FallbackPermissionRequest.js';
+import { EscalationPrompt } from './EscalationPrompt.js';
 import { FileEditPermissionRequest } from './FileEditPermissionRequest/FileEditPermissionRequest.js';
 import { FilesystemPermissionRequest } from './FilesystemPermissionRequest/FilesystemPermissionRequest.js';
 import { FileWritePermissionRequest } from './FileWritePermissionRequest/FileWritePermissionRequest.js';
@@ -124,6 +125,8 @@ export type ToolUseConfirm<Input extends AnyObject = AnyObject> = {
   onAllow(updatedInput: z.infer<Input>, permissionUpdates: PermissionUpdate[], feedback?: string, contentBlocks?: ContentBlockParam[]): void;
   onReject(feedback?: string, contentBlocks?: ContentBlockParam[]): void;
   recheckPermission(): Promise<void>;
+  /** Present when this is an escalation request (PERM-04). */
+  escalationRequest?: import('../../utils/permissions/escalation/types.js').EscalationRequest
 };
 function getNotificationMessage(toolUseConfirm: ToolUseConfirm): string {
   const toolName = toolUseConfirm.tool.userFacingName(toolUseConfirm.input as never);
@@ -154,6 +157,25 @@ export function PermissionRequest(t0) {
     workerBadge,
     setStickyFooter
   } = t0;
+
+  // If this is an escalation request, render the EscalationPrompt instead (PERM-04)
+  if (toolUseConfirm.escalationRequest) {
+    return (
+      <EscalationPrompt
+        request={toolUseConfirm.escalationRequest}
+        onApprove={() => {
+          toolUseConfirm.onAllow(toolUseConfirm.input, [])
+          onDone()
+        }}
+        onReject={() => {
+          toolUseConfirm.onReject()
+          onReject()
+          onDone()
+        }}
+      />
+    )
+  }
+
   let t1;
   if ($[0] !== onDone || $[1] !== onReject || $[2] !== toolUseConfirm) {
     t1 = () => {
