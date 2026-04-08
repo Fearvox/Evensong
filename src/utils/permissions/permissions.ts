@@ -54,6 +54,9 @@ import {
   type PermissionRuleFromEditableSettings,
   shouldAllowManagedPermissionRulesOnly,
 } from './permissionsLoader.js'
+import {
+  hasEscalation,
+} from './escalation/EscalationStore.js'
 
 /* eslint-disable @typescript-eslint/no-require-imports */
 const classifierDecisionModule = feature('TRANSCRIPT_CLASSIFIER')
@@ -1293,6 +1296,49 @@ async function hasPermissionsToUseToolInner(
         type: 'rule',
         rule: alwaysAllowedRule,
       },
+    }
+  }
+
+  // 2c. Dynamic escalation check (PERM-04, PERM-05)
+  // Addresses review HIGH #3: placed inside hasPermissionsToUseToolInner so ALL callers
+  // (toolExecution.ts, interactiveHandler.recheckPermission, headless agents) see
+  // escalation consistently. No telemetry/hook mismatch.
+  //
+  // Note: Deliberation DENY fires in toolExecution.ts L749 BEFORE this function
+  // is called (L960), so escalation can NEVER override deliberation DENY.
+  if (feature('DYNAMIC_PERMISSION_ESCALATION')) {
+    // Extract contextId from the ToolUseContext. agentId identifies the caller --
+    // main session vs forked agent. Forked agents get new agentIds that won't
+    // match the main session's registered context (review HIGH #1).
+    const contextId = context.agentId ?? ''
+    const toolName = tool.name
+
+    // Extract ruleContent from the tool's input for granular matching.
+    // For Bash, use the command. For file tools, use the file path.
+    // Fall back to undefined for tools without content-specific escalation.
+    let escalationRuleContent: string | undefined
+    if (tool.name === BASH_TOOL_NAME && input && 'command' in input) {
+      escalationRuleContent = String(input.command)
+    } else if (input && 'file_path' in input) {
+      escalationRuleContent = String(input.file_path)
+    }
+
+    if (hasEscalation(contextId, toolName, escalationRuleContent)) {
+      logForDebugging(
+        `Escalation override: ${toolName} has active escalation grant for context ${contextId}`,
+      )
+      return {
+        behavior: 'allow',
+        updatedInput: getUpdatedInputOrFallback(toolPermissionResult, input),
+        decisionReason: {
+          type: 'rule',
+          rule: {
+            source: 'escalation' as PermissionRuleSource,
+            ruleBehavior: 'allow' as const,
+            ruleValue: { toolName, ruleContent: escalationRuleContent },
+          },
+        },
+      }
     }
   }
 

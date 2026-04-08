@@ -41,6 +41,8 @@ import {
   type ContentReplacementState,
   cloneContentReplacementState,
 } from './toolResultStorage.js'
+import { feature } from './featureFlag.js'
+import type { ToolPermissionContext } from '../types/permissions.js'
 import { createAgentId } from './uuid.js'
 
 /**
@@ -250,6 +252,24 @@ export function extractResultText(
 }
 
 /**
+ * Strip escalation-sourced allow rules from a ToolPermissionContext.
+ * PERM-06: Forked agents must NOT inherit dynamic escalations from parent.
+ *
+ * IMPORTANT (review HIGH #2): Only strips 'escalation' key.
+ * The 'session' key is PRESERVED -- it carries allowedTools, .claude
+ * session-only rules, and other legitimate session state.
+ */
+export function stripEscalationRules(
+  context: ToolPermissionContext,
+): ToolPermissionContext {
+  const { escalation: _stripped, ...preservedAllowRules } = context.alwaysAllowRules
+  return {
+    ...context,
+    alwaysAllowRules: preservedAllowRules,
+  }
+}
+
+/**
  * Options for creating a subagent context.
  *
  * By default, all mutable state is isolated to prevent interference with the parent.
@@ -358,16 +378,26 @@ export function createSubagentContext(
   const getAppState: ToolUseContext['getAppState'] = overrides?.getAppState
     ? overrides.getAppState
     : overrides?.shareAbortController
-      ? parentContext.getAppState
+      ? () => {
+          const state = parentContext.getAppState()
+          if (!feature('DYNAMIC_PERMISSION_ESCALATION')) return state
+          return {
+            ...state,
+            toolPermissionContext: stripEscalationRules(state.toolPermissionContext),
+          }
+        }
       : () => {
           const state = parentContext.getAppState()
-          if (state.toolPermissionContext.shouldAvoidPermissionPrompts) {
-            return state
+          const permContext = feature('DYNAMIC_PERMISSION_ESCALATION')
+            ? stripEscalationRules(state.toolPermissionContext)
+            : state.toolPermissionContext
+          if (permContext.shouldAvoidPermissionPrompts) {
+            return { ...state, toolPermissionContext: permContext }
           }
           return {
             ...state,
             toolPermissionContext: {
-              ...state.toolPermissionContext,
+              ...permContext,
               shouldAvoidPermissionPrompts: true,
             },
           }

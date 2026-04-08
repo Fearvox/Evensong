@@ -60,6 +60,7 @@ export type PermissionRuleSource =
   | 'cliArg'
   | 'command'
   | 'session'
+  | 'escalation'
 
 /**
  * The value of a permission rule - specifies which tool and optional content
@@ -91,6 +92,7 @@ export type PermissionUpdateDestination =
   | 'localSettings'
   | 'session'
   | 'cliArg'
+  | 'escalation'
 
 /**
  * Update operations for permission configuration
