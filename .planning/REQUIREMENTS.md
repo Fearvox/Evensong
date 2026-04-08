@@ -11,7 +11,7 @@
 
 ### Infrastructure (INFRA)
 - [x] **INFRA-01**: GrowthBook gate override layer routes `tengu_*` runtime checks through local config file (`~/.claude/feature-flags.json`)
-- [ ] **INFRA-02**: Feature flag dependency graph is documented and CI-gatable (carried from v1.0 Phase 5)
+- [x] **INFRA-02**: Feature flag dependency graph is documented and CI-gatable (carried from v1.0 Phase 5)
 - [x] **INFRA-03**: MCP stdio and SSE transports connect correctly (carried from v1.0 Phase 5)
 
 ### Memory (MEM)
@@ -99,7 +99,7 @@
 | Requirement | Phase | Status |
 |-------------|-------|--------|
 | INFRA-01 | Phase 5 | Complete |
-| INFRA-02 | Phase 5 | Pending |
+| INFRA-02 | Phase 5 | Complete |
 | INFRA-03 | Phase 5 | Complete |
 | MEM-01 | Phase 6 | Pending |
 | MEM-02 | Phase 6 | Pending |
