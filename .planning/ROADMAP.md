@@ -15,7 +15,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 1: Foundation Hardening** - Core types and state layer carry correct annotations; test infrastructure is operational
 - [x] **Phase 2: Core Tool Reliability** - BashTool, FileEditTool, GrepTool, and AgentTool each handle errors correctly and have integration tests
 - [x] **Phase 3: API & Streaming Resilience** - Streaming layer recovers from network failures; provider switching works; history writes atomically
-- [ ] **Phase 4: Query Loop & Permission System** - Multi-turn query loop is correct; permission enforcement is reliable across session turns
+- [x] **Phase 4: Query Loop & Permission System** - Multi-turn query loop is correct; permission enforcement is reliable across session turns (completed 2026-04-08)
 - [ ] **Phase 5: Feature Flags & MCP Transport** - Feature flag dependency graph is documented and CI-gated; MCP stdio and SSE transports connect correctly
 - [ ] **Phase 6: REPL/UI Cleanup** - React Compiler boilerplate removed; REPL decomposed into focused components; Ink snapshot tests established
 
@@ -88,7 +88,7 @@ Plans:
 - [x] 04-01-PLAN.md — Permission unit tests: hasPermissionsToUseTool() deny/ask/allow modes + PERM-01 resolution (PERM-01, PERM-02)
 - [x] 04-02-PLAN.md — Compaction boundary tests: calculateTokenWarningState() and isAutoCompactEnabled() with env overrides (QUERY-02)
 - [x] 04-03-PLAN.md — Session resume tests: loadTranscriptFile() + buildConversationChain() with temp JSONL files (QUERY-03)
-- [ ] 04-04-PLAN.md — Query loop integration tests: multi-tool batching, abort exit paths, permission persistence (QUERY-01, QUERY-04, PERM-03, TEST-04)
+- [x] 04-04-PLAN.md — Query loop integration tests: multi-tool batching, abort exit paths, permission persistence (QUERY-01, QUERY-04, PERM-03, TEST-04)
 
 ### Phase 5: Feature Flags & MCP Transport
 **Goal**: The feature flag system is documented, CI-verified, and validated at runtime; MCP stdio and SSE transports connect and exchange messages correctly
@@ -130,6 +130,6 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6
 | 1. Foundation Hardening | 2/2 | Complete | 2026-04-07 |
 | 2. Core Tool Reliability | 3/3 | Complete | 2026-04-07 |
 | 3. API & Streaming Resilience | 3/3 | Complete | 2026-04-07 |
-| 4. Query Loop & Permission System | 3/4 | In Progress|  |
+| 4. Query Loop & Permission System | 4/4 | Complete   | 2026-04-08 |
 | 5. Feature Flags & MCP Transport | 0/TBD | Not started | - |
 | 6. REPL/UI Cleanup | 0/TBD | Not started | - |

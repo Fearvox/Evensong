@@ -33,23 +33,23 @@ Requirements for engineering maturity milestone. Each maps to roadmap phases.
 
 ### Query Loop
 
-- [ ] **QUERY-01**: query.ts turn loop handles multi-tool-use responses correctly
+- [x] **QUERY-01**: query.ts turn loop handles multi-tool-use responses correctly
 - [x] **QUERY-02**: Context compaction triggers at safe boundary and preserves recent context
 - [x] **QUERY-03**: QueryEngine session resume loads correct conversation state
-- [ ] **QUERY-04**: Abort/cancel mid-turn leaves conversation in recoverable state
+- [x] **QUERY-04**: Abort/cancel mid-turn leaves conversation in recoverable state
 
 ### Permission System
 
 - [x] **PERM-01**: Tool permission prompt displays before execution (fix inherited upstream bug)
 - [x] **PERM-02**: Permission modes (ask, auto-approve, deny) enforce correctly per tool
-- [ ] **PERM-03**: Permission state persists correctly across session turns
+- [x] **PERM-03**: Permission state persists correctly across session turns
 
 ### Testing
 
 - [x] **TEST-01**: ink-testing-library installed and verified working with Bun runtime
 - [x] **TEST-02**: Core tool modules have integration test suites (BashTool, FileEditTool, GrepTool)
 - [x] **TEST-03**: API streaming has tests covering retry, timeout, abort, and provider switching
-- [ ] **TEST-04**: Query loop has tests covering multi-turn, compaction, and abort scenarios
+- [x] **TEST-04**: Query loop has tests covering multi-turn, compaction, and abort scenarios
 - [x] **TEST-05**: Test coverage tracking established for recovered modules
 
 ### Feature Flags
@@ -124,14 +124,14 @@ Requirements for engineering maturity milestone. Each maps to roadmap phases.
 | API-04 | Phase 3 | Complete |
 | API-05 | Phase 3 | Complete |
 | TEST-03 | Phase 3 | Complete |
-| QUERY-01 | Phase 4 | Pending |
+| QUERY-01 | Phase 4 | Complete |
 | QUERY-02 | Phase 4 | Complete |
 | QUERY-03 | Phase 4 | Complete |
-| QUERY-04 | Phase 4 | Pending |
+| QUERY-04 | Phase 4 | Complete |
 | PERM-01 | Phase 4 | Complete |
 | PERM-02 | Phase 4 | Complete |
-| PERM-03 | Phase 4 | Pending |
-| TEST-04 | Phase 4 | Pending |
+| PERM-03 | Phase 4 | Complete |
+| TEST-04 | Phase 4 | Complete |
 | FLAG-01 | Phase 5 | Pending |
 | FLAG-02 | Phase 5 | Pending |
 | FLAG-03 | Phase 5 | Pending |
