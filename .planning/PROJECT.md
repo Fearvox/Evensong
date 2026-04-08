@@ -13,20 +13,26 @@ A working, modifiable Claude Code CLI that developers can study, extend, and cus
 ### Validated
 
 - Build stability (bun build outputs dist/cli.js ~25MB) — Phase 1
-- Test infrastructure (bun test, 58 tests across 3 modules: sanitization, uuid, keybindings) — Phase 1
+- Test infrastructure (bun test, 218 tests across 19 modules) — Phase 1-4
 - Linting (Biome with recommended:false, formatter disabled) — Phase 1
 - Feature flag configurability (runtime env var + config file + CLAUDE_FEATURE_ALL) — Phase 1
+- Core tool reliability (BashTool, FileEditTool, GrepTool, AgentTool) — Phase 2
+- API streaming resilience (error recovery, abort handling) — Phase 3
+- Query loop correctness (multi-tool batch, abort, permission persistence) — Phase 4
+- Permission system enforcement (deny/ask/allow/passthrough modes) — Phase 4
 
 ### Active
 
+- [ ] CONTEXT_COLLAPSE — Intelligent context folding for long conversations
+- [ ] EXTRACT_MEMORIES — Cross-session memory extraction and persistence
+- [ ] Deliberation Checkpoint — Forced deep thinking before high-risk tool calls
+- [ ] COORDINATOR_MODE — Multi-agent coordination and orchestration
+- [ ] KAIROS — Proactive assistant mode (channels, dream, brief)
+- [ ] Dynamic Permission Escalation — Context-aware permission upgrade requests
+- [ ] Feature Flags & MCP Transport (from v1.0 Phase 5)
+- [ ] REPL/UI Cleanup (from v1.0 Phase 6)
 - [ ] Reduce tsc type errors (~1341 from decompilation, prioritize core modules)
-- [ ] Harden core tool system (BashTool, FileEditTool, GrepTool, AgentTool reliability)
-- [ ] Improve API layer resilience (streaming, error recovery, provider switching)
-- [ ] Restore MCP server integration (simplified, without OAuth complexity)
-- [ ] Refine permission system (cleaner UX, correct enforcement)
-- [ ] Expand test coverage to core modules (query, tools, context)
 - [ ] Clean up React Compiler decompilation artifacts (_c() memoization boilerplate)
-- [ ] Documentation for architecture and contribution guide
 
 ### Out of Scope
 
@@ -82,5 +88,19 @@ This document evolves at phase transitions and milestone boundaries.
 3. Audit Out of Scope — reasons still valid?
 4. Update Context with current state
 
+## Current Milestone: v2.0 Agent Intelligence Enhancement
+
+**Goal:** Evolve CCB from a working CLI into an intelligent agent platform by unlocking 6 major capabilities hidden behind feature flags, informed by Mythos System Card findings and internal code reverse-engineering.
+
+**Target features:**
+- CONTEXT_COLLAPSE — Intelligent context folding for long conversations
+- EXTRACT_MEMORIES — Cross-session memory extraction and persistence
+- Deliberation Checkpoint — Forced deep thinking before high-risk tool calls
+- COORDINATOR_MODE — Multi-agent coordination and orchestration
+- KAIROS — Proactive assistant mode (channels, dream, brief)
+- Dynamic Permission Escalation — Context-aware permission upgrade requests
+- Feature Flags & MCP Transport (carried from v1.0)
+- REPL/UI Cleanup (carried from v1.0)
+
 ---
-*Last updated: 2026-04-06 after initialization*
+*Last updated: 2026-04-08 after v2.0 milestone start*
