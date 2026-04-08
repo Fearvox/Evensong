@@ -1,154 +1,105 @@
-# Requirements: CCB (Claude Code Best)
+# Requirements: CCB v2.0 Agent Intelligence Enhancement
 
-**Defined:** 2026-04-06
-**Core Value:** A working, modifiable Claude Code CLI that developers can study, extend, and customize
+**Defined:** 2026-04-08
+**Core Value:** A working, modifiable Claude Code CLI that developers can study, extend, and customize — now evolving into an intelligent agent platform
 
-## v1 Requirements
+## Overview
 
-Requirements for engineering maturity milestone. Each maps to roadmap phases.
+8 categories, 29 requirements. Covers 6 new agent intelligence capabilities + v1.0 Phase 5-6 carryover + integration testing.
 
-### Type Safety
+## Requirements
 
-- [x] **TYPE-01**: Core type definitions (message.ts, permissions.ts) have correct, non-decompiled types
-- [x] **TYPE-02**: tsconfig.strict.json overlay enforces strict mode on all new/recovered files
-- [x] **TYPE-03**: State layer types (AppStateStore, bootstrap singletons) are correctly annotated
-- [ ] **TYPE-04**: Tool interface type (Tool.ts) uses precise generics instead of unknown/never/{}
-- [x] **TYPE-05**: API client boundary types match Anthropic SDK BetaRawMessageStreamEvent shape (verified with Zod)
+### Infrastructure (INFRA)
+- [ ] **INFRA-01**: GrowthBook gate override layer routes `tengu_*` runtime checks through local config file (`~/.claude/feature-flags.json`)
+- [ ] **INFRA-02**: Feature flag dependency graph is documented and CI-gatable (carried from v1.0 Phase 5)
+- [ ] **INFRA-03**: MCP stdio and SSE transports connect correctly (carried from v1.0 Phase 5)
 
-### Tool Reliability
+### Memory (MEM)
+- [ ] **MEM-01**: Cross-session memories are extracted automatically after conversation ends via forked agent
+- [ ] **MEM-02**: Extracted memories load automatically in future sessions via context.ts
+- [ ] **MEM-03**: Secret scanner prevents API keys/credentials from leaking to persistent memory storage
 
-- [x] **TOOL-01**: BashTool correctly propagates errors, handles timeouts, and reports exit codes
-- [x] **TOOL-02**: FileEditTool applies diffs without file corruption under partial writes
-- [x] **TOOL-03**: GrepTool handles large result sets and binary file detection
-- [x] **TOOL-04**: AgentTool subagent recursion works with correct ToolUseContext propagation
-- [x] **TOOL-05**: Each core tool has integration tests covering happy path and error cases
+### Deliberation (DELIB)
+- [ ] **DELIB-01**: High-risk tool calls (rm, git push --force, --no-verify, DB mutations) trigger visible reasoning before execution
+- [ ] **DELIB-02**: Risk scoring classifies tool calls into PROCEED/CONFIRM_ONCE/DENY tiers based on command content
+- [ ] **DELIB-03**: Deliberation memory with scope tags and TTL prevents over-refusal death spiral in multi-step workflows
 
-### API & Streaming
+### Permissions (PERM)
+- [ ] **PERM-04**: User can grant session-scoped temporary permission escalations when agent requests elevated access
+- [ ] **PERM-05**: Dynamic escalations expire at session end and never persist to project settings
+- [ ] **PERM-06**: Forked agents (memory extraction, dream) do NOT inherit dynamic escalations from parent session
 
-- [x] **API-01**: Streaming handles ECONNRESET/EPIPE/ETIMEDOUT with automatic retry (p-retry)
-- [x] **API-02**: Idle timeout wrapper detects and recovers from frozen streams (thinking block hang)
-- [x] **API-03**: Provider switching (Anthropic/Bedrock/Vertex) works without code changes
-- [x] **API-04**: Stream abort path writes history atomically (temp file + rename, no partial state)
-- [x] **API-05**: claude.ts type annotations match SDK event types without unsafe casts
+### Context (CTX)
+- [ ] **CTX-01**: Context collapse identifies stale message spans and replaces them with short summaries in-place
+- [ ] **CTX-02**: Recent messages (last N turns) always retain full fidelity and are never collapse candidates
+- [ ] **CTX-03**: Collapse and autocompact coordinate via shared lock — no race condition, no orphaned metadata
+- [ ] **CTX-04**: Session restore correctly rebuilds collapsed spans from transcript commit/snapshot entries
 
-### Query Loop
+### Coordinator (COORD)
+- [ ] **COORD-01**: Coordinator mode launches and manages parallel worker agents with task assignment
+- [ ] **COORD-02**: File reservation system in canUseTool prevents concurrent writes to same file path
+- [ ] **COORD-03**: Workers receive correct ToolUseContext and can call all standard tools
+- [ ] **COORD-04**: SendMessage tool delivers notifications between coordinator and workers reliably
 
-- [x] **QUERY-01**: query.ts turn loop handles multi-tool-use responses correctly
-- [x] **QUERY-02**: Context compaction triggers at safe boundary and preserves recent context
-- [x] **QUERY-03**: QueryEngine session resume loads correct conversation state
-- [x] **QUERY-04**: Abort/cancel mid-turn leaves conversation in recoverable state
+### Proactive (KAIROS)
+- [ ] **KAIROS-01**: Proactive mode activates only via explicit user opt-in (`--proactive` flag or config)
+- [ ] **KAIROS-02**: Local session storage adapter replaces inaccessible cloud `/v1/sessions/{id}/events` API
+- [ ] **KAIROS-03**: Brief system shows proactive suggestions without interrupting active user workflow
+- [ ] **KAIROS-04**: Dream consolidation runs across sessions with time-based and session-count gates
 
-### Permission System
+### UI (UI)
+- [ ] **UI-01**: React Compiler `_c()` memoization boilerplate removed from core components (carried from v1.0 Phase 6)
+- [ ] **UI-02**: REPL.tsx decomposed into focused sub-components with clear boundaries
+- [ ] **UI-03**: Ink snapshot tests established for key UI states (message rendering, permission prompts, status bar)
 
-- [x] **PERM-01**: Tool permission prompt displays before execution (fix inherited upstream bug)
-- [x] **PERM-02**: Permission modes (ask, auto-approve, deny) enforce correctly per tool
-- [x] **PERM-03**: Permission state persists correctly across session turns
+### Integration (INT)
+- [ ] **INT-01**: 8-config test matrix covers critical feature flag combinations (collapse+compact, delib+coordinator, etc.)
+- [ ] **INT-02**: Dangerous-pair tests verify deliberation + coordinator + permission interactions don't create deadlocks
 
-### Testing
+## Future Requirements (Deferred)
 
-- [x] **TEST-01**: ink-testing-library installed and verified working with Bun runtime
-- [x] **TEST-02**: Core tool modules have integration test suites (BashTool, FileEditTool, GrepTool)
-- [x] **TEST-03**: API streaming has tests covering retry, timeout, abort, and provider switching
-- [x] **TEST-04**: Query loop has tests covering multi-turn, compaction, and abort scenarios
-- [x] **TEST-05**: Test coverage tracking established for recovered modules
-
-### Feature Flags
-
-- [ ] **FLAG-01**: Feature flag dependency graph documented (which flags depend on what modules)
-- [ ] **FLAG-02**: CI gate verifies CLI starts with all flags off (default-safe)
-- [ ] **FLAG-03**: Flag enablement has runtime validation that checks required module availability
-
-### MCP
-
-- [ ] **MCP-01**: MCP stdio transport connects and exchanges messages correctly
-- [ ] **MCP-02**: MCP SSE transport works for remote server connections
-- [ ] **MCP-03**: OAuth dead code removed (replaced with simplified auth or no auth)
-- [ ] **MCP-04**: Tool list correctly includes MCP-provided tools alongside built-in tools
-
-### UI Cleanup
-
-- [ ] **UI-01**: React Compiler _c() boilerplate removed via ts-morph codemod from core components
-- [ ] **UI-02**: REPL.tsx refactored into smaller components with clear responsibilities
-- [ ] **UI-03**: Ink snapshot tests established for message rendering and prompt input
-- [ ] **UI-04**: Component imports reduced from 80+ to manageable module boundaries
-
-## v2 Requirements
-
-### Advanced Features
-
-- **ADV-01**: Multi-model routing (use different models for different task types)
-- **ADV-02**: Custom tool registration API for user-defined tools
-- **ADV-03**: Session persistence and resume across CLI restarts
-- **ADV-04**: Configurable system prompt injection points
-
-### Developer Experience
-
-- **DX-01**: Architecture documentation for contributors
-- **DX-02**: Plugin system for third-party tool extensions
-- **DX-03**: Debug mode with verbose logging of API calls and tool execution
+- Full KAIROS channel stack (push notifications, GitHub webhooks) — too many cloud API unknowns
+- File ownership enforcement in coordinator mode — needs runtime path tracking
+- Command rewriting after deliberation — requires thinking output feedback loop
+- Channel-based permission routing — depends on KAIROS channel system
 
 ## Out of Scope
 
-| Feature | Reason |
-|---------|--------|
-| Computer Use (@ant/* packages) | Requires proprietary Anthropic infrastructure |
-| NAPI native bindings (audio, image, url) | Native binding source not available |
-| Analytics / GrowthBook / Sentry | Telemetry not needed for open source |
-| Magic Docs / Voice Mode / LSP Server | Secondary features, high complexity |
-| Plugins / Marketplace | Too coupled to Anthropic platform |
-| Full MCP OAuth | Anthropic-platform-specific complexity |
-| Node.js compatibility | Bun is the sole runtime; not worth maintaining dual support |
-| Auto-commit on edit | High risk, low value |
-| Real-time collaboration | Out of scope for CLI tool |
+- Computer Use (@ant/* packages) — requires proprietary Anthropic infra
+- NAPI packages (audio, image, url, modifiers) — native bindings not available
+- Analytics / GrowthBook / Sentry — telemetry not needed (we bypass GrowthBook gates, not run the service)
+- Full KAIROS cloud integration — Anthropic's session API is inaccessible
 
 ## Traceability
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| TYPE-01 | Phase 1 | Complete |
-| TYPE-02 | Phase 1 | Complete |
-| TYPE-03 | Phase 1 | Complete |
-| TYPE-04 | Phase 1 | Pending |
-| TYPE-05 | Phase 1 | Complete |
-| TEST-01 | Phase 1 | Complete |
-| TEST-05 | Phase 1 | Complete |
-| TOOL-01 | Phase 2 | Complete |
-| TOOL-02 | Phase 2 | Complete |
-| TOOL-03 | Phase 2 | Complete |
-| TOOL-04 | Phase 2 | Complete |
-| TOOL-05 | Phase 2 | Complete |
-| TEST-02 | Phase 2 | Complete |
-| API-01 | Phase 3 | Complete |
-| API-02 | Phase 3 | Complete |
-| API-03 | Phase 3 | Complete |
-| API-04 | Phase 3 | Complete |
-| API-05 | Phase 3 | Complete |
-| TEST-03 | Phase 3 | Complete |
-| QUERY-01 | Phase 4 | Complete |
-| QUERY-02 | Phase 4 | Complete |
-| QUERY-03 | Phase 4 | Complete |
-| QUERY-04 | Phase 4 | Complete |
-| PERM-01 | Phase 4 | Complete |
-| PERM-02 | Phase 4 | Complete |
-| PERM-03 | Phase 4 | Complete |
-| TEST-04 | Phase 4 | Complete |
-| FLAG-01 | Phase 5 | Pending |
-| FLAG-02 | Phase 5 | Pending |
-| FLAG-03 | Phase 5 | Pending |
-| MCP-01 | Phase 5 | Pending |
-| MCP-02 | Phase 5 | Pending |
-| MCP-03 | Phase 5 | Pending |
-| MCP-04 | Phase 5 | Pending |
-| UI-01 | Phase 6 | Pending |
-| UI-02 | Phase 6 | Pending |
-| UI-03 | Phase 6 | Pending |
-| UI-04 | Phase 6 | Pending |
-
-**Coverage:**
-- v1 requirements: 38 total
-- Mapped to phases: 38
-- Unmapped: 0
-
----
-*Requirements defined: 2026-04-06*
-*Last updated: 2026-04-06 after roadmap creation*
+| INFRA-01 | TBD | Pending |
+| INFRA-02 | TBD | Pending |
+| INFRA-03 | TBD | Pending |
+| MEM-01 | TBD | Pending |
+| MEM-02 | TBD | Pending |
+| MEM-03 | TBD | Pending |
+| DELIB-01 | TBD | Pending |
+| DELIB-02 | TBD | Pending |
+| DELIB-03 | TBD | Pending |
+| PERM-04 | TBD | Pending |
+| PERM-05 | TBD | Pending |
+| PERM-06 | TBD | Pending |
+| CTX-01 | TBD | Pending |
+| CTX-02 | TBD | Pending |
+| CTX-03 | TBD | Pending |
+| CTX-04 | TBD | Pending |
+| COORD-01 | TBD | Pending |
+| COORD-02 | TBD | Pending |
+| COORD-03 | TBD | Pending |
+| COORD-04 | TBD | Pending |
+| KAIROS-01 | TBD | Pending |
+| KAIROS-02 | TBD | Pending |
+| KAIROS-03 | TBD | Pending |
+| KAIROS-04 | TBD | Pending |
+| UI-01 | TBD | Pending |
+| UI-02 | TBD | Pending |
+| UI-03 | TBD | Pending |
+| INT-01 | TBD | Pending |
+| INT-02 | TBD | Pending |
