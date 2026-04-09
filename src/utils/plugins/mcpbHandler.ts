@@ -83,8 +83,8 @@ export function isMcpbSource(source: string): boolean {
 /**
  * Check if a source is a URL
  */
-function isUrl(source: string): boolean {
-  return source.startsWith('http://') || source.startsWith('https://')
+export function isUrl(source: string): boolean {
+  return source.startsWith('https://')
 }
 
 /**
@@ -479,11 +479,14 @@ async function saveCacheMetadata(
 /**
  * Download MCPB file from URL
  */
-async function downloadMcpb(
+export async function downloadMcpb(
   url: string,
   destPath: string,
   onProgress?: ProgressCallback,
 ): Promise<Uint8Array> {
+  if (url.startsWith('http://')) {
+    throw new Error('MCPB download rejected: http:// URLs are not supported for security reasons. Use https:// or file:// instead.')
+  }
   logForDebugging(`Downloading MCPB from ${url}`)
   if (onProgress) {
     onProgress(`Downloading ${url}...`)
