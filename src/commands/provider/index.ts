@@ -5,7 +5,7 @@ export default {
   name: 'provider',
   description: 'Switch AI provider (anthropic, minimax, codex, gemini)',
   argumentHint: '[provider]',
-  isEnabled: true,
+  isEnabled: () => true,
   isHidden: false,
   load: () => import('./provider.js'),
 } satisfies Command
