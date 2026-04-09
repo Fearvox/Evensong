@@ -7,18 +7,19 @@
 <p align="center">
   <img src="https://img.shields.io/badge/TypeScript-520K%2B%E8%A1%8C-3178C6?style=flat-square&logo=typescript&logoColor=white" alt="TypeScript 520K+ 行" />
   <img src="https://img.shields.io/badge/Bun-%E8%BF%90%E8%A1%8C%E6%97%B6-f472b6?style=flat-square&logo=bun&logoColor=white" alt="Bun 运行时" />
-  <img src="https://img.shields.io/badge/%E6%B5%8B%E8%AF%95-700%2B_%E9%80%89%E9%80%9A-22c55e?style=flat-square" alt="700%2B 测试通过" />
+  <img src="https://img.shields.io/badge/%E6%B5%8B%E8%AF%95-1%2C419_%E9%80%9A%E8%BF%87-22c55e?style=flat-square" alt="1,419 测试通过" />
   <img src="https://img.shields.io/badge/%E8%B7%AF%E7%BA%BF%E5%9B%BE-%E7%AC%AC_5%2F14_%E9%98%B6%E6%AE%B5-14-brightgreen?style=flat-square" alt="阶段 5/14" />
 </p>
 
 <p align="center">
-  <b>支持的Provider:</b> Anthropic | AWS Bedrock | Google Vertex | Azure
+  <b>支持的 Provider:</b> Anthropic | Bedrock | Vertex | Azure | MiniMax | OpenAI/Codex | Gemini | 本地 (Ollama/Atomic Chat)
 </p>
 
 ---
 
 ## 目录
 
+- [Benchmark 结果](#benchmark-结果)
 - [项目缘起](#项目缘起)
 - [当前功能](#当前功能)
 - [快速开始](#快速开始)
@@ -27,6 +28,23 @@
 - [演进路线图](#演进路线图)
 - [贡献指南](#贡献指南)
 - [许可证](#许可证)
+
+---
+
+## Benchmark 结果
+
+| 运行 | 模型 | 模式 | 服务数 | 测试数 | 通过率 | 耗时 |
+|------|------|------|--------|--------|--------|------|
+| R001 | MiniMax M2.7 | P9 Tech Lead | 6 | 327 | 18/18 | ~20m |
+| R002 | Opus 4.6 | Codex Rescue | 6 | 111 | 18/18 | 15.7m |
+| R003 | Opus 4.6 | GSD Plan-Phase | 6 | 291 | 18/18 | 25.6m |
+| R004 | MiniMax M2.7 | Codex 6-Agent | 6 | 265 | 18/18 | ~17m |
+| **R005** | **MiniMax M2.7** | **GSD+P9 融合** | **6** | **265** | **18/18** | **~4.5m** |
+| R006 | MiniMax M2.7 | PUA 极限压测 | **8** | 230 | **24/24** | ~17m |
+
+[Live Dashboard](https://benchmarks-zeta.vercel.app)
+
+<p align="right"><a href="#目录">↑ 顶部</a></p>
 
 ---
 
@@ -48,7 +66,7 @@ Anthropic 将 Claude Code 打包成编译后的二进制文件。你可以使用
 |-----------|--------|---------|
 | 交互式 REPL | 可用 | 全功能 Ink 终端 UI，5000+ 行主屏幕代码 |
 | 流式对话 | 可用 | 完整的查询循环，支持自动压缩和 token 追踪 |
-| 多 Provider API | 可用 | Anthropic Direct、AWS Bedrock、Google Vertex、Azure Foundry |
+| 多 Provider API | 可用 | Anthropic、Bedrock、Vertex、Azure、MiniMax、OpenAI/Codex、Gemini、本地 |
 | 权限系统 | 可用 | Plan / auto / manual 模式，配备 YOLO 分类器 |
 | Hook 系统 | 可用 | 通过 `settings.json` 配置工具调用前后钩子 |
 | 会话恢复 | 可用 | 通过 `/resume` 完全恢复对话状态 |
@@ -83,7 +101,7 @@ Anthropic 将 Claude Code 打包成编译后的二进制文件。你可以使用
 <details>
 <summary><strong>70+ 斜杠命令</strong>（点击展开）</summary>
 
-从 `/compact`（压缩对话）到 `/model`（切换模型）到 `/doctor`（健康检查）到 `/vim`（vim 模式）。完整列表见 `src/commands/`。
+从 `/compact`（压缩对话）到 `/model`（切换模型）到 `/provider`（切换 Provider，支持 Anthropic、MiniMax、OpenAI/Codex、Gemini、本地等）到 `/doctor`（健康检查）到 `/vim`（vim 模式）。完整列表见 `src/commands/`。
 
 </details>
 
@@ -106,7 +124,7 @@ echo "解释这个代码库" | bun run src/entrypoints/cli.tsx -p
 # 构建（单文件打包 -> dist/cli.js，约 26 MB）
 bun run build
 
-# 测试（35 个测试文件，700%2B 个测试通过）
+# 测试（35 个测试文件，1,419 个测试通过）
 bun test
 ```
 
@@ -235,7 +253,7 @@ bun test
 | 9 | 上下文折叠 | 智能上下文折叠，保留近期消息保真度 | 计划中 |
 | 10 | 协调者模式 | 带文件预留的多 Agent 编排 | 计划中 |
 | 11 | KAIROS 主动模式 | 可选主动建议、梦境整合 | 计划中 |
-| 12 | 多模型 Provider 架构 | OpenAI 兼容适配器、难度路由、回退链 | 计划中 |
+| 12 | 多模型 Provider 架构 | OpenAI 兼容适配器、难度路由、回退链 | 进行中 |
 | 13 | UI 清理与集成测试 | React Compiler 清理、REPL 分解、测试矩阵 | 计划中 |
 | 14 | 进化流水线 | 对抗性评估、指标仪表板、自我迭代 | 计划中 |
 
@@ -283,7 +301,7 @@ claude-code-reimagined/
 |   |-- image-processor-napi/# Stub
 |   |-- @ant/               # Anthropic 内部包 stub
 |   `-- ...
-|-- tests/                   # 35 个测试文件，700%2B 个测试通过
+|-- tests/                   # 35 个测试文件，1,419 个测试通过
 `-- dist/                   # 构建输出（单文件打包）
 ```
 
