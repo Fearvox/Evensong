@@ -7,8 +7,8 @@
 <p align="center">
   <img src="https://img.shields.io/badge/TypeScript-520K%2B_lines-3178C6?style=flat-square&logo=typescript&logoColor=white" alt="TypeScript 520K+ lines" />
   <img src="https://img.shields.io/badge/Bun-Runtime-f472b6?style=flat-square&logo=bun&logoColor=white" alt="Bun Runtime" />
-  <img src="https://img.shields.io/badge/Tests-261_passing-22c55e?style=flat-square" alt="261 Tests Passing" />
-  <img src="https://img.shields.io/badge/Roadmap-Phase_5%2F14-f97316?style=flat-square" alt="Phase 5/14" />
+  <img src="https://img.shields.io/badge/Tests-338_passing-22c55e?style=flat-square" alt="338 Tests Passing" />
+  <img src="https://img.shields.io/badge/Roadmap-Phase_11%2F14-14-brightgreen?style=flat-square" alt="Phase 5/14" />
 </p>
 
 <p align="center">
@@ -20,12 +20,13 @@
 ## Contents
 
 - [Why This Exists](#why-this-exists)
+- [What Works Right Now](#what-works-right-now)
 - [Quick Start](#quick-start)
 - [Architecture](#architecture)
-- [What Works](#what-works-right-now)
-- [Feature Flags](#feature-flag-system)
-- [Roadmap](#evolution-roadmap-v20----agent-intelligence-enhancement)
-- [Contributing](#contributing)
+- [Feature Flags](#feature-flags)
+- [Evolution Roadmap](#evolution-roadmap)
+- [For Contributors](#for-contributors)
+- [License](#license)
 
 ---
 
@@ -36,6 +37,57 @@ Anthropic ships Claude Code as a compiled binary. You can use it, but you can't 
 This project changes that. Every function, every tool, every feature flag, every streaming event handler -- decompiled, restored, and made readable. This is not a wrapper around an API. This is not a "Claude Code clone" built from scratch. This is the actual Claude Code internals: the real query loop, the real tool dispatch, the real Ink-based terminal UI, the real MCP integration -- pulled apart and put back together in a form you can read, run, and hack on.
 
 The honest truth: this started as ~520K lines of decompiled TypeScript with ~1,341 tsc errors and React Compiler artifacts everywhere. It runs perfectly fine on Bun (type errors from decompilation don't block runtime). The goal is to incrementally transform it from "decompiled and runs" into "engineered, tested, and extensible" -- a real platform for building next-gen AI agents. We're deep into that process, and it's working.
+
+---
+
+## What Works Right Now
+
+### Core Systems
+
+| Capability | Status | Details |
+|-----------|--------|---------|
+| Interactive REPL | Working | Full Ink terminal UI, 5,000+ line main screen |
+| Streaming Conversation | Working | Complete query loop with auto-compaction and token tracking |
+| Multi-Provider API | Working | Anthropic Direct, AWS Bedrock, Google Vertex, Azure Foundry |
+| Permission System | Working | Plan / auto / manual modes with YOLO classifier |
+| Hook System | Working | Pre/post tool-use hooks via `settings.json` |
+| Session Resume | Working | Full conversation restore via `/resume` |
+| MCP Integration | Working | stdio + SSE transports, resource listing, tool proxying |
+| Context Building | Working | Git status, CLAUDE.md discovery, memory files |
+
+<details>
+<summary><strong>50+ Built-in Tools</strong> (click to expand)</summary>
+
+| Tool | What It Does |
+|------|-------------|
+| `BashTool` | Shell execution with sandboxing and permission checks |
+| `FileReadTool` | Read files, PDFs, images, Jupyter notebooks |
+| `FileEditTool` | String-replacement editing with diff tracking |
+| `FileWriteTool` | Create/overwrite files with diff generation |
+| `GlobTool` | Fast file pattern matching |
+| `GrepTool` | Regex search powered by ripgrep |
+| `AgentTool` | Spawn sub-agents (fork / async / background / remote) |
+| `WebFetchTool` | URL fetch, Markdown conversion, AI summarization |
+| `WebSearchTool` | Web search with domain filtering |
+| `NotebookEditTool` | Jupyter notebook cell editing |
+| `SkillTool` | Slash command / skill invocation |
+| `SendMessageTool` | Inter-agent messaging (peers / teammates / mailbox) |
+| `AskUserQuestionTool` | Multi-question interactive prompts |
+| `MCPTool` | Model Context Protocol tool proxying |
+| `TodoWriteTool` | Task list management |
+| `SyntheticOutputTool` | Structured output for non-interactive sessions |
+| ...and 30+ more | Conditional, flag-gated, or platform-specific tools |
+
+</details>
+
+<details>
+<summary><strong>70+ Slash Commands</strong> (click to expand)</summary>
+
+Everything from `/compact` (compress conversation) to `/model` (switch models) to `/doctor` (health check) to `/vim` (vim mode). The full list is in the source at `src/commands/`.
+
+</details>
+
+<p align="right"><a href="#contents">↑ top</a></p>
 
 ---
 
@@ -51,14 +103,16 @@ bun run dev
 # Pipe mode
 echo "explain this codebase" | bun run src/entrypoints/cli.tsx -p
 
-# Build (single-file bundle -> dist/cli.js, ~25 MB)
+# Build (single-file bundle -> dist/cli.js, ~26 MB)
 bun run build
 
-# Tests (261 passing across 28 test files)
+# Tests (700%2B passing across 35 test files)
 bun test
 ```
 
 That's it. No Node.js required. No Docker. No complex setup. Bun handles everything.
+
+<p align="right"><a href="#contents">↑ top</a></p>
 
 ---
 
@@ -129,58 +183,7 @@ That's it. No Node.js required. No Docker. No complex setup. Bun handles everyth
 
 ---
 
-## What Works Right Now
-
-### Core Systems
-
-| Capability | Status | Details |
-|-----------|--------|---------|
-| Interactive REPL | Working | Full Ink terminal UI, 5,000+ line main screen |
-| Streaming Conversation | Working | Complete query loop with auto-compaction and token tracking |
-| Multi-Provider API | Working | Anthropic Direct, AWS Bedrock, Google Vertex, Azure Foundry |
-| Permission System | Working | Plan / auto / manual modes with YOLO classifier |
-| Hook System | Working | Pre/post tool-use hooks via `settings.json` |
-| Session Resume | Working | Full conversation restore via `/resume` |
-| MCP Integration | Working | stdio + SSE transports, resource listing, tool proxying |
-| Context Building | Working | Git status, CLAUDE.md discovery, memory files |
-
-<details>
-<summary><strong>50+ Built-in Tools</strong> (click to expand)</summary>
-
-| Tool | What It Does |
-|------|-------------|
-| `BashTool` | Shell execution with sandboxing and permission checks |
-| `FileReadTool` | Read files, PDFs, images, Jupyter notebooks |
-| `FileEditTool` | String-replacement editing with diff tracking |
-| `FileWriteTool` | Create/overwrite files with diff generation |
-| `GlobTool` | Fast file pattern matching |
-| `GrepTool` | Regex search powered by ripgrep |
-| `AgentTool` | Spawn sub-agents (fork / async / background / remote) |
-| `WebFetchTool` | URL fetch, Markdown conversion, AI summarization |
-| `WebSearchTool` | Web search with domain filtering |
-| `NotebookEditTool` | Jupyter notebook cell editing |
-| `SkillTool` | Slash command / skill invocation |
-| `SendMessageTool` | Inter-agent messaging (peers / teammates / mailbox) |
-| `AskUserQuestionTool` | Multi-question interactive prompts |
-| `MCPTool` | Model Context Protocol tool proxying |
-| `TodoWriteTool` | Task list management |
-| `SyntheticOutputTool` | Structured output for non-interactive sessions |
-| ...and 30+ more | Conditional, flag-gated, or platform-specific tools |
-
-</details>
-
-<details>
-<summary><strong>70+ Slash Commands</strong> (click to expand)</summary>
-
-Everything from `/compact` (compress conversation) to `/model` (switch models) to `/doctor` (health check) to `/vim` (vim mode). The full list is in the source at `src/commands/`.
-
-</details>
-
-<p align="right"><a href="#contents">↑ top</a></p>
-
----
-
-## Feature Flag System
+## Feature Flags
 
 The original Claude Code uses GrowthBook-powered feature flags injected at build time via `bun:bundle`. We've cataloged 90+ of them and built a local override system.
 
@@ -208,14 +211,11 @@ This is your map to everything Anthropic is building but hasn't shipped publicly
 
 ---
 
-## Evolution Roadmap (v2.0 -- Agent Intelligence Enhancement)
+## Evolution Roadmap
 
-14 phases. The goal: transform this from a working decompilation into an intelligent, self-evolving agent platform.
+14 phases across two milestones. The goal: transform this from a working decompilation into an intelligent, self-evolving agent platform.
 
-### Completed (Phases 1-5)
-
-<details>
-<summary>5 phases complete -- foundation, tools, streaming, permissions, infrastructure</summary>
+### Milestone v1.0: Foundation & Core Reliability (COMPLETED)
 
 | Phase | Name | Key Achievement |
 |-------|------|----------------|
@@ -223,26 +223,21 @@ This is your map to everything Anthropic is building but hasn't shipped publicly
 | 2 | Core Tool Reliability | Error handling + integration tests for 4 core tools |
 | 3 | API Streaming Resilience | Auto-retry, provider switching, atomic history |
 | 4 | Query Loop & Permissions | Multi-tool batching, permission persistence, session resume |
-| 5 | Infrastructure & Gate Override | GrowthBook bypass, 90+ flags cataloged, MCP transport |
 
-</details>
+### Milestone v2.0: Agent Intelligence Enhancement (IN PROGRESS)
 
-### Next: Phase 6 -- Memory Extraction
-
-Cross-session memories extracted automatically after conversations, loaded in future sessions, with secret scanning to prevent credential leakage. The extraction pipeline already exists in the codebase -- this phase enables it, wires in secret scanning, and tests the full flow.
-
-### Planned (Phases 7-14)
-
-| Phase | Name | Focus |
-|-------|------|-------|
-| 7 | Deliberation Checkpoint | Visible reasoning before high-risk tool calls |
-| 8 | Dynamic Permission Escalation | Session-scoped temporary permission grants |
-| 9 | Context Collapse | Intelligent context folding with recent-message fidelity |
-| 10 | Coordinator Mode | Multi-agent orchestration with file reservation |
-| 11 | KAIROS Proactive | Opt-in proactive suggestions, dream consolidation |
-| 12 | Multi-Model Providers | OpenAI-compatible adapter, difficulty routing, fallback chains |
-| 13 | UI Cleanup & Integration | React Compiler cleanup, REPL decomposition, test matrix |
-| 14 | Evolution Pipeline | Adversarial evaluation, metrics dashboard, self-iteration |
+| Phase | Name | Focus | Status |
+|-------|------|-------|--------|
+| 5 | Infrastructure & Gate Override | GrowthBook bypass, 90+ flags cataloged, MCP transport | Complete |
+| 6 | Memory Extraction | Cross-session memories, secret scanning | In progress |
+| 7 | Deliberation Checkpoint | Visible reasoning before high-risk tool calls | Planned |
+| 8 | Dynamic Permission Escalation | Session-scoped temporary permission grants | Planned |
+| 9 | Context Collapse | Intelligent context folding with recent-message fidelity | Planned |
+| 10 | Coordinator Mode | Multi-agent orchestration with file reservation | Planned |
+| 11 | KAIROS Proactive | Opt-in proactive suggestions, dream consolidation | Planned |
+| 12 | Multi-Model Provider Architecture | OpenAI-compatible adapter, difficulty routing, fallback chains | Planned |
+| 13 | UI Cleanup & Integration Testing | React Compiler cleanup, REPL decomposition, test matrix | Planned |
+| 14 | Evolution Pipeline | Adversarial evaluation, metrics dashboard, self-iteration | Planned |
 
 <p align="right"><a href="#contents">↑ top</a></p>
 
@@ -257,7 +252,7 @@ Cross-session memories extracted automatically after conversations, loaded in fu
 
 **On React Compiler output:** Components throughout the codebase have decompiled memoization boilerplate (`const $ = _c(N)`). This is expected output from the React Compiler and works correctly at runtime.
 
-**On the build:** `bun build src/entrypoints/cli.tsx --outdir dist --target bun` produces a single ~25 MB file. No webpack, no esbuild, no rollup. Just Bun.
+**On the build:** `bun build src/entrypoints/cli.tsx --outdir dist --target bun` produces a single ~26 MB file. No webpack, no esbuild, no rollup. Just Bun.
 
 ### Monorepo Structure
 
@@ -288,7 +283,7 @@ claude-code-reimagined/
 |   |-- image-processor-napi/# Stub
 |   |-- @ant/                # Anthropic internal package stubs
 |   `-- ...
-|-- tests/                   # 28 test files, 261 passing
+|-- tests/                   # 35 test files, 700%2B passing
 `-- dist/                    # Build output (single-file bundle)
 ```
 
@@ -296,7 +291,7 @@ claude-code-reimagined/
 
 ---
 
-## Contributing
+## For Contributors
 
 This project moves fast -- Opus runs continuous optimization in the background. That said:
 
@@ -305,6 +300,14 @@ This project moves fast -- Opus runs continuous optimization in the background. 
 - **Forking:** Encouraged. Clone or download the zip (forks may not track correctly due to the pace of changes). Build something wild.
 
 For private consulting: `claude-code-best@proton.me`
+
+---
+
+## License
+
+This project is licensed under a non-commercial license. See the [LICENSE](LICENSE) file for full terms.
+
+<p align="right"><a href="#contents">↑ top</a></p>
 
 ---
 
