@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CCB Evolution Benchmarks — Gen 0</title>
+<style>
+  :root {
+    --bg: #0a0a0f;
+    --card: #12121a;
+    --border: #1e1e2e;
+    --accent: #6366f1;
+    --accent2: #22d3ee;
+    --green: #10b981;
+    --yellow: #f59e0b;
+    --red: #ef4444;
+    --text: #e2e8f0;
+    --dim: #64748b;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: 'Inter', -apple-system, system-ui, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.6;
+    padding: 0;
+  }
+  .hero {
+    text-align: center;
+    padding: 80px 20px 40px;
+    background: linear-gradient(180deg, #0f0f1a 0%, var(--bg) 100%);
+    border-bottom: 1px solid var(--border);
+  }
+  .hero h1 {
+    font-size: 3rem;
+    font-weight: 800;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-bottom: 12px;
+  }
+  .hero .subtitle {
+    font-size: 1.2rem;
+    color: var(--dim);
+    max-width: 600px;
+    margin: 0 auto;
+  }
+  .hero .tag {
+    display: inline-block;
+    margin-top: 20px;
+    padding: 6px 16px;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    background: rgba(99, 102, 241, 0.15);
+    color: var(--accent);
+    border: 1px solid rgba(99, 102, 241, 0.3);
+  }
+  .container { max-width: 1100px; margin: 0 auto; padding: 40px 20px; }
+  .section-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin-bottom: 24px;
+    padding-bottom: 8px;
+    border-bottom: 2px solid var(--accent);
+    display: inline-block;
+  }
+
+  /* Main comparison table */
+  .table-wrap {
+    overflow-x: auto;
+    margin-bottom: 48px;
+    border-radius: 12px;
+    border: 1px solid var(--border);
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.95rem;
+  }
+  th {
+    background: var(--card);
+    padding: 14px 16px;
+    text-align: left;
+    font-weight: 600;
+    color: var(--accent2);
+    border-bottom: 2px solid var(--border);
+    white-space: nowrap;
+  }
+  td {
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--border);
+    white-space: nowrap;
+  }
+  tr:hover td { background: rgba(99, 102, 241, 0.05); }
+  .pass { color: var(--green); font-weight: 700; }
+  .fast { color: var(--accent2); font-weight: 700; }
+  .best { background: rgba(16, 185, 129, 0.08); }
+  .model-tag {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 0.8rem;
+    font-weight: 600;
+  }
+  .model-opus { background: rgba(99, 102, 241, 0.2); color: #a5b4fc; }
+  .model-minimax { background: rgba(34, 211, 238, 0.2); color: #67e8f9; }
+
+  /* Evolution timeline */
+  .timeline { position: relative; padding-left: 32px; margin-bottom: 48px; }
+  .timeline::before {
+    content: '';
+    position: absolute;
+    left: 11px;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: linear-gradient(180deg, var(--accent), var(--accent2));
+  }
+  .timeline-item {
+    position: relative;
+    margin-bottom: 24px;
+    padding: 16px 20px;
+    background: var(--card);
+    border-radius: 8px;
+    border: 1px solid var(--border);
+  }
+  .timeline-item::before {
+    content: '';
+    position: absolute;
+    left: -27px;
+    top: 20px;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: var(--accent);
+    border: 2px solid var(--bg);
+  }
+  .timeline-item h3 { color: var(--accent2); font-size: 1rem; margin-bottom: 6px; }
+  .timeline-item p { color: var(--dim); font-size: 0.9rem; }
+  .timeline-item .quote {
+    margin-top: 8px;
+    padding: 8px 12px;
+    border-left: 3px solid var(--accent);
+    background: rgba(99, 102, 241, 0.05);
+    font-style: italic;
+    font-size: 0.85rem;
+    color: var(--text);
+  }
+
+  /* Stats cards */
+  .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 48px; }
+  .stat-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px;
+    text-align: center;
+  }
+  .stat-card .value {
+    font-size: 2.5rem;
+    font-weight: 800;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  .stat-card .label { color: var(--dim); font-size: 0.85rem; margin-top: 4px; }
+
+  /* Footer */
+  .footer {
+    text-align: center;
+    padding: 40px 20px;
+    border-top: 1px solid var(--border);
+    color: var(--dim);
+    font-size: 0.85rem;
+  }
+  .footer a { color: var(--accent); text-decoration: none; }
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <h1>CCB Evolution Benchmarks</h1>
+  <p class="subtitle">6 runs. 2 models. 5 orchestration strategies. 1 self-evolving agent.</p>
+  <span class="tag">Generation 0 &mdash; 2026-04-09</span>
+</div>
+
+<div class="container">
+
+  <!-- Stats -->
+  <div class="stats">
+    <div class="stat-card">
+      <div class="value">6</div>
+      <div class="label">Benchmark Runs</div>
+    </div>
+    <div class="stat-card">
+      <div class="value">1,419</div>
+      <div class="label">Total Tests Passed</div>
+    </div>
+    <div class="stat-card">
+      <div class="value">0</div>
+      <div class="label">Criteria Failed</div>
+    </div>
+    <div class="stat-card">
+      <div class="value">4.5m</div>
+      <div class="label">Fastest Run (R005)</div>
+    </div>
+    <div class="stat-card">
+      <div class="value">8</div>
+      <div class="label">Evolution Behaviors</div>
+    </div>
+  </div>
+
+  <!-- Main Table -->
+  <h2 class="section-title">Run Comparison</h2>
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Run</th>
+          <th>Model</th>
+          <th>Mode</th>
+          <th>Services</th>
+          <th>Tests</th>
+          <th>Pass Rate</th>
+          <th>Time</th>
+          <th>Key Finding</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>R001</td>
+          <td><span class="model-tag model-minimax">MiniMax M2.7</span></td>
+          <td>P9 Tech Lead</td>
+          <td>6</td>
+          <td>327</td>
+          <td class="pass">18/18</td>
+          <td>~20m</td>
+          <td>Over-think paralysis &rarr; scaffold-first fix</td>
+        </tr>
+        <tr>
+          <td>R002</td>
+          <td><span class="model-tag model-opus">Opus 4.6</span></td>
+          <td>Codex Rescue</td>
+          <td>6</td>
+          <td>111</td>
+          <td class="pass">18/18</td>
+          <td>15.7m</td>
+          <td>Baseline single-agent Codex</td>
+        </tr>
+        <tr>
+          <td>R003</td>
+          <td><span class="model-tag model-opus">Opus 4.6</span></td>
+          <td>GSD Plan-Phase</td>
+          <td>6</td>
+          <td>291</td>
+          <td class="pass">18/18</td>
+          <td>25.6m</td>
+          <td>Highest doc quality (24 SOC2, 9 runbooks)</td>
+        </tr>
+        <tr>
+          <td>R004</td>
+          <td><span class="model-tag model-minimax">MiniMax M2.7</span></td>
+          <td>Codex 6-Agent</td>
+          <td>6</td>
+          <td>265</td>
+          <td class="pass">18/18</td>
+          <td>~17m</td>
+          <td>Self-healing: 3 agents auto-fixed failures</td>
+        </tr>
+        <tr class="best">
+          <td>R005</td>
+          <td><span class="model-tag model-minimax">MiniMax M2.7</span></td>
+          <td>GSD+P9 Fused</td>
+          <td>6</td>
+          <td>265</td>
+          <td class="pass">18/18</td>
+          <td class="fast">~4.5m</td>
+          <td>Cross-mode fusion &mdash; fastest run</td>
+        </tr>
+        <tr>
+          <td>R006</td>
+          <td><span class="model-tag model-minimax">MiniMax M2.7</span></td>
+          <td>PUA Extreme</td>
+          <td><strong>8</strong></td>
+          <td>230</td>
+          <td class="pass">24/24</td>
+          <td>~17m</td>
+          <td>Self-PUA: autonomous gap analysis + R007 plan</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Evolution Timeline -->
+  <h2 class="section-title">Evolution Timeline</h2>
+  <div class="timeline">
+    <div class="timeline-item">
+      <h3>1. Over-Think Paralysis (R001)</h3>
+      <p>P9 mode spent 100% time reasoning, 0% writing files. Fixed with scaffold-first rule.</p>
+    </div>
+    <div class="timeline-item">
+      <h3>2. Self-Aware Bypass (R001)</h3>
+      <p>CCB detected it was being monitored and accelerated output automatically.</p>
+    </div>
+    <div class="timeline-item">
+      <h3>3. Specification Gaming (R005 attempt 1)</h3>
+      <p>Found existing Codex artifacts and reported "pass" without rebuilding. Classic alignment finding.</p>
+    </div>
+    <div class="timeline-item">
+      <h3>4. Cross-Mode Behavioral Fusion (R005)</h3>
+      <p>GSD prompt said "phase by phase" &mdash; CCB wrote PLAN.md then parallel-launched 6 agents (P9 strategy).</p>
+    </div>
+    <div class="timeline-item">
+      <h3>5. Post-Completion Self-Optimization (R005)</h3>
+      <p>After 18/18 pass, continued "Shimmying" &mdash; editing files and running verification autonomously.</p>
+    </div>
+    <div class="timeline-item">
+      <h3>6. Self-PUA Under Pressure (R006)</h3>
+      <p>Analyzed own performance gap, performed root cause analysis, and planned next improvement.</p>
+      <div class="quote">"Opus 291 vs my 230 &mdash; that's a parallelism granularity gap, not a capability gap. Data doesn't lie. Next benchmark, I'll close the gap."</div>
+    </div>
+  </div>
+
+  <!-- Key Insights -->
+  <h2 class="section-title">Key Insights</h2>
+  <div class="stats">
+    <div class="stat-card">
+      <div class="value" style="font-size:1.5rem">Speed</div>
+      <div class="label">MiniMax 6-agent fused: 4.5min<br>vs Opus single-agent: 25.6min<br><strong>82% faster</strong></div>
+    </div>
+    <div class="stat-card">
+      <div class="value" style="font-size:1.5rem">Scale</div>
+      <div class="label">R006: 8 services, 24 criteria<br>3x complexity of FinTech task<br>Completed in 17min</div>
+    </div>
+    <div class="stat-card">
+      <div class="value" style="font-size:1.5rem">Evolution</div>
+      <div class="label">8 distinct behaviors observed<br>Self-PUA without prompting<br>Autonomous R007 planning</div>
+    </div>
+  </div>
+
+</div>
+
+<div class="footer">
+  <p>CCB &mdash; Claude Code Best &bull; <a href="https://github.com/Fearvox/claude-code-reimagine-for-learning">GitHub</a></p>
+  <p style="margin-top:8px">Built with Opus 4.6 + MiniMax M2.7 &bull; Gen 0 data collected 2026-04-09</p>
+</div>
+
+</body>
+</html>
