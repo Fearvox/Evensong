@@ -467,10 +467,10 @@ export async function copyPluginToVersionedCache(
 /**
  * Validate a git URL using Node.js URL parsing
  */
-function validateGitUrl(url: string): string {
+export function validateGitUrl(url: string): string {
   try {
     const parsed = new URL(url)
-    if (!['https:', 'http:', 'file:'].includes(parsed.protocol)) {
+    if (!['https:', 'file:'].includes(parsed.protocol)) {
       if (!/^git@[a-zA-Z0-9.-]+:/.test(url)) {
         throw new Error(
           `Invalid git URL protocol: ${parsed.protocol}. Only HTTPS, HTTP, file:// and SSH (git@) URLs are supported.`,
