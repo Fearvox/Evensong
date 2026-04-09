@@ -1054,6 +1054,91 @@ async function* queryModel(
     return
   }
 
+  // ─── Provider Routing: Non-Anthropic providers bypass the Anthropic SDK path ───
+  // When activeProvider is set to a third-party provider (minimax, codex, gemini),
+  // route through ProviderRouter instead of getAnthropicClient + withRetry.
+  const { getActiveProvider } = await import('../../state/activeProvider.js')
+  const activeProvider = getActiveProvider()
+  if (activeProvider !== 'anthropic') {
+    const { getProviderRouter } = await import('../providers/ProviderRouter.js')
+    const router = getProviderRouter()
+    const provider = router.getProvider(activeProvider)
+    if (!provider) {
+      yield getAssistantMessageFromError(
+        new Error(`Provider '${activeProvider}' not configured. Run /provider to check available providers.`),
+        options.model,
+      )
+      return
+    }
+
+    try {
+      // Convert messages to OpenAI-compatible format
+      const systemParts: string[] = []
+      for (const part of Array.isArray(systemPrompt) ? systemPrompt : [systemPrompt]) {
+        if (typeof part === 'string') systemParts.push(part)
+        else if (part && typeof part === 'object' && 'text' in part) systemParts.push(String(part.text))
+      }
+
+      const apiMessages: Array<{ role: string; content: unknown }> = []
+      for (const msg of messages) {
+        if (!msg.message) continue
+        const role = msg.message.role ?? (msg.type === 'user' ? 'user' : 'assistant')
+        const content = typeof msg.message.content === 'string'
+          ? msg.message.content
+          : JSON.stringify(msg.message.content)
+        apiMessages.push({ role, content })
+      }
+
+      const result = await provider.createMessage({
+        systemPrompt: systemParts.join('\n\n'),
+        messages: apiMessages,
+      })
+
+      // Wrap response as AssistantMessage
+      const { randomUUID } = await import('crypto')
+      const assistantMsg: AssistantMessage = {
+        type: 'assistant',
+        uuid: randomUUID(),
+        message: {
+          role: 'assistant',
+          id: `msg_${activeProvider}_${Date.now()}`,
+          content: [{ type: 'text', text: result.text }],
+          usage: {
+            input_tokens: result.usage.inputTokens,
+            output_tokens: result.usage.outputTokens,
+            cache_creation_input_tokens: 0,
+            cache_read_input_tokens: 0,
+          },
+          model: provider.modelName,
+          stop_reason: result.finishReason === 'stop' ? 'end_turn' : result.finishReason,
+        },
+        costUSD: 0, // Third-party cost tracking TBD
+      }
+
+      // Handle tool calls from OpenAI-compatible providers
+      if (result.toolCalls.length > 0) {
+        const content = assistantMsg.message!.content as any[]
+        for (const tc of result.toolCalls) {
+          content.push({
+            type: 'tool_use',
+            id: tc.id,
+            name: tc.name,
+            input: tc.arguments,
+          })
+        }
+      }
+
+      yield assistantMsg
+    } catch (err) {
+      yield getAssistantMessageFromError(
+        err instanceof Error ? err : new Error(String(err)),
+        provider.modelName,
+      )
+    }
+    return
+  }
+  // ─── End Provider Routing ───
+
   // Derive previous request ID from the last assistant message in this query chain.
   // This is scoped per message array (main thread, subagent, teammate each have their own),
   // so concurrent agents don't clobber each other's request chain tracking.

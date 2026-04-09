@@ -91,6 +91,8 @@ export type AppState = DeepImmutable<{
   verbose: boolean
   mainLoopModel: ModelSetting
   mainLoopModelForSession: ModelSetting
+  // Active provider for API calls: 'anthropic' (default), 'minimax', 'codex', 'gemini', or custom
+  activeProvider: string
   statusLineText: string | undefined
   expandedView: 'none' | 'tasks' | 'teammates'
   isBriefOnly: boolean
@@ -472,6 +474,7 @@ export function getDefaultAppState(): AppState {
     verbose: false,
     mainLoopModel: null, // alias, full name (as with --model or env var), or null (default)
     mainLoopModelForSession: null,
+    activeProvider: 'anthropic',
     statusLineText: undefined,
     expandedView: 'none',
     isBriefOnly: false,
