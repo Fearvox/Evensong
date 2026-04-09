@@ -32,6 +32,12 @@ export const PROVIDER_PRESETS: Record<string, Omit<ProviderConfig, 'apiKey'>> = 
     modelName: 'claude-opus-4-6',
     baseUrl: 'https://api.anthropic.com',
   },
+  local: {
+    name: 'local',
+    providerClass: 'openai-compatible',
+    modelName: 'Gemma-4-E4B-Uncensored-HauhauCS-Aggressive-Q4_K_M',
+    baseUrl: 'http://127.0.0.1:1337/v1',
+  },
 };
 
 export function getProviderRouter(): ProviderRouter {
@@ -109,6 +115,7 @@ export class ProviderRouter {
       codex: process.env.OPENAI_API_KEY,
       gemini: process.env.GEMINI_API_KEY,
       anthropic: process.env.ANTHROPIC_API_KEY,
+      local: 'no-key-needed', // Atomic Chat local server
     };
 
     for (const [name, preset] of Object.entries(PROVIDER_PRESETS)) {
