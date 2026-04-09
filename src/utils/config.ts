@@ -587,7 +587,7 @@ function createDefaultGlobalConfig(): GlobalConfig {
     numStartups: 0,
     installMethod: undefined,
     autoUpdates: undefined,
-    theme: 'dark',
+    theme: 'dash',
     preferredNotifChannel: 'auto',
     verbose: false,
     editorMode: 'normal',

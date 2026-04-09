@@ -95,6 +95,7 @@ export const THEME_NAMES = [
   'dark-daltonized',
   'light-ansi',
   'dark-ansi',
+  'dash',
 ] as const
 
 /** A renderable theme. Always resolvable to a concrete color palette. */
@@ -595,6 +596,78 @@ const darkDaltonizedTheme: Theme = {
   rainbow_violet_shimmer: 'rgb(230,180,210)',
 }
 
+const dashTheme: Theme = {
+  autoAccept: 'rgb(240,238,155)',
+  bashBorder: 'rgb(240,238,155)',
+  claude: 'rgb(53,88,76)',
+  claudeShimmer: 'rgb(240,238,155)',
+  claudeBlue_FOR_SYSTEM_SPINNER: 'rgb(147,165,255)',
+  claudeBlueShimmer_FOR_SYSTEM_SPINNER: 'rgb(177,195,255)',
+  permission: 'rgb(240,238,155)',
+  permissionShimmer: 'rgb(248,246,195)',
+  planMode: 'rgb(53,88,76)',
+  ide: 'rgb(71,130,200)',
+  promptBorder: 'rgb(53,88,76)',
+  promptBorderShimmer: 'rgb(83,118,106)',
+  text: 'rgb(221,214,199)',
+  inverseText: 'rgb(26,26,24)',
+  inactive: 'rgb(127,136,130)',
+  inactiveShimmer: 'rgb(167,176,170)',
+  subtle: 'rgb(53,88,76)',
+  suggestion: 'rgb(221,214,199)',
+  remember: 'rgb(240,238,155)',
+  background: 'rgb(248,245,239)',
+  success: 'rgb(240,238,155)',
+  error: 'rgb(255,107,128)',
+  warning: 'rgb(255,193,7)',
+  merged: 'rgb(175,135,255)',
+  warningShimmer: 'rgb(255,223,57)',
+  diffAdded: 'rgb(34,92,43)',
+  diffRemoved: 'rgb(122,41,54)',
+  diffAddedDimmed: 'rgb(71,88,74)',
+  diffRemovedDimmed: 'rgb(105,72,77)',
+  diffAddedWord: 'rgb(56,166,96)',
+  diffRemovedWord: 'rgb(179,89,107)',
+  red_FOR_SUBAGENTS_ONLY: 'rgb(220,38,38)',
+  blue_FOR_SUBAGENTS_ONLY: 'rgb(37,99,235)',
+  green_FOR_SUBAGENTS_ONLY: 'rgb(22,163,74)',
+  yellow_FOR_SUBAGENTS_ONLY: 'rgb(202,138,4)',
+  purple_FOR_SUBAGENTS_ONLY: 'rgb(147,51,234)',
+  orange_FOR_SUBAGENTS_ONLY: 'rgb(234,88,12)',
+  pink_FOR_SUBAGENTS_ONLY: 'rgb(219,39,119)',
+  cyan_FOR_SUBAGENTS_ONLY: 'rgb(8,145,178)',
+  professionalBlue: 'rgb(106,155,204)',
+  chromeYellow: 'rgb(240,238,155)',
+  clawd_body: 'rgb(53,88,76)',
+  clawd_background: 'rgb(16,41,31)',
+  userMessageBackground: 'rgb(22,50,38)',
+  userMessageBackgroundHover: 'rgb(32,60,48)',
+  messageActionsBackground: 'rgb(28,45,42)',
+  selectionBg: 'rgb(53,88,76)',
+  bashMessageBackgroundColor: 'rgb(28,45,38)',
+  memoryBackgroundColor: 'rgb(22,50,45)',
+  rate_limit_fill: 'rgb(240,238,155)',
+  rate_limit_empty: 'rgb(53,88,76)',
+  fastMode: 'rgb(240,238,155)',
+  fastModeShimmer: 'rgb(248,245,239)',
+  briefLabelYou: 'rgb(240,238,155)',
+  briefLabelClaude: 'rgb(53,88,76)',
+  rainbow_red: 'rgb(235,95,87)',
+  rainbow_orange: 'rgb(245,139,87)',
+  rainbow_yellow: 'rgb(250,195,95)',
+  rainbow_green: 'rgb(145,200,130)',
+  rainbow_blue: 'rgb(130,170,220)',
+  rainbow_indigo: 'rgb(155,130,200)',
+  rainbow_violet: 'rgb(200,130,180)',
+  rainbow_red_shimmer: 'rgb(250,155,147)',
+  rainbow_orange_shimmer: 'rgb(255,185,137)',
+  rainbow_yellow_shimmer: 'rgb(255,225,155)',
+  rainbow_green_shimmer: 'rgb(185,230,180)',
+  rainbow_blue_shimmer: 'rgb(180,205,240)',
+  rainbow_indigo_shimmer: 'rgb(195,180,230)',
+  rainbow_violet_shimmer: 'rgb(230,180,210)',
+}
+
 export function getTheme(themeName: ThemeName): Theme {
   switch (themeName) {
     case 'light':
@@ -607,6 +680,8 @@ export function getTheme(themeName: ThemeName): Theme {
       return lightDaltonizedTheme
     case 'dark-daltonized':
       return darkDaltonizedTheme
+    case 'dash':
+      return dashTheme
     default:
       return darkTheme
   }
