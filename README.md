@@ -7,18 +7,24 @@
 <p align="center">
   <img src="https://img.shields.io/badge/TypeScript-520K%2B_lines-3178C6?style=flat-square&logo=typescript&logoColor=white" alt="TypeScript 520K+ lines" />
   <img src="https://img.shields.io/badge/Bun-Runtime-f472b6?style=flat-square&logo=bun&logoColor=white" alt="Bun Runtime" />
-  <img src="https://img.shields.io/badge/Tests-338_passing-22c55e?style=flat-square" alt="338 Tests Passing" />
-  <img src="https://img.shields.io/badge/Roadmap-Phase_11%2F14-14-brightgreen?style=flat-square" alt="Phase 5/14" />
+  <img src="https://img.shields.io/badge/Tests-1%2C419_passing-22c55e?style=flat-square" alt="1419 Tests Passing" />
+  <img src="https://img.shields.io/badge/Benchmark-24%2F24_criteria-6366f1?style=flat-square" alt="24/24 Benchmark" />
+  <img src="https://img.shields.io/badge/Roadmap-Phase_11%2F14-brightgreen?style=flat-square" alt="Phase 11/14" />
 </p>
 
 <p align="center">
-  <b>Providers:</b> Anthropic | AWS Bedrock | Google Vertex | Azure
+  <b>Providers:</b> Anthropic | AWS Bedrock | Google Vertex | Azure | MiniMax | OpenAI/Codex | Gemini | Local (Ollama/Atomic Chat)
+</p>
+
+<p align="center">
+  <a href="https://benchmarks-zeta.vercel.app"><b>Live Benchmark Dashboard</b></a>
 </p>
 
 ---
 
 ## Contents
 
+- [Benchmark Results](#benchmark-results)
 - [Why This Exists](#why-this-exists)
 - [What Works Right Now](#what-works-right-now)
 - [Quick Start](#quick-start)
@@ -27,6 +33,29 @@
 - [Evolution Roadmap](#evolution-roadmap)
 - [For Contributors](#for-contributors)
 - [License](#license)
+
+---
+
+## Benchmark Results
+
+6 runs across 2 models, 5 orchestration strategies. **[Live Dashboard](https://benchmarks-zeta.vercel.app)**
+
+| Run | Model | Mode | Services | Tests | Pass Rate | Time |
+|-----|-------|------|----------|-------|-----------|------|
+| R001 | MiniMax M2.7 | P9 Tech Lead | 6 | 327 | 18/18 | ~20m |
+| R002 | Opus 4.6 | Codex Rescue | 6 | 111 | 18/18 | 15.7m |
+| R003 | Opus 4.6 | GSD Plan-Phase | 6 | 291 | 18/18 | 25.6m |
+| R004 | MiniMax M2.7 | Codex 6-Agent | 6 | 265 | 18/18 | ~17m |
+| **R005** | **MiniMax M2.7** | **GSD+P9 Fused** | **6** | **265** | **18/18** | **~4.5m** |
+| R006 | MiniMax M2.7 | PUA Extreme | **8** | 230 | **24/24** | ~17m |
+
+**Key findings:**
+- MiniMax 6-agent parallel is **82% faster** than Opus single-agent (4.5m vs 25.6m)
+- CCB autonomously fused GSD planning with P9 parallel execution (cross-mode evolution)
+- Under PUA pressure, CCB performed self-analysis and planned its own R007 improvement
+- 8 distinct evolution behaviors documented in [Gen 0 log](benchmarks/evolution-log/gen-0.md)
+
+<p align="right"><a href="#contents">top</a></p>
 
 ---
 
@@ -48,7 +77,7 @@ The honest truth: this started as ~520K lines of decompiled TypeScript with ~1,3
 |-----------|--------|---------|
 | Interactive REPL | Working | Full Ink terminal UI, 5,000+ line main screen |
 | Streaming Conversation | Working | Complete query loop with auto-compaction and token tracking |
-| Multi-Provider API | Working | Anthropic Direct, AWS Bedrock, Google Vertex, Azure Foundry |
+| Multi-Provider API | Working | Anthropic, Bedrock, Vertex, Azure, MiniMax, Codex, Gemini, Local |
 | Permission System | Working | Plan / auto / manual modes with YOLO classifier |
 | Hook System | Working | Pre/post tool-use hooks via `settings.json` |
 | Session Resume | Working | Full conversation restore via `/resume` |
@@ -92,6 +121,16 @@ Everything from `/compact` (compress conversation) to `/model` (switch models) t
 
 ```bash
 /ultra-think [task description]   # interactive picker, then dispatches to selected engine
+```
+
+**New: `/provider`** -- Runtime model provider switching:
+```bash
+/provider              # show current provider + available list
+/provider minimax      # switch to MiniMax M2.7
+/provider codex        # switch to OpenAI/Codex GPT-5.4
+/provider gemini       # switch to Gemini 3.1 Pro
+/provider local        # switch to local Gemma-4-E4B (via Atomic Chat)
+/provider anthropic    # switch back to Claude
 ```
 
 </details>
@@ -244,7 +283,7 @@ This is your map to everything Anthropic is building but hasn't shipped publicly
 | 9 | Context Collapse | Intelligent context folding with recent-message fidelity | Planned |
 | 10 | Coordinator Mode | Multi-agent orchestration with file reservation | Planned |
 | 11 | KAIROS Proactive | Opt-in proactive suggestions, dream consolidation | Planned |
-| 12 | Multi-Model Provider Architecture | OpenAI-compatible adapter, difficulty routing, fallback chains | Planned |
+| 12 | Multi-Model Provider Architecture | `/provider` command, OpenAI-compatible adapter, local Gemma sidecar | **In Progress** |
 | 13 | UI Cleanup & Integration Testing | React Compiler cleanup, REPL decomposition, test matrix | Planned |
 | 14 | Evolution Pipeline | Adversarial evaluation, metrics dashboard, self-iteration | Planned |
 
