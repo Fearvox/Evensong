@@ -1,11 +1,14 @@
 {
-    "name": "claude-js",
+    "name": "dash-shatter",
     "version": "1.0.0",
     "type": "module",
     "workspaces": [
         "packages/*",
         "packages/@ant/*"
     ],
+    "bin": {
+        "dash-shatter": "dist/cli.js"
+    },
     "files": [
         "dist"
     ],
