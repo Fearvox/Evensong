@@ -85,6 +85,15 @@ The honest truth: this started as ~520K lines of decompiled TypeScript with ~1,3
 
 Everything from `/compact` (compress conversation) to `/model` (switch models) to `/doctor` (health check) to `/vim` (vim mode). The full list is in the source at `src/commands/`.
 
+**New: `/ultra-think`** — Unified entry point for deep-reasoning engines. Shows an interactive picker to choose between:
+- 🧠 **P9 Tech Lead**: multi-P7 parallel subagent orchestration
+- 🔍 **Codex Rescue**: adversarial vulnerability scan via Opus 4.6 max
+- 📋 **GSD Plan-Phase**: structured phase planning with RESEARCH.md + PLAN.md
+
+```bash
+/ultra-think [task description]   # interactive picker, then dispatches to selected engine
+```
+
 </details>
 
 <p align="right"><a href="#contents">↑ top</a></p>
