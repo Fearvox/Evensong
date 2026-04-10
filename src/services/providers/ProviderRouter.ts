@@ -38,6 +38,49 @@ export const PROVIDER_PRESETS: Record<string, Omit<ProviderConfig, 'apiKey'>> = 
     modelName: 'Gemma-4-E4B-Uncensored-HauhauCS-Aggressive-Q4_K_M',
     baseUrl: 'http://127.0.0.1:1337/v1',
   },
+  openrouter: {
+    name: 'openrouter',
+    providerClass: 'openai-compatible',
+    modelName: 'anthropic/claude-sonnet-4.6',
+    baseUrl: 'https://openrouter.ai/api/v1',
+  },
+  // OpenRouter benchmark presets — switch model via /provider or ~/.claude/providers.json
+  'or-opus': {
+    name: 'or-opus',
+    providerClass: 'openai-compatible',
+    modelName: 'anthropic/claude-opus-4.6',
+    baseUrl: 'https://openrouter.ai/api/v1',
+  },
+  'or-gpt5': {
+    name: 'or-gpt5',
+    providerClass: 'openai-compatible',
+    modelName: 'openai/gpt-5.4',
+    baseUrl: 'https://openrouter.ai/api/v1',
+  },
+  'or-grok': {
+    name: 'or-grok',
+    providerClass: 'openai-compatible',
+    modelName: 'x-ai/grok-4.20',
+    baseUrl: 'https://openrouter.ai/api/v1',
+  },
+  'or-gemini': {
+    name: 'or-gemini',
+    providerClass: 'openai-compatible',
+    modelName: 'google/gemini-3.1-pro-preview',
+    baseUrl: 'https://openrouter.ai/api/v1',
+  },
+  'or-gpt5pro': {
+    name: 'or-gpt5pro',
+    providerClass: 'openai-compatible',
+    modelName: 'openai/gpt-5.4-pro',
+    baseUrl: 'https://openrouter.ai/api/v1',
+  },
+  'or-grok-fast': {
+    name: 'or-grok-fast',
+    providerClass: 'openai-compatible',
+    modelName: 'x-ai/grok-4.1-fast',
+    baseUrl: 'https://openrouter.ai/api/v1',
+  },
 };
 
 export function getProviderRouter(): ProviderRouter {
@@ -116,6 +159,13 @@ export class ProviderRouter {
       gemini: process.env.GEMINI_API_KEY,
       anthropic: process.env.ANTHROPIC_API_KEY,
       local: 'no-key-needed', // Atomic Chat local server
+      openrouter: process.env.OPENROUTER_API_KEY,
+      'or-opus': process.env.OPENROUTER_API_KEY,
+      'or-gpt5': process.env.OPENROUTER_API_KEY,
+      'or-grok': process.env.OPENROUTER_API_KEY,
+      'or-gemini': process.env.OPENROUTER_API_KEY,
+      'or-gpt5pro': process.env.OPENROUTER_API_KEY,
+      'or-grok-fast': process.env.OPENROUTER_API_KEY,
     };
 
     for (const [name, preset] of Object.entries(PROVIDER_PRESETS)) {
