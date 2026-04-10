@@ -81,6 +81,49 @@ export const PROVIDER_PRESETS: Record<string, Omit<ProviderConfig, 'apiKey'>> = 
     modelName: 'x-ai/grok-4.1-fast',
     baseUrl: 'https://openrouter.ai/api/v1',
   },
+  // 国产 TOP 模型 (via OpenRouter)
+  'or-glm': {
+    name: 'or-glm',
+    providerClass: 'openai-compatible',
+    modelName: 'z-ai/glm-5.1',
+    baseUrl: 'https://openrouter.ai/api/v1',
+  },
+  'or-qwen-coder': {
+    name: 'or-qwen-coder',
+    providerClass: 'openai-compatible',
+    modelName: 'qwen/qwen3-coder-plus',
+    baseUrl: 'https://openrouter.ai/api/v1',
+  },
+  'or-kimi': {
+    name: 'or-kimi',
+    providerClass: 'openai-compatible',
+    modelName: 'moonshotai/kimi-k2-thinking',
+    baseUrl: 'https://openrouter.ai/api/v1',
+  },
+  'or-deepseek': {
+    name: 'or-deepseek',
+    providerClass: 'openai-compatible',
+    modelName: 'deepseek/deepseek-r1-0528',
+    baseUrl: 'https://openrouter.ai/api/v1',
+  },
+  'or-qwen': {
+    name: 'or-qwen',
+    providerClass: 'openai-compatible',
+    modelName: 'qwen/qwen3.6-plus',
+    baseUrl: 'https://openrouter.ai/api/v1',
+  },
+  'or-kimi-k25': {
+    name: 'or-kimi-k25',
+    providerClass: 'openai-compatible',
+    modelName: 'moonshotai/kimi-k2.5',
+    baseUrl: 'https://openrouter.ai/api/v1',
+  },
+  'or-minimax': {
+    name: 'or-minimax',
+    providerClass: 'openai-compatible',
+    modelName: 'minimax/minimax-m1',
+    baseUrl: 'https://openrouter.ai/api/v1',
+  },
 };
 
 export function getProviderRouter(): ProviderRouter {
@@ -166,6 +209,13 @@ export class ProviderRouter {
       'or-gemini': process.env.OPENROUTER_API_KEY,
       'or-gpt5pro': process.env.OPENROUTER_API_KEY,
       'or-grok-fast': process.env.OPENROUTER_API_KEY,
+      'or-glm': process.env.OPENROUTER_API_KEY,
+      'or-qwen-coder': process.env.OPENROUTER_API_KEY,
+      'or-kimi': process.env.OPENROUTER_API_KEY,
+      'or-deepseek': process.env.OPENROUTER_API_KEY,
+      'or-qwen': process.env.OPENROUTER_API_KEY,
+      'or-kimi-k25': process.env.OPENROUTER_API_KEY,
+      'or-minimax': process.env.OPENROUTER_API_KEY,
     };
 
     for (const [name, preset] of Object.entries(PROVIDER_PRESETS)) {
