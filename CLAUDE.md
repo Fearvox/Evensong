@@ -239,6 +239,7 @@ Architecture not yet mapped. Follow existing patterns found in the codebase.
 |-------|-------------|------|
 | everything-claude-code-conventions | Development conventions and patterns for everything-claude-code. JavaScript project with conventional commits. | `.claude/skills/everything-claude-code/SKILL.md` |
 | startup-hook-skill | Creating and developing startup hooks for Claude Code on the web. Use when the user wants to set up a repository for Claude Code on the web, create a SessionStart hook to ensure their project can run tests and linters during web sessions. | `.claude/skills/session-start-hook/SKILL.md` |
+| benchmark-ingest | Post-benchmark workflow: ingest results to registry, update dashboard + research pages, sync i18n, deploy. Trigger on "benchmark done", "收尾", "录入". | `.claude/skills/benchmark-ingest/SKILL.md` |
 <!-- GSD:skills-end -->
 
 <!-- GSD:workflow-start source:GSD defaults -->
