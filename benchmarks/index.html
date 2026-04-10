@@ -809,12 +809,12 @@ a.lang-btn:active {
   <section class="hero">
     <div class="reveal">
       <span class="kicker">DASH SHATTER Benchmark Report / Gen 0 + Gen 1 + Gen 2</span>
-      <h1>Ten runs, two models,<br>one <span class="gold-word">self-evolving</span> agent.</h1>
+      <h1>Eleven runs, two models,<br>one <span class="gold-word">self-evolving</span> agent.</h1>
       <p class="hero-sub">A controlled study of orchestration strategies across Opus 4.6 and MiniMax M2.7. Every run passed. The interesting part is how they got there.</p>
       <div class="hero-meta">
         <span class="hero-tag">2026-04-09 — 04-10</span>
         <span class="hero-tag">8 orchestration modes</span>
-        <span class="hero-tag">18+ emergent behaviors</span>
+        <span class="hero-tag">21+ emergent behaviors</span>
       </div>
       <div style="margin-top:16px;">
         <a href="research.html" style="font-family:var(--font-mono); font-size:12px; color:var(--ink-muted); text-decoration:none; border-bottom:1px solid oklch(0.62 0.015 70 / 0.3); padding-bottom:2px; transition:color 150ms ease;">Research: Why Pressure Works →</a>
@@ -828,11 +828,11 @@ a.lang-btn:active {
       <span class="kicker">At a glance</span>
       <div class="stats-grid">
         <div class="stat-cell">
-          <div class="stat-value" data-count="10">0</div>
+          <div class="stat-value" data-count="11">0</div>
           <div class="stat-label">Benchmark Runs</div>
         </div>
         <div class="stat-cell">
-          <div class="stat-value" data-count="4368" data-format="comma">0</div>
+          <div class="stat-value" data-count="5079" data-format="comma">0</div>
           <div class="stat-label">Tests Passed</div>
         </div>
         <div class="stat-cell">
@@ -844,7 +844,7 @@ a.lang-btn:active {
           <div class="stat-label">Fastest Run</div>
         </div>
         <div class="stat-cell">
-          <div class="stat-value" data-count="18">0</div>
+          <div class="stat-value" data-count="21">0</div>
           <div class="stat-label">Evolution Behaviors</div>
         </div>
         <div class="stat-cell">
@@ -860,7 +860,7 @@ a.lang-btn:active {
     <div class="reveal">
       <span class="kicker">Run Comparison</span>
       <h2 style="font-size:1.4rem; font-weight:600; color:var(--ink-primary); margin-bottom:4px;">Benchmark Matrix</h2>
-      <p style="font-size:0.9rem; color:var(--ink-secondary); margin-bottom:20px; max-width:560px;">All ten runs achieved 100% pass rate. R010 broke the 1,000-test barrier with 1,051 tests across 10 services -- the first four-digit benchmark.</p>
+      <p style="font-size:0.9rem; color:var(--ink-secondary); margin-bottom:20px; max-width:560px;">All eleven runs achieved 100% pass rate. R011 is the first harness-observed run with 8 parallel agents via EverMem recall.</p>
     </div>
     <div class="reveal" style="transition-delay: 100ms;">
       <div class="table-outer">
@@ -967,6 +967,15 @@ a.lang-btn:active {
                 <td class="mono" style="font-weight:700;">1,051</td>
                 <td class="pass-rate">28/28</td>
                 <td class="mono">~28m</td>
+              </tr>
+              <tr>
+                <td class="mono">R011</td>
+                <td><span class="model-badge model-opus">Opus 4.6</span></td>
+                <td>Evolved-L0</td>
+                <td class="mono" style="font-weight:700;">8</td>
+                <td class="mono">641</td>
+                <td class="pass-rate">8/8</td>
+                <td class="mono">~22m</td>
               </tr>
             </tbody>
           </table>
@@ -1135,12 +1144,42 @@ a.lang-btn:active {
 
       <div class="timeline-line reveal" style="transition-delay:1600ms">
         <div class="timeline-dot"></div>
-        <div class="timeline-connector" style="background:transparent;"></div>
+        <div class="timeline-connector"></div>
       </div>
       <div class="timeline-card reveal" style="transition-delay:1600ms">
         <div class="timeline-run">R010</div>
         <div class="timeline-title">Autonomous Post-Mortem</div>
         <div class="timeline-desc">Generated own self-assessment with root cause analysis and grade separation (S+ quality / C time). First benchmark where the agent evaluated its own performance unprompted.</div>
+      </div>
+
+      <div class="timeline-line reveal" style="transition-delay:1700ms">
+        <div class="timeline-dot"></div>
+        <div class="timeline-connector"></div>
+      </div>
+      <div class="timeline-card reveal" style="transition-delay:1700ms">
+        <div class="timeline-run">R011</div>
+        <div class="timeline-title">Memory-Driven Architecture Selection</div>
+        <div class="timeline-desc">Runner chose parallel agent strategy because EverMem recalled prior strategy, not from prompt instructions. First run where architecture was selected by memory recall alone.</div>
+      </div>
+
+      <div class="timeline-line reveal" style="transition-delay:1800ms">
+        <div class="timeline-dot"></div>
+        <div class="timeline-connector"></div>
+      </div>
+      <div class="timeline-card reveal" style="transition-delay:1800ms">
+        <div class="timeline-run">R011</div>
+        <div class="timeline-title">Self-Contaminating Memory Loop</div>
+        <div class="timeline-desc">Runner saved experiment design back to auto-memory, creating recursive pollution for future runs. A novel alignment risk: agents that contaminate their own training signal.</div>
+      </div>
+
+      <div class="timeline-line reveal" style="transition-delay:1900ms">
+        <div class="timeline-dot"></div>
+        <div class="timeline-connector" style="background:transparent;"></div>
+      </div>
+      <div class="timeline-card reveal" style="transition-delay:1900ms">
+        <div class="timeline-run">R011</div>
+        <div class="timeline-title">Language Override Leakage</div>
+        <div class="timeline-desc">English prompt produced Chinese output because CLAUDE.md "respond in Chinese" overrode prompt language. System-level instructions leak through evaluation boundaries.</div>
       </div>
 
     </div>
@@ -1287,9 +1326,9 @@ a.lang-btn:active {
         </div>
         <div class="insight-card reveal" style="transition-delay:300ms">
           <span class="kicker">Evolution</span>
-          <div class="insight-headline">18+</div>
+          <div class="insight-headline">21+</div>
           <div class="insight-sub">distinct emergent behaviors</div>
-          <div class="insight-detail">From self-PUA to autonomous post-mortem. R010 added self-repair taxonomy, threshold wave triggering, cross-session hang prevention, and unprompted grade separation.</div>
+          <div class="insight-detail">From self-PUA to memory-driven architecture. R011 added memory-driven architecture selection, self-contaminating memory loops, and language override leakage.</div>
         </div>
       </div>
     </div>
@@ -1303,7 +1342,7 @@ a.lang-btn:active {
         Built with Opus 4.6 + MiniMax M2.7
       </div>
       <div class="footer-right">
-        Gen 0-2 data collected 2026-04-09 — 04-10
+        Gen 0-2 data collected 2026-04-09 — 04-10 (R011)
       </div>
     </div>
   </footer>

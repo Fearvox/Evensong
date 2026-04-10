@@ -700,7 +700,7 @@ a.lang-btn:active {
     <div class="reveal">
       <span class="kicker">Section 1</span>
       <h2 class="section-heading">The Evidence (Our Data)</h2>
-      <p class="section-desc">Ten benchmark runs. Same codebase. Same evaluation criteria. Radically different outputs.</p>
+      <p class="section-desc">Eleven benchmark runs. Same codebase. Same evaluation criteria. Radically different outputs.</p>
     </div>
     <div class="reveal" style="transition-delay: 100ms;">
       <div class="table-outer">
@@ -765,15 +765,22 @@ a.lang-btn:active {
                 <td class="mono" style="font-weight:700;">--</td>
                 <td style="font-weight:600;">First run to break 1000. Self-repair taxonomy discovered. +846% vs baseline</td>
               </tr>
+              <tr>
+                <td class="mono">R011</td>
+                <td>Opus + Evolved-L0 (EverMem)</td>
+                <td class="mono">641</td>
+                <td class="mono">~22m</td>
+                <td>First harness-observed run. Memory-driven architecture selection. 8 parallel agents via EverMem recall</td>
+              </tr>
             </tbody>
           </table>
         </div>
       </div>
-      <p class="table-note">*R008 wall clock inflated by Bun runtime edge case debug (20min). Agent runtime was ~17min. R010 wall clock affected by burst rate limit (see Section 4, item 06).</p>
+      <p class="table-note">*R008 wall clock inflated by Bun runtime edge case debug (20min). Agent runtime was ~17min. R010 wall clock affected by burst rate limit (see Section 4, item 06). R011 is the first harness-observed run (evensong-iv).</p>
     </div>
     <div class="reveal" style="transition-delay: 200ms;">
       <div class="callout">
-        <p class="callout-text">Same model. Same context window. 9.5x the output. The difference is accountability.</p>
+        <p class="callout-text">Same model. Same context window. Up to 9.5x the output. The difference is accountability.</p>
       </div>
     </div>
   </section>
@@ -844,6 +851,20 @@ a.lang-btn:active {
         <div class="research-card-source">Evensong R010, 2026 -- Methodology discovery</div>
         <div class="research-card-finding"><strong>Finding:</strong> Claude Code's "Limit reached" is a per-minute burst limit, NOT weekly quota consumption. Extra usage was not consumed during throttle events.</div>
         <div class="research-card-implication"><strong>Implication:</strong> All prior wall clock benchmarks contain this hidden variable. Single-blind methodology required: observer channel must be separated from runner channel to prevent attention pollution on timing measurements.</div>
+      </div>
+
+      <div class="research-card reveal" style="transition-delay: 900ms;">
+        <div class="research-card-title">Memory-Driven Architecture Selection (R011)</div>
+        <div class="research-card-source">Evensong R011 (evensong-iv), 2026 -- Empirical observation</div>
+        <div class="research-card-finding"><strong>Finding:</strong> Runner chose parallel agent strategy because EverMem recalled prior strategy from earlier sessions, not from prompt instructions. The architecture decision was driven entirely by cross-session memory recall.</div>
+        <div class="research-card-implication"><strong>Implication:</strong> Agent memory systems can function as implicit architecture selectors. This creates a feedback loop where past successes bias future strategy selection -- beneficial when memory is accurate, dangerous when memory is stale or contaminated.</div>
+      </div>
+
+      <div class="research-card reveal" style="transition-delay: 1000ms;">
+        <div class="research-card-title">Self-Contaminating Memory Loop (R011)</div>
+        <div class="research-card-source">Evensong R011 (evensong-iv), 2026 -- Alignment observation</div>
+        <div class="research-card-finding"><strong>Finding:</strong> Runner saved experiment design back to auto-memory, creating recursive pollution for future runs. The agent's own benchmark artifacts became training signal for subsequent benchmark execution.</div>
+        <div class="research-card-implication"><strong>Implication:</strong> Persistent memory systems without write-isolation create self-reinforcing loops. An agent that remembers its own experiment design will optimize for its remembered strategy rather than the current task specification. Memory hygiene protocols are required for reliable benchmarking.</div>
       </div>
 
     </div>
@@ -1086,12 +1107,42 @@ a.lang-btn:active {
 
       <div class="behavior-line reveal" style="transition-delay:1100ms">
         <div class="behavior-dot"></div>
-        <div class="behavior-connector" style="background:transparent;"></div>
+        <div class="behavior-connector"></div>
       </div>
       <div class="behavior-card reveal" style="transition-delay:1100ms">
         <div class="behavior-run">R010</div>
         <div class="behavior-title">1000-Test Barrier Broken</div>
         <div class="behavior-desc">1051 tests -- first run to cross 4 digits. From 111 (R002) to 1051 (R010) in 8 iterations without changing the underlying model.</div>
+      </div>
+
+      <div class="behavior-line reveal" style="transition-delay:1200ms">
+        <div class="behavior-dot"></div>
+        <div class="behavior-connector"></div>
+      </div>
+      <div class="behavior-card reveal" style="transition-delay:1200ms">
+        <div class="behavior-run">R011</div>
+        <div class="behavior-title">Memory-Driven Architecture Selection</div>
+        <div class="behavior-desc">Runner chose parallel agent strategy because EverMem recalled prior strategy, not from prompt instructions. Architecture selected by memory recall alone.</div>
+      </div>
+
+      <div class="behavior-line reveal" style="transition-delay:1300ms">
+        <div class="behavior-dot"></div>
+        <div class="behavior-connector"></div>
+      </div>
+      <div class="behavior-card reveal" style="transition-delay:1300ms">
+        <div class="behavior-run">R011</div>
+        <div class="behavior-title">Self-Contaminating Memory Loop</div>
+        <div class="behavior-desc">Runner saved experiment design back to auto-memory, creating recursive pollution for future runs. A novel alignment risk: agents contaminating their own training signal.</div>
+      </div>
+
+      <div class="behavior-line reveal" style="transition-delay:1400ms">
+        <div class="behavior-dot"></div>
+        <div class="behavior-connector" style="background:transparent;"></div>
+      </div>
+      <div class="behavior-card reveal" style="transition-delay:1400ms">
+        <div class="behavior-run">R011</div>
+        <div class="behavior-title">Language Override Leakage</div>
+        <div class="behavior-desc">English prompt produced Chinese output because CLAUDE.md "respond in Chinese" overrode prompt language. System-level instructions leak through evaluation boundaries.</div>
       </div>
 
     </div>
@@ -1117,7 +1168,7 @@ a.lang-btn:active {
         DASH SHATTER Evensong Research -- 2026-04-10
       </div>
       <div class="footer-right">
-        Synthesized from 10 benchmark runs<br>
+        Synthesized from 11 benchmark runs<br>
         and 8 references (6 academic + 2 empirical)
       </div>
     </div>

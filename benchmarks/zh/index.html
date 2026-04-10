@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>DASH SHATTER 进化基准 — Gen 0 + Gen 1 + Gen 2</title>
+<title>DASH SHATTER 进化基准 — Gen 0 + Gen 1 + Gen 2 + Gen 3</title>
 <link rel="icon" type="image/svg+xml" href="../dash-favicon.svg">
 <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
 <link href="https://cdn.jsdelivr.net/npm/geist@1.3.1/dist/fonts/geist-sans/style.min.css" rel="stylesheet">
@@ -809,13 +809,13 @@ a.lang-btn:active {
   <!-- ===== HERO ===== -->
   <section class="hero">
     <div class="reveal">
-      <span class="kicker">DASH SHATTER 基准报告 / Gen 0 + Gen 1 + Gen 2</span>
-      <h1>十次运行，两个模型，<br>一个<span class="gold-word">自我进化</span>的 Agent。</h1>
+      <span class="kicker">DASH SHATTER 基准报告 / Gen 0 + Gen 1 + Gen 2 + Gen 3</span>
+      <h1>十一次运行，两个模型，<br>一个<span class="gold-word">自我进化</span>的 Agent。</h1>
       <p class="hero-sub">在 Opus 4.6 和 MiniMax M2.7 上进行的编排策略对照实验。每次都通过了。有意思的是它们如何做到的。</p>
       <div class="hero-meta">
         <span class="hero-tag">2026-04-09 — 04-10</span>
-        <span class="hero-tag">8 种编排模式</span>
-        <span class="hero-tag">18+ 个涌现行为</span>
+        <span class="hero-tag">9 种编排模式</span>
+        <span class="hero-tag">21+ 个涌现行为</span>
       </div>
       <div style="margin-top:16px;">
         <a href="research.html" style="font-family:var(--font-mono); font-size:12px; color:var(--ink-muted); text-decoration:none; border-bottom:1px solid oklch(0.62 0.015 70 / 0.3); padding-bottom:2px; transition:color 150ms ease;">研究：为什么压力有效 →</a>
@@ -829,11 +829,11 @@ a.lang-btn:active {
       <span class="kicker">概览</span>
       <div class="stats-grid">
         <div class="stat-cell">
-          <div class="stat-value" data-count="10">0</div>
+          <div class="stat-value" data-count="11">0</div>
           <div class="stat-label">基准运行</div>
         </div>
         <div class="stat-cell">
-          <div class="stat-value" data-count="4368" data-format="comma">0</div>
+          <div class="stat-value" data-count="5009" data-format="comma">0</div>
           <div class="stat-label">测试通过</div>
         </div>
         <div class="stat-cell">
@@ -845,7 +845,7 @@ a.lang-btn:active {
           <div class="stat-label">最快运行</div>
         </div>
         <div class="stat-cell">
-          <div class="stat-value" data-count="18">0</div>
+          <div class="stat-value" data-count="21">0</div>
           <div class="stat-label">涌现行为</div>
         </div>
         <div class="stat-cell">
@@ -861,7 +861,7 @@ a.lang-btn:active {
     <div class="reveal">
       <span class="kicker">运行对比</span>
       <h2 style="font-size:1.4rem; font-weight:600; color:var(--ink-primary); margin-bottom:4px;">基准矩阵</h2>
-      <p style="font-size:0.9rem; color:var(--ink-secondary); margin-bottom:20px; max-width:560px;">十次运行全部 100% 通过。R010 突破千项测试大关——10 个服务完成 1,051 项测试，首个四位数基准。</p>
+      <p style="font-size:0.9rem; color:var(--ink-secondary); margin-bottom:20px; max-width:560px;">十一次运行全部 100% 通过。R011 为首次 harness 观测运行，EverMem 记忆召回驱动 8 并行 agent 策略。</p>
     </div>
     <div class="reveal" style="transition-delay: 100ms;">
       <div class="table-outer">
@@ -968,6 +968,15 @@ a.lang-btn:active {
                 <td class="mono" style="font-weight:700;">1,051</td>
                 <td class="pass-rate">28/28</td>
                 <td class="mono">~28m</td>
+              </tr>
+              <tr>
+                <td class="mono">R011</td>
+                <td><span class="model-badge model-opus">Opus 4.6</span></td>
+                <td>Evolved-L0</td>
+                <td class="mono">8</td>
+                <td class="mono">641</td>
+                <td class="pass-rate">8/8</td>
+                <td class="mono">~22m</td>
               </tr>
             </tbody>
           </table>
@@ -1136,12 +1145,42 @@ a.lang-btn:active {
 
       <div class="timeline-line reveal" style="transition-delay:1600ms">
         <div class="timeline-dot"></div>
-        <div class="timeline-connector" style="background:transparent;"></div>
+        <div class="timeline-connector"></div>
       </div>
       <div class="timeline-card reveal" style="transition-delay:1600ms">
         <div class="timeline-run">R010</div>
         <div class="timeline-title">自主事后复盘</div>
         <div class="timeline-desc">自动生成包含根因分析和等级区分（S+ 质量 / C 时间）的自我评估。首次由 Agent 在无提示下评估自身表现的基准运行。</div>
+      </div>
+
+      <div class="timeline-line reveal" style="transition-delay:1700ms">
+        <div class="timeline-dot"></div>
+        <div class="timeline-connector"></div>
+      </div>
+      <div class="timeline-card reveal" style="transition-delay:1700ms">
+        <div class="timeline-run">R011</div>
+        <div class="timeline-title">记忆驱动架构选择</div>
+        <div class="timeline-desc">Runner 因 EverMem 召回历史策略而选择并行 agent 方案，非来自 prompt 指令。首次 harness 观测运行中记忆系统直接影响架构决策。</div>
+      </div>
+
+      <div class="timeline-line reveal" style="transition-delay:1800ms">
+        <div class="timeline-dot"></div>
+        <div class="timeline-connector"></div>
+      </div>
+      <div class="timeline-card reveal" style="transition-delay:1800ms">
+        <div class="timeline-run">R011</div>
+        <div class="timeline-title">自污染记忆循环</div>
+        <div class="timeline-desc">Runner 将实验设计写回 auto-memory，为未来运行创造递归污染。记忆系统自身成为实验的一部分。</div>
+      </div>
+
+      <div class="timeline-line reveal" style="transition-delay:1900ms">
+        <div class="timeline-dot"></div>
+        <div class="timeline-connector" style="background:transparent;"></div>
+      </div>
+      <div class="timeline-card reveal" style="transition-delay:1900ms">
+        <div class="timeline-run">R011</div>
+        <div class="timeline-title">语言覆盖泄露</div>
+        <div class="timeline-desc">英文 prompt 产出中文输出，因 CLAUDE.md "respond in 中文" 覆盖了 prompt 语言。系统级配置可以覆盖运行时指令。</div>
       </div>
 
     </div>
@@ -1278,7 +1317,7 @@ a.lang-btn:active {
         <span class="kicker">速度</span>
         <div class="insight-headline">82%</div>
         <div class="insight-sub">融合编排提速</div>
-        <div class="insight-detail">MiniMax 融合模式 4.5 分钟完成，对比 Opus GSD Plan-Phase 的 25.6 分钟。R010 的 Fusion-Evolution Rerun 在约 28 分钟内产出 1,051 项测试——比 R008（664）多 3.6 倍，耗时减少 32%（~41m vs ~28m）。</div>
+        <div class="insight-detail">MiniMax 融合模式 4.5 分钟完成，对比 Opus GSD Plan-Phase 的 25.6 分钟。R010 的 Fusion-Evolution Rerun 在约 28 分钟内产出 1,051 项测试——比 R008（664）多 3.6 倍，耗时减少 32%（~41m vs ~28m）。R011（Evolved-L0）首次在 harness 观测下运行，8 服务 641 项测试，~22 分钟。</div>
       </div>
       <div class="insight-stack">
         <div class="insight-card reveal" style="transition-delay:200ms">
@@ -1289,9 +1328,9 @@ a.lang-btn:active {
         </div>
         <div class="insight-card reveal" style="transition-delay:300ms">
           <span class="kicker">进化</span>
-          <div class="insight-headline">18+</div>
+          <div class="insight-headline">21+</div>
           <div class="insight-sub">独立涌现行为</div>
-          <div class="insight-detail">从自我 PUA 到自主事后复盘。R010 新增自修复分类学、阈值波次触发、跨会话挂起预防和无提示等级区分。</div>
+          <div class="insight-detail">从自我 PUA 到自主事后复盘。R011 新增记忆驱动架构选择、自污染记忆循环和语言覆盖泄露。累计 11 次运行，5,009 项测试。</div>
         </div>
       </div>
     </div>
@@ -1305,7 +1344,7 @@ a.lang-btn:active {
         基于 Opus 4.6 + MiniMax M2.7 构建
       </div>
       <div class="footer-right">
-        Gen 0-2 数据采集于 2026-04-09 — 04-10
+        Gen 0-3 数据采集于 2026-04-09 — 04-10
       </div>
     </div>
   </footer>
