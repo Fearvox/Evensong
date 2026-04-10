@@ -702,38 +702,52 @@ footer {
   position: fixed;
   top: 20px;
   right: 20px;
-  z-index: 100;
+  z-index: 9999;
   display: flex;
   gap: 0;
-  border: 1px solid oklch(0.88 0.02 75 / 0.7);
+  border: 1px solid rgba(200, 195, 180, 0.7);
   border-radius: 4px;
-  overflow: hidden;
-  background: oklch(0.94 0.012 83 / 0.9);
+  overflow: visible;
+  background: rgba(240, 238, 230, 0.95);
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  pointer-events: auto;
 }
 .lang-btn {
   font-family: var(--font-mono);
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 500;
-  padding: 6px 12px;
-  color: var(--ink-muted);
+  padding: 8px 16px;
+  color: #7F8882;
   text-decoration: none;
   transition: background-color 150ms ease, color 150ms ease;
   border: none;
   cursor: pointer;
   background: transparent;
+  display: inline-block;
+  line-height: 1;
+  -webkit-tap-highlight-color: rgba(0,0,0,0.1);
+  touch-action: manipulation;
+  user-select: none;
 }
 .lang-btn:hover {
-  background: var(--hover-glow);
+  background: rgba(230, 225, 210, 0.8);
 }
 .lang-btn.active {
-  background: oklch(0.35 0.08 160 / 0.1);
-  color: var(--palm-shadow);
+  background: rgba(53, 88, 76, 0.1);
+  color: #35584C;
   font-weight: 600;
+  cursor: default;
+}
+a.lang-btn {
+  cursor: pointer;
+}
+a.lang-btn:active {
+  background: rgba(53, 88, 76, 0.2);
 }
 .lang-btn + .lang-btn {
-  border-left: 1px solid oklch(0.88 0.02 75 / 0.5);
+  border-left: 1px solid rgba(200, 195, 180, 0.5);
 }
 </style>
 </head>
