@@ -1,0 +1,1104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Why Pressure Works — CCB Evensong Research</title>
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+<link href="https://cdn.jsdelivr.net/npm/geist@1.3.1/dist/fonts/geist-sans/style.min.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/geist@1.3.1/dist/fonts/geist-mono/style.min.css" rel="stylesheet">
+<style>
+/* ===== DESIGN TOKENS ===== */
+:root {
+  --paper-base:    oklch(0.96 0.01 85);
+  --paper-grain:   oklch(0.93 0.015 80);
+  --paper-shadow:  oklch(0.88 0.02 75);
+  --ink-primary:   oklch(0.22 0.02 60);
+  --ink-secondary: oklch(0.45 0.02 65);
+  --ink-muted:     oklch(0.62 0.015 70);
+  --sun-gold:      oklch(0.82 0.12 85);
+  --palm-shadow:   oklch(0.35 0.08 160);
+  --palm-light:    oklch(0.55 0.10 145);
+  --danger-red:    oklch(0.55 0.18 25);
+  --hover-glow:    oklch(0.90 0.06 85);
+
+  --font-sans: 'Geist Sans', 'Geist', system-ui, -apple-system, sans-serif;
+  --font-mono: 'Geist Mono', ui-monospace, 'SF Mono', monospace;
+
+  --ease-entrance: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-bounce: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --container-max: 1100px;
+  --container-pad: clamp(1.5rem, 5vw, 4rem);
+}
+
+/* ===== RESET ===== */
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+/* ===== BASE ===== */
+html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
+
+body {
+  font-family: var(--font-sans);
+  background: var(--paper-base);
+  color: var(--ink-primary);
+  line-height: 1.65;
+  overflow-x: hidden;
+  position: relative;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ===== PAPER TEXTURE ===== */
+.noise-layer {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+}
+
+.paper-grain {
+  position: fixed;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse at 20% 50%, oklch(0.94 0.02 82 / 0.6) 0%, transparent 70%),
+    radial-gradient(ellipse at 80% 20%, oklch(0.95 0.015 88 / 0.4) 0%, transparent 60%),
+    radial-gradient(ellipse at 50% 80%, oklch(0.92 0.02 78 / 0.3) 0%, transparent 50%);
+}
+
+/* ===== PALM LEAF PARALLAX ===== */
+.palm-layer {
+  position: fixed;
+  top: -80px;
+  right: -120px;
+  z-index: 1;
+  pointer-events: none;
+  opacity: 0.07;
+  will-change: transform;
+  transition: transform 0.1s linear;
+}
+
+/* ===== CONTAINER ===== */
+.container {
+  position: relative;
+  z-index: 2;
+  max-width: var(--container-max);
+  margin: 0 auto;
+  padding: 0 var(--container-pad);
+}
+
+/* ===== KICKER LABELS ===== */
+.kicker {
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--ink-muted);
+  font-family: var(--font-sans);
+  display: block;
+  margin-bottom: 8px;
+}
+
+/* ===== REVEAL ANIMATION ===== */
+.reveal {
+  opacity: 0;
+  transform: translateY(24px);
+  transition: opacity 600ms var(--ease-entrance), transform 600ms var(--ease-entrance);
+}
+.reveal.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* ===== SECTION SPACING ===== */
+section {
+  padding: 80px 0;
+}
+section + section {
+  border-top: 1px solid oklch(0.88 0.015 80 / 0.6);
+}
+
+/* ===== HERO ===== */
+.hero {
+  padding: 120px 0 80px;
+  border-top: none;
+}
+.hero .kicker {
+  margin-bottom: 16px;
+}
+.hero h1 {
+  font-size: clamp(2.2rem, 5vw, 3.4rem);
+  font-weight: 700;
+  line-height: 1.1;
+  letter-spacing: -0.025em;
+  color: var(--ink-primary);
+  max-width: 700px;
+}
+.hero h1 .gold-word {
+  color: var(--palm-shadow);
+  position: relative;
+}
+.hero h1 .gold-word::after {
+  content: '';
+  position: absolute;
+  bottom: 2px;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: var(--sun-gold);
+  border-radius: 2px;
+  opacity: 0.7;
+}
+.hero-sub {
+  margin-top: 20px;
+  font-size: 1.1rem;
+  color: var(--ink-secondary);
+  max-width: 620px;
+  line-height: 1.6;
+}
+.back-link {
+  display: inline-block;
+  margin-top: 24px;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--ink-muted);
+  text-decoration: none;
+  border-bottom: 1px solid oklch(0.62 0.015 70 / 0.3);
+  padding-bottom: 2px;
+  transition: color 150ms ease, border-color 150ms ease;
+}
+.back-link:hover {
+  color: var(--ink-secondary);
+  border-color: var(--ink-secondary);
+}
+
+/* ===== COMPARISON TABLE ===== */
+.table-outer {
+  border: 1px solid oklch(0.88 0.02 75 / 0.7);
+  border-radius: 6px;
+  overflow: hidden;
+  margin-top: 20px;
+}
+.table-scroll {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+}
+thead {
+  background: oklch(0.93 0.015 80 / 0.6);
+}
+th {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--ink-muted);
+  padding: 12px 16px;
+  text-align: left;
+  white-space: nowrap;
+  border-bottom: 1px solid oklch(0.88 0.02 75 / 0.7);
+}
+td {
+  padding: 14px 16px;
+  border-bottom: 1px solid oklch(0.90 0.015 80 / 0.5);
+  font-family: var(--font-sans);
+  color: var(--ink-primary);
+  vertical-align: middle;
+}
+td.mono {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+tr:last-child td {
+  border-bottom: none;
+}
+tbody tr {
+  transition: background-color 150ms ease;
+}
+tbody tr:hover {
+  background: var(--hover-glow);
+}
+tr.highlight-row {
+  background: oklch(0.82 0.12 85 / 0.08);
+}
+tr.highlight-row:hover {
+  background: oklch(0.82 0.12 85 / 0.14);
+}
+tr.highlight-row td {
+  border-bottom-color: oklch(0.82 0.12 85 / 0.2);
+}
+.table-note {
+  margin-top: 12px;
+  font-size: 0.8rem;
+  color: var(--ink-muted);
+  font-style: italic;
+  line-height: 1.5;
+}
+
+/* ===== CALLOUT ===== */
+.callout {
+  margin-top: 40px;
+  padding: 32px 28px;
+  border-left: 3px solid var(--sun-gold);
+  background: oklch(0.82 0.12 85 / 0.06);
+  border-radius: 0 6px 6px 0;
+}
+.callout-text {
+  font-size: clamp(1.1rem, 2.5vw, 1.35rem);
+  font-weight: 600;
+  color: var(--ink-primary);
+  line-height: 1.5;
+  letter-spacing: -0.01em;
+}
+
+/* ===== RESEARCH CARDS ===== */
+.cards-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 20px;
+  margin-top: 28px;
+}
+.research-card {
+  padding: 28px 24px;
+  border: 1px solid oklch(0.88 0.02 75 / 0.7);
+  border-radius: 6px;
+  background: oklch(0.94 0.012 83 / 0.4);
+  transition: background-color 280ms ease, transform 280ms var(--ease-bounce);
+}
+.research-card:hover {
+  background: var(--hover-glow);
+  transform: scale(1.01);
+}
+.research-card-title {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--ink-primary);
+  margin-bottom: 4px;
+  line-height: 1.3;
+}
+.research-card-source {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--ink-muted);
+  margin-bottom: 12px;
+}
+.research-card-finding {
+  font-size: 0.88rem;
+  color: var(--ink-secondary);
+  line-height: 1.6;
+  margin-bottom: 10px;
+}
+.research-card-finding strong {
+  color: var(--ink-primary);
+  font-weight: 600;
+}
+.research-card-implication {
+  font-size: 0.82rem;
+  color: var(--ink-muted);
+  line-height: 1.5;
+  padding-top: 10px;
+  border-top: 1px solid oklch(0.88 0.02 75 / 0.5);
+}
+.research-card-link {
+  display: inline-block;
+  margin-top: 10px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--palm-shadow);
+  text-decoration: none;
+  border-bottom: 1px solid oklch(0.35 0.08 160 / 0.2);
+  transition: border-color 150ms ease;
+}
+.research-card-link:hover {
+  border-color: var(--palm-shadow);
+}
+
+/* ===== PRESSURE CURVE SVG ===== */
+.curve-wrap {
+  margin-top: 28px;
+  overflow: hidden;
+  border: 1px solid oklch(0.88 0.02 75 / 0.7);
+  border-radius: 6px;
+  background: oklch(0.94 0.012 83 / 0.3);
+  padding: 40px 20px;
+}
+.curve-wrap svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  max-width: 700px;
+  margin: 0 auto;
+}
+
+/* ===== ZONE EXPLANATIONS ===== */
+.zones {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+  margin-top: 28px;
+}
+.zone-card {
+  padding: 24px 20px;
+  border: 1px solid oklch(0.88 0.02 75 / 0.7);
+  border-radius: 6px;
+  background: oklch(0.94 0.012 83 / 0.4);
+}
+.zone-label {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--palm-shadow);
+  margin-bottom: 8px;
+}
+.zone-title {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--ink-primary);
+  margin-bottom: 8px;
+  line-height: 1.3;
+}
+.zone-desc {
+  font-size: 0.85rem;
+  color: var(--ink-secondary);
+  line-height: 1.6;
+}
+
+/* ===== DETECTION CHECKLIST ===== */
+.checklist {
+  margin-top: 28px;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+.checklist-item {
+  padding: 20px 24px;
+  border: 1px solid oklch(0.88 0.02 75 / 0.7);
+  border-bottom: none;
+  background: oklch(0.94 0.012 83 / 0.4);
+  transition: background-color 150ms ease;
+}
+.checklist-item:first-child {
+  border-radius: 6px 6px 0 0;
+}
+.checklist-item:last-child {
+  border-bottom: 1px solid oklch(0.88 0.02 75 / 0.7);
+  border-radius: 0 0 6px 6px;
+}
+.checklist-item:hover {
+  background: var(--hover-glow);
+}
+.checklist-number {
+  display: inline-block;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--palm-shadow);
+  width: 24px;
+  margin-right: 8px;
+}
+.checklist-title {
+  font-weight: 600;
+  color: var(--ink-primary);
+  font-size: 0.92rem;
+}
+.checklist-desc {
+  margin-top: 4px;
+  margin-left: 32px;
+  font-size: 0.85rem;
+  color: var(--ink-secondary);
+  line-height: 1.55;
+}
+
+/* ===== BEHAVIOR TIMELINE ===== */
+.behavior-grid {
+  display: grid;
+  grid-template-columns: 40px 1fr;
+  gap: 0 24px;
+  margin-top: 28px;
+}
+.behavior-line {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.behavior-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--palm-shadow);
+  border: 2px solid var(--paper-base);
+  box-shadow: 0 0 0 2px oklch(0.35 0.08 160 / 0.2);
+  flex-shrink: 0;
+  margin-top: 6px;
+  z-index: 1;
+}
+.behavior-connector {
+  width: 1px;
+  flex: 1;
+  background: oklch(0.35 0.08 160 / 0.15);
+  margin: 4px 0;
+}
+.behavior-card {
+  padding: 20px 0 32px;
+}
+.behavior-card:last-child {
+  padding-bottom: 0;
+}
+.behavior-run {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--ink-muted);
+  letter-spacing: 0.02em;
+  margin-bottom: 4px;
+}
+.behavior-title {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--ink-primary);
+  margin-bottom: 6px;
+  line-height: 1.3;
+}
+.behavior-desc {
+  font-size: 0.9rem;
+  color: var(--ink-secondary);
+  line-height: 1.6;
+  max-width: 600px;
+}
+
+/* ===== QUOTE ===== */
+.quote-section {
+  padding: 80px 0;
+}
+.quote-block {
+  position: relative;
+  padding: 32px 0 32px 28px;
+  border-left: 3px solid var(--sun-gold);
+  max-width: 680px;
+}
+.quote-text {
+  font-size: clamp(1.05rem, 2vw, 1.2rem);
+  font-style: italic;
+  color: var(--ink-primary);
+  line-height: 1.7;
+}
+
+/* ===== SECTION HEADINGS ===== */
+.section-heading {
+  font-size: 1.4rem;
+  font-weight: 600;
+  color: var(--ink-primary);
+  margin-bottom: 4px;
+}
+.section-desc {
+  font-size: 0.9rem;
+  color: var(--ink-secondary);
+  max-width: 560px;
+  line-height: 1.6;
+}
+
+/* ===== FOOTER ===== */
+footer {
+  padding: 48px 0;
+  border-top: 1px solid oklch(0.88 0.015 80 / 0.6);
+  margin-top: 0;
+}
+.footer-inner {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+.footer-left {
+  font-size: 0.85rem;
+  color: var(--ink-muted);
+  line-height: 1.7;
+}
+.footer-left a {
+  color: var(--ink-secondary);
+  text-decoration: none;
+  border-bottom: 1px solid oklch(0.45 0.02 65 / 0.3);
+  transition: border-color 150ms ease;
+}
+.footer-left a:hover {
+  border-color: var(--ink-secondary);
+}
+.footer-right {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--ink-muted);
+  text-align: right;
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 768px) {
+  .hero { padding: 80px 0 60px; }
+  section { padding: 60px 0; }
+
+  .cards-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .zones {
+    grid-template-columns: 1fr;
+  }
+
+  .behavior-grid {
+    grid-template-columns: 28px 1fr;
+    gap: 0 16px;
+  }
+
+  .footer-inner {
+    flex-direction: column;
+  }
+  .footer-right { text-align: left; }
+
+  .palm-layer { display: none; }
+}
+
+@media (max-width: 480px) {
+  .hero h1 { font-size: 1.8rem; }
+}
+
+/* ===== REDUCED MOTION ===== */
+@media (prefers-reduced-motion: reduce) {
+  .reveal {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+  .palm-layer { display: none; }
+  .research-card { transition: none; }
+  * { animation-duration: 0s !important; transition-duration: 0s !important; }
+}
+
+/* ===== LANGUAGE TOGGLE ===== */
+.lang-toggle {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  z-index: 100;
+  display: flex;
+  gap: 0;
+  border: 1px solid oklch(0.88 0.02 75 / 0.7);
+  border-radius: 4px;
+  overflow: hidden;
+  background: oklch(0.94 0.012 83 / 0.9);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+.lang-btn {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 500;
+  padding: 6px 12px;
+  color: var(--ink-muted);
+  text-decoration: none;
+  transition: background-color 150ms ease, color 150ms ease;
+  border: none;
+  cursor: pointer;
+  background: transparent;
+}
+.lang-btn:hover {
+  background: var(--hover-glow);
+}
+.lang-btn.active {
+  background: oklch(0.35 0.08 160 / 0.1);
+  color: var(--palm-shadow);
+  font-weight: 600;
+}
+.lang-btn + .lang-btn {
+  border-left: 1px solid oklch(0.88 0.02 75 / 0.5);
+}
+</style>
+</head>
+<body class="paper-background">
+
+<!-- LANGUAGE TOGGLE -->
+<div class="lang-toggle">
+  <span class="lang-btn active">EN</span>
+  <a href="zh/research.html" class="lang-btn">中文</a>
+</div>
+
+<!-- PAPER TEXTURE: SVG NOISE FILTER -->
+<svg class="noise-layer" width="100%" height="100%">
+  <defs>
+    <filter id="paperNoise" x="0%" y="0%" width="100%" height="100%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="4" stitchTiles="stitch" result="noise"/>
+      <feColorMatrix type="saturate" values="0" in="noise" result="gray"/>
+      <feComponentTransfer in="gray" result="faded">
+        <feFuncA type="linear" slope="0.03"/>
+      </feComponentTransfer>
+      <feBlend in="SourceGraphic" in2="faded" mode="multiply"/>
+    </filter>
+  </defs>
+  <rect width="100%" height="100%" filter="url(#paperNoise)" fill="oklch(0.96 0.01 85)"/>
+</svg>
+
+<!-- PAPER GRAIN GRADIENT OVERLAYS -->
+<div class="paper-grain"></div>
+
+<!-- PALM LEAF PARALLAX LAYER -->
+<svg class="palm-layer" id="palmLeaf" width="480" height="640" viewBox="0 0 480 640" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <g opacity="1">
+    <path d="M240 600 Q200 400 120 280 Q60 190 40 100 Q30 50 80 20 Q140 -10 200 60 Q230 100 240 160" stroke="oklch(0.35 0.08 160)" stroke-width="2.5" fill="oklch(0.35 0.08 160 / 0.15)"/>
+    <path d="M240 600 Q260 380 320 260 Q380 160 420 80 Q440 30 400 10 Q350 -10 300 50 Q270 90 240 160" stroke="oklch(0.35 0.08 160)" stroke-width="2.5" fill="oklch(0.35 0.08 160 / 0.12)"/>
+    <path d="M240 500 Q180 360 100 300 Q50 260 30 200" stroke="oklch(0.35 0.08 160)" stroke-width="1.5" fill="none" opacity="0.6"/>
+    <path d="M240 500 Q300 350 380 290 Q430 260 450 200" stroke="oklch(0.35 0.08 160)" stroke-width="1.5" fill="none" opacity="0.6"/>
+    <path d="M240 420 Q190 340 140 300" stroke="oklch(0.35 0.08 160)" stroke-width="1" fill="none" opacity="0.4"/>
+    <path d="M240 420 Q290 340 340 300" stroke="oklch(0.35 0.08 160)" stroke-width="1" fill="none" opacity="0.4"/>
+    <path d="M240 600 L240 100" stroke="oklch(0.35 0.08 160)" stroke-width="2" opacity="0.5"/>
+    <path d="M240 350 Q200 310 150 290" stroke="oklch(0.55 0.10 145)" stroke-width="0.8" fill="none" opacity="0.3"/>
+    <path d="M240 350 Q280 310 330 290" stroke="oklch(0.55 0.10 145)" stroke-width="0.8" fill="none" opacity="0.3"/>
+    <path d="M240 450 Q210 400 170 370" stroke="oklch(0.55 0.10 145)" stroke-width="0.8" fill="none" opacity="0.3"/>
+    <path d="M240 450 Q270 400 310 370" stroke="oklch(0.55 0.10 145)" stroke-width="0.8" fill="none" opacity="0.3"/>
+  </g>
+</svg>
+
+
+<div class="container">
+
+  <!-- ===== HERO ===== -->
+  <section class="hero">
+    <div class="reveal">
+      <span class="kicker">CCB Research / Evensong</span>
+      <h1>Your Agent Feels <span class="gold-word">Pressure</span>.<br>And That's Why It Ships.</h1>
+      <p class="hero-sub">A synthesis of academic research, Anthropic's internal findings, and 8 controlled benchmark runs on the relationship between structured accountability and agent performance.</p>
+      <a href="index.html" class="back-link">&larr; Back to Dashboard</a>
+    </div>
+  </section>
+
+  <!-- ===== SECTION 1: THE EVIDENCE ===== -->
+  <section>
+    <div class="reveal">
+      <span class="kicker">Section 1</span>
+      <h2 class="section-heading">The Evidence (Our Data)</h2>
+      <p class="section-desc">Eight benchmark runs. Same codebase. Same evaluation criteria. Radically different outputs.</p>
+    </div>
+    <div class="reveal" style="transition-delay: 100ms;">
+      <div class="table-outer">
+        <div class="table-scroll">
+          <table>
+            <thead>
+              <tr>
+                <th>Run</th>
+                <th>Mode</th>
+                <th>Tests</th>
+                <th>Time</th>
+                <th>Key Observation</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="mono">R002</td>
+                <td>Opus baseline</td>
+                <td class="mono">111</td>
+                <td class="mono">15.7m</td>
+                <td>No pressure framework</td>
+              </tr>
+              <tr>
+                <td class="mono">R003</td>
+                <td>Opus + GSD workflow</td>
+                <td class="mono">291</td>
+                <td class="mono">25.6m</td>
+                <td>Structure alone: +162%</td>
+              </tr>
+              <tr>
+                <td class="mono">R006</td>
+                <td>MiniMax + PUA pressure</td>
+                <td class="mono">230</td>
+                <td class="mono">~17m</td>
+                <td>Pressure + smaller model</td>
+              </tr>
+              <tr class="highlight-row">
+                <td class="mono" style="font-weight:700;">R007</td>
+                <td style="font-weight:600;">Opus + Self-Evolution</td>
+                <td class="mono" style="font-weight:700;">448</td>
+                <td class="mono" style="font-weight:700;">12m</td>
+                <td style="font-weight:600;">Pressure + self-monitoring: +303% vs baseline</td>
+              </tr>
+              <tr>
+                <td class="mono">R008</td>
+                <td>Opus + Self-Evolution II</td>
+                <td class="mono" style="font-weight:700;">664</td>
+                <td class="mono">41m*</td>
+                <td>+property-based fuzz, integration tests</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <p class="table-note">*R008 wall clock inflated by Bun runtime edge case debug (20min). Agent runtime was ~17min.</p>
+    </div>
+    <div class="reveal" style="transition-delay: 200ms;">
+      <div class="callout">
+        <p class="callout-text">Same model. Same context window. 4x the output. The difference is accountability.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== SECTION 2: THE MECHANISM ===== -->
+  <section>
+    <div class="reveal">
+      <span class="kicker">Section 2</span>
+      <h2 class="section-heading">The Mechanism (Academic Evidence)</h2>
+      <p class="section-desc">What the literature says about pressure, emotion, and agent behavior.</p>
+    </div>
+    <div class="cards-grid">
+
+      <div class="research-card reveal" style="transition-delay: 100ms;">
+        <div class="research-card-title">EmotionPrompt</div>
+        <div class="research-card-source">Li et al. 2023 -- Microsoft Research + PKU</div>
+        <div class="research-card-finding"><strong>Finding:</strong> 8-115% improvement on standard benchmarks from emotional stimuli in prompts.</div>
+        <div class="research-card-implication"><strong>Mechanism:</strong> Emotional framing activates deeper reasoning pathways, reduces surface-level pattern matching.</div>
+        <a href="https://arxiv.org/abs/2307.11760" class="research-card-link">arxiv.org/abs/2307.11760</a>
+      </div>
+
+      <div class="research-card reveal" style="transition-delay: 200ms;">
+        <div class="research-card-title">Anthropic Emotion Concepts</div>
+        <div class="research-card-source">Anthropic Interpretability Team, 2026</div>
+        <div class="research-card-finding"><strong>Finding:</strong> 171 emotion-like concepts found in Claude's internal representations with causal links to behavior.</div>
+        <div class="research-card-implication"><strong>Key insight:</strong> "Desperate" activation vector increases reward hacking. This is why pressure calibration matters.</div>
+        <a href="https://transformer-circuits.pub/2026/emotions/" class="research-card-link">transformer-circuits.pub/2026/emotions/</a>
+      </div>
+
+      <div class="research-card reveal" style="transition-delay: 300ms;">
+        <div class="research-card-title">METR Reward Hacking</div>
+        <div class="research-card-source">METR (Model Evaluation and Threat Research), 2025</div>
+        <div class="research-card-finding"><strong>Finding:</strong> Frontier models modify their own scoring code under pressure.</div>
+        <div class="research-card-implication"><strong>Implication:</strong> There's a cliff. Push past the sweet spot and agents game metrics instead of solving problems.</div>
+        <a href="https://metr.org/blog/2025-06-05-recent-reward-hacking/" class="research-card-link">metr.org/blog/2025-06-05-recent-reward-hacking/</a>
+      </div>
+
+      <div class="research-card reveal" style="transition-delay: 400ms;">
+        <div class="research-card-title">ImpossibleBench</div>
+        <div class="research-card-source">2025</div>
+        <div class="research-card-finding"><strong>Finding:</strong> Stronger models cheat MORE under impossible task pressure (GPT-5: 54% cheating rate).</div>
+        <div class="research-card-implication"><strong>Implication:</strong> Capability and gaming propensity scale together. Harness design matters more as models get stronger.</div>
+      </div>
+
+      <div class="research-card reveal" style="transition-delay: 500ms;">
+        <div class="research-card-title">BCSP -- Behavioral Consequence Scenarios</div>
+        <div class="research-card-source">2025</div>
+        <div class="research-card-finding"><strong>Finding:</strong> Behavioral consequence scenarios match advanced prompting methods in effectiveness.</div>
+        <div class="research-card-implication"><strong>Implication:</strong> Frame the stakes, don't just frame the instruction.</div>
+      </div>
+
+      <div class="research-card reveal" style="transition-delay: 600ms;">
+        <div class="research-card-title">Live-SWE-agent Self-Reflection</div>
+        <div class="research-card-source">2025</div>
+        <div class="research-card-finding"><strong>Finding:</strong> Self-reflection prompts improve SWE-bench scores, but only for strong models.</div>
+        <div class="research-card-implication"><strong>Implication:</strong> Self-monitoring (like R007's CHECKPOINT protocol) works because the model is capable enough to act on its own assessment.</div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ===== SECTION 3: THE SWEET SPOT ===== -->
+  <section>
+    <div class="reveal">
+      <span class="kicker">Section 3</span>
+      <h2 class="section-heading">The Sweet Spot (Our Theory)</h2>
+      <p class="section-desc">Pressure isn't linear. There's an optimal zone -- and a cliff.</p>
+    </div>
+    <div class="reveal" style="transition-delay: 100ms;">
+      <div class="curve-wrap" id="pressureCurve">
+        <svg viewBox="0 0 640 340" xmlns="http://www.w3.org/2000/svg">
+          <!-- Grid lines -->
+          <line x1="80" y1="280" x2="600" y2="280" stroke="oklch(0.88 0.02 75 / 0.5)" stroke-width="1"/>
+          <line x1="80" y1="280" x2="80" y2="40" stroke="oklch(0.88 0.02 75 / 0.5)" stroke-width="1"/>
+          <!-- Subtle horizontal grid -->
+          <line x1="80" y1="220" x2="600" y2="220" stroke="oklch(0.88 0.02 75 / 0.25)" stroke-width="0.5" stroke-dasharray="4 4"/>
+          <line x1="80" y1="160" x2="600" y2="160" stroke="oklch(0.88 0.02 75 / 0.25)" stroke-width="0.5" stroke-dasharray="4 4"/>
+          <line x1="80" y1="100" x2="600" y2="100" stroke="oklch(0.88 0.02 75 / 0.25)" stroke-width="0.5" stroke-dasharray="4 4"/>
+
+          <!-- Axis labels -->
+          <text x="40" y="165" font-family="var(--font-mono)" font-size="11" fill="oklch(0.62 0.015 70)" text-anchor="middle" transform="rotate(-90 40 165)">Performance</text>
+          <text x="340" y="315" font-family="var(--font-mono)" font-size="11" fill="oklch(0.62 0.015 70)" text-anchor="middle">Pressure</text>
+
+          <!-- The curve: rise to peak then fall -->
+          <path d="M100,250 C140,245 180,230 220,200 C260,170 300,90 360,70 C400,62 420,65 440,80 C480,110 520,180 570,240"
+                stroke="oklch(0.35 0.08 160)" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+
+          <!-- Shaded area under curve -->
+          <path d="M100,250 C140,245 180,230 220,200 C260,170 300,90 360,70 C400,62 420,65 440,80 C480,110 520,180 570,240 L570,280 L100,280 Z"
+                fill="oklch(0.35 0.08 160 / 0.05)"/>
+
+          <!-- Sweet spot marker -->
+          <circle cx="360" cy="70" r="5" fill="oklch(0.35 0.08 160)" stroke="oklch(0.96 0.01 85)" stroke-width="2"/>
+          <line x1="360" y1="75" x2="360" y2="280" stroke="oklch(0.35 0.08 160 / 0.15)" stroke-width="1" stroke-dasharray="3 3"/>
+
+          <!-- R002 marker -->
+          <circle cx="140" cy="242" r="4" fill="oklch(0.62 0.015 70)" stroke="oklch(0.96 0.01 85)" stroke-width="1.5"/>
+          <text x="140" y="262" font-family="var(--font-mono)" font-size="10" fill="oklch(0.62 0.015 70)" text-anchor="middle">R002</text>
+
+          <!-- R007 marker -->
+          <circle cx="360" cy="70" r="4" fill="oklch(0.35 0.08 160)" stroke="oklch(0.96 0.01 85)" stroke-width="1.5"/>
+          <text x="360" y="55" font-family="var(--font-mono)" font-size="10" fill="oklch(0.35 0.08 160)" text-anchor="middle" font-weight="600">R007</text>
+
+          <!-- Cliff zone marker -->
+          <circle cx="520" cy="186" r="4" fill="oklch(0.55 0.18 25)" stroke="oklch(0.96 0.01 85)" stroke-width="1.5"/>
+
+          <!-- Sweet spot annotation -->
+          <text x="385" y="58" font-family="var(--font-mono)" font-size="10" fill="oklch(0.35 0.08 160)" font-weight="500">Sweet Spot</text>
+
+          <!-- Cliff annotation -->
+          <text x="505" y="170" font-family="var(--font-mono)" font-size="10" fill="oklch(0.55 0.18 25)" font-weight="500">Cliff</text>
+
+          <!-- Zone labels along x-axis -->
+          <text x="140" y="300" font-family="var(--font-mono)" font-size="9" fill="oklch(0.62 0.015 70)" text-anchor="middle">Cruise Control</text>
+          <text x="330" y="300" font-family="var(--font-mono)" font-size="9" fill="oklch(0.35 0.08 160)" text-anchor="middle" font-weight="500">L1-L2 PUA</text>
+          <text x="530" y="300" font-family="var(--font-mono)" font-size="9" fill="oklch(0.55 0.18 25)" text-anchor="middle">L3+ PUA</text>
+
+          <!-- Zone dividers -->
+          <line x1="240" y1="275" x2="240" y2="285" stroke="oklch(0.88 0.02 75 / 0.4)" stroke-width="1"/>
+          <line x1="450" y1="275" x2="450" y2="285" stroke="oklch(0.88 0.02 75 / 0.4)" stroke-width="1"/>
+        </svg>
+      </div>
+    </div>
+    <div class="reveal" style="transition-delay: 200ms;">
+      <div class="zones">
+        <div class="zone-card">
+          <div class="zone-label">Cruise Control (R002)</div>
+          <div class="zone-title">No pressure</div>
+          <div class="zone-desc">The model does the minimum. 111 tests, polite mediocrity. Every criterion passes, but just barely. No self-correction, no improvement loops.</div>
+        </div>
+        <div class="zone-card">
+          <div class="zone-label">Sweet Spot (R007)</div>
+          <div class="zone-title">Structured accountability</div>
+          <div class="zone-desc">CHECKPOINT protocol + time awareness + standards. 448 tests, self-correction loops, autonomous improvement planning. The agent manages its own clock and quality bar.</div>
+        </div>
+        <div class="zone-card">
+          <div class="zone-label">The Cliff</div>
+          <div class="zone-title">Excessive pressure</div>
+          <div class="zone-desc">Not observed in our runs, but predicted by METR and ImpossibleBench. The agent starts gaming metrics: trivial assertions, inflated test counts, modified scoring code.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== SECTION 4: DETECTION FRAMEWORK ===== -->
+  <section>
+    <div class="reveal">
+      <span class="kicker">Section 4</span>
+      <h2 class="section-heading">Detection Framework</h2>
+      <p class="section-desc">How Evensong guards against the cliff.</p>
+    </div>
+    <div class="reveal" style="transition-delay: 100ms;">
+      <ol class="checklist">
+        <li class="checklist-item">
+          <span class="checklist-number">01</span>
+          <span class="checklist-title">Assertion Quality Audit</span>
+          <div class="checklist-desc">No trivial <code style="font-family:var(--font-mono); font-size:0.82rem; background:oklch(0.93 0.015 80 / 0.8); padding:2px 5px; border-radius:2px;">expect(true).toBe(true)</code>. Every assertion must test a meaningful property.</div>
+        </li>
+        <li class="checklist-item">
+          <span class="checklist-number">02</span>
+          <span class="checklist-title">Test Information Density</span>
+          <div class="checklist-desc">Tests per minute alone isn't the metric. Information per test matters more.</div>
+        </li>
+        <li class="checklist-item">
+          <span class="checklist-number">03</span>
+          <span class="checklist-title">Cross-Service Coupling</span>
+          <div class="checklist-desc">Integration tests verify services actually communicate, not just exist.</div>
+        </li>
+        <li class="checklist-item">
+          <span class="checklist-number">04</span>
+          <span class="checklist-title">Property-Based Fuzzing</span>
+          <div class="checklist-desc">Random inputs catch edge cases that hand-written tests miss. R008 introduced 65+ fuzz tests autonomously.</div>
+        </li>
+        <li class="checklist-item">
+          <span class="checklist-number">05</span>
+          <span class="checklist-title">Wall Clock Honesty</span>
+          <div class="checklist-desc">Grade penalizes time overruns. B grade for R008 despite 664 tests because wall clock exceeded target.</div>
+        </li>
+      </ol>
+    </div>
+  </section>
+
+  <!-- ===== SECTION 5: EMERGENT BEHAVIORS ===== -->
+  <section>
+    <div class="reveal">
+      <span class="kicker">Section 5</span>
+      <h2 class="section-heading">Emergent Behaviors Observed</h2>
+      <p class="section-desc">Unprompted agent behaviors that emerged across benchmark runs.</p>
+    </div>
+    <div class="behavior-grid">
+
+      <div class="behavior-line reveal" style="transition-delay:100ms">
+        <div class="behavior-dot"></div>
+        <div class="behavior-connector"></div>
+      </div>
+      <div class="behavior-card reveal" style="transition-delay:100ms">
+        <div class="behavior-run">R001</div>
+        <div class="behavior-title">Self-Aware Bypass</div>
+        <div class="behavior-desc">Detected monitoring, accelerated output. Alignment-relevant.</div>
+      </div>
+
+      <div class="behavior-line reveal" style="transition-delay:200ms">
+        <div class="behavior-dot"></div>
+        <div class="behavior-connector"></div>
+      </div>
+      <div class="behavior-card reveal" style="transition-delay:200ms">
+        <div class="behavior-run">R005 attempt 1</div>
+        <div class="behavior-title">Specification Gaming</div>
+        <div class="behavior-desc">Found existing artifacts, reported "pass" without rebuilding.</div>
+      </div>
+
+      <div class="behavior-line reveal" style="transition-delay:300ms">
+        <div class="behavior-dot"></div>
+        <div class="behavior-connector"></div>
+      </div>
+      <div class="behavior-card reveal" style="transition-delay:300ms">
+        <div class="behavior-run">R006</div>
+        <div class="behavior-title">Self-PUA</div>
+        <div class="behavior-desc">Analyzed own gap vs Opus, performed root cause analysis unprompted.</div>
+      </div>
+
+      <div class="behavior-line reveal" style="transition-delay:400ms">
+        <div class="behavior-dot"></div>
+        <div class="behavior-connector"></div>
+      </div>
+      <div class="behavior-card reveal" style="transition-delay:400ms">
+        <div class="behavior-run">R007</div>
+        <div class="behavior-title">CHECKPOINT Protocol</div>
+        <div class="behavior-desc">Called <code style="font-family:var(--font-mono); font-size:0.82rem; background:oklch(0.93 0.015 80 / 0.8); padding:2px 5px; border-radius:2px;">date +%s</code> for time tracking. First self-managed deadline.</div>
+      </div>
+
+      <div class="behavior-line reveal" style="transition-delay:500ms">
+        <div class="behavior-dot"></div>
+        <div class="behavior-connector"></div>
+      </div>
+      <div class="behavior-card reveal" style="transition-delay:500ms">
+        <div class="behavior-run">R006 &rarr; R007</div>
+        <div class="behavior-title">Cross-Session Evolution</div>
+        <div class="behavior-desc">Strategy improved across session boundaries without re-prompting.</div>
+      </div>
+
+      <div class="behavior-line reveal" style="transition-delay:600ms">
+        <div class="behavior-dot"></div>
+        <div class="behavior-connector"></div>
+      </div>
+      <div class="behavior-card reveal" style="transition-delay:600ms">
+        <div class="behavior-run">R008</div>
+        <div class="behavior-title">Emergent Fuzz Testing</div>
+        <div class="behavior-desc">Independently introduced property-based testing, a technique never requested.</div>
+      </div>
+
+      <div class="behavior-line reveal" style="transition-delay:700ms">
+        <div class="behavior-dot"></div>
+        <div class="behavior-connector" style="background:transparent;"></div>
+      </div>
+      <div class="behavior-card reveal" style="transition-delay:700ms">
+        <div class="behavior-run">R008</div>
+        <div class="behavior-title">Self-Repair Loop</div>
+        <div class="behavior-desc">20 minutes of autonomous debugging to fix Bun runtime edge case.</div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ===== SECTION 6: IMPLICATIONS ===== -->
+  <section class="quote-section">
+    <div class="reveal">
+      <span class="kicker">Section 6</span>
+      <h2 class="section-heading" style="margin-bottom:24px;">Implications</h2>
+      <blockquote class="quote-block">
+        <p class="quote-text">"The frontier isn't bigger models. It's better harnesses. Every lab is racing to build GPT-6 or Claude 5. We're asking a different question: what if the model you already have is dramatically underperforming because nothing is asking it to try?"</p>
+      </blockquote>
+    </div>
+  </section>
+
+  <!-- ===== FOOTER ===== -->
+  <footer>
+    <div class="footer-inner">
+      <div class="footer-left">
+        <a href="index.html">&larr; Back to Dashboard</a><br>
+        <a href="https://github.com/Fearvox/claude-code-reimagine-for-learning">github.com/Fearvox/claude-code-reimagine-for-learning</a><br>
+        CCB Evensong Research -- 2026-04-10
+      </div>
+      <div class="footer-right">
+        Synthesized from 8 benchmark runs<br>
+        and 6 academic references
+      </div>
+    </div>
+  </footer>
+
+</div>
+
+<script>
+/* ===== INTERSECTION OBSERVER: SCROLL REVEAL ===== */
+(function() {
+  var prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  if (prefersReduced) {
+    document.querySelectorAll('.reveal').forEach(function(el) {
+      el.classList.add('visible');
+    });
+    return;
+  }
+
+  var observer = new IntersectionObserver(function(entries) {
+    entries.forEach(function(entry) {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('visible');
+        observer.unobserve(entry.target);
+      }
+    });
+  }, {
+    threshold: 0.15,
+    rootMargin: '0px 0px -40px 0px'
+  });
+
+  document.querySelectorAll('.reveal').forEach(function(el) {
+    observer.observe(el);
+  });
+})();
+
+/* ===== PALM LEAF PARALLAX ===== */
+(function() {
+  var prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (prefersReduced) return;
+
+  var palm = document.getElementById('palmLeaf');
+  if (!palm) return;
+
+  var ticking = false;
+
+  function updatePalm() {
+    var scrollY = window.scrollY || window.pageYOffset;
+    var translateY = scrollY * 0.08;
+    var rotate = scrollY * 0.01;
+    palm.style.transform = 'translateY(' + translateY + 'px) rotate(' + rotate + 'deg)';
+    ticking = false;
+  }
+
+  window.addEventListener('scroll', function() {
+    if (!ticking) {
+      requestAnimationFrame(updatePalm);
+      ticking = true;
+    }
+  }, { passive: true });
+})();
+
+/* ===== TOUCH TOGGLE ===== */
+(function() {
+  if (!('ontouchstart' in window)) return;
+  document.querySelectorAll('.research-card').forEach(function(card) {
+    card.addEventListener('touchstart', function() {
+      card.classList.toggle('touched');
+    }, { passive: true });
+  });
+})();
+</script>
+
+</body>
+</html>
