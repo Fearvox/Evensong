@@ -121,9 +121,18 @@ export async function fetchBootstrapData(): Promise<void> {
 
     // Only persist if data actually changed — avoids a config write on every startup.
     const config = getGlobalConfig()
+
+    // Preserve locally-injected model options (e.g. from inject-profile.sh for
+    // cross-provider benchmarks). If the API returns empty but we already have
+    // models cached, keep the local ones — they were intentionally placed there.
+    const effectiveModelOptions =
+      additionalModelOptions.length > 0
+        ? additionalModelOptions
+        : (config.additionalModelOptionsCache ?? [])
+
     if (
       isEqual(config.clientDataCache, clientData) &&
-      isEqual(config.additionalModelOptionsCache, additionalModelOptions)
+      isEqual(config.additionalModelOptionsCache, effectiveModelOptions)
     ) {
       logForDebugging('[Bootstrap] Cache unchanged, skipping write')
       return
@@ -133,7 +142,7 @@ export async function fetchBootstrapData(): Promise<void> {
     saveGlobalConfig(current => ({
       ...current,
       clientDataCache: clientData,
-      additionalModelOptionsCache: additionalModelOptions,
+      additionalModelOptionsCache: effectiveModelOptions,
     }))
   } catch (error) {
     logError(error)
