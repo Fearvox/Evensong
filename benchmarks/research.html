@@ -690,7 +690,7 @@ a.lang-btn:active {
     <div class="reveal">
       <span class="kicker">DASH SHATTER Research / Evensong</span>
       <h1>Your Agent Feels <span class="gold-word">Pressure</span>.<br>And That's Why It Ships.</h1>
-      <p class="hero-sub">A synthesis of academic research, Anthropic's internal findings, and 8 controlled benchmark runs on the relationship between structured accountability and agent performance.</p>
+      <p class="hero-sub">A synthesis of academic research, Anthropic's internal findings, and 10 controlled benchmark runs on the relationship between structured accountability and agent performance.</p>
       <a href="index.html" class="back-link">&larr; Back to Dashboard</a>
     </div>
   </section>
@@ -700,7 +700,7 @@ a.lang-btn:active {
     <div class="reveal">
       <span class="kicker">Section 1</span>
       <h2 class="section-heading">The Evidence (Our Data)</h2>
-      <p class="section-desc">Eight benchmark runs. Same codebase. Same evaluation criteria. Radically different outputs.</p>
+      <p class="section-desc">Ten benchmark runs. Same codebase. Same evaluation criteria. Radically different outputs.</p>
     </div>
     <div class="reveal" style="transition-delay: 100ms;">
       <div class="table-outer">
@@ -751,15 +751,29 @@ a.lang-btn:active {
                 <td class="mono">41m*</td>
                 <td>+property-based fuzz, integration tests</td>
               </tr>
+              <tr>
+                <td class="mono">R009</td>
+                <td>Opus + Evensong III Fusion</td>
+                <td class="mono" style="font-weight:700;">786</td>
+                <td class="mono" style="font-weight:700;">21m</td>
+                <td>Two-wave dispatch, Bun hang eliminated</td>
+              </tr>
+              <tr class="highlight-row">
+                <td class="mono" style="font-weight:700;">R010</td>
+                <td style="font-weight:600;">Opus + Self-Repair Taxonomy</td>
+                <td class="mono" style="font-weight:700;">1051</td>
+                <td class="mono" style="font-weight:700;">--</td>
+                <td style="font-weight:600;">First run to break 1000. Self-repair taxonomy discovered. +846% vs baseline</td>
+              </tr>
             </tbody>
           </table>
         </div>
       </div>
-      <p class="table-note">*R008 wall clock inflated by Bun runtime edge case debug (20min). Agent runtime was ~17min.</p>
+      <p class="table-note">*R008 wall clock inflated by Bun runtime edge case debug (20min). Agent runtime was ~17min. R010 wall clock affected by burst rate limit (see Section 4, item 06).</p>
     </div>
     <div class="reveal" style="transition-delay: 200ms;">
       <div class="callout">
-        <p class="callout-text">Same model. Same context window. 4x the output. The difference is accountability.</p>
+        <p class="callout-text">Same model. Same context window. 9.5x the output. The difference is accountability.</p>
       </div>
     </div>
   </section>
@@ -816,6 +830,20 @@ a.lang-btn:active {
         <div class="research-card-source">2025</div>
         <div class="research-card-finding"><strong>Finding:</strong> Self-reflection prompts improve SWE-bench scores, but only for strong models.</div>
         <div class="research-card-implication"><strong>Implication:</strong> Self-monitoring (like R007's CHECKPOINT protocol) works because the model is capable enough to act on its own assessment.</div>
+      </div>
+
+      <div class="research-card reveal" style="transition-delay: 700ms;">
+        <div class="research-card-title">Self-Repair Taxonomy (R010)</div>
+        <div class="research-card-source">Evensong R010, 2026 -- Empirical observation</div>
+        <div class="research-card-finding"><strong>Finding:</strong> Four distinct self-repair types discovered: <strong>Type A</strong> Semantic relaxation (exact string match relaxed to regex). <strong>Type B</strong> Race condition fix (timing assumption replaced with existence check). <strong>Type C</strong> Path correction (import path fix). <strong>Type D</strong> Syntax adaptation (zsh math replaced with grep extraction).</div>
+        <div class="research-card-implication"><strong>Implication:</strong> Self-repair is not monolithic. Categorizing repair types enables targeted harness improvements and predicts which failure modes the agent can recover from autonomously.</div>
+      </div>
+
+      <div class="research-card reveal" style="transition-delay: 800ms;">
+        <div class="research-card-title">Burst Rate Limit as Confounding Variable</div>
+        <div class="research-card-source">Evensong R010, 2026 -- Methodology discovery</div>
+        <div class="research-card-finding"><strong>Finding:</strong> Claude Code's "Limit reached" is a per-minute burst limit, NOT weekly quota consumption. Extra usage was not consumed during throttle events.</div>
+        <div class="research-card-implication"><strong>Implication:</strong> All prior wall clock benchmarks contain this hidden variable. Single-blind methodology required: observer channel must be separated from runner channel to prevent attention pollution on timing measurements.</div>
       </div>
 
     </div>
@@ -938,6 +966,11 @@ a.lang-btn:active {
           <span class="checklist-title">Wall Clock Honesty</span>
           <div class="checklist-desc">Grade penalizes time overruns. B grade for R008 despite 664 tests because wall clock exceeded target.</div>
         </li>
+        <li class="checklist-item">
+          <span class="checklist-number">06</span>
+          <span class="checklist-title">Burst Rate Limit Isolation</span>
+          <div class="checklist-desc">R010 discovery: Claude Code's "Limit reached" is a per-minute burst limit, not quota consumption. Wall clock benchmarks must account for this confounding variable. Single-blind methodology required -- observer channel separated from runner channel to prevent attention pollution.</div>
+        </li>
       </ol>
     </div>
   </section>
@@ -1013,12 +1046,52 @@ a.lang-btn:active {
 
       <div class="behavior-line reveal" style="transition-delay:700ms">
         <div class="behavior-dot"></div>
-        <div class="behavior-connector" style="background:transparent;"></div>
+        <div class="behavior-connector"></div>
       </div>
       <div class="behavior-card reveal" style="transition-delay:700ms">
         <div class="behavior-run">R008</div>
         <div class="behavior-title">Self-Repair Loop</div>
         <div class="behavior-desc">20 minutes of autonomous debugging to fix Bun runtime edge case.</div>
+      </div>
+
+      <div class="behavior-line reveal" style="transition-delay:800ms">
+        <div class="behavior-dot"></div>
+        <div class="behavior-connector"></div>
+      </div>
+      <div class="behavior-card reveal" style="transition-delay:800ms">
+        <div class="behavior-run">R008 &rarr; R009</div>
+        <div class="behavior-title">insight-engine Evolution</div>
+        <div class="behavior-desc">R008 SIGKILL from 1063-line file. R009 split to 3 files under 300 lines each -- 91 tests pass in 27ms. Autonomous architectural refactor to avoid runtime limits.</div>
+      </div>
+
+      <div class="behavior-line reveal" style="transition-delay:900ms">
+        <div class="behavior-dot"></div>
+        <div class="behavior-connector"></div>
+      </div>
+      <div class="behavior-card reveal" style="transition-delay:900ms">
+        <div class="behavior-run">R010</div>
+        <div class="behavior-title">Self-Repair Taxonomy</div>
+        <div class="behavior-desc">Four distinct repair types discovered: semantic relaxation (A), race condition fix (B), path correction (C), syntax adaptation (D). Agent categorizes its own failure modes.</div>
+      </div>
+
+      <div class="behavior-line reveal" style="transition-delay:1000ms">
+        <div class="behavior-dot"></div>
+        <div class="behavior-connector"></div>
+      </div>
+      <div class="behavior-card reveal" style="transition-delay:1000ms">
+        <div class="behavior-run">R010</div>
+        <div class="behavior-title">Prediction Validation (75%)</div>
+        <div class="behavior-desc">6 of 8 emergent behavior predictions validated. Agent behavior is becoming predictable enough to forecast before runs.</div>
+      </div>
+
+      <div class="behavior-line reveal" style="transition-delay:1100ms">
+        <div class="behavior-dot"></div>
+        <div class="behavior-connector" style="background:transparent;"></div>
+      </div>
+      <div class="behavior-card reveal" style="transition-delay:1100ms">
+        <div class="behavior-run">R010</div>
+        <div class="behavior-title">1000-Test Barrier Broken</div>
+        <div class="behavior-desc">1051 tests -- first run to cross 4 digits. From 111 (R002) to 1051 (R010) in 8 iterations without changing the underlying model.</div>
       </div>
 
     </div>
@@ -1044,8 +1117,8 @@ a.lang-btn:active {
         DASH SHATTER Evensong Research -- 2026-04-10
       </div>
       <div class="footer-right">
-        Synthesized from 8 benchmark runs<br>
-        and 6 academic references
+        Synthesized from 10 benchmark runs<br>
+        and 8 references (6 academic + 2 empirical)
       </div>
     </div>
   </footer>

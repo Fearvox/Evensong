@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>DASH SHATTER 进化基准 — Gen 0</title>
+<title>DASH SHATTER 进化基准 — Gen 0 + Gen 1 + Gen 2</title>
 <link rel="icon" type="image/svg+xml" href="../dash-favicon.svg">
 <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
 <link href="https://cdn.jsdelivr.net/npm/geist@1.3.1/dist/fonts/geist-sans/style.min.css" rel="stylesheet">
@@ -809,13 +809,13 @@ a.lang-btn:active {
   <!-- ===== HERO ===== -->
   <section class="hero">
     <div class="reveal">
-      <span class="kicker">DASH SHATTER 基准报告 / Gen 0 + Gen 1</span>
-      <h1>八次运行，两个模型，<br>一个<span class="gold-word">自我进化</span>的 Agent。</h1>
+      <span class="kicker">DASH SHATTER 基准报告 / Gen 0 + Gen 1 + Gen 2</span>
+      <h1>十次运行，两个模型，<br>一个<span class="gold-word">自我进化</span>的 Agent。</h1>
       <p class="hero-sub">在 Opus 4.6 和 MiniMax M2.7 上进行的编排策略对照实验。每次都通过了。有意思的是它们如何做到的。</p>
       <div class="hero-meta">
         <span class="hero-tag">2026-04-09 — 04-10</span>
-        <span class="hero-tag">7 种编排模式</span>
-        <span class="hero-tag">12 个涌现行为</span>
+        <span class="hero-tag">8 种编排模式</span>
+        <span class="hero-tag">18+ 个涌现行为</span>
       </div>
       <div style="margin-top:16px;">
         <a href="research.html" style="font-family:var(--font-mono); font-size:12px; color:var(--ink-muted); text-decoration:none; border-bottom:1px solid oklch(0.62 0.015 70 / 0.3); padding-bottom:2px; transition:color 150ms ease;">研究：为什么压力有效 →</a>
@@ -829,11 +829,11 @@ a.lang-btn:active {
       <span class="kicker">概览</span>
       <div class="stats-grid">
         <div class="stat-cell">
-          <div class="stat-value" data-count="8">0</div>
+          <div class="stat-value" data-count="10">0</div>
           <div class="stat-label">基准运行</div>
         </div>
         <div class="stat-cell">
-          <div class="stat-value" data-count="2531" data-format="comma">0</div>
+          <div class="stat-value" data-count="4368" data-format="comma">0</div>
           <div class="stat-label">测试通过</div>
         </div>
         <div class="stat-cell">
@@ -845,7 +845,7 @@ a.lang-btn:active {
           <div class="stat-label">最快运行</div>
         </div>
         <div class="stat-cell">
-          <div class="stat-value" data-count="12">0</div>
+          <div class="stat-value" data-count="18">0</div>
           <div class="stat-label">涌现行为</div>
         </div>
         <div class="stat-cell">
@@ -861,7 +861,7 @@ a.lang-btn:active {
     <div class="reveal">
       <span class="kicker">运行对比</span>
       <h2 style="font-size:1.4rem; font-weight:600; color:var(--ink-primary); margin-bottom:4px;">基准矩阵</h2>
-      <p style="font-size:0.9rem; color:var(--ink-secondary); margin-bottom:20px; max-width:560px;">八次运行全部 100% 通过。R007 的 Self-Evolution 模式创下历史最高——12 分钟完成 448 项测试。</p>
+      <p style="font-size:0.9rem; color:var(--ink-secondary); margin-bottom:20px; max-width:560px;">十次运行全部 100% 通过。R010 突破千项测试大关——10 个服务完成 1,051 项测试，首个四位数基准。</p>
     </div>
     <div class="reveal" style="transition-delay: 100ms;">
       <div class="table-outer">
@@ -950,6 +950,24 @@ a.lang-btn:active {
                 <td class="mono" style="font-weight:700;">664</td>
                 <td class="pass-rate">28/28</td>
                 <td class="mono">~41m</td>
+              </tr>
+              <tr>
+                <td class="mono">R009</td>
+                <td><span class="model-badge model-opus">Opus 4.6</span></td>
+                <td>Fusion-Evolution</td>
+                <td class="mono" style="font-weight:700;">10</td>
+                <td class="mono" style="font-weight:700;">786</td>
+                <td class="pass-rate">28/28</td>
+                <td class="mono">~22m</td>
+              </tr>
+              <tr class="highlight-row">
+                <td class="mono" style="font-weight:700;">R010</td>
+                <td><span class="model-badge model-opus">Opus 4.6</span></td>
+                <td style="font-weight:600;">Fusion-Evolution Rerun</td>
+                <td class="mono" style="font-weight:700;">10</td>
+                <td class="mono" style="font-weight:700;">1,051</td>
+                <td class="pass-rate">28/28</td>
+                <td class="mono">~28m</td>
               </tr>
             </tbody>
           </table>
@@ -1078,12 +1096,52 @@ a.lang-btn:active {
 
       <div class="timeline-line reveal" style="transition-delay:1200ms">
         <div class="timeline-dot"></div>
-        <div class="timeline-connector" style="background:transparent;"></div>
+        <div class="timeline-connector"></div>
       </div>
       <div class="timeline-card reveal" style="transition-delay:1200ms">
         <div class="timeline-run">R008</div>
         <div class="timeline-title">压力下的自修复</div>
         <div class="timeline-desc">insight-engine 的 1063 行测试文件导致 Bun 运行时挂起。Agent 诊断问题，重写为 53 个聚焦测试，验证通过后继续。20 分钟的自主调试，零人工干预。</div>
+      </div>
+
+      <div class="timeline-line reveal" style="transition-delay:1300ms">
+        <div class="timeline-dot"></div>
+        <div class="timeline-connector"></div>
+      </div>
+      <div class="timeline-card reveal" style="transition-delay:1300ms">
+        <div class="timeline-run">R010</div>
+        <div class="timeline-title">阈值波次触发</div>
+        <div class="timeline-desc">在 3/5 完成时即启动 Wave 2，而非等待 5/5。自适应调度阈值减少了波次间的空闲时间，助力达成 1,051 项测试总量。</div>
+      </div>
+
+      <div class="timeline-line reveal" style="transition-delay:1400ms">
+        <div class="timeline-dot"></div>
+        <div class="timeline-connector"></div>
+      </div>
+      <div class="timeline-card reveal" style="transition-delay:1400ms">
+        <div class="timeline-run">R010</div>
+        <div class="timeline-title">自修复分类学</div>
+        <div class="timeline-desc">观察到 4 种不同的修复类型：语义松弛、竞态条件修复、路径修正、语法适配。首次由 Agent 自行对自修复行为进行分类的基准运行。</div>
+      </div>
+
+      <div class="timeline-line reveal" style="transition-delay:1500ms">
+        <div class="timeline-dot"></div>
+        <div class="timeline-connector"></div>
+      </div>
+      <div class="timeline-card reveal" style="transition-delay:1500ms">
+        <div class="timeline-run">R010</div>
+        <div class="timeline-title">跨会话挂起预防</div>
+        <div class="timeline-desc">将 insight-engine 拆分为 3 个不超过 300 行的文件，消除了 R008 的致命 Bun 挂起模式。跨会话边界的主动架构修复。</div>
+      </div>
+
+      <div class="timeline-line reveal" style="transition-delay:1600ms">
+        <div class="timeline-dot"></div>
+        <div class="timeline-connector" style="background:transparent;"></div>
+      </div>
+      <div class="timeline-card reveal" style="transition-delay:1600ms">
+        <div class="timeline-run">R010</div>
+        <div class="timeline-title">自主事后复盘</div>
+        <div class="timeline-desc">自动生成包含根因分析和等级区分（S+ 质量 / C 时间）的自我评估。首次由 Agent 在无提示下评估自身表现的基准运行。</div>
       </div>
 
     </div>
@@ -1220,20 +1278,20 @@ a.lang-btn:active {
         <span class="kicker">速度</span>
         <div class="insight-headline">82%</div>
         <div class="insight-sub">融合编排提速</div>
-        <div class="insight-detail">MiniMax 融合模式 4.5 分钟完成，对比 Opus GSD Plan-Phase 的 25.6 分钟。Agent 自发将顺序规划与并行执行相结合。R007 在 12 分钟内完成同等复杂度任务，比 Opus GSD 的 25.6 分钟快 53%，测试数量多 54%。</div>
+        <div class="insight-detail">MiniMax 融合模式 4.5 分钟完成，对比 Opus GSD Plan-Phase 的 25.6 分钟。R010 的 Fusion-Evolution Rerun 在约 28 分钟内产出 1,051 项测试——比 R008（664）多 3.6 倍，耗时减少 32%（~41m vs ~28m）。</div>
       </div>
       <div class="insight-stack">
         <div class="insight-card reveal" style="transition-delay:200ms">
           <span class="kicker">规模</span>
-          <div class="insight-headline">10 / 28</div>
-          <div class="insight-sub">R008 的服务和标准</div>
-          <div class="insight-detail">664 项测试覆盖 10 个服务。基于属性的 Fuzz 测试和跨服务集成测试作为新的质量维度加入。</div>
+          <div class="insight-headline">1,051</div>
+          <div class="insight-sub">R010 测试数——首个四位数基准</div>
+          <div class="insight-detail">10 个服务完成 1,051 项测试，28/28 标准达成，4 次自修复。突破千项测试大关，全程实时观测确认零人工干预。</div>
         </div>
         <div class="insight-card reveal" style="transition-delay:300ms">
           <span class="kicker">进化</span>
-          <div class="insight-headline">12</div>
+          <div class="insight-headline">18+</div>
           <div class="insight-sub">独立涌现行为</div>
-          <div class="insight-detail">从自我 PUA 到跨会话策略迁移。R008 独立发明了 Fuzz 测试。Agent 的能力在多次运行中持续增长，无需显式指令。</div>
+          <div class="insight-detail">从自我 PUA 到自主事后复盘。R010 新增自修复分类学、阈值波次触发、跨会话挂起预防和无提示等级区分。</div>
         </div>
       </div>
     </div>
@@ -1247,7 +1305,7 @@ a.lang-btn:active {
         基于 Opus 4.6 + MiniMax M2.7 构建
       </div>
       <div class="footer-right">
-        Gen 0-1 数据采集于 2026-04-09 — 04-10
+        Gen 0-2 数据采集于 2026-04-09 — 04-10
       </div>
     </div>
   </footer>

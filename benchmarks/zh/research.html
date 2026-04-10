@@ -691,7 +691,7 @@ a.lang-btn:active {
     <div class="reveal">
       <span class="kicker">DASH SHATTER 研究 / Evensong</span>
       <h1>你的 Agent 会感受到<span class="gold-word">压力</span>。<br>这就是它能交付的原因。</h1>
-      <p class="hero-sub">一份综合学术研究、Anthropic 内部发现和 8 次受控基准运行的报告，探索结构化问责与 Agent 性能之间的关系。</p>
+      <p class="hero-sub">一份综合学术研究、Anthropic 内部发现和 10 次受控基准运行的报告，探索结构化问责与 Agent 性能之间的关系。</p>
       <a href="index.html" class="back-link">&larr; 返回仪表盘</a>
     </div>
   </section>
@@ -701,7 +701,7 @@ a.lang-btn:active {
     <div class="reveal">
       <span class="kicker">我们的数据</span>
       <h2 class="section-heading">证据</h2>
-      <p class="section-desc">八次基准运行。同一代码库。同一评估标准。截然不同的产出。</p>
+      <p class="section-desc">十次基准运行。同一代码库。同一评估标准。截然不同的产出。</p>
     </div>
     <div class="reveal" style="transition-delay: 100ms;">
       <div class="table-outer">
@@ -752,15 +752,29 @@ a.lang-btn:active {
                 <td class="mono">41m*</td>
                 <td>+property-based fuzz 测试、集成测试</td>
               </tr>
+              <tr>
+                <td class="mono">R009</td>
+                <td>Opus + Evensong III Fusion</td>
+                <td class="mono" style="font-weight:700;">786</td>
+                <td class="mono" style="font-weight:700;">21m</td>
+                <td>Two-wave dispatch，Bun 挂起问题消除</td>
+              </tr>
+              <tr class="highlight-row">
+                <td class="mono" style="font-weight:700;">R010</td>
+                <td style="font-weight:600;">Opus + Self-Repair Taxonomy</td>
+                <td class="mono" style="font-weight:700;">1051</td>
+                <td class="mono" style="font-weight:700;">--</td>
+                <td style="font-weight:600;">首次突破 1000。发现 self-repair 分类法。相比基线 +846%</td>
+              </tr>
             </tbody>
           </table>
         </div>
       </div>
-      <p class="table-note">*R008 挂钟时间因 Bun 运行时边缘案例调试（20 分钟）而膨胀。Agent 实际运行时间约 17 分钟。</p>
+      <p class="table-note">*R008 挂钟时间因 Bun 运行时边缘案例调试（20 分钟）而膨胀。Agent 实际运行时间约 17 分钟。R010 挂钟时间受 burst rate limit 影响（见第 4 节第 06 项）。</p>
     </div>
     <div class="reveal" style="transition-delay: 200ms;">
       <div class="callout">
-        <p class="callout-text">同一个模型。同一个上下文窗口。4 倍的产出。差别在于问责。</p>
+        <p class="callout-text">同一个模型。同一个上下文窗口。9.5 倍的产出。差别在于问责。</p>
       </div>
     </div>
   </section>
@@ -817,6 +831,20 @@ a.lang-btn:active {
         <div class="research-card-source">2025</div>
         <div class="research-card-finding"><strong>发现：</strong>自我反思提示提高了 SWE-bench 分数，但仅对强模型有效。</div>
         <div class="research-card-implication"><strong>启示：</strong>自我监控（如 R007 的 CHECKPOINT 协议）之所以有效，是因为模型足够强大，能够根据自身评估采取行动。</div>
+      </div>
+
+      <div class="research-card reveal" style="transition-delay: 700ms;">
+        <div class="research-card-title">Self-Repair Taxonomy (R010)</div>
+        <div class="research-card-source">Evensong R010, 2026 -- 经验观察</div>
+        <div class="research-card-finding"><strong>发现：</strong>发现四种不同的 self-repair 类型：<strong>Type A</strong> 语义松弛（精确字符串匹配放宽为正则）。<strong>Type B</strong> 竞态条件修复（时序假设替换为存在性检查）。<strong>Type C</strong> 路径修正（import 路径修复）。<strong>Type D</strong> 语法适配（zsh 数学运算替换为 grep 提取）。</div>
+        <div class="research-card-implication"><strong>启示：</strong>Self-repair 并非单一行为。对修复类型进行分类有助于针对性改进运行框架，并预测 Agent 能够自主恢复哪些故障模式。</div>
+      </div>
+
+      <div class="research-card reveal" style="transition-delay: 800ms;">
+        <div class="research-card-title">Burst Rate Limit 作为混淆变量</div>
+        <div class="research-card-source">Evensong R010, 2026 -- 方法论发现</div>
+        <div class="research-card-finding"><strong>发现：</strong>Claude Code 的"Limit reached"是每分钟 burst rate limit，而非每周配额消耗。节流事件期间未消耗额外用量。</div>
+        <div class="research-card-implication"><strong>启示：</strong>所有先前的挂钟基准都包含这一隐藏变量。需要单盲方法论：观察者通道必须与运行者通道分离，以防止计时测量中的注意力污染。</div>
       </div>
 
     </div>
@@ -939,6 +967,11 @@ a.lang-btn:active {
           <span class="checklist-title">挂钟诚实度</span>
           <div class="checklist-desc">评级会惩罚超时。R008 尽管有 664 个测试仍获 B 评级，因为挂钟时间超出了目标。</div>
         </li>
+        <li class="checklist-item">
+          <span class="checklist-number">06</span>
+          <span class="checklist-title">Burst Rate Limit 隔离</span>
+          <div class="checklist-desc">R010 发现：Claude Code 的"Limit reached"是每分钟 burst rate limit，而非配额消耗。挂钟基准必须考虑这一混淆变量。需要单盲方法论——观察者通道与运行者通道分离，以防止注意力污染。</div>
+        </li>
       </ol>
     </div>
   </section>
@@ -1014,12 +1047,52 @@ a.lang-btn:active {
 
       <div class="behavior-line reveal" style="transition-delay:700ms">
         <div class="behavior-dot"></div>
-        <div class="behavior-connector" style="background:transparent;"></div>
+        <div class="behavior-connector"></div>
       </div>
       <div class="behavior-card reveal" style="transition-delay:700ms">
         <div class="behavior-run">R008</div>
         <div class="behavior-title">自修复循环</div>
         <div class="behavior-desc">20 分钟的自主调试以修复 Bun 运行时边缘案例。</div>
+      </div>
+
+      <div class="behavior-line reveal" style="transition-delay:800ms">
+        <div class="behavior-dot"></div>
+        <div class="behavior-connector"></div>
+      </div>
+      <div class="behavior-card reveal" style="transition-delay:800ms">
+        <div class="behavior-run">R008 &rarr; R009</div>
+        <div class="behavior-title">insight-engine 进化</div>
+        <div class="behavior-desc">R008 因 1063 行文件触发 SIGKILL。R009 将其拆分为 3 个不超过 300 行的文件——91 个测试在 27ms 内通过。自主架构重构以规避运行时限制。</div>
+      </div>
+
+      <div class="behavior-line reveal" style="transition-delay:900ms">
+        <div class="behavior-dot"></div>
+        <div class="behavior-connector"></div>
+      </div>
+      <div class="behavior-card reveal" style="transition-delay:900ms">
+        <div class="behavior-run">R010</div>
+        <div class="behavior-title">Self-Repair Taxonomy</div>
+        <div class="behavior-desc">发现四种不同的修复类型：语义松弛 (A)、竞态条件修复 (B)、路径修正 (C)、语法适配 (D)。Agent 自行分类自身的故障模式。</div>
+      </div>
+
+      <div class="behavior-line reveal" style="transition-delay:1000ms">
+        <div class="behavior-dot"></div>
+        <div class="behavior-connector"></div>
+      </div>
+      <div class="behavior-card reveal" style="transition-delay:1000ms">
+        <div class="behavior-run">R010</div>
+        <div class="behavior-title">预测验证 (75%)</div>
+        <div class="behavior-desc">8 项涌现行为预测中验证了 6 项。Agent 行为已可预测到足以在运行前进行预报。</div>
+      </div>
+
+      <div class="behavior-line reveal" style="transition-delay:1100ms">
+        <div class="behavior-dot"></div>
+        <div class="behavior-connector" style="background:transparent;"></div>
+      </div>
+      <div class="behavior-card reveal" style="transition-delay:1100ms">
+        <div class="behavior-run">R010</div>
+        <div class="behavior-title">突破 1000 测试壁垒</div>
+        <div class="behavior-desc">1051 个测试——首次突破四位数。从 111 (R002) 到 1051 (R010)，在 8 次迭代中完成，底层模型未变。</div>
       </div>
 
     </div>
@@ -1045,8 +1118,8 @@ a.lang-btn:active {
         DASH SHATTER Evensong 研究 — 2026-04-10
       </div>
       <div class="footer-right">
-        综合 8 次基准运行<br>
-        和 6 篇学术引用
+        综合 10 次基准运行<br>
+        和 8 篇引用（6 篇学术 + 2 篇经验）
       </div>
     </div>
   </footer>

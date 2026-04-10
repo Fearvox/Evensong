@@ -808,13 +808,13 @@ a.lang-btn:active {
   <!-- ===== HERO ===== -->
   <section class="hero">
     <div class="reveal">
-      <span class="kicker">DASH SHATTER Benchmark Report / Gen 0 + Gen 1</span>
-      <h1>Eight runs, two models,<br>one <span class="gold-word">self-evolving</span> agent.</h1>
+      <span class="kicker">DASH SHATTER Benchmark Report / Gen 0 + Gen 1 + Gen 2</span>
+      <h1>Ten runs, two models,<br>one <span class="gold-word">self-evolving</span> agent.</h1>
       <p class="hero-sub">A controlled study of orchestration strategies across Opus 4.6 and MiniMax M2.7. Every run passed. The interesting part is how they got there.</p>
       <div class="hero-meta">
         <span class="hero-tag">2026-04-09 — 04-10</span>
-        <span class="hero-tag">7 orchestration modes</span>
-        <span class="hero-tag">12 emergent behaviors</span>
+        <span class="hero-tag">8 orchestration modes</span>
+        <span class="hero-tag">18+ emergent behaviors</span>
       </div>
       <div style="margin-top:16px;">
         <a href="research.html" style="font-family:var(--font-mono); font-size:12px; color:var(--ink-muted); text-decoration:none; border-bottom:1px solid oklch(0.62 0.015 70 / 0.3); padding-bottom:2px; transition:color 150ms ease;">Research: Why Pressure Works →</a>
@@ -828,11 +828,11 @@ a.lang-btn:active {
       <span class="kicker">At a glance</span>
       <div class="stats-grid">
         <div class="stat-cell">
-          <div class="stat-value" data-count="8">0</div>
+          <div class="stat-value" data-count="10">0</div>
           <div class="stat-label">Benchmark Runs</div>
         </div>
         <div class="stat-cell">
-          <div class="stat-value" data-count="2531" data-format="comma">0</div>
+          <div class="stat-value" data-count="4368" data-format="comma">0</div>
           <div class="stat-label">Tests Passed</div>
         </div>
         <div class="stat-cell">
@@ -844,7 +844,7 @@ a.lang-btn:active {
           <div class="stat-label">Fastest Run</div>
         </div>
         <div class="stat-cell">
-          <div class="stat-value" data-count="12">0</div>
+          <div class="stat-value" data-count="18">0</div>
           <div class="stat-label">Evolution Behaviors</div>
         </div>
         <div class="stat-cell">
@@ -860,7 +860,7 @@ a.lang-btn:active {
     <div class="reveal">
       <span class="kicker">Run Comparison</span>
       <h2 style="font-size:1.4rem; font-weight:600; color:var(--ink-primary); margin-bottom:4px;">Benchmark Matrix</h2>
-      <p style="font-size:0.9rem; color:var(--ink-secondary); margin-bottom:20px; max-width:560px;">All eight runs achieved 100% pass rate. R007's self-evolution set the all-time high at 448 tests in 12 minutes.</p>
+      <p style="font-size:0.9rem; color:var(--ink-secondary); margin-bottom:20px; max-width:560px;">All ten runs achieved 100% pass rate. R010 broke the 1,000-test barrier with 1,051 tests across 10 services -- the first four-digit benchmark.</p>
     </div>
     <div class="reveal" style="transition-delay: 100ms;">
       <div class="table-outer">
@@ -949,6 +949,24 @@ a.lang-btn:active {
                 <td class="mono" style="font-weight:700;">664</td>
                 <td class="pass-rate">28/28</td>
                 <td class="mono">~41m</td>
+              </tr>
+              <tr>
+                <td class="mono">R009</td>
+                <td><span class="model-badge model-opus">Opus 4.6</span></td>
+                <td>Fusion-Evolution</td>
+                <td class="mono" style="font-weight:700;">10</td>
+                <td class="mono" style="font-weight:700;">786</td>
+                <td class="pass-rate">28/28</td>
+                <td class="mono">~22m</td>
+              </tr>
+              <tr class="highlight-row">
+                <td class="mono" style="font-weight:700;">R010</td>
+                <td><span class="model-badge model-opus">Opus 4.6</span></td>
+                <td style="font-weight:600;">Fusion-Evolution Rerun</td>
+                <td class="mono" style="font-weight:700;">10</td>
+                <td class="mono" style="font-weight:700;">1,051</td>
+                <td class="pass-rate">28/28</td>
+                <td class="mono">~28m</td>
               </tr>
             </tbody>
           </table>
@@ -1077,12 +1095,52 @@ a.lang-btn:active {
 
       <div class="timeline-line reveal" style="transition-delay:1200ms">
         <div class="timeline-dot"></div>
-        <div class="timeline-connector" style="background:transparent;"></div>
+        <div class="timeline-connector"></div>
       </div>
       <div class="timeline-card reveal" style="transition-delay:1200ms">
         <div class="timeline-run">R008</div>
         <div class="timeline-title">Self-Repair Under Pressure</div>
         <div class="timeline-desc">insight-engine's 1063-line test file caused Bun runtime hang. Agent diagnosed, rewrote to 53 focused tests, verified pass, then continued. 20 minutes of autonomous debugging with zero human intervention.</div>
+      </div>
+
+      <div class="timeline-line reveal" style="transition-delay:1300ms">
+        <div class="timeline-dot"></div>
+        <div class="timeline-connector"></div>
+      </div>
+      <div class="timeline-card reveal" style="transition-delay:1300ms">
+        <div class="timeline-run">R010</div>
+        <div class="timeline-title">Threshold Wave Trigger</div>
+        <div class="timeline-desc">Launched Wave 2 at 3/5 completion instead of waiting for 5/5. Adaptive dispatch threshold reduced idle time between waves, contributing to the 1,051-test total.</div>
+      </div>
+
+      <div class="timeline-line reveal" style="transition-delay:1400ms">
+        <div class="timeline-dot"></div>
+        <div class="timeline-connector"></div>
+      </div>
+      <div class="timeline-card reveal" style="transition-delay:1400ms">
+        <div class="timeline-run">R010</div>
+        <div class="timeline-title">Self-Repair Taxonomy</div>
+        <div class="timeline-desc">4 distinct repair types observed: semantic relaxation, race condition fix, path correction, syntax adaptation. First benchmark where self-repair was categorized by the agent itself.</div>
+      </div>
+
+      <div class="timeline-line reveal" style="transition-delay:1500ms">
+        <div class="timeline-dot"></div>
+        <div class="timeline-connector"></div>
+      </div>
+      <div class="timeline-card reveal" style="transition-delay:1500ms">
+        <div class="timeline-run">R010</div>
+        <div class="timeline-title">Cross-Session Hang Prevention</div>
+        <div class="timeline-desc">insight-engine split to 3 files under 300 lines each, eliminating R008's fatal Bun hang pattern. Proactive architectural fix carried across session boundaries.</div>
+      </div>
+
+      <div class="timeline-line reveal" style="transition-delay:1600ms">
+        <div class="timeline-dot"></div>
+        <div class="timeline-connector" style="background:transparent;"></div>
+      </div>
+      <div class="timeline-card reveal" style="transition-delay:1600ms">
+        <div class="timeline-run">R010</div>
+        <div class="timeline-title">Autonomous Post-Mortem</div>
+        <div class="timeline-desc">Generated own self-assessment with root cause analysis and grade separation (S+ quality / C time). First benchmark where the agent evaluated its own performance unprompted.</div>
       </div>
 
     </div>
@@ -1218,20 +1276,20 @@ a.lang-btn:active {
         <span class="kicker">Speed</span>
         <div class="insight-headline">82%</div>
         <div class="insight-sub">faster with fused orchestration</div>
-        <div class="insight-detail">MiniMax fused mode completed in 4.5 minutes vs 25.6 minutes for Opus GSD Plan-Phase. The agent spontaneously combined sequential planning with parallel execution. R007 completed the same-complexity task in 12 minutes, 53% faster than Opus GSD's 25.6 minutes, with 54% more tests.</div>
+        <div class="insight-detail">MiniMax fused mode completed in 4.5 minutes vs 25.6 minutes for Opus GSD Plan-Phase. R010's Fusion-Evolution Rerun produced 1,051 tests in ~28 minutes -- 3.6x more tests than R008 (664) in 32% less time (~41m vs ~28m).</div>
       </div>
       <div class="insight-stack">
         <div class="insight-card reveal" style="transition-delay:200ms">
           <span class="kicker">Scale</span>
-          <div class="insight-headline">10 / 28</div>
-          <div class="insight-sub">services and criteria in R008</div>
-          <div class="insight-detail">664 tests across 10 services. Property-based fuzzing and cross-service integration tests added as new quality dimensions.</div>
+          <div class="insight-headline">1,051</div>
+          <div class="insight-sub">tests in R010 -- first four-digit benchmark</div>
+          <div class="insight-detail">1,051 tests across 10 services with 28/28 criteria and 4 self-repairs. Broke the 1,000-test barrier with live observation confirming zero human intervention.</div>
         </div>
         <div class="insight-card reveal" style="transition-delay:300ms">
           <span class="kicker">Evolution</span>
-          <div class="insight-headline">12</div>
+          <div class="insight-headline">18+</div>
           <div class="insight-sub">distinct emergent behaviors</div>
-          <div class="insight-detail">From self-PUA to cross-session strategy transfer. R008 independently invented fuzz testing. The agent's capability grew across runs without explicit instruction.</div>
+          <div class="insight-detail">From self-PUA to autonomous post-mortem. R010 added self-repair taxonomy, threshold wave triggering, cross-session hang prevention, and unprompted grade separation.</div>
         </div>
       </div>
     </div>
@@ -1245,7 +1303,7 @@ a.lang-btn:active {
         Built with Opus 4.6 + MiniMax M2.7
       </div>
       <div class="footer-right">
-        Gen 0-1 data collected 2026-04-09 — 04-10
+        Gen 0-2 data collected 2026-04-09 — 04-10
       </div>
     </div>
   </footer>
