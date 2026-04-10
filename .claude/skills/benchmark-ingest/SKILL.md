@@ -119,11 +119,19 @@ Translation rules:
 
 The main product website at `dash-shatter.vercel.app` (repo: `~/dash-shatter/`) also needs updating.
 
+**CRITICAL: Hero.tsx has hardcoded values that MUST be updated manually.**
+
 1. **benchmarkData.ts** — Add new run to `BENCHMARK_RUNS` array in `/Users/0xvox/dash-shatter/src/lib/benchmarkData.ts`
-2. **EvolutionTimeline** — Add new emergent behaviors to the timeline component data
-3. **i18n translations** — Update both EN and ZH translations in `/Users/0xvox/dash-shatter/src/lib/i18n.ts`
-4. **Build verify** — `cd ~/dash-shatter && bun run build`
-5. **Commit + push** — Separate commit in the dash-shatter repo
+   - `TOTAL_TESTS` and `TOTAL_RUNS` are auto-computed from array — no manual update needed
+   - R005 is excluded from array by convention (invalid run)
+2. **Hero.tsx** — Update hardcoded `target: N` for behaviors count in `/Users/0xvox/dash-shatter/src/components/sections/Hero.tsx` line ~54
+   - Search for `heroStatBehaviors` — the number before it is hardcoded
+   - This is NOT auto-computed. You MUST update it.
+3. **EvolutionTimeline.tsx** — Add new emergent behaviors to EVENTS array in `/Users/0xvox/dash-shatter/src/components/sections/EvolutionTimeline.tsx`
+4. **i18n translations** — Update both EN and ZH translations in `/Users/0xvox/dash-shatter/src/lib/i18n.ts`
+   - Add translation keys for new emergent behaviors (evo* pattern)
+5. **Build verify** — `cd ~/dash-shatter && bun run build` (MUST pass before commit)
+6. **Commit + push** — Separate commit in the dash-shatter repo
 
 ```bash
 cd ~/dash-shatter
@@ -133,11 +141,12 @@ git push origin main
 ```
 
 Architecture notes:
-- Next.js 15 app with App Router
+- Next.js 16 app with App Router
 - i18n via React Context (`LocaleContext.tsx`) + translations in `i18n.ts`
 - `LocaleToggle.tsx` in SiteHeader toggles locale context
 - Section components read `useLocale()` and index into translations
 - Fonts: Plus Jakarta Sans + Geist Mono (no Noto Sans SC needed, system CJK fallback)
+- **Hero stats: TOTAL_RUNS and TOTAL_TESTS are auto-computed, but behaviors count is HARDCODED**
 
 ### Phase 7: CCB Benchmark Commit + Deploy
 
@@ -164,7 +173,32 @@ Check if existing memory files need updating:
 - `memory/benchmark_evolution_r00X_results.md` — create new or update
 - `memory/project_evensong_benchmark.md` — update with latest run reference
 
-### Phase 8: Ad Copy (if notable results)
+### Phase 8: Post-Deploy Verification
+
+After ALL commits and pushes, verify BOTH live sites show correct data:
+
+1. **CCB Benchmarks site** — `benchmarks-zeta.vercel.app` (force deploy if needed: `cd benchmarks && npx vercel --prod`)
+2. **DASH SHATTER site** — `dash-shatter.vercel.app` (auto-deploys from git push)
+
+Check these specific values on EACH site:
+- Run count matches registry entry count
+- Total tests matches sum of all runs in registry
+- Emergent behaviors count matches latest total
+- Latest run appears in comparison table
+- R011+ data visible (not cached old version)
+
+If values don't match: check Vercel deployment status, force redeploy, or wait 60s for CDN propagation.
+
+### Phase 8.5: Presentation Review (Steve Jobs Lens)
+
+**REQUIRED** — invoke `benchmark-presentation-review` skill after registry update.
+
+This evaluates whether the dashboard layout still serves the data at current scale.
+Thresholds: ≤11 runs = likely KEEP, 12-24 = REVIEW for era grouping, 25+ = RESTRUCTURE.
+
+Output: KEEP / RESTRUCTURE / REDESIGN decision with specific recommendations.
+
+### Phase 9: Ad Copy (if notable results)
 
 If the run achieved S+ grade or set new records:
 - Update `docs/superpowers/ad-copy/your-agent-feels-pressure.md` numbers table
