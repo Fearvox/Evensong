@@ -754,10 +754,13 @@ a.lang-btn:active {
 </head>
 <body class="paper-background">
 
+<!-- LOCALE REDIRECT (runs before paint) -->
+<script>if(localStorage.getItem('ds-locale')==='zh')location.replace('zh/');</script>
+
 <!-- LANGUAGE TOGGLE -->
 <div class="lang-toggle">
   <span class="lang-btn active">EN</span>
-  <a href="zh/" class="lang-btn">中文</a>
+  <a href="zh/" class="lang-btn" onclick="localStorage.setItem('ds-locale','zh')">中文</a>
 </div>
 
 <!-- PAPER TEXTURE: SVG NOISE FILTER -->

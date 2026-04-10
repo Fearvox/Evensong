@@ -755,9 +755,12 @@ a.lang-btn:active {
 </head>
 <body class="paper-background">
 
+<!-- PERSIST LOCALE -->
+<script>localStorage.setItem('ds-locale','zh');</script>
+
 <!-- LANGUAGE TOGGLE -->
 <div class="lang-toggle">
-  <a href="../" class="lang-btn">EN</a>
+  <a href="../" class="lang-btn" onclick="localStorage.setItem('ds-locale','en')">EN</a>
   <span class="lang-btn active">中文</span>
 </div>
 
@@ -815,7 +818,7 @@ a.lang-btn:active {
         <span class="hero-tag">12 个涌现行为</span>
       </div>
       <div style="margin-top:16px;">
-        <a href="../research.html" style="font-family:var(--font-mono); font-size:12px; color:var(--ink-muted); text-decoration:none; border-bottom:1px solid oklch(0.62 0.015 70 / 0.3); padding-bottom:2px; transition:color 150ms ease;">研究：为什么压力有效 →</a>
+        <a href="research.html" style="font-family:var(--font-mono); font-size:12px; color:var(--ink-muted); text-decoration:none; border-bottom:1px solid oklch(0.62 0.015 70 / 0.3); padding-bottom:2px; transition:color 150ms ease;">研究：为什么压力有效 →</a>
       </div>
     </div>
   </section>

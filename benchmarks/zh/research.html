@@ -639,9 +639,12 @@ a.lang-btn:active {
 </head>
 <body class="paper-background">
 
+<!-- PERSIST LOCALE -->
+<script>localStorage.setItem('ds-locale','zh');</script>
+
 <!-- LANGUAGE TOGGLE -->
 <div class="lang-toggle">
-  <a href="../research.html" class="lang-btn">EN</a>
+  <a href="../research.html" class="lang-btn" onclick="localStorage.setItem('ds-locale','en')">EN</a>
   <span class="lang-btn active">中文</span>
 </div>
 
