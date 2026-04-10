@@ -66,12 +66,12 @@ jq -c '.env // {}' "$SETTINGS_JSON"
 echo ""
 
 # ── Helper: safe jq in-place ───────────────────────────────────────────────
-# jq_inplace FILE FILTER
+# jq_inplace FILE [jq-args...] FILTER
 jq_inplace() {
-  local file="$1" filter="$2"
+  local file="$1"; shift
   local tmp
   tmp="$(mktemp)"
-  jq "$filter" "$file" > "$tmp" && mv "$tmp" "$file"
+  jq "$@" "$file" > "$tmp" && mv "$tmp" "$file"
 }
 
 # ── Profile: evensong-universal ─────────────────────────────────────────────
