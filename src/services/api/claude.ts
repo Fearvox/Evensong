@@ -560,7 +560,7 @@ export async function verifyApiKey(
           // biome-ignore lint/plugin: API key verification is intentionally a minimal direct call
           await anthropic.beta.messages.create({
             model,
-            max_tokens: 1,
+            max_tokens: 16,
             messages,
             temperature: 1,
             ...(betas.length > 0 && { betas }),
