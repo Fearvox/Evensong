@@ -1,0 +1,152 @@
+% !TeX program = xelatex
+% Evensong 技术简报 — 开发 / 工程
+% Compile: latexmk -xelatex dev-technical-zh.tex
+
+\documentclass[11pt,a4paper]{article}
+\usepackage[top=20mm,bottom=20mm,inner=25mm,outer=25mm]{geometry}
+\usepackage{fontspec}\setmainfont{Noto Serif CJK SC}\setsansfont{Noto Sans CJK SC}\setmonofont{Menlo}[Scale=0.82]
+\usepackage[dvipsnames,table,svgnames]{xcolor}
+\definecolor{deep}{RGB}{53,88,76}
+\definecolor{accent}{RGB}{240,238,155}
+\usepackage[most]{tcolorbox}
+\usepackage{hyperref}\hypersetup{colorlinks=true,linkcolor=deep}
+\usepackage{fancyhdr}\pagestyle{fancy}\fancyhf{}\fancyfoot[C]{\small\sffamily\color{gray}{\thepage}}
+\usepackage{bookmark}
+\usepackage{adjustbox}\usepackage{tabularray}\UseTblrLibrary{booktabs}
+\usepackage{enumitem}\setlist{nosep}
+\usepackage{titlesec}\titleformat{\section}{\sffamily\Large\bfseries\color{deep}}{\thesection}{0.7em}{}[\vspace{-0.3em}{\color{accent}\hrule height=0.8pt}]
+\usepackage{pgfplots}\pgfplotsset{compat=1.18}
+
+\begin{document}
+
+\begin{center}
+{\fontsize{22pt}{28pt}\selectfont\sffamily\bfseries\color{deep}Evensong 基准测试框架}\\
+{\fontsize{11pt}{14pt}\selectfont\sffamily\color{gray}工程 / 开发集成简报}
+\end{center}
+\vspace{2mm}{\color{deep}\rule{\textwidth}{0.5pt}}\vspace{2mm}
+
+\section{CLI 快速参考}
+
+\subsection{运行基准测试}
+\begin{verbatim}
+bun benchmarks/evensong/cli.ts run \
+  --model minimax-m27 \
+  --pressure L0 \
+  --memory clean \
+  --id RNEXT
+\end{verbatim}
+
+\subsection{列出模型}
+\begin{verbatim}
+bun benchmarks/evensong/cli.ts models
+bun benchmarks/evensong/cli.ts list   # 显示所有运行
+bun benchmarks/evensong/cli.ts compare R009 R010  # 对比两次运行
+\end{verbatim}
+
+\section{工具链架构}
+
+Evensong 工具链有 4 层：
+
+\subsection{1. 编排层（TypeScript）}
+\begin{itemize}
+  \item \texttt{cli.ts} — CLI 入口、参数解析、命令分发
+  \item \texttt{harness.ts} — 工作区设置、CCB 派生、结果解析
+  \item \texttt{batch.ts} — 多运行批量执行
+\end{itemize}
+
+\subsection{2. 分析层（TypeScript）}
+\begin{itemize}
+  \item \texttt{emotion.ts} — 运行后 Haiku 转录分析，EmotionProfile 提取
+  \item \texttt{classify-memory.ts} — ALLOW/BLOCK/GRAY 记忆分类
+  \item \texttt{collaboration-schema.ts} — 模型间协作模式
+\end{itemize}
+
+\subsection{3. EverOS 集成（TypeScript）}
+\begin{itemize}
+  \item \texttt{everos.ts} — EverOS API 客户端工厂（observer/runner/void 密钥）
+  \item \texttt{upload-evidence.ts} — 截图/PDF 存储
+\end{itemize}
+
+\subsection{4. 配置（TypeScript）}
+\begin{itemize}
+  \item \texttt{types.ts} — ProviderPreset、RunConfig、RunResult、BENCHMARK\_MODELS（9 个模型）
+  \item \texttt{prompts.ts} — 压力修饰符（L0-L3）、基础提示词模板
+  \item \texttt{transcript.ts} — JSONL 转录日志
+\end{itemize}
+
+\section{关键配置}
+
+\subsection{9 个基准测试模型}
+\begin{tabular}{ll}
+\textbf{OpenRouter（8 个模型）} & \\
+or-opus    & $\rightarrow$ anthropic/claude-opus-4.6 \\
+or-gpt5    & $\rightarrow$ openai/gpt-5.4 \\
+or-grok    & $\rightarrow$ xai/grok-4.20-beta \\
+or-gemini  & $\rightarrow$ google/gemini-3.1-pro \\
+or-glm     & $\rightarrow$ 智谱AI/glm-5.1 \\
+or-qwen-coder & $\rightarrow$ Qwen/Qwen3-Coder-Plus \\
+or-deepseek & $\rightarrow$ deepseek-ai/DeepSeek-R1 \\
+or-kimi    & $\rightarrow$ moonshot/kimi-k2.5 \\[6pt]
+\textbf{MiniMax 直连（1 个模型）} & \\
+minimax-m27 & $\rightarrow$ MiniMax-M2.7 via api.minimax.io/anthropic
+\end{tabular}
+
+\section{方法验证协议}
+
+\textbf{规则：}始终先用廉价模型验证。
+
+\begin{verbatim}
+# 步骤 1：用 MiniMax 验证（~$0.50）
+bun benchmarks/evensong/cli.ts run \
+  --model minimax-m27 --pressure L0 --memory clean --id RTEST
+
+# 步骤 2：用 Opus 在参考模型上验证（~$15）
+bun benchmarks/evensong/cli.ts run \
+  --model or-opus --pressure L0 --memory blind --id ROPA
+
+# 步骤 3：仅在步骤 1+2 通过后运行昂贵模型
+bun benchmarks/evensong/cli.ts run \
+  --model or-gpt5 --pressure L2 --memory clean --id R012
+\end{verbatim}
+
+\section{运行前检查清单}
+
+运行前检查：
+\begin{enumerate}
+  \item 检查 API 额度余额（OpenRouter 仪表板 / MiniMax 门户）
+  \item 确认工作区中 \texttt{bun install} 成功
+  \item 确认 \texttt{CLAUDE\_CODE\_DISABLE\_MEMORY\_EXTRACTION=1}
+  \item 验证 EverOS 密钥隔离：Keys A/B/C/D 到正确空间
+  \item 新模型：全速运行前进行 1 分钟冒烟测试
+  \item 昂贵运行：额度余额超过估算成本 3 倍
+\end{enumerate}
+
+\section{记忆密钥隔离}
+\begin{tabular}{ll}
+Key A & $\rightarrow$ zonicdesign.art \quad（观察者空间）\\
+Key B & $\rightarrow$ allaround \quad（运行者空间）\\
+Key C & $\rightarrow$ allaround \quad（运行者备选）\\
+Key D & $\rightarrow$ void \quad（干净室隔离）\\
+\end{tabular}
+
+切勿跨条件重复使用密钥。密钥隔离是有效实验设计的基础。
+
+\section{转录格式}
+
+基准测试在运行目录生成 \texttt{transcript.jsonl}。每行：\texttt{\{"type","content","model","ts"\}}。解析 \texttt{tool\_use} / \texttt{tool\_result} 条目以重建代理推理链。
+
+\section{可复现性}
+
+\begin{verbatim}
+git commit -m "benchmark(R00X): description"
+git push origin main
+# 强制重新部署
+cd benchmarks && npx vercel --prod
+\end{verbatim}
+
+\vfill
+
+\textbf{源码：}\texttt{benchmarks/evensong/}\\
+\textbf{文档：}\texttt{benchmarks/evensong/MISTAKES.md}（事件日志）和 \texttt{benchmarks/evensong/ROADMAP.md}
+
+\end{document}

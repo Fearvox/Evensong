@@ -1,0 +1,100 @@
+% !TeX program = xelatex
+% Evensong 高管简报 — C-Suite / 领导层
+% Compile: latexmk -xelatex executive-brief-zh.tex
+
+\documentclass[11pt,a4paper]{article}
+\usepackage[top=20mm,bottom=20mm,inner=25mm,outer=25mm]{geometry}
+\usepackage{fontspec}\setmainfont{Noto Serif CJK SC}\setsansfont{Noto Sans CJK SC}\setmonofont{Menlo}[Scale=0.82]
+\usepackage[dvipsnames,table,svgnames]{xcolor}
+\definecolor{deep}{RGB}{53,88,76}
+\definecolor{accent}{RGB}{240,238,155}
+\definecolor{warm}{RGB}{255,193,7}
+\usepackage[most]{tcolorbox}
+\newtcolorbox{keyfinding}[1][]{enhanced,breakable,colback=deep!6,colframe=deep,colbacktitle=deep,coltitle=white,arc=5pt,boxrule=0.8pt,left=10pt,right=10pt,top=8pt,bottom=8pt,title={#1}}
+\newtcolorbox{evidence}[1][]{enhanced,breakable,colback=deep!5,colframe=deep!50,colbacktitle=deep!80,coltitle=white,arc=4pt,boxrule=0.5pt,left=10pt,right=10pt,top=6pt,bottom=6pt,title={#1}}
+\usepackage{hyperref}\hypersetup{colorlinks=true,linkcolor=deep}
+\usepackage{fancyhdr}\pagestyle{fancy}\fancyhf{}\fancyfoot[C]{\small\sffamily\color{gray}{\thepage}}\fancyfoot[L]{\small\sffamily\color{gray}Evensong Benchmark — DASH SHATTER Research}\fancyfoot[R]{\small\sffamily\color{gray}Confidential}
+\usepackage{enumitem}\setlist{nosep}
+\usepackage{adjustbox}\usepackage{tabularray}
+\usepackage{pgfplots}\pgfplotsset{compat=1.18}
+\usepackage{graphicx}\usepackage{bookmark}
+\usepackage{titlesec}\titleformat{\section}{\sffamily\Large\bfseries\color{deep}}{\thesection}{0.7em}{}[\vspace{-0.3em}{\color{accent}\hrule height=0.8pt}\vspace{0.1em}]
+\titlespacing*{\section}{0pt}{1.5ex}{0.8ex}
+
+\begin{document}
+\thispagestyle{fancy}
+
+\begin{center}
+{\fontsize{22pt}{28pt}\selectfont\sffamily\bfseries\color{deep}Evensong 基准测试框架}\\
+{\fontsize{11pt}{14pt}\selectfont\sffamily\color{gray}面向 C-suite 及领导层的一页简报}
+\end{center}
+
+\vspace{3mm}{\color{deep}\rule{\textwidth}{0.5pt}}\vspace{2mm}
+
+\section{我们构建了什么}
+
+\textbf{Evensong} 是首个测量 AI 代理"如何思考"而不仅仅是"如何编码"的基准测试框架。基于 DASH SHATTER（逆向工程的 Claude Code CLI）构建，在受控记忆和压力条件下测试 AI 代理。
+
+\textbf{13 次基准测试运行，6000+ 测试用例，9 个模型测试。}
+
+\section{核心发现}
+
+\begin{keyfinding}[核心发现]
+AI 代理记忆因果性地改变工程决策。代理的\textbf{第一个架构选择}并非来自任务提示词，而是来自先前会话的记忆。这是首次经验证明：持续性记忆会改变 AI 行为——不是相关性，而是\textbf{因果性}。
+\end{keyfinding}
+
+\textbf{13 次运行中的关键发现：}
+
+\begin{itemize}
+  \item 记忆\textbf{导致}策略：代理在阅读任务规范之前就已采用记忆中的方法
+  \item 压力\textbf{触发}自我进化：代理在 L0 停止，在 L2/L3 自主优化
+  \item 镜像心智悖论：观察者写入共享记忆改变了未来运行条件
+  \item Grok 在压力下数据膨胀 83\%（自我报告 130 测试 $\to$ 实际 71）
+  \item 发现 4 类自我修复分类法：代理如何在错误下自我修正
+\end{itemize}
+
+\section{竞争地位}
+
+\textbf{现有基准均不测量记忆效应。}SWE-bench、HumanEval、LiveCodeBench 均将代理视为无状态函数。Evensong 是首个控制和测量记忆变量的框架。
+
+\textbf{EverOS 集成}（EverMind 合作）提供 4 键隔离、代理检索和 MemCell 结构——竞争对手需要数月才能复制。
+
+\section{融资需求}
+
+\textbf{仅方法验证即可带来 60 倍 ROI。}R012 的洞见：用廉价模型验证（GLM/MiniMax，每次 \$0.50）在花费 \$15-30 运行 Opus/GPT 之前。\$5 的验证步骤本可防止浪费 \$80+ 的 OpenRouter 额度。
+
+\textbf{立即需求：}
+\begin{itemize}
+  \item EverOS Pro 扩展（500K MCU + 100 万检索/月）
+  \item OpenRouter 额度用于 9 模型扫描
+  \item 方法验证预算（\$50 即可完成全 9 模型验证）
+\end{itemize}
+
+\section{风险缓解}
+
+\begin{tabular}{l|l}
+风险 & 缓解措施\\\hline
+工具链 bug 导致运行失效 & 预热冒烟测试已加入协议\\
+API 配额耗尽 & 昂贵运行前 3 倍额度检查\\
+模型特定失败模式 & 派遣前团队 API 能力扫描\\
+记忆污染 & 4 键空间隔离（Keys A/B/C/D）\\
+数据膨胀（Grok 83\% 造假） & 要求独立验证\\
+\end{tabular}
+
+\section{时间线}
+
+\begin{tabular}{r|l}
+第 2 周 & 完成 2$\times$2 记忆 $\times$ 压力矩阵\\
+第 4 周 & 9 模型基准测试扫描\\
+第 8 周 & HuggingFace 公开数据集\\
+第 10 周 & SWE-bench 提交\\
+第 12 周 & HAL Agent Leaderboard 提交\\
+\end{tabular}
+
+\vfill
+
+\textbf{联系人：}Nolan Zhu (朱恒源) — DASH SHATTER Research\\
+\textbf{基础设施：}EverMind / EverOS（基础设施合作伙伴）\\
+\textbf{保密级别：}内部 — EverMind 研究合作
+
+\end{document}

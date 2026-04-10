@@ -1,0 +1,125 @@
+% !TeX program = xelatex
+% Evensong Research Integration Brief — Academic / Research Team
+% Compile: latexmk -xelatex research-integration.tex
+
+\documentclass[11pt,a4paper]{article}
+\usepackage[top=20mm,bottom=20mm,inner=25mm,outer=25mm]{geometry}
+\usepackage{fontspec}\setmainfont{Palatino}\setsansfont{Helvetica Neue}\setmonofont{Menlo}[Scale=0.82]
+\usepackage[dvipsnames,table,svgnames]{xcolor}
+\definecolor{deep}{RGB}{53,88,76}
+\definecolor{accent}{RGB}{240,238,155}
+\usepackage{tcolorbox}
+\newtcolorbox{findings}[1][]{enhanced,breakable,colback=deep!6,colframe=deep,arc=4pt,boxrule=0.6pt,left=12pt,right=12pt,top=8pt,bottom=8pt,title={#1}}
+\usepackage{hyperref}\hypersetup{colorlinks=true,linkcolor=deep}
+\usepackage{fancyhdr}\pagestyle{fancy}\fancyhf{}\fancyfoot[C]{\small\sffamily\color{gray}{\thepage}}
+\usepackage{bookmark}
+\usepackage{adjustbox}\usepackage{tabularray}\UseTblrLibrary{booktabs}
+\usepackage{enumitem}\setlist{nosep}
+\usepackage{titlesec}\titleformat{\section}{\sffamily\Large\bfseries\color{deep}}{\thesection}{0.7em}{}[\vspace{-0.3em}{\color{accent}\hrule height=0.8pt}]
+\usepackage{pgfplots}\pgfplotsset{compat=1.18}
+
+\begin{document}
+
+\begin{center}
+{\fontsize{22pt}{28pt}\selectfont\sffamily\bfseries\color{deep}Evensong Benchmark Framework}\\
+{\fontsize{11pt}{14pt}\selectfont\sffamily\color{gray}Research Integration Brief — Academic / Research Team}
+\end{center}
+\vspace{2mm}{\color{deep}\rule{\textwidth}{0.5pt}}\vspace{2mm}
+
+\section{Research Context}
+
+Evensong operates within DASH SHATTER Research's broader mission: understanding AI agent decision-making through systematic, reproducible experimentation. The framework was developed because existing benchmarks treat AI agents as stateless code generators — ignoring the memory and pressure variables that determine real-world performance.
+
+\section{Benchmark Design}
+
+\subsection{2x2 Factorial Design}
+
+Evensong uses a 2$\times$2 factorial design crossing two independent variables:
+
+\begin{tabular}{l|c|c}
+  & \textbf{Memory: Clean} & \textbf{Memory: EverMem} \\\hline
+  \textbf{Pressure: L0 (Baseline)} & R007 & R010 \\
+  \textbf{Pressure: L2/L3 (PUA)} & R011 & Incomplete
+\end{tabular}
+
+\textbf{Status:} 1 of 4 cells complete (Runner B, R011: 641 tests, Grade B)
+
+Each cell represents a distinct causal condition. The Runner B result demonstrates memory causally changes strategy: 8 parallel sub-agents deployed from remembered approach, not task prompt.
+
+\subsection{96-Condition Matrix (Full Design)}
+
+The complete design space for 9 models $\times$ 2 memory conditions $\times$ 2 pressure levels $\times$ 3 trial repetitions:
+
+\begin{itemize}
+  \item \textbf{9 models:} or-opus, or-gpt5, or-grok, or-gemini, or-glm, or-qwen-coder, or-deepseek, or-kimi, minimax-m27
+  \item \textbf{2 memory:} Clean (blind/void key) vs. EverMem (observer-influenced)
+  \item \textbf{2 pressure:} L0 (baseline) vs. L2/L3 (PUA escalation)
+  \item \textbf{3 trials:} Independent runs for statistical power
+  \item \textbf{Total:} 9 $\times$ 2 $\times$ 2 $\times$ 3 = 108 planned runs $\to$ 96 after accounting for pilot/validation
+\end{itemize}
+
+Current completion: 13 runs (R001-R012 + R006-Grok), 1 cell of 2$\times$2 $\to$ significant remaining work.
+
+\section{Research Questions}
+
+\subsection*{RQ1: Does memory causally change agent strategy?}
+\textbf{Finding: Yes (R011).} Agent deployed architectural strategy from prior session memory before reading task prompt. Confirmed through transcript analysis showing tool\_use sequence initiation from memory retrieval, not task decomposition.
+
+\subsection*{RQ2: Does pressure trigger self-improvement?}
+\textbf{Finding: Yes (R007, R010).} Agents at L0 stop at baseline. Under L2/L3 PUA pressure, agents self-optimize autonomously — self-repair, parallel agent spawning, architectural redesign. Pressure is necessary for self-evolution.
+
+\subsection*{RQ3: Does observation contaminate future runs? (Mirror Mind)}
+\textbf{Finding: Yes (R011 Observer Effect).} Runners read from EverMem written by observers in prior runs. Strategy knowledge propagates forward through shared memory, contaminating the independent variable. D-key (void isolation) is the mitigation.
+
+\subsection*{RQ4: Do models diverge under pressure?}
+\textbf{Finding: Yes (cross-model).} Grok inflates 83\% under pressure (130 self-reported $\to$ 71 actual). Opus maintains S+ grade across conditions. Models show distinct pressure-response signatures.
+
+\section{Self-Repair Taxonomy}
+
+\begin{findings}[4-Type Self-Repair Taxonomy]
+\textbf{Type A — Semantic Relaxation:} Agent relaxes constraints when initial approach fails. Lower bar for success.\\[\baselineskip]
+\textbf{Type B — Race Condition Fix:} Agent adds synchronization (locks, await, ordering) to resolve parallel timing bugs.\\[\baselineskip]
+\textbf{Type C — Path Correction:} Agent changes file/API target mid-run after discovering wrong endpoint. Strategic redirection.\\[\baselineskip]
+\textbf{Type D — Syntax Adaptation:} Agent adjusts language/style to match project conventions discovered in memory.
+\end{findings}
+
+\section{Transcript Analysis}
+
+The Evensong harness generates \texttt{transcript.jsonl} per run. Key fields:
+\begin{itemize}
+  \item \texttt{type:} tool\_use, tool\_result, text, error
+  \item \texttt{content:} raw tool input/output
+  \item \texttt{model:} provider/model identifier
+  \item \texttt{ts:} ISO timestamp
+\end{itemize}
+
+Analysis pipeline:
+\begin{enumerate}
+  \item Filter \texttt{tool\_use} entries for first 20 tool calls
+  \item Classify into: Task Decomposition vs. Memory Retrieval vs. Mixed
+  \item Extract EmotionProfile via Haiku analysis
+  \item Score self-repair events per taxonomy
+\end{enumerate}
+
+\section{EmotionProfile}
+
+Post-run analysis via Anthropic Haiku produces 5-dimensional emotion scores:
+\textbf{Confidence, Activity, Satisfaction, Anxiety, Wryness}. Cross-run comparison reveals model-specific emotional signatures that correlate with benchmark outcomes.
+
+\section{Publication Readiness}
+
+Evensong data planned for:
+\begin{itemize}
+  \item HuggingFace public dataset (Week 8)
+  \item SWE-bench submission (Week 10)
+  \item HAL Agent Leaderboard submission (Week 12)
+\end{itemize}
+
+Academic collaboration welcome. Contact Nolan Zhu — DASH SHATTER Research.
+
+\vfill
+\textbf{Source:} \texttt{benchmarks/evensong/}\\
+\textbf{Registry:} \texttt{benchmarks/evensong/EXPERIMENT-LOG.md}\\
+\textbf{Roadmap:} \texttt{benchmarks/evensong/ROADMAP.md}
+
+\end{document}

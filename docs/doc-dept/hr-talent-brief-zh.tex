@@ -1,0 +1,86 @@
+% !TeX program = xelatex
+% Evensong 人才简报 — HR / 招聘
+% Compile: latexmk -xelatex hr-talent-brief-zh.tex
+
+\documentclass[11pt,a4paper]{article}
+\usepackage[top=20mm,bottom=20mm,inner=25mm,outer=25mm]{geometry}
+\usepackage{fontspec}\setmainfont{Noto Serif CJK SC}\setsansfont{Noto Sans CJK SC}\setmonofont{Menlo}[Scale=0.82]
+\usepackage[dvipsnames,table,svgnames]{xcolor}
+\definecolor{deep}{RGB}{53,88,76}
+\definecolor{accent}{RGB}{240,238,155}
+\usepackage{tikz}\usetikzlibrary{positioning}
+\usepackage{bookmark}\usepackage{hyperref}\hypersetup{colorlinks=true,linkcolor=deep}
+\usepackage{fancyhdr}\pagestyle{fancy}\fancyhf{}\fancyfoot[C]{\small\sffamily\color{gray}{\thepage}}
+\usepackage{enumitem}\setlist{nosep}
+\usepackage{adjustbox}\usepackage{tabularray}
+\usepackage{titlesec}\titleformat{\section}{\sffamily\Large\bfseries\color{deep}}{\thesection}{0.7em}{}[\vspace{-0.3em}{\color{accent}\hrule height=0.8pt}]
+\usepackage{tcolorbox}\newtcolorbox{insight}[1][]{colback=deep!5,colframe=deep,arc=3pt,boxrule=0.5pt,left=10pt,right=10pt,top=6pt,bottom=6pt}
+\usepackage{pgfplots}\pgfplotsset{compat=1.18}
+
+\begin{document}
+
+\begin{center}
+{\fontsize{22pt}{28pt}\selectfont\sffamily\bfseries\color{deep}Evensong 基准测试框架}\\
+{\fontsize{11pt}{14pt}\selectfont\sffamily\color{gray}人才招聘简报 — 人力资源}
+\end{center}
+\vspace{2mm}{\color{deep}\rule{\textwidth}{0.5pt}}\vspace{2mm}
+
+\section{团队角色}
+
+Evensong 是 DASH SHATTER Research 的核心评估系统。它在记忆条件和压力水平下测试 AI 代理，为研究出版物和基准数据集生成行为画像。
+
+\textbf{团队职能：}工程 + 研究（混合角色）
+
+\section{我们需要的人才技能}
+
+\subsection*{核心 Technical}
+\begin{itemize}
+  \item \textbf{Bun + TypeScript：}工具链运行在 Bun 上。需要对 TS 接口和异步模式熟悉
+  \item \textbf{LaTeX / pgfplots：}用于论文和报告的文档生成
+  \item \textbf{CLI 工具：}Shell 脚本、进程管理、管道
+  \item \textbf{多模型 API 路由：}OpenRouter、EverOS、模型提供商配置
+\end{itemize}
+
+\subsection*{研究 fluency}
+\begin{itemize}
+  \item \textbf{实验设计：}2$\times$2 因子矩阵、受控条件
+  \item \textbf{基准测试方法论：}熟悉 SWE-bench、LiveCodeBench、Berkeley FCF
+  \item \textbf{压力校准：}PUA 级别（L0-L3）、提示注入、行为测量
+\end{itemize}
+
+\section{我们在候选人身上测量什么}
+
+基准测试结果揭示行为特征：
+
+\begin{adjustbox}{max width=\linewidth}
+\begin{tblr}{
+  colspec={lX[l]},
+  row{1}={font=\sffamily\bfseries, bg=deep, fg=white},
+  hlines={gray!20},
+  rowsep=3pt
+}
+行为 & 信号含义\\\hline
+高测试数 + 0 失败 & 系统性、质量驱动的开发\\
+压力下自我修复 & 适应性解决问题、主人翁意识\\
+记忆感知策略选择 & 元认知、从上下文学习\\
+低膨胀（自我报告 vs 实际） & 诚信、诚实自我评估\\
+PUA 下规则遵从 & 抗压能力、协议遵守\\
+\end{tblr}
+\end{adjustbox}
+
+\section{面试流程}
+
+\textbf{第一阶段（45 分钟）：}给定基准测试工具链设置，在 3 次运行中识别记忆隔离 bug。观察他们如何处理问题。
+
+\textbf{第二阶段（60 分钟）：}使用新模型运行一次基准测试。评估：候选人是否 catch 到 API 配置错误？
+
+\textbf{第三阶段（30 分钟）：}讨论自我修复分类法。探究：他们如何扩展 4 类分类？
+
+\section{薪酬基准}
+
+Evensong 经验稀缺的工程师深入理解 AI 行为的机制层面——对研究工程、AI 安全和前沿模型评估角色非常有价值。
+
+\vfill
+\textbf{联系人：}Nolan Zhu — DASH SHATTER Research
+
+\end{document}

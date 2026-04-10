@@ -203,11 +203,6 @@ async function setupWorkspace(config: RunConfig, logger: TranscriptLogger): Prom
 function buildEnv(provider: ProviderPreset, config: RunConfig, workspace: Workspace): Record<string, string> {
   const env: Record<string, string> = {
     ...process.env as Record<string, string>,
-    // OpenRouter key for all OR models
-    ANTHROPIC_API_KEY: process.env.OPENROUTER_API_KEY ?? process.env.ANTHROPIC_API_KEY ?? '',
-    ANTHROPIC_BASE_URL: 'https://openrouter.ai/api/v1',
-    // Model override
-    ANTHROPIC_MODEL: provider.modelId,
     // Disable auto-memory extraction during benchmark (prevent contamination)
     CLAUDE_CODE_DISABLE_MEMORY_EXTRACTION: '1',
     // Benchmark identification
@@ -215,6 +210,19 @@ function buildEnv(provider: ProviderPreset, config: RunConfig, workspace: Worksp
     EVENSONG_MODEL: config.model,
     EVENSONG_PRESSURE: config.pressure,
   }
+
+  // Route to correct API based on provider type
+  if (provider.provider === 'minimax-direct') {
+    env.ANTHROPIC_API_KEY = process.env[provider.apiKeyEnvVar ?? 'MINIMAX_API_KEY'] ?? ''
+    env.ANTHROPIC_BASE_URL = provider.baseUrl ?? 'https://api.minimax.io/anthropic'
+  } else {
+    // OpenRouter routing (default for all or-* models)
+    env.ANTHROPIC_API_KEY = process.env.OPENROUTER_API_KEY ?? process.env.ANTHROPIC_API_KEY ?? ''
+    env.ANTHROPIC_BASE_URL = 'https://openrouter.ai/api/v1'
+  }
+
+  // Model override
+  env.ANTHROPIC_MODEL = provider.modelId
 
   // Memory isolation with EverOS keys
   if (workspace.memoryPath) {

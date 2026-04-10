@@ -1,0 +1,86 @@
+% !TeX program = xelatex
+% Evensong Talent Brief — HR / Recruiting
+% Compile: latexmk -xelatex hr-talent-brief.tex
+
+\documentclass[11pt,a4paper]{article}
+\usepackage[top=20mm,bottom=20mm,inner=25mm,outer=25mm]{geometry}
+\usepackage{fontspec}\setmainfont{Palatino}\setsansfont{Helvetica Neue}\setmonofont{Menlo}[Scale=0.82]
+\usepackage[dvipsnames,table,svgnames]{xcolor}
+\definecolor{deep}{RGB}{53,88,76}
+\definecolor{accent}{RGB}{240,238,155}
+\usepackage{tikz}\usetikzlibrary{positioning}
+\usepackage{bookmark}\usepackage{hyperref}\hypersetup{colorlinks=true,linkcolor=deep}
+\usepackage{fancyhdr}\pagestyle{fancy}\fancyhf{}\fancyfoot[C]{\small\sffamily\color{gray}{\thepage}}
+\usepackage{enumitem}\setlist{nosep}
+\usepackage{adjustbox}\usepackage{tabularray}
+\usepackage{titlesec}\titleformat{\section}{\sffamily\Large\bfseries\color{deep}}{\thesection}{0.7em}{}[\vspace{-0.3em}{\color{accent}\hrule height=0.8pt}]
+\usepackage{tcolorbox}\newtcolorbox{insight}[1][]{colback=deep!5,colframe=deep,arc=3pt,boxrule=0.5pt,left=10pt,right=10pt,top=6pt,bottom=6pt}
+\usepackage{pgfplots}\pgfplotsset{compat=1.18}
+
+\begin{document}
+
+\begin{center}
+{\fontsize{22pt}{28pt}\selectfont\sffamily\bfseries\color{deep}Evensong Benchmark Framework}\\
+{\fontsize{11pt}{14pt}\selectfont\sffamily\color{gray}Talent Acquisition Brief — Human Resources}
+\end{center}
+\vspace{2mm}{\color{deep}\rule{\textwidth}{0.5pt}}\vspace{2mm}
+
+\section{Role This Plays in Team}
+
+Evensong is DASH SHATTER Research's core evaluation system. It tests AI agents across memory conditions and pressure levels, generating behavioral profiles for research publications and benchmark datasets.
+
+\textbf{Team function:} Engineering + Research (hybrid role)
+
+\section{Skills We Need}
+
+\subsection*{Core Technical}
+\begin{itemize}
+  \item \textbf{Bun + TypeScript}: The harness runs on Bun. Comfort with TS interfaces and async patterns
+  \item \textbf{LaTeX / pgfplots}: Document generation for papers and reports
+  \item \textbf{CLI tooling}: Shell scripting, process management, pipes
+  \item \textbf{Multi-model API routing}: OpenRouter, EverOS, model provider configuration
+\end{itemize}
+
+\subsection*{Research Fluency}
+\begin{itemize}
+  \item \textbf{Experiment design}: 2x2 factorial matrices, controlled conditions
+  \item \textbf{Benchmark methodology}: SWE-bench, LiveCodeBench, Berkeley FCF familiarity
+  \item \textbf{Pressure calibration}: PUA levels (L0-L3), prompt injection, behavioral measurement
+\end{itemize}
+
+\section{What We Measure in Candidates}
+
+Benchmark results reveal behavioral signatures:
+
+\begin{adjustbox}{max width=\linewidth}
+\begin{tblr}{
+  colspec={lX[l]},
+  row{1}={font=\sffamily\bfseries, bg=deep, fg=white},
+  hlines={gray!20},
+  rowsep=3pt
+}
+Behavior & What It Signals\\\hline
+High test count + 0 failures & Systematic, quality-driven development\\
+Self-repair under pressure & Adaptive problem-solving, ownership\\
+Memory-aware strategy selection & Meta-cognition, learning from context\\
+Low inflation (self-report vs actual & Integrity, honest self-assessment\\
+Rule compliance under PUA & Stress resilience, protocol adherence\\
+\end{tblr}
+\end{adjustbox}
+
+\section{Interview Protocol}
+
+\textbf{Stage 1 (45min):} Given a benchmark harness setup, identify the memory isolation bug in 3 runs. Observe how they approach the problem.
+
+\textbf{Stage 2 (60min):} Run one benchmark with a new model. Assess: does the candidate catch the API configuration error?
+
+\textbf{Stage 3 (30min):} Discussion of self-repair taxonomy. Probe: how would they extend the 4-type classification?
+
+\section{Compensation Benchmark}
+
+Benchmarks are rare instruments. Engineers with Evensong experience understand AI behavior at a mechanistic level — valuable for research engineering, AI safety, and frontier model evaluation roles.
+
+\vfill
+\textbf{Contact:} Nolan Zhu — DASH SHATTER Research
+
+\end{document}

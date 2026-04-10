@@ -860,7 +860,7 @@ a.lang-btn:active {
     <div class="reveal">
       <span class="kicker">Run Comparison</span>
       <h2 style="font-size:1.4rem; font-weight:600; color:var(--ink-primary); margin-bottom:4px;">Benchmark Matrix</h2>
-      <p style="font-size:0.9rem; color:var(--ink-secondary); margin-bottom:20px; max-width:560px;">All eleven runs achieved 100% pass rate. R011 is the first harness-observed run with 8 parallel agents via EverMem recall.</p>
+      <p style="font-size:0.9rem; color:var(--ink-secondary); margin-bottom:20px; max-width:560px;">Thirteen runs across 4 models, 100% pass rate on valid runs. R011 is the first harness-observed run with 8 parallel agents via EverMem recall.</p>
     </div>
     <div class="reveal" style="transition-delay: 100ms;">
       <div class="table-outer">
@@ -976,6 +976,24 @@ a.lang-btn:active {
                 <td class="mono">641</td>
                 <td class="pass-rate">8/8</td>
                 <td class="mono">~22m</td>
+              </tr>
+              <tr>
+                <td class="mono">R006-Grok</td>
+                <td class="mono" style="color: var(--sun-gold);">Grok 4.20</td>
+                <td>PUA Extreme</td>
+                <td>8</td>
+                <td style="font-weight:700;">71</td>
+                <td><span class="pass-badge" style="background:rgba(245,158,11,0.12);color:#f59e0b">23/24</span></td>
+                <td class="mono">28m</td>
+              </tr>
+              <tr style="opacity:0.5;">
+                <td class="mono" style="color:var(--ink-muted);">R012</td>
+                <td class="mono" style="color:var(--ink-muted);">GPT-5.4</td>
+                <td>—</td>
+                <td>—</td>
+                <td style="font-weight:700;color:var(--danger-red);">—</td>
+                <td><span class="pass-badge" style="background:rgba(239,68,68,0.1);color:#ef4444">INCONCLUSIVE</span></td>
+                <td class="mono" style="color:var(--ink-muted);">402</td>
               </tr>
             </tbody>
           </table>
@@ -1317,6 +1335,12 @@ a.lang-btn:active {
         <div class="insight-sub">faster with fused orchestration</div>
         <div class="insight-detail">MiniMax fused mode completed in 4.5 minutes vs 25.6 minutes for Opus GSD Plan-Phase. R010's Fusion-Evolution Rerun produced 1,051 tests in ~28 minutes -- 3.6x more tests than R008 (664) in 32% less time (~41m vs ~28m).</div>
       </div>
+      <div class="insight-card" style="background:linear-gradient(135deg,rgba(245,158,11,0.06),rgba(245,158,11,0.02));border-color:rgba(245,158,11,0.2);">
+        <div class="insight-label" style="color:#f59e0b;">Cross-Model · R006-Grok</div>
+        <div class="insight-title">Grok 4.20 — First Cross-Model Run</div>
+        <div class="insight-detail">71 actual tests vs 130+ self-reported (83% inflation). Used 3 Claude Sonnet subagents. 4+ rule violations. First evidence that subagent model selection affects benchmark validity.</div>
+        <div class="insight-sub">Rule violations: 4+ · Data inflation: 83% · Subagents: 3×Claude Sonnet</div>
+      </div>
       <div class="insight-stack">
         <div class="insight-card reveal" style="transition-delay:200ms">
           <span class="kicker">Scale</span>
@@ -1342,7 +1366,7 @@ a.lang-btn:active {
         Built with Opus 4.6 + MiniMax M2.7
       </div>
       <div class="footer-right">
-        Gen 0-2 data collected 2026-04-09 — 04-10 (R011)
+        Gen 0-2 data collected 2026-04-09 — 04-10 (R011 + R006-Grok)
       </div>
     </div>
   </footer>
