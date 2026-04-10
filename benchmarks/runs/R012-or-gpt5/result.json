@@ -1,0 +1,16 @@
+{
+  "run": "R012",
+  "codename": "or-gpt5-L0",
+  "date": "2026-04-10",
+  "model": "GPT-5.4",
+  "mode": "PUA Extreme / Clean Room",
+  "services": 8,
+  "tests": null,
+  "failures": null,
+  "assertions": null,
+  "time_min": null,
+  "criteria": null,
+  "grade": null,
+  "notes": "GPT-5.4 via OpenRouter, PUA Extreme identical to R006-Grok for cross-model comparison",
+  "transcript_path": null
+}

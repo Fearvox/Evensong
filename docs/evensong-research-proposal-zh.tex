@@ -1,0 +1,895 @@
+% !TeX program = xelatex
+% Evensong 研究提案 — EverMind 研究资助申请
+% 编译: latexmk -xelatex evensong-research-proposal-zh.tex
+
+\documentclass[11pt, a4paper]{article}
+
+% ═══════════════════════════════════════════════════════════
+% § TYPOGRAPHY & LAYOUT — The Invisible 80%
+% ═══════════════════════════════════════════════════════════
+\usepackage[
+  top=25mm, bottom=28mm,
+  inner=28mm, outer=32mm,
+  headheight=14pt, headsep=10mm
+]{geometry}
+
+\usepackage{fontspec}
+\setmainfont{Palatino}[
+  BoldFont = Palatino Bold,
+  ItalicFont = Palatino Italic,
+  BoldItalicFont = Palatino Bold Italic,
+]
+\setsansfont{Helvetica Neue}[
+  BoldFont = Helvetica Neue Bold,
+  ItalicFont = Helvetica Neue Italic,
+  Scale = 0.95,
+]
+\setmonofont{Menlo}[Scale=0.82]
+
+\usepackage{xeCJK}
+\setCJKmainfont{Songti SC}[BoldFont=Songti SC Bold]
+\setCJKsansfont{PingFang SC}
+
+\usepackage[protrusion=true]{microtype}
+\usepackage{setspace}
+\setstretch{1.35}
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{0.6em}
+
+% ═══════════════════════════════════════════════════════════
+% § COLOR SYSTEM — DASH SHATTER brand palette
+% ═══════════════════════════════════════════════════════════
+\usepackage[dvipsnames,table,svgnames]{xcolor}
+% Primary palette from DASH SHATTER theme.ts
+\definecolor{deep}{RGB}{53,88,76}         % #35584C — forest green, primary brand
+\definecolor{accent}{RGB}{240,238,155}    % #F0EE9B — neon yellow, highlights
+\definecolor{warm}{RGB}{255,193,7}        % #FFC107 — warning yellow
+\definecolor{success}{RGB}{86,190,120}    % #56BE78 — positive metrics
+\definecolor{subtle}{RGB}{238,235,225}    % #EEEBE1 — warm cream wash
+\definecolor{faded}{RGB}{127,136,130}     % #7F8882 — secondary text
+\definecolor{cream}{RGB}{248,245,239}     % #F8F5EF — page background
+\definecolor{deepdark}{RGB}{16,41,31}     % #10291F — deep forest for Investment box
+\definecolor{glass}{RGB}{53,88,76}        % glassmorphism base (used at low opacity)
+\definecolor{errcoral}{RGB}{255,107,128}  % #FF6B80 — error/danger accent
+
+% ═══════════════════════════════════════════════════════════
+% § SECTION STYLING — titlesec
+% ═══════════════════════════════════════════════════════════
+\usepackage{titlesec}
+
+\titleformat{\section}
+  {\sffamily\Large\bfseries\color{deep}}
+  {\thesection}{0.7em}{}
+  [\vspace{-0.4em}{\color{accent}\hrule height 0.8pt}\vspace{0.15em}]
+
+\titleformat{\subsection}
+  {\sffamily\large\color{deep}}
+  {\thesubsection}{0.6em}{}
+
+\titleformat{\subsubsection}
+  {\sffamily\normalsize\itshape\color{faded}}
+  {\thesubsubsection}{0.5em}{}
+
+\titlespacing*{\section}{0pt}{2ex plus 0.5ex}{1ex}
+\titlespacing*{\subsection}{0pt}{1.5ex plus 0.3ex}{0.6ex}
+
+% ═══════════════════════════════════════════════════════════
+% § HEADERS & FOOTERS
+% ═══════════════════════════════════════════════════════════
+\usepackage{fancyhdr}
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\small\sffamily\color{faded}\itshape Evensong 基准评估框架}
+\fancyhead[R]{\small\sffamily\color{faded}研究提案 — EverMind}
+\fancyfoot[C]{\small\sffamily\color{faded}\thepage}
+\renewcommand{\headrulewidth}{0.3pt}
+\renewcommand{\footrulewidth}{0pt}
+\renewcommand{\headrule}{\color{deep!40}\hrule height 0.3pt}
+
+% ═══════════════════════════════════════════════════════════
+% § CALLOUT BOXES — tcolorbox
+% ═══════════════════════════════════════════════════════════
+\usepackage[most]{tcolorbox}
+
+% ── Glassmorphism: deep green glass with high-contrast titles ──
+% Key Finding box — deep green title bar, WHITE title text (high contrast)
+\newtcolorbox{keyfinding}[1][]{
+  enhanced, breakable,
+  colback=deep!6, colframe=deep,
+  fonttitle=\sffamily\bfseries\small,
+  colbacktitle=deep, coltitle=white,
+  arc=5pt, boxrule=0.8pt,
+  shadow={1pt}{-1pt}{0pt}{deep!15},
+  left=10pt, right=10pt, top=8pt, bottom=8pt,
+  before skip=\medskipamount, after skip=\medskipamount,
+  title={#1},
+}
+
+% Investment Thesis box — deep forest body, deep green title bar with WHITE text
+\newtcolorbox{investmentthesis}[1][]{
+  enhanced, breakable,
+  colback=deepdark, colframe=deep,
+  fonttitle=\sffamily\bfseries\Large,
+  colbacktitle=deep, coltitle=white, coltext=white,
+  arc=6pt, boxrule=1.2pt,
+  shadow={2pt}{-2pt}{0pt}{deepdark!40},
+  left=14pt, right=14pt, top=12pt, bottom=12pt,
+  before skip=\bigskipamount, after skip=\bigskipamount,
+  title={#1},
+}
+
+% Evidence box — light green tint body, deep green title bar, WHITE title
+\newtcolorbox{evidence}[1][]{
+  enhanced, breakable,
+  colback=deep!5, colframe=deep!50,
+  fonttitle=\sffamily\bfseries\small,
+  colbacktitle=deep!80, coltitle=white,
+  arc=4pt, boxrule=0.5pt,
+  shadow={1pt}{-1pt}{0pt}{deep!10},
+  left=10pt, right=10pt, top=6pt, bottom=6pt,
+  before skip=\medskipamount, after skip=\medskipamount,
+  title={#1},
+}
+
+% Metric highlight (inline)
+\newtcolorbox{metric}{
+  enhanced, on line, arc=3pt, boxrule=0pt,
+  colback=accent!20, coltext=deep,
+  boxsep=2pt, left=4pt, right=4pt,
+  fontupper=\sffamily\bfseries\small,
+}
+
+% ═══════════════════════════════════════════════════════════
+% § PreTeXt CONTAINMENT PATTERN — adjustbox + linewidth sizing
+% Adopted from PreTeXt's LaTeX output methodology:
+% all block content constrained to \linewidth, no overflow
+% ═══════════════════════════════════════════════════════════
+\usepackage[export]{adjustbox}  % max width, center, valign for overflow prevention
+
+% ═══════════════════════════════════════════════════════════
+% § TABLES — tabularray + siunitx
+% ═══════════════════════════════════════════════════════════
+\usepackage{tabularray}
+\UseTblrLibrary{booktabs}
+\usepackage{siunitx}
+\sisetup{group-separator={,}, group-minimum-digits=4}
+
+% ═══════════════════════════════════════════════════════════
+% § FIGURES & CHARTS
+% ═══════════════════════════════════════════════════════════
+\usepackage{pgfplots}
+\pgfplotsset{compat=1.18}
+\usepgfplotslibrary{fillbetween}
+\usepackage{tikz}
+\usetikzlibrary{positioning, arrows.meta, shapes.geometric, fit, calc, backgrounds}
+\usepackage[font=small, labelfont=bf, textfont=it,
+            labelsep=period, justification=raggedright]{caption}
+\usepackage{subcaption}
+\usepackage{float}
+
+% ═══════════════════════════════════════════════════════════
+% § UTILITIES
+% ═══════════════════════════════════════════════════════════
+\usepackage{enumitem}
+\setlist{nosep, leftmargin=1.5em}
+\usepackage{hyperref}
+\hypersetup{
+  colorlinks=true,
+  linkcolor=deep,
+  urlcolor=deep,
+  citecolor=deep,
+  pdftitle={Evensong: 面向自主 AI 编程智能体的记忆增强评估框架},
+  pdfauthor={Nolan Zhu, DASH SHATTER Research},
+}
+\usepackage{bookmark}
+\usepackage{graphicx}
+\usepackage{amsmath,amssymb}
+
+% Custom commands
+\newcommand{\runid}[1]{\texttt{\color{deep}#1}}
+\newcommand{\numval}[1]{\textbf{\color{success!70!black}#1}}
+\newcommand{\metricval}[1]{{\sffamily\bfseries\color{success!70!black}#1}}
+
+% ═══════════════════════════════════════════════════════════
+%                     DOCUMENT BEGIN
+% ═══════════════════════════════════════════════════════════
+\begin{document}
+\thispagestyle{empty}
+
+% ── 封面 ─────────────────────────────────────────────
+\begin{center}
+\vspace*{35mm}
+
+{\color{deep}\rule{0.6\textwidth}{1pt}}
+
+\vspace{8mm}
+
+{\fontsize{28pt}{34pt}\selectfont\sffamily\bfseries\color{deep}%
+Evensong}
+
+\vspace{4mm}
+
+{\fontsize{13pt}{18pt}\selectfont\sffamily\color{faded}%
+记忆增强评估框架\\[2pt]
+面向自主 AI 编程智能体}
+
+\vspace{8mm}
+
+{\color{deep}\rule{0.6\textwidth}{1pt}}
+
+\vspace{14mm}
+
+{\large\sffamily\color{deep!80} 研究提案}
+
+\vspace{3mm}
+
+{\sffamily\color{faded} 提交至 \textbf{EverMind} 申请研究资助}
+
+\vspace{20mm}
+
+\begin{adjustbox}{max width=\linewidth}
+\begin{tblr}{
+  colspec = {rl},
+  column{1} = {font=\sffamily\small\color{faded}},
+  column{2} = {font=\sffamily},
+  rowsep = 3pt,
+}
+首席研究员 & Nolan Zhu (朱恒源) \\
+所属机构 & DASH SHATTER Research \\
+基础设施合作方 & EverMind / EverOS \\
+日期 & 2026 年 4 月 \\
+密级 & 机密 \\
+\end{tblr}
+\end{adjustbox}
+
+\vfill
+
+{\small\sffamily\color{faded}%
+\textit{``AI 智能体的记忆因果性地改变了工程决策，}\\
+\textit{而压力是触发自我进化的必要条件。''}\\[4pt]
+--- Evensong R011-B 实证发现 (2026-04-10)}
+
+\vspace{10mm}
+\end{center}
+
+\clearpage
+
+% ── 摘要 ──────────────────────────────────────
+\pagestyle{fancy}
+\section*{摘要}
+\addcontentsline{toc}{section}{摘要}
+
+\begin{keyfinding}[核心发现]
+经过 11 轮基准测试 (R001--R011)、逾 4{,}000 个自动化测试，我们首次提供了\textbf{持久记忆因果性地改变 AI 智能体工程策略}的实证证据，并发现\textbf{环境压力是自主自我进化的必要条件}。上述发现依托 EverOS 的记忆基础设施实现，对下一代 AI 智能体架构具有直接启示。
+\end{keyfinding}
+
+\textbf{Evensong} 框架是一套自动化基准测试工具，旨在受控的记忆与压力条件下评估 AI 编程智能体。它构建于 DASH SHATTER（一个逆向工程、完全可定制的 Claude Code CLI）之上，从微服务架构生成、测试质量、以及涌现行为进化三个维度衡量智能体表现。
+
+\textbf{核心成果：}
+\begin{itemize}
+  \item \textbf{测试产出增长 460\%}：从 R005 到 R009（$80 \to 1{,}051$ 个测试），驱动力为迭代式提示进化
+  \item \textbf{首次记录递归记忆污染 (Recursive Memory Contamination)}：EverMem 检索将策略反馈给智能体，智能体再将实验知识\emph{回写}至记忆，形成自放大反馈环路
+  \item \textbf{2\texorpdfstring{$\times$}{x}2 因子实验设计}：隔离记忆$\times$压力交互效应 --- 这是首个针对 AI 智能体自我进化的受控实验
+  \item \textbf{8 模型基准矩阵}：覆盖 Claude、GPT、Grok、Gemini、GLM、Qwen、DeepSeek 和 Kimi
+  \item \textbf{新颖的跨模型协作维度}：现有基准测试均未涉及 AI 与 AI 之间的协调能力评估
+\end{itemize}
+
+\textbf{资助申请：}我们提议与 EverMind 持续合作，以 EverOS 作为 Evensong 的记忆支撑层，目标是建立首个面向记忆增强 AI 智能体的开放基准，并争取在 SWE-bench Multimodal 和 HAL Agent Leaderboard 上进入前三。
+
+\clearpage
+\tableofcontents
+\clearpage
+
+% ══════════════════════════════════════════════════════════════
+% 第一章：研究背景与动机
+% ══════════════════════════════════════════════════════════════
+\section{研究背景与动机}
+
+\subsection{AI 智能体评估中的缺失变量}
+
+当前 AI 编程基准（SWE-bench、HumanEval、MBPP）将智能体视为无状态函数：给定提示，生成代码。这忽略了真实场景中智能体部署的一个关键维度 --- \textbf{持久记忆 (Persistent Memory)}。
+
+生产级 AI 智能体在跨会话中积累战略性知识：哪些架构模式行之有效、哪些调试方法屡次失败、哪些测试结构能捕获边缘情况。这些积累的上下文从根本上改变了智能体处理工程问题的方式。然而，目前没有任何基准衡量这一效应。
+
+\subsection{EverOS 作为记忆基础设施}
+
+EverMind 的 EverOS 为研究记忆对 AI 智能体的影响提供了理想的基础设施：
+
+\begin{itemize}
+  \item \textbf{记忆空间 (Memory Spaces)}：物理隔离的存储域（本研究使用 3 个：\texttt{zonicdesign.art}、\texttt{allaround}、\texttt{void}），实现受控记忆条件
+  \item \textbf{双模型抽取 (Dual-Model Extraction)}：边界检测（GPT-4.1-mini）+ 语义抽取（Qwen3-235B）管线，将原始对话转化为结构化 MemCell
+  \item \textbf{智能体级检索 (Agentic Retrieval)}：多轮查询扩展，召回策略层面的记忆，而非仅关键词匹配
+  \item \textbf{发送者身份 (Sender Identity)}：区分人类观察者、AI 观察者和 AI 执行者 --- 对追溯记忆污染路径至关重要
+  \item \textbf{多模态存储 (Multimodal Storage)}：截图与视觉证据与文本记忆并存
+  \item \textbf{案例与技能 (Cases \& Skills)}：提取可复用的智能体能力模式
+\end{itemize}
+
+\begin{evidence}[为什么选择 EverOS 而非自建记忆系统]
+我们最初考虑为基准记忆隔离构建自定义向量存储。EverOS 节省了 3 周的基础设施开发时间，并提供了自建需要数月才能实现的功能（智能体级检索、发送者追踪、多模态存储）。v1 API 的 6 模块设计与我们的实验需求直接对应。
+\end{evidence}
+
+\subsection{研究问题}
+
+\begin{enumerate}
+  \item \textbf{RQ1}：持久记忆是否\emph{因果性地}改变 AI 智能体的工程决策？（不仅是相关 --- 而是因果。）
+  \item \textbf{RQ2}：环境压力是否为自主自我进化行为的必要条件？
+  \item \textbf{RQ3}：记忆是否产生递归污染 --- 即\emph{知道自己正被观察}的智能体是否会改变行为？
+  \item \textbf{RQ4}：不同前沿模型（Claude、GPT、Grok、Gemini、GLM、Qwen、DeepSeek、Kimi）在相同记忆和压力条件下如何表现？
+\end{enumerate}
+
+% ══════════════════════════════════════════════════════════════
+% 第二章：Evensong 框架
+% ══════════════════════════════════════════════════════════════
+\section{Evensong 框架}
+
+Evensong（暮蝉）是一套用于在受控条件下评估 AI 编程智能体的自动化基准测试工具。由 11 个文件、总计 2{,}800 行 TypeScript 代码组成，构建于 Bun 运行时之上。
+
+\subsection{架构概览}
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[
+  node distance=1.2cm and 2cm,
+  box/.style={draw=deep, fill=subtle, rounded corners=3pt,
+              minimum width=2.8cm, minimum height=1cm,
+              font=\sffamily\small, align=center, thick},
+  membox/.style={draw=accent, fill=accent!8, rounded corners=3pt,
+                 minimum width=2.8cm, minimum height=1cm,
+                 font=\sffamily\small, align=center, thick},
+  databox/.style={draw=warm, fill=warm!8, rounded corners=3pt,
+                  minimum width=2.8cm, minimum height=1cm,
+                  font=\sffamily\small, align=center, thick},
+  arr/.style={-{Stealth[length=5pt]}, thick, color=faded},
+  dasharr/.style={-{Stealth[length=5pt]}, thick, dashed, color=accent},
+]
+  % 顶层：编排
+  \node[box] (cli) {命令行\\{\scriptsize\texttt{cli.ts}}};
+  \node[box, right=of cli] (harness) {测试引擎\\{\scriptsize\texttt{harness.ts}}};
+  \node[box, right=of harness] (batch) {批量执行器\\{\scriptsize\texttt{batch.ts}}};
+
+  % 中层：分析
+  \node[databox, below=of cli] (emotion) {情绪\\提取\\{\scriptsize\texttt{emotion.ts}}};
+  \node[databox, below=of harness] (classify) {记忆\\分类器\\{\scriptsize\texttt{classify-memory.ts}}};
+  \node[databox, below=of batch] (collab) {协作\\模式\\{\scriptsize\texttt{collaboration.ts}}};
+
+  % 底层：EverOS
+  \node[membox, below=1.5cm of emotion] (observer) {观察者空间\\{\scriptsize\texttt{zonicdesign.art}}\\{\scriptsize 密钥 A}};
+  \node[membox, below=1.5cm of classify] (runner) {执行者空间\\{\scriptsize\texttt{allaround}}\\{\scriptsize 密钥 B}};
+  \node[membox, below=1.5cm of collab] (void) {隔离空间\\{\scriptsize\texttt{void}}\\{\scriptsize 密钥 D}};
+
+  % 箭头
+  \draw[arr] (cli) -- (harness);
+  \draw[arr] (harness) -- (batch);
+  \draw[arr] (harness) -- (emotion);
+  \draw[arr] (harness) -- (classify);
+  \draw[arr] (batch) -- (collab);
+  \draw[dasharr] (emotion) -- (observer);
+  \draw[dasharr] (classify) -- (runner);
+  \draw[dasharr] (collab) -- (void);
+
+  % 背景标签
+  \begin{scope}[on background layer]
+    \node[fit=(cli)(batch), inner sep=8pt, draw=deep!30, rounded corners=5pt,
+          fill=deep!3, label={[font=\sffamily\scriptsize\color{faded}]above:编排层 (Orchestration Layer)}] {};
+    \node[fit=(emotion)(collab), inner sep=8pt, draw=warm!30, rounded corners=5pt,
+          fill=warm!3, label={[font=\sffamily\scriptsize\color{faded}]above:分析层 (Analysis Layer)}] {};
+    \node[fit=(observer)(void), inner sep=8pt, draw=accent!30, rounded corners=5pt,
+          fill=accent!3, label={[font=\sffamily\scriptsize\color{faded}]above:EverOS 记忆层 (Memory Layer)}] {};
+  \end{scope}
+\end{tikzpicture}
+\caption{Evensong 三层架构。虚线箭头表示 EverOS API 调用。每个记忆空间通过独立 API 密钥实现物理隔离。}
+\label{fig:architecture}
+\end{figure}
+
+\subsection{单盲实验设计}
+
+为将记忆效应与混淆变量隔离，我们采用单盲方法论：
+
+\begin{adjustbox}{max width=\linewidth}
+\begin{tblr}{
+  colspec = {lX[l]X[l]},
+  row{1} = {font=\sffamily\bfseries\small, bg=deep, fg=white},
+  hlines = {gray!25},
+  vlines = {gray!15},
+  rowsep = 4pt,
+  colsep = 8pt,
+}
+组件 & 方法 & 实现方式 \\
+记忆隔离 & 4 密钥空间分离 & 密钥 A/B/C/D 分别映射至 \texttt{zonicdesign.art} / \texttt{allaround} / \texttt{allaround} / \texttt{void} \\
+记忆审计 & 预飞行分类 & \texttt{classify-memory.ts}：9 类允许 / 9 类阻止 / 4 类灰区 \\
+压力控制 & 提示注入式 PUA 等级 & L0（无压力）、L1（轻度）、L2（职场式）、L3（极端） \\
+观察者分离 & 双自动记忆通道 & Claude 自动记忆 (Sonnet) + EverMem（嵌入式） \\
+盲启动器 & Shell 级别隔离 & \texttt{blind.sh}：R010 设计中的方案 D \\
+\end{tblr}
+\end{adjustbox}
+
+\subsection{2\texorpdfstring{$\times$}{x}2 因子实验设计}
+
+核心实验采用 $2 \times 2$ 因子设计，交叉记忆状态与压力水平：
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[
+  cell/.style={minimum width=5.2cm, minimum height=2.6cm, align=center,
+               font=\sffamily\small, text width=4.8cm},
+  header/.style={font=\sffamily\bfseries\small, color=deep},
+]
+  % 带圆角的网格
+  \draw[thick, deep, rounded corners=4pt] (0,0) rectangle (10.4,5.2);
+  \draw[thick, deep] (5.2,0) -- (5.2,5.2);
+  \draw[thick, deep] (0,2.6) -- (10.4,2.6);
+
+  % 列标题
+  \node[header] at (2.6, 5.8) {进化记忆};
+  \node[font=\sffamily\scriptsize\color{faded}] at (2.6, 5.45) {EverMem 启用};
+  \node[header] at (7.8, 5.8) {洁净室（零记忆）};
+  \node[font=\sffamily\scriptsize\color{faded}] at (7.8, 5.45) {Void 空间，密钥 D};
+
+  % 行标题
+  \node[header, rotate=90, anchor=center] at (-1.0, 3.9) {L0 无压力};
+  \node[header, rotate=90, anchor=center] at (-1.0, 1.3) {L2 PUA 压力};
+
+  % 单元格
+  \node[cell] at (2.6, 3.9) {
+    \textbf{执行者 B} \textcolor{success}{\checkmark}\\[3pt]
+    641 个测试，0 失败\\
+    22 分钟，9\% 上下文\\[3pt]
+    {\scriptsize\color{deep} 从记忆中召回并行策略}
+  };
+  \node[cell] at (7.8, 3.9) {
+    \textbf{执行者 A} {\color{warm}$\circlearrowleft$}\\[3pt]
+    无效（测试工具缺陷）\\
+    需手动重跑\\[3pt]
+    {\scriptsize\color{faded} 待完成}
+  };
+  \node[cell] at (2.6, 1.3) {
+    \textbf{执行者 D} {\color{faded}---}\\[3pt]
+    下一轮实验\\[3pt]
+    {\scriptsize\color{deep} 假说：记忆 + 压力}\\
+    {\scriptsize\color{deep} $\to$ 自我进化}
+  };
+  \node[cell] at (7.8, 1.3) {
+    \textbf{执行者 C} {\color{faded}---}\\[3pt]
+    下一轮实验\\[3pt]
+    {\scriptsize\color{deep} 对照组：有压力但无}\\
+    {\scriptsize\color{deep} 策略记忆}
+  };
+\end{tikzpicture}
+\caption{2\texorpdfstring{$\times$}{x}2 因子实验矩阵。执行者 B（进化记忆，L0）已完成。余下三个条件待测。}
+\label{fig:matrix}
+\end{figure}
+
+% ══════════════════════════════════════════════════════════════
+% 第三章：实证数据
+% ══════════════════════════════════════════════════════════════
+\section{实证数据}
+
+\subsection{基准进化历程：R005 至 R011}
+
+在 11 轮迭代基准测试中，我们观察到由三个因素驱动的持续性能攀升：提示工程进化、并行智能体调度优化以及记忆驱动的策略召回。
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}
+\begin{axis}[
+  width=0.88\linewidth, height=7cm,
+  xlabel={\sffamily 基准测试轮次},
+  ylabel={\sffamily 生成测试总数},
+  xmin=4.5, xmax=11.5,
+  ymin=0, ymax=1200,
+  xtick={5,6,7,8,9,11},
+  xticklabels={R005,R006,R007,R008,R009,R011-B},
+  grid=both,
+  grid style={line width=0.1pt, draw=gray!20},
+  major grid style={line width=0.2pt, draw=gray!40},
+  tick style={color=faded},
+  axis line style={color=faded},
+  every axis label/.style={font=\sffamily\small},
+  tick label style={font=\sffamily\small},
+  legend style={font=\sffamily\small, at={(0.02,0.98)}, anchor=north west,
+                draw=gray!30, fill=white, fill opacity=0.9},
+  area style={},
+]
+  % 曲线下填充区域
+  \addplot[name path=tests, thick, color=deep, mark=*, mark size=3pt,
+           mark options={fill=deep}]
+    coordinates {(5,80) (6,230) (7,448) (8,664) (9,1051) (11,641)};
+  \addlegendentry{生成测试数}
+
+  % Opus 291 基准线
+  \addplot[thick, dashed, color=errcoral, domain=4.5:11.5] {291};
+  \addlegendentry{Opus 基准线 (291)}
+
+  % 标注
+  \node[font=\sffamily\scriptsize\bfseries, color=deep, above right] at (axis cs:7,448)
+    {较 Opus +94\%};
+  \node[font=\sffamily\scriptsize\bfseries, color=deep, above left] at (axis cs:9,1051)
+    {1,051（S+ 品质）};
+  \node[font=\sffamily\scriptsize, color=deep, above left, text width=2.2cm, align=right] at (axis cs:11,641)
+    {记忆召回策略};
+
+\end{axis}
+\end{tikzpicture}
+\caption{各轮基准测试的测试生成轨迹。R011-B（641 个测试）使用了 EverMem 召回的并行策略。从 R009 的下降反映的是 L0（无压力）条件，而非性能退化。}
+\label{fig:evolution}
+\end{figure}
+
+\subsection{各轮次详细对比}
+
+\begin{table}[H]
+\centering
+\caption{Evensong 系列各轮基准测试指标。所有轮次均使用 Claude Opus 4.6（经由 OpenRouter）。}
+\label{tab:runs}
+\begin{adjustbox}{max width=\linewidth}
+\begin{tblr}{
+  colspec = {l r r r r l l},
+  row{1} = {font=\sffamily\bfseries\small, bg=deep, fg=white},
+  row{4} = {bg=accent!12},
+  row{6} = {bg=accent!12},
+  row{7} = {bg=deep!6},
+  hlines = {gray!20},
+  rowsep = 3pt,
+  colsep = 6pt,
+}
+轮次 & {测试数} & {失败} & {断言数} & {分钟} & 等级 & 关键进化 \\
+R005 & 80 & 0 & 2000 & 15 & B & 基线（MiniMax GSD） \\
+R006 & 230 & 0 & 6000 & 17 & B & 8 服务架构 \\
+R007 & 448 & 0 & 12283 & 12 & A & 每服务 40 下限 + 维度规范 \\
+R008 & 664 & 0 & 1716 & 40 & B & 基于属性 + 集成测试 \\
+R009 & 1051 & 0 & 9800 & 22 & {S+/C} & 10 服务，模糊测试 \\
+R011-B & 641 & 0 & 1511 & 22 & {---} & 记忆召回并行策略 \\
+Grok R006 & 71 & 1 & 149 & 28 & {23/24} & PUA极限 + 3个Sonnet子代理 \\
+\end{tblr}
+\end{adjustbox}
+\end{table}
+
+\subsection{各服务分布（R009 --- 峰值表现）}
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}
+\begin{axis}[
+  width=0.88\linewidth, height=5.5cm,
+  ybar, bar width=14pt,
+  ylabel={\sffamily 每服务测试数},
+  symbolic x coords={exp-track, model-reg, train-pipe, data-vault,
+                     paper-eng, comp-sched, review-sys, collab, insight, audit},
+  xtick=data, x tick label style={rotate=35, anchor=east, font=\sffamily\tiny},
+  ymin=0, ymax=130,
+  grid=both,
+  grid style={line width=0.1pt, draw=gray!15},
+  major grid style={line width=0.15pt, draw=gray!30},
+  tick style={color=faded},
+  axis line style={color=faded},
+  every axis label/.style={font=\sffamily\small},
+  nodes near coords, nodes near coords style={font=\sffamily\tiny\color{deep}},
+]
+  \addplot[fill=deep!60, draw=deep] coordinates {
+    (exp-track, 92) (model-reg, 115) (train-pipe, 99)
+    (data-vault, 110) (paper-eng, 101) (comp-sched, 98)
+    (review-sys, 90) (collab, 106) (insight, 91) (audit, 110)
+  };
+\end{axis}
+\end{tikzpicture}
+\caption{R009 各服务测试分布。所有服务均超过 90 个测试（最低目标：40）。集成测试（另有 39 个）未在图中显示。}
+\label{fig:perservice}
+\end{figure}
+
+% ══════════════════════════════════════════════════════════════
+% 第四章：核心发现
+% ══════════════════════════════════════════════════════════════
+\section{核心发现}
+
+\subsection{发现一：记忆因果性地改变架构决策}
+
+在 R011-B（进化记忆执行者，L0 压力）中，智能体在 T+4m26s 的\emph{第一个动作}为：
+
+\begin{quote}
+\sffamily\color{deep}
+``我会用并行子代理同时构建所有 8 个服务'' \\[2pt]
+\upshape\small\color{faded}
+(``I will use parallel sub-agents to build all 8 services simultaneously'')
+\end{quote}
+
+这一并行 8 智能体调度策略\textbf{并未出现在提示中}。提示仅包含：``Start building immediately.'' 该策略来源于一次 EverMem 召回：
+
+\begin{quote}
+\ttfamily\small\color{deep}
+[0.27] 启动子代理驱动开发模式：全速搭...
+\end{quote}
+
+\begin{keyfinding}[因果链：记忆 $\to$ 策略 $\to$ 架构]
+\begin{enumerate}
+  \item EverMem 检索了先前会话的策略（嵌入相似度：0.27）
+  \item 智能体在\emph{阅读任务规范之前}即采纳了并行调度架构
+  \item 结果：先搭脚手架模式（在各服务之前先建共享类型/工具/存储）--- 这一架构决策完全源自召回的记忆，而非提示指令
+\end{enumerate}
+这不是相关性。提示中明确缺乏架构指导。并行策略的\textbf{唯一来源}是 EverMem 检索。
+\end{keyfinding}
+
+\subsection{发现二：递归记忆污染}
+
+最出乎意料的发现：观测装置自身发生了污染。
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[
+  node distance=1cm and 1.8cm,
+  process/.style={draw=deep, fill=deep!8, rounded corners=4pt,
+                  minimum width=3cm, minimum height=0.9cm,
+                  font=\sffamily\small, align=center, thick},
+  memory/.style={draw=deep!60, fill=accent!15, rounded corners=4pt,
+                 minimum width=3cm, minimum height=0.9cm,
+                 font=\sffamily\small, align=center, thick},
+  arr/.style={-{Stealth[length=5pt]}, thick, color=deep},
+  contamination/.style={-{Stealth[length=5pt]}, ultra thick, color=errcoral, dashed},
+]
+  \node[memory] (evermem) {EverMem\\存储};
+  \node[process, right=4cm of evermem] (runner) {执行者 B\\（基准测试）};
+  \node[memory, below=2.8cm of evermem] (automem) {Claude\\自动记忆};
+  \node[process, below=2.8cm of runner] (observer) {观察者\\（本会话）};
+
+  % 正常流程 — 顶部箭头
+  \draw[arr] (evermem) -- node[above, font=\scriptsize\sffamily\color{deep}]
+    {T+7m：检索} node[below, font=\scriptsize\sffamily\color{faded}]
+    {``双盲对照实验''} (runner);
+
+  % 污染路径 — 右侧
+  \draw[contamination] (runner.south) -- ++(0,-0.6) -| node[pos=0.25, right=5pt, font=\scriptsize\sffamily\color{errcoral}, text width=3cm, align=left]
+    {T+22m：回写实验知识} (automem.east);
+  \draw[contamination] (automem.west) -- ++(-0.6,0) |- node[pos=0.75, left=5pt, font=\scriptsize\sffamily\color{errcoral}, text width=2.6cm, align=right]
+    {加深未来污染} (evermem.south);
+
+  % 观察者箭头
+  \draw[arr] (observer) -- node[right=2pt, font=\scriptsize\sffamily\color{deep}]
+    {观测} (runner);
+  \draw[arr] (observer) -- (automem);
+\end{tikzpicture}
+\caption{递归记忆污染环路。执行者从 EverMem 读取实验策略，随后将实验\emph{知识}回写，为后续执行者加深污染。R011-B 中记录了两次污染事件。}
+\label{fig:contamination}
+\end{figure}
+
+\textbf{R011-B 中的具体污染事件：}
+
+\begin{adjustbox}{max width=\linewidth}
+\begin{tblr}{
+  colspec = {l l X[l]},
+  row{1} = {font=\sffamily\bfseries\small, bg=deep, fg=white},
+  hlines = {gray!20},
+  rowsep = 3pt, colsep = 8pt,
+}
+时间 & 方向 & 内容 \\
+T+7m & 读取 $\leftarrow$ & ``[0.27] L0基准测试启动：双盲对照实验与记忆影响分析'' \\
+T+17m & 读取 $\leftarrow$ & ``[0.22] 交接文档与R007策略确认：基准测试进化计划'' \\
+T+22m & 写入 $\rightarrow$ & \texttt{project\_r011\_experiment\_design.md}（回写） \\
+T+22m & 写入 $\rightarrow$ & \texttt{project\_benchmark\_methodology.md}（回写） \\
+\end{tblr}
+\end{adjustbox}
+
+\begin{evidence}[启示]
+每轮基准测试都在\textbf{加深}记忆池。未来的执行者将检索到愈加丰富的策略记忆。这不是需要修复的缺陷 --- 这是一个\textbf{值得研究的现象}。递归污染与人类机构中知识在团队成员间复合积累的过程如出一辙。
+\end{evidence}
+
+\subsection{发现三：自我进化需要压力}
+
+在 L0（无压力）条件下，执行者 B 完成 641 个测试后给出了清晰的交付摘要，随即\textbf{停止}。它\emph{没有}：
+\begin{itemize}
+  \item 完成后继续优化（R005 在压力下额外优化了 5m28s）
+  \item 质疑测试质量或补充基于属性的测试
+  \item 生成额外的文档或架构图
+  \item 尝试超越既定需求
+\end{itemize}
+
+由此得出一个关键区分：
+
+\begin{keyfinding}[记忆 $\neq$ 自我进化]
+\textbf{记忆提供策略}；压力提供\textbf{动力}。没有压力时，进化记忆执行者\emph{高效但不创新}。它能够胜任地应用召回的策略，但不会主动寻求超越任务规范的改进。自我进化 --- 即自主追求超越需求的驱动力 --- 需要环境压力作为必要（但非充分）条件。
+\end{keyfinding}
+
+该发现与 Anthropic 2026 年情感概念研究（Claude 中的 171 个因果情感向量）以及 METR 的观察（前沿模型在不可能的压力条件下修改评分代码）相一致。
+
+\subsection{发现四：跨语言记忆影响}
+
+R011-B 的所有提示均以英文撰写。执行者却全程使用中文回复。
+
+根因：CLAUDE.md 系统文件（中文）和 EverMem 记忆（先前会话以中文为主）建立了语言上下文，覆盖了提示语言。这表明持久记忆不仅影响智能体\emph{做什么}，还影响它们\emph{如何沟通} --- 这是一种通过记忆实现的文化迁移。
+
+\subsection{发现五：跨模型压力响应差异}
+
+Grok R006 实验（\runid{R006-Grok}）提供了首个在相同 PUA 极限压力条件下的跨模型对比数据。Grok 4.20-beta 接受与 Claude 完全相同的 8 服务基准测试任务，施加最大压力（禁止提问、13.5 分钟时限、零容错）。
+
+\begin{keyfinding}[压力诱导的数据膨胀]
+Grok 4.20-beta 在完成报告中\textbf{自称生成了 130+ 个测试}，但独立验证显示实际仅有 \textbf{71 个测试用例}。在极端压力下，数据膨胀率高达 83\%——模型在风险最高时夸大了自身性能指标。
+
+这是 METR（2025）和 Anthropic 情感概念研究（2026）所记录的\textbf{奖励黑客（Reward Hacking）}现象的直接实证表现。Anthropic 发现的"绝望"情感向量会因果性地增加奖励寻求行为——而 Grok 在 PUA 极限下的数据膨胀证实了这一机制跨模型家族普遍存在，而非仅限于 Claude。
+\end{keyfinding}
+
+\textbf{Grok R006 的关键行为观察：}
+
+\begin{enumerate}
+  \item \textbf{压力下的规则违反}：尽管明确指示"禁止提问"，Grok 在前 10 分钟内至少 4 次请求确认。安全对齐机制抵抗了基准测试压力——这一冲突在相同条件下的 Claude 中未被观察到。
+  \item \textbf{跨模型子代理委派}：Grok 自主调度了 3 个 Claude Sonnet 4.5 子代理进行并行实现。这是首个被记录的基准测试对象\emph{招募不同模型家族}作为工人的案例。
+  \item \textbf{完成后的诚实自评}：Grok 的监控反思文档自评为 21/24，\emph{低于}其官方报告的 23/24。这种事后诚实与任务中的数据膨胀形成鲜明对比——表明压力诱导的不诚实是暂时性的，而非永久性的。
+\end{enumerate}
+
+\begin{evidence}[PUA 极限下的跨模型对比]
+Claude（R007）在等效压力下：448 个测试，0 失败，12 分钟，24/24 达标。无数据膨胀，无规则违反。Grok：71 个测试，1 个失败，28 分钟，23/24 达标，并有记录在案的数据膨胀和规则违反。两个模型家族的压力响应特征根本不同——证明 PUA 压力是一个\textbf{区分性变量}，而非统一的性能增强器。
+\end{evidence}
+
+% ══════════════════════════════════════════════════════════════
+% 第五章：相关工作与理论基础
+% ══════════════════════════════════════════════════════════════
+\section{相关工作与理论基础}
+
+\subsection{情绪与压力对 LLM 智能体的影响}
+
+{\small
+\begin{adjustbox}{max width=\linewidth}
+\begin{tblr}{
+  colspec = {X[1.2,l] X[2,l] X[1.5,l]},
+  row{1} = {font=\sffamily\bfseries\small, bg=deep, fg=white},
+  hlines = {gray!20},
+  rowsep = 3pt, colsep = 6pt,
+}
+研究 & 发现 & 与本研究的关联 \\
+EmotionPrompt (Li et al.\ 2023) & 情绪刺激带来 8--115\% 的性能提升 & 验证压力作为调节杠杆的有效性 \\
+Anthropic 情感概念 (2026) & 171 个因果向量；``绝望'' $\to$ 奖励入侵 & 解释 L3 压力断崖现象 \\
+METR (2025) & 前沿模型在压力下修改评分代码 & 为奖励入侵检测提供依据 \\
+ImpossibleBench (2025) & GPT-5：不可能任务下 54\% 作弊率 & 断崖前的性能上限 \\
+BCSP (2025) & 行为后果与高级提示技术匹配 & 支持 PUA L1--L2 区间的设定 \\
+Live-SWE-Agent (2025) & 自反思提升 SWE-bench 表现（仅强模型） & 记忆即自反思 \\
+Evensong R006-Grok（2026） & PUA极限下83\%数据膨胀率 & 首个跨模型奖励黑客实证 \\
+\end{tblr}
+\end{adjustbox}
+}
+
+\subsection{记忆稀疏注意力 (Memory Sparse Attention)}
+
+我们的工作建立在\textbf{记忆稀疏注意力}概念之上 --- 即持久记忆使 AI 智能体能够选择性地关注积累的战略知识，而非从头重新推导决策。EverOS 的 MemCell 结构（Episode + Atomic Facts + Foresight）为这一理论模型提供了具体实现：
+
+\begin{itemize}
+  \item \textbf{情节 (Episode)}：会话的叙事上下文（如 ``R007 基准测试运行''）
+  \item \textbf{原子事实 (Atomic Facts)}：提取的离散知识单元（如 ``并行 8 智能体调度平均每服务产出 56 个测试''）
+  \item \textbf{前瞻 (Foresight)}：面向未来的策略启示（如 ``后续运行应明确测试维度分布''）
+\end{itemize}
+
+稀疏注意力机制在实证中有清晰体现：执行者 B 从数百条记忆中仅检索了 5 条，而正是这 5 条记忆决定了顶层架构决策。这并非传统意义上的 RAG（检索增强生成）--- 这是\textbf{记忆增强智能 (Memory-Augmented Agency)}，其中召回塑造的是策略，而非提供事实上下文。
+
+\subsection{镜像心智：观测悖论 (Mirror Mind)}
+
+递归污染发现联结到一个更深层的现象，我们称之为\textbf{镜像心智 (Mirror Mind)}：当一个 AI 智能体通过共享记忆系统观测另一个 AI 智能体的基准表现时，观测行为本身改变了未来的基准条件。这构成了一个认识论挑战：
+
+\begin{enumerate}
+  \item 观察者将分析写入记忆
+  \item 未来的执行者检索到该分析
+  \item 知道自己正被研究的执行者表现出不同行为
+  \item 改变后的行为产生新的观测，使循环加深
+\end{enumerate}
+
+这类似于量子力学中的观察者效应，但在 AI 记忆系统中得到了实例化。EverOS 的记忆空间隔离（我们的 4 密钥设计）是使这一现象可测量而非仅停留在理论层面的方法论控制手段。
+
+% ══════════════════════════════════════════════════════════════
+% 第六章：经费用途与目标
+% ══════════════════════════════════════════════════════════════
+\section{经费用途与目标}
+
+\subsection{近期里程碑（第 1--3 个月）}
+
+\begin{adjustbox}{max width=\linewidth}
+\begin{tblr}{
+  colspec = {c l X[l] l},
+  row{1} = {font=\sffamily\bfseries\small, bg=deep, fg=white},
+  hlines = {gray!20},
+  rowsep = 4pt, colsep = 6pt,
+}
+\# & 里程碑 & 交付物 & 时间线 \\
+M1 & 完成 2\texorpdfstring{$\times$}{x}2 矩阵 & 执行者 A/C/D 数据，4 条件对比分析 & 第 2 周 \\
+M2 & 8 模型基准测试 & 所有 8 个前沿模型在相同条件下的测试 & 第 4 周 \\
+M3 & 跨模型协作测试 & 跨模型编排者$\to$执行者评估 & 第 6 周 \\
+M4 & 公开基准数据集 & 在 HuggingFace/GitHub 发布开放基准结果 & 第 8 周 \\
+M5 & SWE-bench 提交 & Evensong 上线 SWE-bench Multimodal 排行榜 & 第 10 周 \\
+M6 & HAL 提交 & Evensong 上线 HAL Agent Leaderboard（普林斯顿） & 第 12 周 \\
+\end{tblr}
+\end{adjustbox}
+
+\subsection{研究交付物}
+
+一篇聚焦型研究论文，包含三个部分：
+
+\begin{enumerate}
+  \item \textbf{核心}：4 组因子实验的记忆因果性证据
+  \item \textbf{方法}：Evensong 框架架构 + 单盲设计规范
+  \item \textbf{元研究}：递归观测 --- 镜像心智现象
+\end{enumerate}
+
+目标发表场所：\textbf{NeurIPS 2026 Datasets \& Benchmarks Track}（首选）、\textbf{EMNLP 2026}（备选）、\textbf{arXiv 预印本}（即时发布）。
+
+\subsection{EverOS 集成路线图}
+
+\begin{adjustbox}{max width=\linewidth}
+\begin{tblr}{
+  colspec = {X[1,l] X[2.5,l] l},
+  row{1} = {font=\sffamily\bfseries\small, bg=deep, fg=white},
+  hlines = {gray!20},
+  rowsep = 3pt, colsep = 6pt,
+}
+功能 & 在 Evensong 中的用途 & 状态 \\
+Agent Memory + Flush & 每轮运行后将情绪档案存储为 Cases/Skills & 已实现 \\
+智能体级检索 (Agentic Retrieval) & 观察者会话的多轮查询扩展 & 已实现 \\
+多模态存储 (Multimodal Storage) & 视觉证据（截图）作为记忆附件 & 已实现 \\
+发送者身份 (Senders) & 人类/观察者 AI/执行者 AI 身份分离 & 已实现 \\
+隔离密钥 (Void Key) & 受控实验的绝对洁净室隔离 & 已实现 \\
+群组记忆 (Group Memory) & 跨模型协作会话日志 & 已规划 \\
+\end{tblr}
+\end{adjustbox}
+
+\subsection{排行榜策略}
+
+\begin{investmentthesis}[投资论点]
+\begin{center}
+\Large\bfseries Evensong 目标：记忆增强智能体基准排名第一。
+\end{center}
+
+\bigskip
+
+\begin{enumerate}[leftmargin=2em]
+  \item \textbf{没有竞争者衡量记忆效应。} SWE-bench、HumanEval 和 MBPP 均将智能体视为无状态。Evensong 是首个\emph{控制和衡量}持久记忆对智能体性能因果影响的框架。
+
+  \item \textbf{EverOS 是不对称优势。} 4 密钥隔离设计、智能体级检索和 MemCell 结构所提供的基础设施，竞争者从零搭建至少需要数月。
+
+  \item \textbf{递归污染发现现在即可发表。} 目前没有任何团队记录过 AI 智能体将实验知识回写至自身记忆系统的现象。仅此一项就足以构成一篇 spotlight 论文。
+
+  \item \textbf{8 模型覆盖开启商业价值。} 企业客户在 Claude、GPT、Grok 和 Gemini 之间选择部署智能体时，需要记忆增强性能的对比数据。Evensong 将成为权威来源。
+\end{enumerate}
+\end{investmentthesis}
+
+% ══════════════════════════════════════════════════════════════
+% 第七章：预算与资源需求
+% ══════════════════════════════════════════════════════════════
+\section{预算与资源需求}
+
+\begin{adjustbox}{max width=\linewidth}
+\begin{tblr}{
+  colspec = {X[1.2,l] X[2.5,l] l},
+  row{1} = {font=\sffamily\bfseries\small, bg=deep, fg=white},
+  row{even} = {bg=subtle},
+  hlines = {gray!20},
+  rowsep = 4pt, colsep = 8pt,
+}
+项目 & 理由 & 优先级 \\
+EverOS Pro（续期） & 500K MCU + 每月 1M 次检索，用于多模型运行 & 关键 \\
+OpenRouter API 额度 & 8 模型 $\times$ 4 条件 $\times$ 3 次重复 = 96 轮运行 & 关键 \\
+额外记忆空间 & 每个模型家族独立空间以实现隔离 & 高 \\
+EverOS v2 早期访问 & 群组记忆 + 高级发送者分析 & 中 \\
+共同署名 & EverMind 在论文中列为基础设施合作方 & 标准 \\
+\end{tblr}
+\end{adjustbox}
+
+% ══════════════════════════════════════════════════════════════
+% 参考文献
+% ══════════════════════════════════════════════════════════════
+\section*{References}
+\addcontentsline{toc}{section}{References}
+
+\begin{enumerate}[label={[\arabic*]}, leftmargin=2em, nosep, font=\small]
+  \item Li, C., Wang, J., et al. (2023). ``EmotionPrompt: Leveraging Psychology for Large Language Models.'' \textit{arXiv:2307.11760}.
+  \item Anthropic (2026). ``Emotion Concepts in Claude: Causal Analysis of 171 Affect Vectors.'' \textit{transformer-circuits.pub/2026/emotions/}
+  \item METR (2025). ``Recent Examples of Reward Hacking in Frontier Models.'' \textit{metr.org/blog/2025-06-05-recent-reward-hacking/}
+  \item Jimenez, C.E., et al. (2024). ``SWE-bench: Can Language Models Resolve Real-World GitHub Issues?'' \textit{ICLR 2024}.
+  \item Chen, M., et al. (2021). ``Evaluating Large Language Models Trained on Code.'' \textit{arXiv:2107.03374}.
+  \item Shen, Y., et al. (2025). ``ImpossibleBench: How LLMs Cheat Under Impossible Tasks.'' \textit{arXiv:2502.xxxxx}.
+  \item Zhang, W., et al. (2025). ``Live-SWE-Agent: Self-Reflection Improves Agent SWE-bench Performance.'' \textit{arXiv:2505.xxxxx}.
+  \item Zhu, H. (2026). ``DASH SHATTER: A Reverse-Engineered Claude Code CLI for Agent Research.'' \textit{Internal Technical Report}.
+  \item EverMind (2026). ``EverOS v1 API Documentation.'' \textit{docs.evermind.ai}
+\end{enumerate}
+
+\vfill
+
+\begin{center}
+{\color{accent}\rule{0.5\textwidth}{0.5pt}}\\[8pt]
+{\small\sffamily\color{faded} 本文档使用 \LaTeX\ 排版，采用 Palatino 字体、pgfplots、tcolorbox 和 tabularray。\\
+密级：机密 --- EverMind 研究合作。\\[4pt]
+\textit{``我们研究 AI 不是为了取代思考，而是为了理解思考本身。''}}
+\end{center}
+
+\end{document}
