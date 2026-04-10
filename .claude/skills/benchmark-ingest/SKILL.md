@@ -115,10 +115,35 @@ Translation rules:
 - Technical terms stay English: property-based, fuzz testing
 - All data, numbers, code blocks unchanged
 
-### Phase 6: Commit + Deploy
+### Phase 6: DASH SHATTER Website Sync
+
+The main product website at `dash-shatter.vercel.app` (repo: `~/dash-shatter/`) also needs updating.
+
+1. **benchmarkData.ts** — Add new run to `BENCHMARK_RUNS` array in `/Users/0xvox/dash-shatter/src/lib/benchmarkData.ts`
+2. **EvolutionTimeline** — Add new emergent behaviors to the timeline component data
+3. **i18n translations** — Update both EN and ZH translations in `/Users/0xvox/dash-shatter/src/lib/i18n.ts`
+4. **Build verify** — `cd ~/dash-shatter && bun run build`
+5. **Commit + push** — Separate commit in the dash-shatter repo
 
 ```bash
-# Stage only benchmark files
+cd ~/dash-shatter
+git add -A
+git commit -m "benchmark(R00X): sync R00X data + i18n updates"
+git push origin main
+```
+
+Architecture notes:
+- Next.js 15 app with App Router
+- i18n via React Context (`LocaleContext.tsx`) + translations in `i18n.ts`
+- `LocaleToggle.tsx` in SiteHeader toggles locale context
+- Section components read `useLocale()` and index into translations
+- Fonts: Plus Jakarta Sans + Geist Mono (no Noto Sans SC needed, system CJK fallback)
+
+### Phase 7: CCB Benchmark Commit + Deploy
+
+```bash
+# Stage only benchmark files in the CCB repo
+cd ~/claude-code-reimagine-for-learning
 git add benchmarks/index.html benchmarks/research.html \
        benchmarks/zh/index.html benchmarks/zh/research.html \
        benchmarks/evensong/registry.jsonl
@@ -130,10 +155,10 @@ git commit -m "benchmark(R00X): [codename] — N tests, 0 failures, +delta vs pr
 git push origin main
 
 # Verify Vercel deployment
-npx vercel --prod
+cd benchmarks && npx vercel --prod
 ```
 
-### Phase 7: Memory Update
+### Phase 8: Memory Update
 
 Check if existing memory files need updating:
 - `memory/benchmark_evolution_r00X_results.md` — create new or update
@@ -152,6 +177,7 @@ Use subagents for independent work:
 - Agent 2: Update research.html (if new findings)
 - Agent 3: Update zh/index.html (Chinese dashboard)
 - Agent 4: Update zh/research.html (Chinese research)
+- Agent 5: Update dash-shatter repo (benchmarkData.ts + i18n + timeline)
 
 Agents 3-4 depend on 1-2 completing first (need to know what changed).
 
