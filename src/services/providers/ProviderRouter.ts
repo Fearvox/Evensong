@@ -81,6 +81,38 @@ export const PROVIDER_PRESETS: Record<string, Omit<ProviderConfig, 'apiKey'>> = 
     modelName: 'x-ai/grok-4.1-fast',
     baseUrl: 'https://openrouter.ai/api/v1',
   },
+  // Native xAI (direct API, not via OpenRouter)
+  xai: {
+    name: 'xai',
+    providerClass: 'openai-compatible',
+    modelName: 'grok-4.20-0309-reasoning',
+    baseUrl: 'https://api.x.ai/v1',
+  },
+  'xai-multi': {
+    name: 'xai-multi',
+    providerClass: 'openai-compatible',
+    modelName: 'grok-4.20-multi-agent-0309',
+    baseUrl: 'https://api.x.ai/v1',
+  },
+  'xai-fast': {
+    name: 'xai-fast',
+    providerClass: 'openai-compatible',
+    modelName: 'grok-4-1-fast-reasoning',
+    baseUrl: 'https://api.x.ai/v1',
+  },
+  // Native MiMo (Xiaomi, direct API)
+  mimo: {
+    name: 'mimo',
+    providerClass: 'openai-compatible',
+    modelName: 'mimo-v2-pro',
+    baseUrl: 'https://api.xiaomimimo.com/v1',
+  },
+  'mimo-flash': {
+    name: 'mimo-flash',
+    providerClass: 'openai-compatible',
+    modelName: 'mimo-v2-flash',
+    baseUrl: 'https://api.xiaomimimo.com/v1',
+  },
   // 国产 TOP 模型 (via OpenRouter)
   'or-glm': {
     name: 'or-glm',
@@ -216,6 +248,11 @@ export class ProviderRouter {
       'or-qwen': process.env.OPENROUTER_API_KEY,
       'or-kimi-k25': process.env.OPENROUTER_API_KEY,
       'or-minimax': process.env.OPENROUTER_API_KEY,
+      mimo: process.env.MIMO_API_KEY,
+      'mimo-flash': process.env.MIMO_API_KEY,
+      xai: process.env.XAI_API_KEY,
+      'xai-multi': process.env.XAI_API_KEY,
+      'xai-fast': process.env.XAI_API_KEY,
     };
 
     for (const [name, preset] of Object.entries(PROVIDER_PRESETS)) {
