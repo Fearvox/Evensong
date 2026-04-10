@@ -216,6 +216,9 @@ export function getDefaultMainLoopModel(): ModelName {
  */
 export function firstPartyNameToCanonical(name: ModelName): ModelShortName {
   name = name.toLowerCase()
+  // Normalize OpenRouter-style dotted versions (e.g. 'anthropic/claude-opus-4.6')
+  // to dash-separated form before matching.
+  name = name.replace(/claude-(opus|sonnet|haiku)-(\d+)\.(\d+)/g, 'claude-$1-$2-$3')
   // Special cases for Claude 4+ models to differentiate versions
   // Order matters: check more specific versions first (4-5 before 4)
   if (name.includes('claude-opus-4-6')) {

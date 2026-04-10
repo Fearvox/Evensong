@@ -30,7 +30,11 @@ export const CCR_TERMS_URL = 'https://code.claude.com/docs/en/claude-code-on-the
 // load: the GrowthBook cache is empty at import and `/config` Gates can flip
 // it between invocations.
 function getUltraplanModel(): string {
-  return getFeatureValue_CACHED_MAY_BE_STALE('tengu_ultraplan_model', ALL_MODEL_CONFIGS.opus46.firstParty);
+  const raw = getFeatureValue_CACHED_MAY_BE_STALE('tengu_ultraplan_model', ALL_MODEL_CONFIGS.opus46.firstParty);
+  // Strip ANSI escape codes and [1m]/[2m] context-window suffixes —
+  // the CCR API requires a clean model ID like 'claude-opus-4-6'.
+  // eslint-disable-next-line no-control-regex
+  return raw.replace(/\x1b\[\d+m/g, '').replace(/\[\d+m\]$/i, '').trim();
 }
 
 // prompt.txt is wrapped in <system-reminder> so the CCR browser hides
