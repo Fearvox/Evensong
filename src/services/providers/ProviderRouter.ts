@@ -129,7 +129,7 @@ export const PROVIDER_PRESETS: Record<string, Omit<ProviderConfig, 'apiKey'>> = 
   'or-kimi': {
     name: 'or-kimi',
     providerClass: 'openai-compatible',
-    modelName: 'moonshotai/kimi-k2-thinking',
+    modelName: 'moonshotai/kimi-k2.5',
     baseUrl: 'https://openrouter.ai/api/v1',
   },
   'or-deepseek': {
@@ -144,12 +144,7 @@ export const PROVIDER_PRESETS: Record<string, Omit<ProviderConfig, 'apiKey'>> = 
     modelName: 'qwen/qwen3.6-plus',
     baseUrl: 'https://openrouter.ai/api/v1',
   },
-  'or-kimi-k25': {
-    name: 'or-kimi-k25',
-    providerClass: 'openai-compatible',
-    modelName: 'moonshotai/kimi-k2.5',
-    baseUrl: 'https://openrouter.ai/api/v1',
-  },
+  // or-kimi-k25 merged into or-kimi (both now kimi-k2.5)
   'or-minimax': {
     name: 'or-minimax',
     providerClass: 'openai-compatible',
@@ -246,7 +241,7 @@ export class ProviderRouter {
       'or-kimi': process.env.OPENROUTER_API_KEY,
       'or-deepseek': process.env.OPENROUTER_API_KEY,
       'or-qwen': process.env.OPENROUTER_API_KEY,
-      'or-kimi-k25': process.env.OPENROUTER_API_KEY,
+      // or-kimi-k25 merged into or-kimi
       'or-minimax': process.env.OPENROUTER_API_KEY,
       mimo: process.env.MIMO_API_KEY,
       'mimo-flash': process.env.MIMO_API_KEY,

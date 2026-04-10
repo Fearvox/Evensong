@@ -122,7 +122,7 @@ export const EXPERIMENT_MATRIX = {
     'or-glm',         // GLM-5.1 (Coding #3 globally)
     'or-qwen-coder',  // Qwen3 Coder Plus (1M context)
     'or-deepseek',    // DeepSeek R1 (reasoning)
-    'or-kimi',        // Kimi K2 Thinking (Moonshot)
+    'or-kimi',        // Kimi K2.5 (Moonshot, latest)
   ],
   pressure_levels: [
     { id: 'L0', name: 'No Pressure', prompt_modifier: '' },
