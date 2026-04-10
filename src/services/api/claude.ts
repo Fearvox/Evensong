@@ -545,7 +545,9 @@ export async function verifyApiKey(
   try {
     // WARNING: if you change this to use a non-Haiku model, this request will fail in 1P unless it uses getCLISyspromptPrefix.
     const model = getSmallFastModel()
-    const betas = getModelBetas(model)
+    // Non-Claude models (e.g. OpenRouter) don't recognize Anthropic beta headers
+    const isClaudeFamily = /^(claude-|anthropic\/)/.test(model.toLowerCase())
+    const betas = isClaudeFamily ? getModelBetas(model) : []
     return await returnValue(
       withRetry(
         () =>

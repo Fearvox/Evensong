@@ -232,7 +232,22 @@ export function shouldUseGlobalCacheScope(): boolean {
 }
 
 export const getAllModelBetas = memoize((model: string): string[] => {
-  const betaHeaders = []
+  const betaHeaders: string[] = []
+
+  // Non-Claude models (e.g. OpenRouter gpt-5, gemini) don't recognize Anthropic
+  // beta headers. Only send user-specified ANTHROPIC_BETAS for passthrough.
+  const lowerModel = model.toLowerCase()
+  if (!/^(claude-|anthropic\/)/.test(lowerModel) && !getCanonicalName(model).includes('claude-')) {
+    if (process.env.ANTHROPIC_BETAS) {
+      betaHeaders.push(
+        ...process.env.ANTHROPIC_BETAS.split(',')
+          .map(_ => _.trim())
+          .filter(Boolean),
+      )
+    }
+    return betaHeaders
+  }
+
   const isHaiku = getCanonicalName(model).includes('haiku')
   const provider = getAPIProvider()
   const includeFirstPartyOnlyBetas = shouldIncludeFirstPartyOnlyBetas()

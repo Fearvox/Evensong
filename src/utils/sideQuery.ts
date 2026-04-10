@@ -126,9 +126,12 @@ export async function sideQuery(opts: SideQueryOptions): Promise<BetaMessage> {
     model,
     source: 'side_query',
   })
-  const betas = [...getModelBetas(model)]
+  // Non-Claude models (e.g. OpenRouter) don't recognize Anthropic beta headers
+  const isClaudeFamily = /^(claude-|anthropic\/)/.test(model.toLowerCase())
+  const betas = isClaudeFamily ? [...getModelBetas(model)] : []
   // Add structured-outputs beta if using output_format and provider supports it
   if (
+    isClaudeFamily &&
     output_format &&
     modelSupportsStructuredOutputs(model) &&
     !betas.includes(STRUCTURED_OUTPUTS_BETA_HEADER)
