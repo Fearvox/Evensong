@@ -10,6 +10,7 @@
 | R004 | 2026-04-09 | MiniMax M2.7 | Codex (CCB 6-agent) | 265 | 18/18 | ~17m | ~8.6K | 154 |
 | R005 | 2026-04-09 | MiniMax M2.7 | GSD (CCB 6-agent fused) | 265 | 18/18 | ~10m (4.5m peak) | ~7K | ~154 |
 | R006 | 2026-04-09 | MiniMax M2.7 | PUA Extreme (8-svc, 24-criteria) | 230 | 24/24 | ~17m | ~14K | ~60 |
+| R007 | 2026-04-09 | MiniMax M2.7 | Evensong (self-evo, 40t/svc) | *pending* | 24/24 | *pending* | *pending* | *pending* |
 
 ## Task Spec
 - 6-service FinTech platform (Meridian Financial Systems)
@@ -42,6 +43,7 @@ benchmarks/
     R004-minimax-codex/
     R005-minimax-gsd/       <- pending
     R006-minimax-pua/       <- pending
+    R007-evensong/          <- self-evolution run
   evolution-log/
     gen-0.md                <- current generation
   v1.0-three-mode-comparison/

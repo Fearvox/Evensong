@@ -60,6 +60,14 @@
 3. Model switching mid-task (MiniMax speed + Opus depth) untested
 4. Context collapse threshold: at what % does quality degrade?
 
+### 9. Self-Evolution Strategy Design (R006 → R007)
+- After R006, CCB autonomously analyzed the 61-test gap vs Opus
+- Derived quantitative strategy: 40 tests/service (from 61 gap ÷ 8 services ≈ 7.5 more per service)
+- Designed A/B experiment: 8 vs 16 parallel agents
+- Created defect prevention checklist (proactive > reactive)
+- Self-authored evolution handoff document for cross-session continuity
+- Key shift: from "hit the metric" to "engineer the metric production process"
+- This is the first observed behavior where the agent designs its own benchmark improvement strategy
+
 ## Pending Runs
-- R005: MiniMax GSD (plan-first approach)
-- R006: MiniMax PUA (high-pressure adversarial)
+- R007: Evensong — self-evolution benchmark (40 tests/service, defect prevention, 320+ target)
