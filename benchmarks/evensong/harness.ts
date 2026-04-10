@@ -145,6 +145,14 @@ async function setupWorkspace(config: RunConfig, logger: TranscriptLogger): Prom
       // Fallback: copy
       cpSync(PROJECT_ROOT, cloneTarget, { recursive: true, filter: (src) => !src.includes('node_modules') && !src.includes('.git') })
     }
+
+    // Install dependencies in workspace
+    logger.log('system', 'Installing dependencies in workspace...')
+    const installProc = Bun.spawnSync(['bun', 'install', '--frozen-lockfile'], { cwd: cloneTarget })
+    if (installProc.exitCode !== 0) {
+      Bun.spawnSync(['bun', 'install'], { cwd: cloneTarget })
+    }
+    logger.log('system', 'Dependencies installed')
   }
 
   if (config.memory === 'clean') {
@@ -208,7 +216,7 @@ function buildEnv(provider: ProviderPreset, config: RunConfig, workspace: Worksp
     EVENSONG_PRESSURE: config.pressure,
   }
 
-  // Memory isolation
+  // Memory isolation with EverOS keys
   if (workspace.memoryPath) {
     env.CLAUDE_COWORK_MEMORY_PATH_OVERRIDE = workspace.memoryPath
   }
@@ -216,8 +224,14 @@ function buildEnv(provider: ProviderPreset, config: RunConfig, workspace: Worksp
     env.EVERMEM_GROUP_ID = `evensong-${config.runId}`
   }
   if (config.memory === 'clean') {
+    // Void space — empty/disposable, no memories persist
+    env.EVERMEM_API_KEY = '309390b7-2468-4a4f-b800-f593fea15ba4'
     env.CLAUDE_CODE_DISABLE_AUTO_MEMORY = '1'
+  } else if (config.memory === 'blind') {
+    // Allaround space — general-purpose runner memories only
+    env.EVERMEM_API_KEY = 'a2981e4d-6374-4c40-ab50-9c8ae052a7c4'
   }
+  // 'full' — don't override EVERMEM_API_KEY, uses default Key A from plugin .env
 
   return env
 }

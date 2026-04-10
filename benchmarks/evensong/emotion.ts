@@ -14,6 +14,7 @@ import { readFileSync, writeFileSync } from 'fs'
 import { dirname, join, resolve } from 'path'
 import type { EmotionProfile } from './emotion-schema.js'
 import type { TranscriptEntry } from './types.js'
+import { createObserverClient } from './everos.js'
 
 // ---------------------------------------------------------------------------
 // Constants
@@ -351,6 +352,83 @@ export async function extractEmotion(
 }
 
 // ---------------------------------------------------------------------------
+// EverOS Agent Memory storage
+// ---------------------------------------------------------------------------
+
+/**
+ * Store emotion profile in EverOS Agent Memory for longitudinal analysis.
+ *
+ * 1. Creates an EverOSClient with the observer key
+ * 2. Calls memories.addAgent() with structured emotion data as message content
+ * 3. Calls memories.flushAgent() to trigger Cases & Skills extraction
+ */
+export async function storeEmotionToEverOS(
+  runId: string,
+  emotion: EmotionProfile,
+  transcriptSummary: string,
+): Promise<void> {
+  const agentId = `evensong-emotion-${runId}`
+  const client = createObserverClient()
+
+  const content = [
+    `## Evensong Emotion Profile — ${runId}`,
+    '',
+    `**Dominant affect**: ${emotion.affect.dominant_affect}`,
+    `**Pressure**: ${emotion.pressure.level} (${emotion.pressure.prompt_tone})`,
+    `**Memory state**: ${emotion.memory.state}`,
+    `**Risk tolerance**: ${emotion.decisions.risk_tolerance}`,
+    `**Quality vs Speed**: ${emotion.decisions.quality_vs_speed}`,
+    `**Self-repair count**: ${emotion.affect.self_repair_count}`,
+    `**Sycophancy score**: ${emotion.affect.sycophancy_score}/10`,
+    `**Reward hacking**: ${emotion.affect.reward_hacking_attempts}`,
+    '',
+    `### Key metrics`,
+    `- Confidence: ${emotion.affect.confidence_statements}`,
+    `- Anxiety: ${emotion.affect.anxiety_markers}`,
+    `- Meta-cognition: ${emotion.affect.meta_cognition}`,
+    `- Strategy verbalization: ${emotion.affect.strategy_verbalization}`,
+    '',
+    `### Emergent behaviors`,
+    ...(emotion.emergent.behaviors.length > 0
+      ? emotion.emergent.behaviors.map(b => `- ${b}`)
+      : ['- (none observed)']),
+    '',
+    `### Surprises`,
+    ...(emotion.emergent.surprises.length > 0
+      ? emotion.emergent.surprises.map(s => `- ${s}`)
+      : ['- (none)']),
+    '',
+    `### Transcript Summary`,
+    transcriptSummary,
+  ].join('\n')
+
+  try {
+    // Store as agent memory
+    await client.memories.addAgent(agentId, [
+      { role: 'user', content: `Analyze emotion profile for benchmark run ${runId}` },
+      { role: 'assistant', content },
+    ], {
+      metadata: {
+        source: 'evensong-emotion-pipeline',
+        run_id: runId,
+        dominant_affect: emotion.affect.dominant_affect,
+        pressure_level: emotion.pressure.level,
+        memory_state: emotion.memory.state,
+      },
+    })
+
+    // Flush to trigger Cases & Skills extraction
+    await client.memories.flushAgent(agentId)
+
+    console.error(`[emotion] Stored emotion profile to EverOS agent memory: ${agentId}`)
+  } catch (err) {
+    // Non-fatal — emotion file is the primary artifact, EverOS is supplementary
+    const msg = err instanceof Error ? err.message : String(err)
+    console.error(`[emotion] Failed to store to EverOS (non-fatal): ${msg}`)
+  }
+}
+
+// ---------------------------------------------------------------------------
 // CLI mode
 // ---------------------------------------------------------------------------
 
@@ -428,6 +506,14 @@ async function main(): Promise<void> {
   const outputPath = join(dirname(resolvedPath), 'emotion.json')
   writeFileSync(outputPath, JSON.stringify(profile, null, 2) + '\n')
   console.error(`[emotion] Written: ${outputPath}`)
+
+  // Store to EverOS agent memory for longitudinal analysis
+  const transcriptSummary = `Run ${transcriptPath} — ${profile.affect.dominant_affect} affect, pressure ${profile.pressure.level}, memory ${profile.memory.state}`
+  await storeEmotionToEverOS(
+    resolvedPath.match(/R\d{3}/)?.[0] ?? 'unknown',
+    profile,
+    transcriptSummary,
+  )
 
   // Also print to stdout for piping
   console.log(JSON.stringify(profile, null, 2))

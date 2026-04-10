@@ -13,6 +13,7 @@ import { runBenchmark, listRuns, nextRunId } from './harness.js'
 import { BENCHMARK_MODELS } from './types.js'
 import type { RunConfig } from './types.js'
 import { getPressureLabel, getMemoryLabel } from './prompts.js'
+import { uploadEvidence } from './upload-evidence.js'
 
 const HELP = `
   ╔══════════════════════════════════════════════╗
@@ -24,6 +25,7 @@ const HELP = `
     setup    Prepare workspace only (for manual interactive run)
     list     Show all benchmark runs from registry
     compare  Diff two runs (e.g., compare R009 R010)
+    upload   Upload evidence screenshot/PDF to EverOS storage
     models   List available benchmark models
     next     Show next available run ID
 
@@ -36,9 +38,14 @@ const HELP = `
     --id <RUN_ID>       Explicit run ID (default: auto-increment)
     --codename <name>   Run codename (default: model-pressure)
 
+  Upload Options:
+    --run <RUN_ID>      Run ID to associate with the evidence
+    --format json       Output as JSON
+
   Examples:
     bun benchmarks/evensong/cli.ts run --model or-gpt5 --pressure L2 --memory clean
     bun benchmarks/evensong/cli.ts run --model or-glm --pressure L3 --services 10
+    bun benchmarks/evensong/cli.ts upload ./screenshot.png --run R011
     bun benchmarks/evensong/cli.ts list
     bun benchmarks/evensong/cli.ts compare R009 R010
 `
@@ -204,6 +211,45 @@ function cmdModels(): void {
   console.log()
 }
 
+async function cmdUpload(args: string[]): Promise<void> {
+  const opts = parseArgs(args)
+
+  // First positional arg (not a flag) is the file path
+  const filePath = args.find(a => !a.startsWith('--') && a !== opts.run && a !== opts.format)
+  const runId = opts.run
+
+  if (!filePath || !runId) {
+    console.error('  Usage: upload <file-path> --run <RUN_ID>')
+    console.error('  Example: upload ./screenshot.png --run R011')
+    process.exit(1)
+  }
+
+  const jsonOutput = opts.format === 'json'
+
+  try {
+    const result = await uploadEvidence(filePath, runId)
+
+    if (jsonOutput) {
+      console.log(JSON.stringify(result, null, 2))
+    } else {
+      console.log(`\n  EVENSONG EVIDENCE UPLOAD`)
+      console.log(`  ${'═'.repeat(50)}`)
+      console.log(`  Run:      ${result.runId}`)
+      console.log(`  File:     ${result.fileName}`)
+      console.log(`  URL:      ${result.downloadUrl}`)
+      console.log(`  ${'═'.repeat(50)}\n`)
+    }
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : String(err)
+    if (jsonOutput) {
+      console.error(JSON.stringify({ error: message }))
+    } else {
+      console.error(`  Error: ${message}`)
+    }
+    process.exit(1)
+  }
+}
+
 function cmdNext(): void {
   console.log(`  Next run ID: ${nextRunId()}`)
 }
@@ -216,6 +262,7 @@ switch (command) {
   case 'setup':   cmdSetup(args); break
   case 'list':    cmdList(); break
   case 'compare': cmdCompare(args); break
+  case 'upload':  await cmdUpload(args); break
   case 'models':  cmdModels(); break
   case 'next':    cmdNext(); break
   case 'help':
