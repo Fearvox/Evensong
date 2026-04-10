@@ -227,6 +227,11 @@ Before committing, verify:
 - [ ] Timeline entries have correct transition-delay sequence
 - [ ] Stats counters sum correctly (cumulative total)
 - [ ] Footer date range includes new run date
+- [ ] **passRate in benchmarkData.ts is criteria format (e.g., '8/8', '24/24', '28/28') — NEVER assertions count**
+  - Sanity check: if either number in passRate > 100, it's WRONG (assertions leaked into criteria field)
+  - passRate comes from registry.jsonl `criteria` field, NOT from `assertions`
+- [ ] **Hero.tsx hardcoded behaviors count matches total emergent behaviors**
+- [ ] **TOTAL_RUNS and TOTAL_TESTS include R005 offset (+1 run, +265 tests)**
 
 ## R009 Behavior Predictions (for comparison)
 
