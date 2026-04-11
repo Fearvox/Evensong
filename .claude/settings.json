@@ -1,0 +1,23 @@
+{
+  "enabledPlugins": {
+    "evermem@evermem": true
+  },
+  "pluginSources": {
+    "evermem": {
+      "url": "https://github.com/EverMind-AI/evermem-claude-code.git"
+    }
+  },
+  "hooks": {
+    "SessionStart": [
+      {
+        "matcher": "startup",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "echo '[Evensong] Session started. EVERMEM_API_KEY=${EVERMEM_API_KEY:+SET}${EVERMEM_API_KEY:-UNSET}'"
+          }
+        ]
+      }
+    ]
+  }
+}

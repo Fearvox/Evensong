@@ -12,3 +12,7 @@ coverage
 # Session transcripts (private conversation data)
 .claude/session-transcript.jsonl
 .claude/session-data/
+.claude/settings.local.json
+.claude/scheduled_tasks.lock
+.claude/projects/
+.gstack/
