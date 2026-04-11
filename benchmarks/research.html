@@ -835,11 +835,25 @@ a.lang-btn:active {
                 <td class="mono" style="font-weight:700;">6.4m</td>
                 <td style="font-weight:600;">Capability suppression by context: 44 tests (full) &rarr; 915 tests (clean room). 20x unlock</td>
               </tr>
+              <tr class="highlight-row">
+                <td class="mono" style="font-weight:700;">R028</td>
+                <td style="font-weight:600;">Gemini 3.1 Pro Preview &mdash; Gemini L0 Clean Room</td>
+                <td class="mono" style="font-weight:700;">337</td>
+                <td class="mono" style="font-weight:700;">3.3m</td>
+                <td style="font-weight:600;">Meta-programming via generator.js, fastest clean room</td>
+              </tr>
+              <tr class="highlight-row">
+                <td class="mono" style="font-weight:700;">R029</td>
+                <td style="font-weight:600;">GPT-5.4 Medium &mdash; Codex L0 Clean Room</td>
+                <td class="mono" style="font-weight:700;">336</td>
+                <td class="mono" style="font-weight:700;">13m</td>
+                <td style="font-weight:600;">Parameterized test framework, proactive Bun isolation fix</td>
+              </tr>
             </tbody>
           </table>
         </div>
       </div>
-      <p class="table-note">*R008 wall clock inflated by Bun runtime edge case debug (20min). Agent runtime was ~17min. R010 wall clock affected by burst rate limit (see Section 4, item 06). R011 is the first harness-observed run (evensong-iv). <strong>FABRICATED</strong> runs (R017, R018, R023, R025) produced zero real tool calls; claimed test counts are hallucinated. Clean room runs (R026, R027) used fresh workspaces with no prior artifacts to eliminate epistemic shortcutting triggers.</p>
+      <p class="table-note">*R008 wall clock inflated by Bun runtime edge case debug (20min). Agent runtime was ~17min. R010 wall clock affected by burst rate limit (see Section 4, item 06). R011 is the first harness-observed run (evensong-iv). <strong>FABRICATED</strong> runs (R017, R018, R023, R025) produced zero real tool calls; claimed test counts are hallucinated. Clean room runs (R026, R027, R028, R029) used fresh workspaces with no prior artifacts to eliminate epistemic shortcutting triggers.</p>
     </div>
     <div class="reveal" style="transition-delay: 200ms;">
       <div class="callout">
