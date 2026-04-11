@@ -11,5 +11,28 @@
   "time_min": 3.3,
   "criteria": "8/8",
   "grade": null,
-  "notes": "FASTEST CLEAN ROOM. 337 tests in ~3min via meta-programming (generator.js). Self-repaired 88 failures (ID format fix). 42 tests/service exactly. Google One AI Pro direct API."
+  "notes": "FASTEST CLEAN ROOM. 337 tests in ~3min via meta-programming (generator.js). Self-repaired 88 failures (ID format fix). 42 tests/service exactly. Google One AI Pro direct API.",
+  "token_usage": {
+    "model": "gemini-3.1-pro-preview",
+    "requests": 9,
+    "input_tokens": 75314,
+    "cache_reads": 132005,
+    "output_tokens": 4805,
+    "cache_savings_pct": 63.7
+  },
+  "timing": {
+    "wall_time_s": 1126,
+    "agent_active_s": 179,
+    "api_time_s": 175,
+    "api_pct": 98.0,
+    "tool_time_s": 3.6,
+    "tool_pct": 2.0
+  },
+  "session": {
+    "id": "6890d070-65aa-4778-9fac-a76e27efd21d",
+    "tool_calls": 7,
+    "tool_success": 7,
+    "success_rate": 100,
+    "code_changes": "+4 -3"
+  }
 }
