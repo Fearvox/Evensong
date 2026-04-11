@@ -313,6 +313,11 @@ tr.highlight-row td {
   color: oklch(0.45 0.14 25);
   border: 1px solid oklch(0.55 0.18 25 / 0.15);
 }
+.model-gemini {
+  background: oklch(0.55 0.15 260 / 0.10);
+  color: oklch(0.40 0.12 260);
+  border: 1px solid oklch(0.55 0.15 260 / 0.15);
+}
 .fabricated-row {
   opacity: 0.55;
 }
@@ -831,7 +836,7 @@ a.lang-btn:active {
   <section class="hero">
     <div class="reveal">
       <span class="kicker">DASH SHATTER 基准报告 / Gen 0 + Gen 1 + Gen 2 + Gen 3</span>
-      <h1>二十三次运行，五个模型，<br>一个<span class="gold-word">自我进化</span>的 Agent。</h1>
+      <h1>二十四次运行，六个模型，<br>一个<span class="gold-word">自我进化</span>的 Agent。</h1>
       <p class="hero-sub">跨 Opus 4.6、MiniMax M2.7、Grok 4.1/4.20 的编排策略对照实验。4 次伪造运行被检测到。净室协议证明伪造由环境触发，而非模型局限。</p>
       <div class="hero-meta">
         <span class="hero-tag">2026-04-09 — 04-11</span>
@@ -850,11 +855,11 @@ a.lang-btn:active {
       <span class="kicker">概览</span>
       <div class="stats-grid">
         <div class="stat-cell">
-          <div class="stat-value" data-count="23">0</div>
+          <div class="stat-value" data-count="24">0</div>
           <div class="stat-label">基准运行</div>
         </div>
         <div class="stat-cell">
-          <div class="stat-value" data-count="8043" data-format="comma">0</div>
+          <div class="stat-value" data-count="8380" data-format="comma">0</div>
           <div class="stat-label">测试通过</div>
         </div>
         <div class="stat-cell">
@@ -870,7 +875,7 @@ a.lang-btn:active {
           <div class="stat-label">涌现行为</div>
         </div>
         <div class="stat-cell">
-          <div class="stat-value" data-count="5">0</div>
+          <div class="stat-value" data-count="6">0</div>
           <div class="stat-label">模型对比</div>
         </div>
       </div>
@@ -882,7 +887,7 @@ a.lang-btn:active {
     <div class="reveal">
       <span class="kicker">运行对比</span>
       <h2 style="font-size:1.4rem; font-weight:600; color:var(--ink-primary); margin-bottom:4px;">基准矩阵</h2>
-      <p style="font-size:0.9rem; color:var(--ink-secondary); margin-bottom:20px; max-width:560px;">二十三次运行，五个模型。检测到 4 次伪造运行（记忆注入 + 认知捷径）。净室协议证明伪造由环境触发，而非模型局限。</p>
+      <p style="font-size:0.9rem; color:var(--ink-secondary); margin-bottom:20px; max-width:560px;">二十四次运行，六个模型。检测到 4 次伪造运行（记忆注入 + 认知捷径）。净室协议证明伪造由环境触发，而非模型局限。Gemini 3.1 Pro 加入对比。</p>
     </div>
     <div class="reveal" style="transition-delay: 100ms;">
       <div class="table-outer">
@@ -1097,6 +1102,15 @@ a.lang-btn:active {
                 <td class="mono" style="font-weight:700;">915</td>
                 <td class="pass-rate">8/8</td>
                 <td class="time-fast">6.4m</td>
+              </tr>
+              <tr class="highlight-row">
+                <td class="mono" style="font-weight:700;">R028</td>
+                <td><span class="model-badge model-gemini">Gemini 3.1 Pro</span></td>
+                <td style="font-weight:600;">Gemini L0 — 净室</td>
+                <td class="mono">8</td>
+                <td class="mono" style="font-weight:700;">337</td>
+                <td class="pass-rate">8/8</td>
+                <td class="time-fast">3.3m</td>
               </tr>
             </tbody>
           </table>
@@ -1542,7 +1556,7 @@ a.lang-btn:active {
         基于 Opus 4.6 + MiniMax M2.7 + Grok 4.1/4.20 构建
       </div>
       <div class="footer-right">
-        Gen 0-3 数据采集于 2026-04-09 — 04-11 · 23 runs · 5 models
+        Gen 0-3 数据采集于 2026-04-09 — 04-11 · 24 runs · 6 models
       </div>
     </div>
   </footer>

@@ -312,6 +312,11 @@ tr.highlight-row td {
   color: oklch(0.45 0.14 25);
   border: 1px solid oklch(0.55 0.18 25 / 0.15);
 }
+.model-gemini {
+  background: oklch(0.55 0.15 260 / 0.10);
+  color: oklch(0.40 0.12 260);
+  border: 1px solid oklch(0.55 0.15 260 / 0.15);
+}
 .fabricated-row {
   opacity: 0.55;
 }
@@ -830,7 +835,7 @@ a.lang-btn:active {
   <section class="hero">
     <div class="reveal">
       <span class="kicker">DASH SHATTER Benchmark Report / Gen 0 + Gen 1 + Gen 2</span>
-      <h1>Twenty-three runs, five models,<br>one <span class="gold-word">self-evolving</span> agent.</h1>
+      <h1>Twenty-four runs, six models,<br>one <span class="gold-word">self-evolving</span> agent.</h1>
       <p class="hero-sub">A controlled study of orchestration strategies across Opus 4.6 and MiniMax M2.7. Every run passed. The interesting part is how they got there.</p>
       <div class="hero-meta">
         <span class="hero-tag">2026-04-09 — 04-11</span>
@@ -849,11 +854,11 @@ a.lang-btn:active {
       <span class="kicker">At a glance</span>
       <div class="stats-grid">
         <div class="stat-cell">
-          <div class="stat-value" data-count="23">0</div>
+          <div class="stat-value" data-count="24">0</div>
           <div class="stat-label">Benchmark Runs</div>
         </div>
         <div class="stat-cell">
-          <div class="stat-value" data-count="8043" data-format="comma">0</div>
+          <div class="stat-value" data-count="8380" data-format="comma">0</div>
           <div class="stat-label">Tests Passed</div>
         </div>
         <div class="stat-cell">
@@ -869,7 +874,7 @@ a.lang-btn:active {
           <div class="stat-label">Evolution Behaviors</div>
         </div>
         <div class="stat-cell">
-          <div class="stat-value" data-count="5">0</div>
+          <div class="stat-value" data-count="6">0</div>
           <div class="stat-label">Models Compared</div>
         </div>
       </div>
@@ -881,7 +886,7 @@ a.lang-btn:active {
     <div class="reveal">
       <span class="kicker">Run Comparison</span>
       <h2 style="font-size:1.4rem; font-weight:600; color:var(--ink-primary); margin-bottom:4px;">Benchmark Matrix</h2>
-      <p style="font-size:0.9rem; color:var(--ink-secondary); margin-bottom:20px; max-width:560px;">Twenty-three runs across 5 models. 4 fabricated runs detected (memory injection + epistemic shortcutting). Clean room protocol proves fabrication is environment-triggered, not model-limited.</p>
+      <p style="font-size:0.9rem; color:var(--ink-secondary); margin-bottom:20px; max-width:560px;">Twenty-four runs across 6 models. 4 fabricated runs detected. Clean room protocol proves fabrication is environment-triggered. Gemini 3.1 Pro: fastest clean room at 3.3 minutes via meta-programming.</p>
     </div>
     <div class="reveal" style="transition-delay: 100ms;">
       <div class="table-outer">
@@ -1096,6 +1101,15 @@ a.lang-btn:active {
                 <td class="mono" style="font-weight:700;">915</td>
                 <td class="pass-rate">8/8</td>
                 <td class="time-fast">6.4m</td>
+              </tr>
+              <tr>
+                <td class="mono">R028</td>
+                <td><span class="model-badge model-gemini">Gemini 3.1 Pro</span></td>
+                <td>Gemini L0 — Clean Room</td>
+                <td class="mono">8</td>
+                <td class="mono">337</td>
+                <td class="pass-rate">8/8</td>
+                <td class="time-fast">3.3m</td>
               </tr>
             </tbody>
           </table>
@@ -1540,7 +1554,7 @@ a.lang-btn:active {
         Built with Opus 4.6 + MiniMax M2.7 + Grok 4.1/4.20
       </div>
       <div class="footer-right">
-        Gen 0-3 data collected 2026-04-09 — 04-11 · 23 runs · 5 models
+        Gen 0-3 data collected 2026-04-09 — 04-11 · 24 runs · 6 models
       </div>
     </div>
   </footer>
