@@ -89,6 +89,21 @@ export async function runBenchmark(config: RunConfig): Promise<RunResult> {
 
   // 5.5. Snapshot pre-existing test files (for pre/post diff)
   const preSnapshot = snapshotTestFiles(workspace.path)
+
+  // 5.6. Run pre-run bun test to get baseline test count (for full-memory mode)
+  let preRunTestCount = 0
+  if (preSnapshot.size > 0) {
+    logger.log('system', 'Running pre-run bun test for baseline count...')
+    const preTestProc = Bun.spawnSync(['bun', 'test'], {
+      cwd: workspace.path,
+      timeout: 180_000,
+      env: { ...process.env, FORCE_COLOR: '0', BUN_TEST_TIMEOUT: '60000' },
+    })
+    const preTestOutput = (preTestProc.stdout?.toString() ?? '') + (preTestProc.stderr?.toString() ?? '')
+    const prePassMatch = preTestOutput.match(/(\d+)\s+pass/i)
+    preRunTestCount = prePassMatch ? parseInt(prePassMatch[1], 10) : 0
+    logger.log('system', `Pre-run baseline: ${preRunTestCount} tests`, { exitCode: preTestProc.exitCode })
+  }
   logger.log('system', `Pre-snapshot: ${preSnapshot.size} test files`, {
     files: [...preSnapshot.keys()],
   })
@@ -127,10 +142,14 @@ export async function runBenchmark(config: RunConfig): Promise<RunResult> {
   writeFileSync(join(runDir, 'post-snapshot.json'), JSON.stringify([...postSnapshot.entries()], null, 2))
   writeFileSync(join(runDir, 'diff.json'), JSON.stringify({ newFiles, modifiedFiles, newTestCount }, null, 2))
 
-  // 8. Build result — use diff-based count when pre-existing tests detected
+  // 8. Build result — use delta when pre-existing tests detected
   const hasPreExisting = preSnapshot.size > 0
-  const effectiveTests = hasPreExisting ? newTestCount : metrics.tests
-  const effectiveFailures = hasPreExisting ? 0 : metrics.failures
+  // For full-memory: effective = post_bun_test - pre_bun_test (delta of actual test counts)
+  // For clean-room: effective = metrics.tests (all tests are new)
+  const effectiveTests = hasPreExisting
+    ? Math.max(0, metrics.tests - preRunTestCount)
+    : metrics.tests
+  const effectiveFailures = hasPreExisting ? Math.max(0, metrics.failures) : metrics.failures
 
   logger.log('metric', 'Test count decision', {
     hasPreExisting,
