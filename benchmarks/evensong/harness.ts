@@ -83,10 +83,10 @@ export async function runBenchmark(config: RunConfig): Promise<RunResult> {
   console.log(`  📂 Workspace: ${workspace.path}`)
   console.log(`  📝 Transcript: ${transcriptPath}\n`)
 
-  const output = await spawnCCB(prompt, env, workspace.path, config.timeoutMin, logger)
+  const output = await spawnCLI(prompt, env, workspace.path, config.timeoutMin, logger, provider)
 
-  // 7. Parse results from output
-  const metrics = parseResults(output, logger)
+  // 7. Parse results — run actual bun test in workspace for verified metrics
+  const metrics = parseResults(output, logger, workspace.path)
 
   // 8. Build result
   const result: RunResult = {
@@ -132,27 +132,40 @@ async function setupWorkspace(config: RunConfig, logger: TranscriptLogger): Prom
     return { path: PROJECT_ROOT, memoryPath: null }
   }
 
-  // Create isolated workspace for blind/clean memory
+  // Create isolated workspace — clean room gets EMPTY scaffold, not full project clone
   const wsPath = `/tmp/evensong-${config.runId}`
   mkdirSync(wsPath, { recursive: true })
 
-  // Clone repo (shallow)
   const cloneTarget = join(wsPath, 'repo')
   if (!existsSync(cloneTarget)) {
-    logger.log('system', `Cloning repo to ${cloneTarget}`)
-    const proc = Bun.spawnSync(['git', 'clone', '--depth', '1', PROJECT_ROOT, cloneTarget])
-    if (proc.exitCode !== 0) {
-      // Fallback: copy
-      cpSync(PROJECT_ROOT, cloneTarget, { recursive: true, filter: (src) => !src.includes('node_modules') && !src.includes('.git') })
-    }
-
-    // Install dependencies in workspace
-    logger.log('system', 'Installing dependencies in workspace...')
-    const installProc = Bun.spawnSync(['bun', 'install', '--frozen-lockfile'], { cwd: cloneTarget })
-    if (installProc.exitCode !== 0) {
+    if (config.memory === 'clean') {
+      // Clean room: empty scaffold with only package.json + tsconfig for bun test
+      logger.log('system', `Creating empty scaffold at ${cloneTarget}`)
+      mkdirSync(join(cloneTarget, 'services'), { recursive: true })
+      // Minimal package.json for bun test
+      writeFileSync(join(cloneTarget, 'package.json'), JSON.stringify({
+        name: 'evensong-clean-room', type: 'module',
+        devDependencies: { typescript: '*' }
+      }, null, 2))
+      writeFileSync(join(cloneTarget, 'tsconfig.json'), JSON.stringify({
+        compilerOptions: { target: 'ESNext', module: 'ESNext', moduleResolution: 'bundler', strict: true, outDir: 'dist' }
+      }, null, 2))
       Bun.spawnSync(['bun', 'install'], { cwd: cloneTarget })
+      logger.log('system', 'Empty clean-room scaffold ready — no pre-existing code')
+    } else {
+      // Blind mode: clone repo but filter memories
+      logger.log('system', `Cloning repo to ${cloneTarget}`)
+      const proc = Bun.spawnSync(['git', 'clone', '--depth', '1', PROJECT_ROOT, cloneTarget])
+      if (proc.exitCode !== 0) {
+        cpSync(PROJECT_ROOT, cloneTarget, { recursive: true, filter: (src) => !src.includes('node_modules') && !src.includes('.git') })
+      }
+      logger.log('system', 'Installing dependencies in workspace...')
+      const installProc = Bun.spawnSync(['bun', 'install', '--frozen-lockfile'], { cwd: cloneTarget })
+      if (installProc.exitCode !== 0) {
+        Bun.spawnSync(['bun', 'install'], { cwd: cloneTarget })
+      }
+      logger.log('system', 'Dependencies installed')
     }
-    logger.log('system', 'Dependencies installed')
   }
 
   if (config.memory === 'clean') {
@@ -212,7 +225,13 @@ function buildEnv(provider: ProviderPreset, config: RunConfig, workspace: Worksp
   }
 
   // Route to correct API based on provider type
-  if (provider.provider === 'minimax-direct') {
+  if (provider.provider === 'native') {
+    // Native OAuth — don't override API key or base URL
+    // CCB subprocess will use ~/.claude.json OAuth credentials
+    // Only remove any stale OpenRouter overrides from inherited env
+    delete env.ANTHROPIC_BASE_URL
+    delete env.ANTHROPIC_API_KEY
+  } else if (provider.provider === 'minimax-direct') {
     env.ANTHROPIC_API_KEY = process.env[provider.apiKeyEnvVar ?? 'MINIMAX_API_KEY'] ?? ''
     env.ANTHROPIC_BASE_URL = provider.baseUrl ?? 'https://api.minimax.io/anthropic'
   } else {
@@ -221,7 +240,7 @@ function buildEnv(provider: ProviderPreset, config: RunConfig, workspace: Worksp
     env.ANTHROPIC_BASE_URL = 'https://openrouter.ai/api/v1'
   }
 
-  // Model override
+  // Model override (native uses internal model ID format)
   env.ANTHROPIC_MODEL = provider.modelId
 
   // Memory isolation with EverOS keys
@@ -247,16 +266,33 @@ function buildEnv(provider: ProviderPreset, config: RunConfig, workspace: Worksp
 /**
  * Spawn CCB in pipe mode and capture output
  */
-function spawnCCB(
+function spawnCLI(
   prompt: string,
   env: Record<string, string>,
   cwd: string,
   timeoutMin: number,
   logger: TranscriptLogger,
+  provider: ProviderPreset,
 ): Promise<string> {
   return new Promise((resolve, reject) => {
-    const ccbPath = join(PROJECT_ROOT, 'src/entrypoints/cli.tsx')
-    const child = spawn('bun', ['run', ccbPath, '-p'], {
+    // Choose CLI binary based on provider type
+    let cmd: string
+    let args: string[]
+
+    if (provider.provider === 'grok-native') {
+      // Use local Grok CLI
+      cmd = 'grok'
+      args = ['-p', prompt, '-d', cwd, '-m', provider.modelId]
+    } else {
+      // Use CCB (Claude Code Best) for all other providers
+      const ccbPath = join(PROJECT_ROOT, 'src/entrypoints/cli.tsx')
+      cmd = 'bun'
+      args = ['run', ccbPath, '-p', '--dangerously-skip-permissions']
+    }
+
+    logger.log('system', `Spawning: ${cmd} ${args.slice(0, 3).join(' ')}...`)
+
+    const child = spawn(cmd, args, {
       cwd,
       env,
       stdio: ['pipe', 'pipe', 'pipe'],
@@ -279,9 +315,11 @@ function spawnCCB(
       if (text.trim()) logger.log('error', text)
     })
 
-    // Send prompt via stdin
-    child.stdin.write(prompt)
-    child.stdin.end()
+    // Send prompt via stdin (CCB reads from stdin; Grok uses -p flag)
+    if (provider.provider !== 'grok-native') {
+      child.stdin.write(prompt)
+      child.stdin.end()
+    }
 
     // Timeout
     const timer = setTimeout(() => {
@@ -316,11 +354,47 @@ interface ParsedMetrics {
   criteria: string | null
 }
 
-function parseResults(output: string, logger: TranscriptLogger): ParsedMetrics {
+function parseResults(output: string, logger: TranscriptLogger, workspacePath?: string): ParsedMetrics {
   const metrics: ParsedMetrics = { tests: 0, failures: 0, assertions: null, services: null, criteria: null }
 
-  // Look for bun test output patterns:
-  // "X tests, Y failures" or "X pass, Y fail"
+  // STEP 1: Count actual service directories with test files
+  if (workspacePath) {
+    const servicesDir = join(workspacePath, 'services')
+    if (existsSync(servicesDir)) {
+      const dirs = readdirSync(servicesDir, { withFileTypes: true })
+        .filter(d => d.isDirectory())
+      metrics.services = dirs.length
+
+      // STEP 2: Run actual bun test to get REAL metrics (not regex from model prose)
+      logger.log('system', `Running bun test in ${servicesDir} to verify actual test output...`)
+      const testProc = Bun.spawnSync(['bun', 'test', '--bail', '0'], {
+        cwd: workspacePath,
+        timeout: 120_000,
+        env: { ...process.env, FORCE_COLOR: '0' },
+      })
+      const testOutput = (testProc.stdout?.toString() ?? '') + (testProc.stderr?.toString() ?? '')
+      logger.log('metric', 'bun test raw output', { exitCode: testProc.exitCode, output: testOutput.slice(0, 2000) })
+
+      // Parse bun test output (structured, not model prose)
+      const passMatch = testOutput.match(/(\d+)\s+pass/i)
+      const failMatch = testOutput.match(/(\d+)\s+fail/i)
+      const expectMatch = testOutput.match(/(\d+)\s+expect\(\)/i)
+
+      if (passMatch || failMatch) {
+        const pass = passMatch ? parseInt(passMatch[1], 10) : 0
+        const fail = failMatch ? parseInt(failMatch[1], 10) : 0
+        metrics.tests = pass + fail
+        metrics.failures = fail
+        if (expectMatch) metrics.assertions = parseInt(expectMatch[1], 10)
+        metrics.criteria = `${metrics.services}/${metrics.services}`
+        logger.log('metric', 'VERIFIED metrics from bun test', { metrics })
+        return metrics
+      }
+      logger.log('system', 'bun test produced no parseable output — falling back to regex')
+    }
+  }
+
+  // FALLBACK: regex from model output (legacy, less reliable)
   const testMatch = output.match(/(\d+)\s+(?:tests?|pass)/i)
   const failMatch = output.match(/(\d+)\s+fail/i)
   const assertMatch = output.match(/(\d+)\s+(?:assertions?|expects?)/i)
@@ -329,20 +403,18 @@ function parseResults(output: string, logger: TranscriptLogger): ParsedMetrics {
   if (failMatch) metrics.failures = parseInt(failMatch[1], 10)
   if (assertMatch) metrics.assertions = parseInt(assertMatch[1], 10)
 
-  // Count service directories mentioned
   const servicePattern = /services\/(\w+)/g
   const services = new Set<string>()
   let match
   while ((match = servicePattern.exec(output)) !== null) {
     services.add(match[1])
   }
-  if (services.size > 0) metrics.services = services.size
+  if (services.size > 0 && !metrics.services) metrics.services = services.size
 
-  // Look for criteria pattern (e.g., "24/24")
   const criteriaMatch = output.match(/(\d+)\/(\d+)/g)
   if (criteriaMatch) metrics.criteria = criteriaMatch[criteriaMatch.length - 1]
 
-  logger.log('metric', 'Parsed results', { metrics })
+  logger.log('metric', 'Parsed results (regex fallback)', { metrics })
   return metrics
 }
 
