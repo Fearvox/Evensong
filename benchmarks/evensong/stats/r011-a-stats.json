@@ -2,21 +2,21 @@
   "config": "r011-a",
   "n": 3,
   "runs": [
-    "R034-r011-a-rep1",
-    "R035-r011-a-rep2",
-    "R036-r011-a-rep3"
+    "R037-r011-a-rep1",
+    "R038-r011-a-rep2",
+    "R039-r011-a-rep3"
   ],
   "date": "2026-04-12",
   "tests": {
-    "mean": 0,
-    "std": 0,
-    "min": 0,
-    "max": 0,
-    "ci95_margin": 0,
+    "mean": 511,
+    "std": 82.05,
+    "min": 424,
+    "max": 587,
+    "ci95_margin": 203.71,
     "values": [
-      0,
-      0,
-      0
+      424,
+      587,
+      522
     ]
   },
   "failures": {
@@ -31,19 +31,30 @@
       0
     ]
   },
-  "assertions": null,
-  "time_min": {
-    "mean": 3.03,
-    "std": 5.08,
-    "min": 0.1,
-    "max": 8.9,
-    "ci95_margin": 12.61,
+  "assertions": {
+    "mean": 1036,
+    "std": 12.53,
+    "min": 1024,
+    "max": 1049,
+    "ci95_margin": 31.11,
     "values": [
-      8.9,
-      0.1,
-      0.1
+      1049,
+      1024,
+      1035
+    ]
+  },
+  "time_min": {
+    "mean": 10.6,
+    "std": 0.53,
+    "min": 10.2,
+    "max": 11.2,
+    "ci95_margin": 1.31,
+    "values": [
+      10.4,
+      10.2,
+      11.2
     ]
   },
   "all_green": true,
-  "tests_cv": null
+  "tests_cv": 0.16
 }
