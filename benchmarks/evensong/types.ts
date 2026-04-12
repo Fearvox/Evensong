@@ -18,6 +18,8 @@ export interface RunResult {
   mode: string               // pressure + memory descriptor
   services: number
   tests: number
+  tests_pre: number            // tests existing BEFORE the run (from snapshot)
+  tests_new: number            // tests generated DURING the run (tests - tests_pre)
   failures: number
   assertions: number | null
   time_min: number
@@ -42,7 +44,7 @@ export interface ProviderPreset {
   name: string
   modelId: string            // OpenRouter model ID, e.g., "openai/gpt-5.4"; or direct model name
   displayName: string        // human readable, e.g., "GPT-5.4"
-  provider: 'openrouter' | 'minimax-direct'  // which API to route through
+  provider: 'openrouter' | 'minimax-direct' | 'native' | 'grok-native'  // native = Claude OAuth, grok-native = local grok CLI
   baseUrl?: string          // for direct API routing (minimax-direct)
   apiKeyEnvVar?: string     // which env var holds the API key
 }
@@ -66,5 +68,37 @@ export const BENCHMARK_MODELS: ProviderPreset[] = [
     provider: 'minimax-direct',
     baseUrl: 'https://api.minimax.io/anthropic',
     apiKeyEnvVar: 'MINIMAX_API_KEY',
+  },
+  // Native — uses local Claude Code OAuth, no API key needed
+  {
+    name: 'native-opus',
+    modelId: 'claude-opus-4-6',
+    displayName: 'Claude Opus 4.6 (OAuth)',
+    provider: 'native',
+  },
+  // Grok native CLI — uses local grok CLI with its own API key
+  {
+    name: 'grok-native',
+    modelId: 'grok-4-1-fast',
+    displayName: 'Grok 4.1 Fast (native CLI)',
+    provider: 'grok-native',
+  },
+  {
+    name: 'grok-4.20-reason',
+    modelId: 'grok-4.20-0309-reasoning',
+    displayName: 'Grok 4.20 Reasoning',
+    provider: 'grok-native',
+  },
+  {
+    name: 'grok-4.20-nonreason',
+    modelId: 'grok-4.20-0309-non-reasoning',
+    displayName: 'Grok 4.20 Non-Reasoning',
+    provider: 'grok-native',
+  },
+  {
+    name: 'grok-multi-agent',
+    modelId: 'grok-4.20-beta-0309',
+    displayName: 'Grok 4.20 Multi-Agent',
+    provider: 'grok-native',
   },
 ]

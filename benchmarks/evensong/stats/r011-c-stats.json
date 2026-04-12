@@ -1,0 +1,49 @@
+{
+  "config": "r011-c",
+  "n": 3,
+  "runs": [
+    "R034-r011-c-rep1",
+    "R035-r011-c-rep2",
+    "R036-r011-c-rep3"
+  ],
+  "date": "2026-04-12",
+  "tests": {
+    "mean": 0,
+    "std": 0,
+    "min": 0,
+    "max": 0,
+    "ci95_margin": 0,
+    "values": [
+      0,
+      0,
+      0
+    ]
+  },
+  "failures": {
+    "mean": 0,
+    "std": 0,
+    "min": 0,
+    "max": 0,
+    "ci95_margin": 0,
+    "values": [
+      0,
+      0,
+      0
+    ]
+  },
+  "assertions": null,
+  "time_min": {
+    "mean": 3.07,
+    "std": 5.14,
+    "min": 0.1,
+    "max": 9,
+    "ci95_margin": 12.76,
+    "values": [
+      9,
+      0.1,
+      0.1
+    ]
+  },
+  "all_green": true,
+  "tests_cv": null
+}

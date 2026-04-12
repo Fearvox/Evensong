@@ -18,7 +18,7 @@ describe('BENCHMARK_MODELS', () => {
       expect(typeof model.displayName).toBe('string')
       expect(model.displayName.length).toBeGreaterThan(0)
 
-      expect(model.provider).toMatch(/^(openrouter|minimax-direct)$/)
+      expect(model.provider).toMatch(/^(openrouter|minimax-direct|native|grok-native)$/)
     }
   })
 

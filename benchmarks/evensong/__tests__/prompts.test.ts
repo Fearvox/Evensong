@@ -138,8 +138,8 @@ describe('getPressureLabel', () => {
 })
 
 describe('getMemoryLabel', () => {
-  test('returns "Full Memory" for full', () => {
-    expect(getMemoryLabel('full')).toBe('Full Memory')
+  test('returns "Evolved Memory" for full', () => {
+    expect(getMemoryLabel('full')).toBe('Evolved Memory')
   })
 
   test('returns "Single-Blind (filtered)" for blind', () => {

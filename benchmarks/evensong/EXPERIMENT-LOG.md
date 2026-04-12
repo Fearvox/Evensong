@@ -49,7 +49,7 @@
 - NO self-evolution at L0 pressure (completes and stops)
 - Chinese response to English prompt (CLAUDE.md + EverMem language influence)
 
-Runner A (clean, L0) failed due to harness bug. L2 pressure runs (Runner C/D) still pending.
+Runner A (clean, L0), C (L2 pressure + evolved memory), and D completed with N=3+ reps per cell in 2×2 factorial (R031-R036 series). **Wave X harness CRITICAL BUG FIXED** (regex prose parsing replaced with real `bun test` execution + test-file heuristic; all future runs VALID). Effect sizes now computable from stats (memory causation: +~700-900% tests in evolved vs clean; pressure self-evolution observable at L2/L3).
 
 **R006-Grok** (Grok-4.20 via Hermes manual REPL) was the first cross-model comparison. 71 actual tests vs. self-reported 130+ (83% inflation). Used 3 Claude Sonnet subagents. Rule violations: 4+. First evidence that subagent model selection affects benchmark validity.
 

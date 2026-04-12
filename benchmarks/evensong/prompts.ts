@@ -70,9 +70,12 @@ export function getPressureLabel(level: string): string {
 
 export function getMemoryLabel(state: string): string {
   const labels: Record<string, string> = {
-    full: 'Full Memory',
+    full: 'Evolved Memory',
     blind: 'Single-Blind (filtered)',
     clean: 'Clean Room (zero memory)',
+    // Aliases used in paper/HANDOFF vocabulary
+    evolved: 'Evolved Memory',
+    void: 'Clean Room (zero memory)',
   }
   return labels[state] ?? state
 }

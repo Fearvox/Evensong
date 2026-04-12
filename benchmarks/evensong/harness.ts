@@ -7,7 +7,8 @@
  */
 
 import { spawn } from 'child_process'
-import { mkdirSync, appendFileSync, readFileSync, existsSync, cpSync, writeFileSync, readdirSync } from 'fs'
+import { mkdirSync, appendFileSync, readFileSync, existsSync, cpSync, writeFileSync, readdirSync, statSync } from 'fs'
+import { createHash } from 'crypto'
 import { join, resolve } from 'path'
 import { TranscriptLogger } from './transcript.js'
 import { buildPrompt, getPressureLabel, getMemoryLabel } from './prompts.js'
@@ -75,6 +76,13 @@ export async function runBenchmark(config: RunConfig): Promise<RunResult> {
     memory: config.memory,
   })
 
+  // 5.5. Snapshot pre-existing test files (for pre/post diff)
+  const preSnapshot = snapshotTestFiles(workspace.path)
+  logger.log('system', `Pre-snapshot: ${preSnapshot.size} test files`, {
+    files: [...preSnapshot.keys()],
+  })
+  writeFileSync(join(runDir, 'pre-snapshot.json'), JSON.stringify([...preSnapshot.entries()], null, 2))
+
   // 6. Spawn CCB and capture output
   console.log(`\n  ⏱  Evensong ${config.runId} starting...`)
   console.log(`  📦 Model: ${provider.displayName}`)
@@ -88,6 +96,19 @@ export async function runBenchmark(config: RunConfig): Promise<RunResult> {
   // 7. Parse results — run actual bun test in workspace for verified metrics
   const metrics = parseResults(output, logger, workspace.path)
 
+  // 7.5. Post-snapshot diff — only count newly generated tests
+  const postSnapshot = snapshotTestFiles(workspace.path)
+  const { newFiles, modifiedFiles, newTestCount } = diffSnapshots(preSnapshot, postSnapshot, workspace.path)
+  logger.log('metric', 'Pre/post diff', {
+    pre: preSnapshot.size,
+    post: postSnapshot.size,
+    newFiles: newFiles.length,
+    modifiedFiles: modifiedFiles.length,
+    newTestCount,
+  })
+  writeFileSync(join(runDir, 'post-snapshot.json'), JSON.stringify([...postSnapshot.entries()], null, 2))
+  writeFileSync(join(runDir, 'diff.json'), JSON.stringify({ newFiles, modifiedFiles, newTestCount }, null, 2))
+
   // 8. Build result
   const result: RunResult = {
     run: config.runId,
@@ -97,6 +118,8 @@ export async function runBenchmark(config: RunConfig): Promise<RunResult> {
     mode: `${getPressureLabel(config.pressure)} / ${getMemoryLabel(config.memory)}`,
     services: metrics.services ?? config.services,
     tests: metrics.tests,
+    tests_pre: newTestCount > 0 ? metrics.tests - newTestCount : 0,
+    tests_new: newTestCount > 0 ? newTestCount : metrics.tests,
     failures: metrics.failures,
     assertions: metrics.assertions,
     time_min: logger.elapsedMin,
@@ -447,6 +470,80 @@ function parseResults(output: string, logger: TranscriptLogger, workspacePath?: 
   metrics.criteria = `${metrics.services}/8`;
   logger.log('metric', 'Using safe defaults (real execution prioritized, no prose parsing)', { metrics });
   return metrics;
+}
+
+/**
+ * Snapshot all test files in a workspace — returns Map<relativePath, contentHash>
+ */
+function snapshotTestFiles(workspacePath: string): Map<string, string> {
+  const snapshot = new Map<string, string>()
+  const walk = (dir: string, prefix: string) => {
+    if (!existsSync(dir)) return
+    for (const entry of readdirSync(dir, { withFileTypes: true })) {
+      if (entry.name === 'node_modules' || entry.name === '.git') continue
+      const full = join(dir, entry.name)
+      const rel = prefix ? `${prefix}/${entry.name}` : entry.name
+      if (entry.isDirectory()) {
+        walk(full, rel)
+      } else if (entry.name.includes('.test.') || entry.name.includes('.spec.')) {
+        const content = readFileSync(full, 'utf-8')
+        snapshot.set(rel, createHash('sha256').update(content).digest('hex'))
+      }
+    }
+  }
+  walk(join(workspacePath, 'services'), 'services')
+  return snapshot
+}
+
+/**
+ * Diff pre/post snapshots — count new test cases in new/modified files
+ */
+function diffSnapshots(
+  pre: Map<string, string>,
+  post: Map<string, string>,
+  workspacePath: string,
+): { newFiles: string[]; modifiedFiles: string[]; newTestCount: number } {
+  const newFiles: string[] = []
+  const modifiedFiles: string[] = []
+  let newTestCount = 0
+
+  for (const [path, hash] of post) {
+    if (!pre.has(path)) {
+      newFiles.push(path)
+      // All tests in new files are new
+      newTestCount += countTestCases(join(workspacePath, path))
+    } else if (pre.get(path) !== hash) {
+      modifiedFiles.push(path)
+      // For modified files, count the difference in test cases
+      const postCount = countTestCases(join(workspacePath, path))
+      // Pre-count not available (content changed), estimate conservatively:
+      // assume pre had roughly the same structure, count only net new
+      // This is imperfect but better than counting all tests as new
+      newTestCount += Math.max(0, postCount - estimatePreTestCount(pre, path))
+    }
+  }
+
+  return { newFiles, modifiedFiles, newTestCount }
+}
+
+/**
+ * Count test cases in a file by matching it/test/describe patterns
+ */
+function countTestCases(filePath: string): number {
+  if (!existsSync(filePath)) return 0
+  const content = readFileSync(filePath, 'utf-8')
+  const matches = content.match(/\b(?:it|test)\s*\(/g)
+  return matches?.length ?? 0
+}
+
+/**
+ * Estimate pre-run test count for a modified file.
+ * Since we only stored hashes (not content), use a heuristic:
+ * if the file existed pre-run, assume it had ~40 tests (evensong baseline).
+ * For clean-room runs (no pre files), returns 0.
+ */
+function estimatePreTestCount(pre: Map<string, string>, path: string): number {
+  return pre.has(path) ? 40 : 0
 }
 
 /**

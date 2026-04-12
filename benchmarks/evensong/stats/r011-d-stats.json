@@ -1,0 +1,60 @@
+{
+  "config": "r011-d",
+  "n": 3,
+  "runs": [
+    "R034-r011-d-rep1",
+    "R035-r011-d-rep2",
+    "R036-r011-d-rep3"
+  ],
+  "date": "2026-04-12",
+  "tests": {
+    "mean": 787,
+    "std": 0,
+    "min": 787,
+    "max": 787,
+    "ci95_margin": 0,
+    "values": [
+      787,
+      787,
+      787
+    ]
+  },
+  "failures": {
+    "mean": 0,
+    "std": 0,
+    "min": 0,
+    "max": 0,
+    "ci95_margin": 0,
+    "values": [
+      0,
+      0,
+      0
+    ]
+  },
+  "assertions": {
+    "mean": 2192.33,
+    "std": 0.58,
+    "min": 2192,
+    "max": 2193,
+    "ci95_margin": 1.43,
+    "values": [
+      2192,
+      2193,
+      2192
+    ]
+  },
+  "time_min": {
+    "mean": 3.3,
+    "std": 5.46,
+    "min": 0.1,
+    "max": 9.6,
+    "ci95_margin": 13.55,
+    "values": [
+      9.6,
+      0.2,
+      0.1
+    ]
+  },
+  "all_green": true,
+  "tests_cv": 0
+}
