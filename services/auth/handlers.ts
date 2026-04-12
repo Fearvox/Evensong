@@ -144,7 +144,7 @@ export async function login(req: Request): Promise<Response> {
 
   // Account lockout check
   if (isAccountLocked(email)) {
-    return error("Account is locked due to too many failed attempts. Try again later.", 423);
+    return unauthorized("Account is locked due to too many failed attempts. Try again later.");
   }
 
   const user = findUserByEmail(email);
@@ -283,6 +283,33 @@ async function changePassword(req: Request): Promise<Response> {
   return success({ message: "Password changed successfully" });
 }
 
+/** POST /auth/password-reset/confirm — confirm password reset with token */
+async function confirmPasswordReset(req: Request): Promise<Response> {
+  const body = await parseBody<{ token?: string; newPassword?: string }>(req);
+  if (!body) return error("Invalid or missing request body");
+
+  const tokenValue = typeof body.token === "string" ? body.token : "";
+  if (!isNonEmptyString(tokenValue)) return error("Reset token is required", 400);
+
+  const newPassword = typeof body.newPassword === "string" ? body.newPassword : "";
+  if (!isNonEmptyString(newPassword) || newPassword.length < 8) {
+    return error("New password must be at least 8 characters", 400);
+  }
+
+  const resetToken = getResetToken(tokenValue);
+  if (!resetToken) return error("Invalid reset token", 400);
+  if (!isResetTokenValid(resetToken)) return error("Reset token is expired or already used", 400);
+
+  const user = getUserById(resetToken.userId);
+  if (!user) return error("User not found", 400);
+
+  updateUser(user.id, { passwordHash: hashPassword(newPassword) });
+  markResetTokenUsed(resetToken.id);
+  deleteUserSessions(user.id);
+
+  return success({ message: "Password has been reset" });
+}
+
 /** GET /auth/sessions — list active sessions for current user */
 async function listSessions(req: Request): Promise<Response> {
   const auth = await authenticateRequest(req);
@@ -406,6 +433,8 @@ export async function router(req: Request): Promise<Response> {
 
     // Password management
     if (method === "POST" && route === "reset-password") return resetPassword(req);
+    if (method === "POST" && route === "password-reset" && !subRoute) return resetPassword(req);
+    if (method === "POST" && route === "password-reset" && subRoute === "confirm") return confirmPasswordReset(req);
     if (method === "POST" && route === "change-password") return changePassword(req);
 
     // Session management
@@ -423,3 +452,5 @@ export async function router(req: Request): Promise<Response> {
     return serverError(message);
   }
 }
+
+export const handleRequest = router;

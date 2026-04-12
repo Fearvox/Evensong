@@ -2,6 +2,7 @@ import {
   success,
   error,
   notFound,
+  paginated,
   parseBody,
   getPathSegments,
   getQueryParams,
@@ -10,8 +11,6 @@ import {
   isNonEmptyString,
   isArray,
   isObject,
-  validate,
-  formatValidationErrors,
 } from "../shared/validation";
 import { analyticsStore } from "./store";
 import type { EventInput } from "./store";
@@ -26,9 +25,30 @@ export async function handleRequest(req: Request): Promise<Response> {
     return notFound("Route not found");
   }
 
+  // GET /analytics/health
+  if (method === "GET" && segments[1] === "health" && segments.length === 2) {
+    return success({ status: "ok", service: "analytics" });
+  }
+
   // GET /analytics/stats
   if (method === "GET" && segments[1] === "stats" && segments.length === 2) {
     return success(analyticsStore.stats());
+  }
+
+  // GET /analytics/aggregate?eventType=...
+  if (method === "GET" && segments[1] === "aggregate" && segments.length === 2) {
+    const eventType = params.get("eventType");
+    if (!eventType) {
+      return error("eventType query parameter is required");
+    }
+    return success(analyticsStore.aggregate(eventType));
+  }
+
+  // GET /analytics/top?limit=N
+  if (method === "GET" && segments[1] === "top" && segments.length === 2) {
+    const limitParam = params.get("limit");
+    const limit = limitParam ? parseInt(limitParam, 10) : 10;
+    return success(analyticsStore.topEventTypes(limit));
   }
 
   // GET /analytics/funnel?steps=step1,step2&userId=
@@ -45,9 +65,28 @@ export async function handleRequest(req: Request): Promise<Response> {
     return success(analyticsStore.funnel(steps, userId));
   }
 
-  // GET /analytics/retention
+  // GET /analytics/retention?eventA=...&eventB=...&days=N
   if (method === "GET" && segments[1] === "retention" && segments.length === 2) {
-    return success(analyticsStore.retention());
+    const eventA = params.get("eventA");
+    const eventB = params.get("eventB");
+    if (!eventA || !eventB) {
+      return error("eventA and eventB query parameters are required");
+    }
+    const daysParam = params.get("days");
+    const days = daysParam ? parseInt(daysParam, 10) : 30;
+    return success(analyticsStore.retentionCount(eventA, eventB, days));
+  }
+
+  // GET /analytics/user/:userId
+  if (method === "GET" && segments[1] === "user" && segments.length === 3) {
+    const userId = segments[2];
+    return success(analyticsStore.findByUserId(userId));
+  }
+
+  // GET /analytics/session/:sessionId
+  if (method === "GET" && segments[1] === "session" && segments.length === 3) {
+    const sessionId = segments[2];
+    return success(analyticsStore.findBySessionId(sessionId));
   }
 
   // POST /analytics/events/batch
@@ -64,11 +103,11 @@ export async function handleRequest(req: Request): Promise<Response> {
     const inputs: EventInput[] = [];
     for (let i = 0; i < events.length; i++) {
       const evt = events[i];
-      if (!isObject(evt) || !isNonEmptyString(evt.name)) {
-        return error(`events[${i}].name is required and must be a non-empty string`);
+      if (!isObject(evt) || !isNonEmptyString(evt.eventType)) {
+        return error(`events[${i}].eventType is required and must be a non-empty string`);
       }
       inputs.push({
-        name: evt.name as string,
+        eventType: evt.eventType as string,
         userId: typeof evt.userId === "string" ? evt.userId : undefined,
         sessionId: typeof evt.sessionId === "string" ? evt.sessionId : undefined,
         properties: isObject(evt.properties) ? (evt.properties as Record<string, unknown>) : undefined,
@@ -79,30 +118,30 @@ export async function handleRequest(req: Request): Promise<Response> {
     return success(created, 201);
   }
 
-  // GET /analytics/events/by-user/:userId
-  if (method === "GET" && segments[1] === "events" && segments[2] === "by-user" && segments.length === 4) {
-    const userId = segments[3];
-    return success(analyticsStore.findByUserId(userId));
-  }
+  // DELETE /analytics/events — bulk delete with filter (must check before GET /events/:id)
+  if (method === "DELETE" && segments[1] === "events" && segments.length === 2) {
+    const eventType = params.get("eventType") ?? undefined;
+    const before = params.get("before") ?? undefined;
 
-  // GET /analytics/events/by-session/:sessionId
-  if (method === "GET" && segments[1] === "events" && segments[2] === "by-session" && segments.length === 4) {
-    const sessionId = segments[3];
-    return success(analyticsStore.findBySessionId(sessionId));
+    if (!eventType && !before) {
+      return error("At least one filter (eventType or before) is required");
+    }
+
+    const deleted = analyticsStore.deleteBulk({ eventType, before });
+    return success({ deleted });
   }
 
   // POST /analytics/events — track single event
   if (method === "POST" && segments[1] === "events" && segments.length === 2) {
-    const body = await parseBody<{ name: unknown; userId?: unknown; sessionId?: unknown; properties?: unknown }>(req);
+    const body = await parseBody<{ eventType: unknown; userId?: unknown; sessionId?: unknown; properties?: unknown }>(req);
     if (!body) return error("Invalid or missing request body");
 
-    const errors = validate([
-      { field: "name", valid: isNonEmptyString(body.name), message: "name is required and must be a non-empty string" },
-    ]);
-    if (errors.length > 0) return error(formatValidationErrors(errors));
+    if (!isNonEmptyString(body.eventType)) {
+      return error("eventType is required and must be a non-empty string");
+    }
 
     const event = analyticsStore.trackEvent({
-      name: body.name as string,
+      eventType: body.eventType as string,
       userId: typeof body.userId === "string" ? body.userId : undefined,
       sessionId: typeof body.sessionId === "string" ? body.sessionId : undefined,
       properties: isObject(body.properties) ? (body.properties as Record<string, unknown>) : undefined,
@@ -110,16 +149,35 @@ export async function handleRequest(req: Request): Promise<Response> {
     return success(event, 201);
   }
 
-  // GET /analytics/events — list events with optional filters
+  // GET /analytics/events — list events with optional filters and pagination
   if (method === "GET" && segments[1] === "events" && segments.length === 2) {
     const userId = params.get("userId") ?? undefined;
     const sessionId = params.get("sessionId") ?? undefined;
     const eventType = params.get("eventType") ?? undefined;
+    const from = params.get("from") ?? undefined;
+    const to = params.get("to") ?? undefined;
+    const pageParam = params.get("page");
+    const pageSizeParam = params.get("pageSize");
 
-    if (userId || sessionId || eventType) {
-      return success(analyticsStore.filter({ userId, sessionId, eventType }));
+    let events = analyticsStore.getAll();
+
+    // Apply filters
+    if (userId || sessionId || eventType || from || to) {
+      events = analyticsStore.filterExtended({ userId, sessionId, eventType, from, to });
     }
-    return success(analyticsStore.getAll());
+
+    const total = events.length;
+
+    // Apply pagination if requested
+    if (pageParam !== null || pageSizeParam !== null) {
+      const page = pageParam ? parseInt(pageParam, 10) : 1;
+      const pageSize = pageSizeParam ? parseInt(pageSizeParam, 10) : 20;
+      const start = (page - 1) * pageSize;
+      const pageEvents = events.slice(start, start + pageSize);
+      return paginated(pageEvents, total, page, pageSize);
+    }
+
+    return success(events);
   }
 
   // GET /analytics/events/:id

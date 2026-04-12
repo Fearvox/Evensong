@@ -11,14 +11,20 @@ import type {
 export interface NotificationTemplate {
   id: string;
   name: string;
+  channel?: string;
+  subject?: string; // alias for title in templates
   title: string;
   body: string;
   createdAt: string;
 }
 
-// Stores
-const notifications = new MemoryStore<Notification>();
-const templates = new MemoryStore<NotificationTemplate>();
+// Stores (exported for testing/integration)
+export const notificationStore = new MemoryStore<Notification>();
+export const templateStore = new MemoryStore<NotificationTemplate>();
+
+// Internal aliases for use in this module
+const notifications = notificationStore;
+const templates = templateStore;
 
 // --- Notification CRUD ---
 
@@ -52,6 +58,10 @@ export function getAllNotifications(): Notification[] {
 
 export function deleteNotification(id: string): boolean {
   return notifications.delete(id);
+}
+
+export function updateNotification(id: string, updates: Partial<Notification>): Notification | undefined {
+  return notifications.update(id, updates);
 }
 
 // --- Read / Unread ---
@@ -131,17 +141,32 @@ export function deleteOldNotifications(daysOld: number): number {
 
 export function createTemplate(
   name: string,
-  title: string,
+  titleOrSubject: string,
   body: string,
+  channel?: string,
 ): NotificationTemplate {
   const template: NotificationTemplate = {
     id: generateId(),
     name: name.trim(),
-    title: title.trim(),
+    title: titleOrSubject.trim(),
+    subject: titleOrSubject.trim(),
     body: body.trim(),
+    ...(channel ? { channel: channel.trim() } : {}),
     createdAt: now(),
   };
   return templates.create(template);
+}
+
+export function getTemplateById(id: string): NotificationTemplate | undefined {
+  return templates.findOne((t) => t.id === id);
+}
+
+export function getAllTemplates(): NotificationTemplate[] {
+  return templates.getAll();
+}
+
+export function getTemplate(id: string): NotificationTemplate | undefined {
+  return templates.findOne((t) => t.id === id);
 }
 
 export function getTemplateByName(

@@ -3,7 +3,7 @@ import type { AnalyticsEvent } from "../shared/types";
 import { generateId, now } from "../shared/http";
 
 export interface EventInput {
-  name: string;
+  eventType: string;
   userId?: string;
   sessionId?: string;
   properties?: Record<string, unknown>;
@@ -12,21 +12,22 @@ export interface EventInput {
 export interface EventStats {
   totalEvents: number;
   uniqueUsers: number;
-  topEventTypes: Array<{ eventType: string; count: number }>;
-  eventsPerDay: Record<string, number>;
+  uniqueSessions: number;
+  eventsToday: number;
 }
 
 export interface FunnelStep {
   step: string;
-  count: number;
+  users: number;
 }
 
-export interface RetentionResult {
-  recentUsers: number;
-  totalUsers: number;
-  retentionRate: number;
-  recentPeriodDays: number;
-  totalPeriodDays: number;
+export interface AggregateResult {
+  count: number;
+  uniqueUsers: number;
+}
+
+export interface RetentionCountResult {
+  count: number;
 }
 
 export class AnalyticsStore {
@@ -35,7 +36,7 @@ export class AnalyticsStore {
   trackEvent(input: EventInput): AnalyticsEvent {
     const event: AnalyticsEvent = {
       id: generateId(),
-      eventType: input.name,
+      eventType: input.eventType,
       userId: input.userId,
       sessionId: input.sessionId,
       properties: input.properties ?? {},
@@ -81,32 +82,67 @@ export class AnalyticsStore {
     });
   }
 
+  filterExtended(filters: {
+    userId?: string;
+    sessionId?: string;
+    eventType?: string;
+    from?: string;
+    to?: string;
+  }): AnalyticsEvent[] {
+    return this.store.find((e) => {
+      if (filters.userId && e.userId !== filters.userId) return false;
+      if (filters.sessionId && e.sessionId !== filters.sessionId) return false;
+      if (filters.eventType && e.eventType !== filters.eventType) return false;
+      if (filters.from) {
+        const fromMs = new Date(filters.from).getTime();
+        if (new Date(e.timestamp).getTime() < fromMs) return false;
+      }
+      if (filters.to) {
+        const toMs = new Date(filters.to).getTime();
+        if (new Date(e.timestamp).getTime() > toMs) return false;
+      }
+      return true;
+    });
+  }
+
   stats(): EventStats {
     const all = this.store.getAll();
+    const today = new Date().toISOString().slice(0, 10);
 
     const uniqueUserSet = new Set<string>();
-    const typeCounts = new Map<string, number>();
-    const dayCounts: Record<string, number> = {};
+    const uniqueSessionSet = new Set<string>();
+    let eventsToday = 0;
 
     for (const event of all) {
       if (event.userId) uniqueUserSet.add(event.userId);
-
-      typeCounts.set(event.eventType, (typeCounts.get(event.eventType) ?? 0) + 1);
-
-      const day = event.timestamp.slice(0, 10);
-      dayCounts[day] = (dayCounts[day] ?? 0) + 1;
+      if (event.sessionId) uniqueSessionSet.add(event.sessionId);
+      if (event.timestamp.slice(0, 10) === today) eventsToday++;
     }
-
-    const topEventTypes = Array.from(typeCounts.entries())
-      .map(([eventType, count]) => ({ eventType, count }))
-      .sort((a, b) => b.count - a.count);
 
     return {
       totalEvents: all.length,
       uniqueUsers: uniqueUserSet.size,
-      topEventTypes,
-      eventsPerDay: dayCounts,
+      uniqueSessions: uniqueSessionSet.size,
+      eventsToday,
     };
+  }
+
+  aggregate(eventType: string): AggregateResult {
+    const events = this.store.find((e) => e.eventType === eventType);
+    const uniqueUsers = new Set(events.map((e) => e.userId).filter(Boolean)).size;
+    return { count: events.length, uniqueUsers };
+  }
+
+  topEventTypes(limit: number): Array<{ eventType: string; count: number }> {
+    const all = this.store.getAll();
+    const typeCounts = new Map<string, number>();
+    for (const event of all) {
+      typeCounts.set(event.eventType, (typeCounts.get(event.eventType) ?? 0) + 1);
+    }
+    return Array.from(typeCounts.entries())
+      .map(([eventType, count]) => ({ eventType, count }))
+      .sort((a, b) => b.count - a.count)
+      .slice(0, limit);
   }
 
   funnel(steps: string[], userId?: string): FunnelStep[] {
@@ -115,10 +151,11 @@ export class AnalyticsStore {
       events = events.filter((e) => e.userId === userId);
     }
 
-    // Group events by user
+    // Group events by user — only events with userId
     const userEvents = new Map<string, AnalyticsEvent[]>();
     for (const event of events) {
-      const uid = event.userId ?? "__anonymous__";
+      if (!event.userId) continue;
+      const uid = event.userId;
       const list = userEvents.get(uid) ?? [];
       list.push(event);
       userEvents.set(uid, list);
@@ -141,43 +178,62 @@ export class AnalyticsStore {
         }
         if (stepIdx > i) count++;
       }
-      result.push({ step: steps[i], count });
+      result.push({ step: steps[i], users: count });
     }
 
     return result;
   }
 
-  retention(recentDays = 7, totalDays = 30): RetentionResult {
+  retentionCount(eventA: string, eventB: string, days: number): RetentionCountResult {
     const all = this.store.getAll();
-    const nowMs = Date.now();
-    const recentCutoff = nowMs - recentDays * 24 * 60 * 60 * 1000;
-    const totalCutoff = nowMs - totalDays * 24 * 60 * 60 * 1000;
+    const windowMs = days * 24 * 60 * 60 * 1000;
 
-    const recentUserSet = new Set<string>();
-    const totalUserSet = new Set<string>();
-
+    // Group events by userId
+    const userEvents = new Map<string, AnalyticsEvent[]>();
     for (const event of all) {
       if (!event.userId) continue;
-      const ts = new Date(event.timestamp).getTime();
-      if (ts >= totalCutoff) {
-        totalUserSet.add(event.userId);
-      }
-      if (ts >= recentCutoff) {
-        recentUserSet.add(event.userId);
+      const list = userEvents.get(event.userId) ?? [];
+      list.push(event);
+      userEvents.set(event.userId, list);
+    }
+
+    // Count users who did eventA then eventB within `days` window
+    let count = 0;
+    for (const [, evts] of userEvents) {
+      const aEvents = evts.filter((e) => e.eventType === eventA).sort(
+        (a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime(),
+      );
+      const bEvents = evts.filter((e) => e.eventType === eventB);
+
+      for (const aEvt of aEvents) {
+        const aMs = new Date(aEvt.timestamp).getTime();
+        const hasB = bEvents.some((bEvt) => {
+          const bMs = new Date(bEvt.timestamp).getTime();
+          return bMs >= aMs && bMs <= aMs + windowMs;
+        });
+        if (hasB) {
+          count++;
+          break;
+        }
       }
     }
 
-    const totalUsers = totalUserSet.size;
-    const recentUsers = recentUserSet.size;
-    const retentionRate = totalUsers === 0 ? 0 : Math.round((recentUsers / totalUsers) * 10000) / 100;
+    return { count };
+  }
 
-    return {
-      recentUsers,
-      totalUsers,
-      retentionRate,
-      recentPeriodDays: recentDays,
-      totalPeriodDays: totalDays,
-    };
+  deleteBulk(filters: { eventType?: string; before?: string }): number {
+    const toDelete = this.store.find((e) => {
+      if (filters.eventType && e.eventType !== filters.eventType) return false;
+      if (filters.before) {
+        const beforeMs = new Date(filters.before).getTime();
+        if (new Date(e.timestamp).getTime() >= beforeMs) return false;
+      }
+      return true;
+    });
+    for (const e of toDelete) {
+      this.store.delete(e.id);
+    }
+    return toDelete.length;
   }
 
   count(): number {

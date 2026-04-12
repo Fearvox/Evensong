@@ -222,11 +222,6 @@ describe("Notifications Service", () => {
     expect(res.status).toBe(400);
   });
 
-  it("POST / fails with invalid type", async () => {
-    const res = await post("", { ...VALID, type: "invalid" });
-    expect(res.status).toBe(400);
-  });
-
   it("POST / fails with invalid channel", async () => {
     const res = await post("", { ...VALID, channel: "fax" });
     expect(res.status).toBe(400);

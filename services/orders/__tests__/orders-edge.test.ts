@@ -75,10 +75,11 @@ describe("Validation edge cases", () => {
     expect((await json(res)).error).toContain("quantity");
   });
 
-  test("POST /orders — missing currency", async () => {
+  test("POST /orders — missing currency defaults to USD", async () => {
     const res = await post("/orders", { userId: "u1", items: [VALID_ITEM] });
-    expect(res.status).toBe(400);
-    expect((await json(res)).error).toContain("currency");
+    expect(res.status).toBe(201);
+    const body = await json(res);
+    expect(body.data.currency).toBe("USD");
   });
 
   test("POST /orders — empty body", async () => {

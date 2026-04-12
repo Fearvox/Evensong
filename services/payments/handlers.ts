@@ -72,6 +72,11 @@ export async function handleRequest(req: Request): Promise<Response> {
     return success({ valid: true, message: "Payment details are valid" });
   }
 
+  // GET /payments/methods
+  if (method === "GET" && segments[1] === "methods" && !segments[2]) {
+    return success(methodStore.getAll());
+  }
+
   // GET /payments/order/:orderId
   if (method === "GET" && segments[1] === "order" && segments[2] && !segments[3]) {
     return success(paymentStore.getByOrderId(segments[2]));

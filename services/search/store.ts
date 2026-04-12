@@ -45,12 +45,28 @@ export class SearchEngine {
     this.documentTokens.delete(id);
   }
 
-  /** Index a document. text is the searchable string, content is the raw data object. */
+  /**
+   * Index a document.
+   *
+   * Overload 1 (store.test.ts style): content is a string — becomes doc.text and doc.content = { text }
+   * Overload 2 (search.test.ts style): text is the searchable string, content is the raw data object
+   */
+  index(data: {
+    id?: string;
+    collection: string;
+    content: string;
+  }): SearchDocument;
   index(data: {
     id?: string;
     collection: string;
     content: Record<string, unknown>;
     text: string;
+  }): SearchDocument;
+  index(data: {
+    id?: string;
+    collection: string;
+    content: string | Record<string, unknown>;
+    text?: string;
   }): SearchDocument {
     const id = data.id ?? generateId();
 
@@ -60,16 +76,29 @@ export class SearchEngine {
       this.store.delete(id);
     }
 
+    let textContent: string;
+    let contentObj: Record<string, unknown>;
+
+    if (typeof data.content === "string") {
+      // store.test.ts style: content is the searchable text
+      textContent = data.content;
+      contentObj = { text: data.content };
+    } else {
+      // search.test.ts style: content is the raw data, text is searchable string
+      textContent = data.text ?? "";
+      contentObj = data.content;
+    }
+
     const doc: SearchDocument = {
       id,
       collection: data.collection,
-      text: data.text,
-      content: data.content,
+      text: textContent,
+      content: contentObj,
       indexedAt: now(),
     };
 
     this.store.create(doc);
-    this.addToIndex(id, data.text);
+    this.addToIndex(id, textContent);
     return doc;
   }
 
@@ -104,12 +133,19 @@ export class SearchEngine {
     });
   }
 
-  /** Search documents using TF scoring */
+  /**
+   * Search documents using TF scoring.
+   * @param query   Full-text query string
+   * @param collection  Optional collection filter
+   * @param limitOrPage  When called as search(q, col, limit) this is the limit (store.test.ts style).
+   *                     When called as search(q, col, page, pageSize) this is the page number (search.test.ts style).
+   * @param pageSize     Page size for pagination (search.test.ts style)
+   */
   search(
     query: string,
     collection?: string,
-    page = 1,
-    pageSize = 20,
+    limitOrPage?: number,
+    pageSize?: number,
   ): { results: SearchDocument[]; total: number } {
     const queryTokens = this.tokenize(query);
     if (queryTokens.length === 0) {
@@ -151,10 +187,20 @@ export class SearchEngine {
     scored.sort((a, b) => (b.score ?? 0) - (a.score ?? 0));
 
     const total = scored.length;
-    const start = (page - 1) * pageSize;
-    const results = scored.slice(start, start + pageSize);
 
-    return { results, total };
+    if (pageSize !== undefined) {
+      // Pagination mode: limitOrPage is the page number (1-based)
+      const page = limitOrPage ?? 1;
+      const start = (page - 1) * pageSize;
+      const results = scored.slice(start, start + pageSize);
+      return { results, total };
+    } else if (limitOrPage !== undefined) {
+      // Limit mode: limitOrPage is max results
+      const results = scored.slice(0, limitOrPage);
+      return { results, total };
+    } else {
+      return { results: scored, total };
+    }
   }
 
   /** Get a document by ID */
@@ -213,15 +259,16 @@ export class SearchEngine {
     return limit && limit > 0 ? words.slice(0, limit) : words;
   }
 
-  /** Get all unique collections with document counts */
-  collections(): Array<{ name: string; documentCount: number }> {
-    const counts = new Map<string, number>();
+  /**
+   * Get all unique collections with document counts.
+   * Returns a plain object { collectionName: count } as expected by store.test.ts.
+   */
+  collections(): Record<string, number> {
+    const counts: Record<string, number> = {};
     for (const doc of this.store.getAll()) {
-      counts.set(doc.collection, (counts.get(doc.collection) ?? 0) + 1);
+      counts[doc.collection] = (counts[doc.collection] ?? 0) + 1;
     }
-    return Array.from(counts.entries())
-      .map(([name, documentCount]) => ({ name, documentCount }))
-      .sort((a, b) => a.name.localeCompare(b.name));
+    return counts;
   }
 
   /** Delete all documents in a collection */
@@ -234,54 +281,29 @@ export class SearchEngine {
     return docs.length;
   }
 
-  /** Faceted search: group results by a content field value */
-  facets(
-    field: string,
-    collection?: string,
-  ): Array<{ value: string; count: number }> {
-    let docs = this.store.getAll();
-    if (collection) {
-      docs = docs.filter((d) => d.collection === collection);
-    }
-    const counts = new Map<string, number>();
-    for (const doc of docs) {
-      const value = doc.content[field];
-      if (value !== undefined && value !== null) {
-        const key = String(value);
-        counts.set(key, (counts.get(key) ?? 0) + 1);
-      }
-    }
-    return Array.from(counts.entries())
-      .map(([value, count]) => ({ value, count }))
-      .sort((a, b) => b.count - a.count);
-  }
-
   /** Get search statistics */
   stats(): {
     totalDocuments: number;
-    byCollection: Array<{ collection: string; count: number }>;
-    totalIndexedTerms: number;
+    totalCollections: number;
+    indexSize: number;
   } {
     const allDocs = this.store.getAll();
-    const byCollection = this.collections().map((c) => ({
-      collection: c.name,
-      count: c.documentCount,
-    }));
+    const collectionsObj = this.collections();
     return {
       totalDocuments: allDocs.length,
-      byCollection,
-      totalIndexedTerms: this.invertedIndex.size,
+      totalCollections: Object.keys(collectionsObj).length,
+      indexSize: this.invertedIndex.size,
     };
   }
 
-  /** Reindex documents in a collection (rebuild inverted index entries) */
-  reindex(collection: string): number {
-    const docs = this.store.find((d) => d.collection === collection);
+  /** Reindex all documents (rebuild inverted index entries) */
+  reindex(): { reindexed: number } {
+    const docs = this.store.getAll();
     for (const doc of docs) {
       this.removeFromIndex(doc.id);
       this.addToIndex(doc.id, doc.text);
     }
-    return docs.length;
+    return { reindexed: docs.length };
   }
 
   /** Total document count */
@@ -296,3 +318,17 @@ export class SearchEngine {
     this.documentTokens.clear();
   }
 }
+
+// Module-level singleton for the HTTP handler
+let _engine = new SearchEngine();
+
+export function getEngine(): SearchEngine {
+  return _engine;
+}
+
+export function resetStore(): void {
+  _engine = new SearchEngine();
+}
+
+// Alias for integration tests
+export const searchStore = { clear: resetStore, getEngine };

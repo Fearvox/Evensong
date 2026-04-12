@@ -22,6 +22,7 @@ import {
 } from "../shared/validation";
 import type { OrderStatus, OrderItem } from "../shared/types";
 import type { OrderStore } from "./store";
+import { orderStore as _orderStore } from "./store";
 
 const VALID_STATUSES: readonly OrderStatus[] = [
   "pending",
@@ -32,6 +33,18 @@ const VALID_STATUSES: readonly OrderStatus[] = [
   "cancelled",
   "refunded",
 ];
+
+// Normalize an item from request body — maps legacy `price` → `unitPrice`,
+// defaults `name` to `productId` when not provided.
+function normalizeItem(raw: Record<string, unknown>): Record<string, unknown> {
+  const unitPrice =
+    raw.unitPrice !== undefined ? raw.unitPrice : raw.price;
+  const name =
+    typeof raw.name === "string" && raw.name.length > 0
+      ? raw.name
+      : raw.productId;
+  return { ...raw, unitPrice, name };
+}
 
 export function createRouter(
   store: OrderStore,
@@ -86,22 +99,23 @@ export function createRouter(
       const body = await parseBody<Record<string, unknown>>(req);
       if (!body) return error("Invalid request body");
 
+      const normalized = normalizeItem(body);
       const itemErrors = validate([
-        { field: "productId", valid: isNonEmptyString(body.productId), message: "required" },
-        { field: "name", valid: isNonEmptyString(body.name), message: "required" },
-        { field: "quantity", valid: isPositiveInteger(body.quantity), message: "must be a positive integer" },
-        { field: "unitPrice", valid: isPositiveNumber(body.unitPrice), message: "must be positive" },
+        { field: "productId", valid: isNonEmptyString(normalized.productId), message: "required" },
+        { field: "name", valid: isNonEmptyString(normalized.name), message: "required" },
+        { field: "quantity", valid: isPositiveInteger(normalized.quantity), message: "must be a positive integer" },
+        { field: "unitPrice", valid: isPositiveNumber(normalized.unitPrice), message: "must be positive" },
       ]);
       if (itemErrors.length > 0) return error(formatValidationErrors(itemErrors));
 
-      const updated = store.addItem(id, body as unknown as OrderItem);
+      const updated = store.addItem(id, normalized as unknown as OrderItem);
       if (!updated) return conflict("Cannot add item to this order");
       return success(updated);
     }
 
     // PATCH /orders/:id/status — advance order status
     if (
-      method === "PATCH" &&
+      (method === "PATCH" || method === "PUT") &&
       segments.length === 3 &&
       segments[2] === "status"
     ) {
@@ -123,6 +137,21 @@ export function createRouter(
       return success(updated);
     }
 
+    // POST /orders/:id/cancel
+    if (
+      method === "POST" &&
+      segments.length === 3 &&
+      segments[2] === "cancel"
+    ) {
+      const id = segments[1];
+      const order = store.get(id);
+      if (!order) return notFound("Order not found");
+      const cancelled = store.cancel(id);
+      if (!cancelled)
+        return error(`Cannot cancel order with status '${order.status}'`, 400);
+      return success(cancelled);
+    }
+
     // GET /orders/:id/total — recalculate and return order total
     if (
       method === "GET" &&
@@ -134,7 +163,7 @@ export function createRouter(
       return success({ total });
     }
 
-    // GET /orders/:id/timeline
+    // GET /orders/:id/timeline or /orders/:id/history
     if (
       method === "GET" &&
       segments.length === 3 &&
@@ -182,28 +211,29 @@ export function createRouter(
           valid: isArray(b.items) && (b.items as unknown[]).length > 0,
           message: "must be a non-empty array",
         },
-        { field: "currency", valid: isNonEmptyString(b.currency), message: "required" },
       ]);
       if (topErrors.length > 0) return error(formatValidationErrors(topErrors));
 
-      // Validate each item
-      const items = b.items as Record<string, unknown>[];
-      for (let i = 0; i < items.length; i++) {
-        const item = items[i];
-        if (!isObject(item)) return error(`items[${i}]: must be an object`);
+      // Validate each item (with normalization)
+      const rawItems = b.items as Record<string, unknown>[];
+      const normalizedItems: OrderItem[] = [];
+      for (let i = 0; i < rawItems.length; i++) {
+        const rawItem = rawItems[i];
+        if (!isObject(rawItem)) return error(`items[${i}]: must be an object`);
+        const item = normalizeItem(rawItem);
         const itemErrors = validate([
           { field: `items[${i}].productId`, valid: isNonEmptyString(item.productId), message: "required" },
-          { field: `items[${i}].name`, valid: isNonEmptyString(item.name), message: "required" },
           { field: `items[${i}].quantity`, valid: isPositiveInteger(item.quantity), message: "must be a positive integer" },
           { field: `items[${i}].unitPrice`, valid: isPositiveNumber(item.unitPrice), message: "must be positive" },
         ]);
         if (itemErrors.length > 0) return error(formatValidationErrors(itemErrors));
+        normalizedItems.push(item as unknown as OrderItem);
       }
 
       const order = store.create({
         userId: b.userId as string,
-        items: items as unknown as OrderItem[],
-        currency: b.currency as string,
+        items: normalizedItems,
+        currency: typeof b.currency === "string" && b.currency.length > 0 ? b.currency : "USD",
         shippingAddress: typeof b.shippingAddress === "string" ? b.shippingAddress : undefined,
       });
       return success(order, 201);
@@ -248,17 +278,17 @@ export function createRouter(
       if (!body) return error("Invalid request body");
 
       const b = body as Record<string, unknown>;
+      if (!isNonEmptyString(b.shippingAddress)) {
+        return error("shippingAddress must be a non-empty string", 400);
+      }
       const updated = store.update(id, {
-        shippingAddress:
-          typeof b.shippingAddress === "string"
-            ? b.shippingAddress
-            : order.shippingAddress,
+        shippingAddress: b.shippingAddress as string,
       });
       if (!updated) return conflict("Cannot update this order");
       return success(updated);
     }
 
-    // DELETE /orders/:id — cancel order (pending or confirmed only)
+    // DELETE /orders/:id — cancel order (pending or confirmed only), then remove from store
     if (method === "DELETE" && segments.length === 2) {
       const id = segments[1];
       const order = store.get(id);
@@ -266,9 +296,12 @@ export function createRouter(
       const cancelled = store.cancel(id);
       if (!cancelled)
         return conflict(`Cannot cancel order with status '${order.status}'`);
-      return success(cancelled);
+      return success({ ...cancelled, deleted: true });
     }
 
     return notFound("Endpoint not found");
   };
 }
+
+// Singleton export for edge tests that import handleRequest directly
+export const handleRequest = createRouter(_orderStore);

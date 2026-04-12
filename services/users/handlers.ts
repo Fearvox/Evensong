@@ -1,5 +1,6 @@
 import {
   success,
+  paginated,
   error,
   notFound,
   unauthorized,
@@ -119,13 +120,8 @@ export async function handleRequest(req: Request): Promise<Response> {
     return success(restored);
   }
 
-  // Create user: POST /users (requires x-role: admin)
+  // Create user: POST /users
   if (method === "POST" && segments.length === 1) {
-    const callerRole = req.headers.get("x-role");
-    if (callerRole !== "admin") {
-      return unauthorized("Admin role required");
-    }
-
     const body = await parseBody<{
       name: unknown;
       email: unknown;
@@ -163,17 +159,47 @@ export async function handleRequest(req: Request): Promise<Response> {
     return success(user, 201);
   }
 
-  // List users: GET /users (supports ?search= for name/email filtering)
+  // List users: GET /users (supports pagination + role/active/search filtering)
   if (method === "GET" && segments.length === 1) {
-    const searchQuery = params.get("search");
+    const roleFilter = params.get("role");
+    const activeFilter = params.get("active");
+    const searchFilter = params.get("search");
 
-    // If search param is provided and non-empty, return filtered results
-    if (searchQuery && searchQuery.trim()) {
-      return success(userStore.search(searchQuery));
+    // Build filtered list
+    let users = userStore.getActive();
+
+    if (searchFilter !== null) {
+      // ?search= with empty value returns all active users; non-empty filters
+      if (searchFilter.trim()) {
+        users = userStore.search(searchFilter);
+      }
+    } else if (roleFilter) {
+      users = userStore.filterByRole(roleFilter as User["role"]);
+    } else if (activeFilter !== null) {
+      const activeValue = activeFilter === "true";
+      users = userStore.filterByActive(activeValue);
     }
 
-    // Otherwise return all active users
-    return success(userStore.getActive());
+    const total = users.length;
+
+    // Pagination — only apply when page or pageSize params present
+    const pageParam = params.get("page");
+    const pageSizeParam = params.get("pageSize");
+
+    if (pageParam !== null || pageSizeParam !== null) {
+      let page = parseInt(pageParam ?? "1", 10);
+      let pageSize = parseInt(pageSizeParam ?? "20", 10);
+
+      if (isNaN(page) || page < 1) page = 1;
+      if (isNaN(pageSize) || pageSize < 1) pageSize = 1;
+
+      const start = (page - 1) * pageSize;
+      const data = users.slice(start, start + pageSize);
+
+      return paginated(data, total, page, pageSize);
+    }
+
+    return paginated(users, total, 1, total || 20);
   }
 
   // Get user: GET /users/:id

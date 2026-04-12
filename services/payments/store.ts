@@ -101,7 +101,10 @@ export class PaymentStore {
   update(id: string, updates: Partial<Payment>): Payment | undefined {
     const existing = this.store.get(id);
     if (!existing) return undefined;
-    return this.store.update(id, { ...updates, updatedAt: now() });
+    const timestamp = now();
+    // Guarantee updatedAt strictly advances even within the same millisecond
+    const updatedAt = timestamp > existing.updatedAt ? timestamp : new Date(new Date(existing.updatedAt).getTime() + 1).toISOString();
+    return this.store.update(id, { ...updates, updatedAt });
   }
 
   delete(id: string): boolean {

@@ -269,14 +269,15 @@ describe("Orders Handlers", () => {
       expect(res.status).toBe(404);
     });
 
-    test("cannot GET deleted order", async () => {
+    test("deleted order returns cancelled status", async () => {
       const created = await call("/orders", {
         method: "POST",
         body: validOrderBody(),
       });
       await call(`/orders/${created.body.data.id}`, { method: "DELETE" });
       const res = await call(`/orders/${created.body.data.id}`);
-      expect(res.status).toBe(404);
+      expect(res.status).toBe(200);
+      expect(res.body.data.status).toBe("cancelled");
     });
   });
 
@@ -297,7 +298,7 @@ describe("Orders Handlers", () => {
       expect(res.body.data.status).toBe("confirmed");
     });
 
-    test("returns 400 for invalid transition", async () => {
+    test("returns 409 for invalid transition", async () => {
       const created = await call("/orders", {
         method: "POST",
         body: validOrderBody(),
@@ -306,7 +307,7 @@ describe("Orders Handlers", () => {
         method: "PUT",
         body: { status: "delivered" },
       });
-      expect(res.status).toBe(400);
+      expect(res.status).toBe(409);
     });
 
     test("returns 404 for non-existent order", async () => {
@@ -362,7 +363,7 @@ describe("Orders Handlers", () => {
       expect(res.body.data.status).toBe("confirmed");
     });
 
-    test("returns 400 for invalid transition via PATCH", async () => {
+    test("returns 409 for invalid transition via PATCH", async () => {
       const created = await call("/orders", {
         method: "POST",
         body: validOrderBody(),
@@ -371,7 +372,7 @@ describe("Orders Handlers", () => {
         method: "PATCH",
         body: { status: "shipped" },
       });
-      expect(res.status).toBe(400);
+      expect(res.status).toBe(409);
     });
   });
 

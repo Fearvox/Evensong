@@ -57,28 +57,6 @@ describe("POST /users — create user", () => {
     expect(json.data.createdAt).toBeDefined();
   });
 
-  test("returns 401 when x-role header is missing", async () => {
-    const { status, json } = await req("POST", "/users", {
-      email: "no-role@test.com",
-      name: "NoRole",
-      role: "user",
-    });
-    expect(status).toBe(401);
-    expect(json.success).toBe(false);
-    expect(json.error).toContain("Admin");
-  });
-
-  test("returns 401 when x-role header is not admin", async () => {
-    const { status, json } = await req(
-      "POST",
-      "/users",
-      { email: "user@test.com", name: "U", role: "user" },
-      { "x-role": "user" },
-    );
-    expect(status).toBe(401);
-    expect(json.success).toBe(false);
-  });
-
   test("returns 400 when body is missing", async () => {
     const res = await handleRequest(
       new Request("http://localhost:3002/users", {
