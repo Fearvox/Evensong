@@ -1,10 +1,18 @@
 # Fdb version 4
-["xdvipdfmx"] 1775953050.27367 "evensong-research-proposal-v2-zh.xdv" "evensong-research-proposal-v2-zh.pdf" "evensong-research-proposal-v2-zh" 1775953050.90486 0
-  "evensong-research-proposal-v2-zh.xdv" 1775953050.17998 415260 8f550b591e6c1100c7eca4a3f1c4dfcb "xelatex"
+["bibtex evensong-paper-v3-en"] 1775954746.84486 "evensong-paper-v3-en.aux" "evensong-paper-v3-en.bbl" "evensong-paper-v3-en" 1775954750.98485 0
+  "./evensong-paper-v3.bib" 1775954051.41671 5851 cd53764d85a12a038f518286f999b0b1 ""
+  "/usr/local/texlive/2025/texmf-dist/bibtex/bst/base/plain.bst" 1292289607 20613 bd3fbfa9f64872b81ac57a0dd2ed855f ""
+  "evensong-paper-v3-en.aux" 1775954750.46871 11198 b5e523d21f884850fa75ae92f004ca30 "xelatex"
   (generated)
-  "evensong-research-proposal-v2-zh.pdf"
+  "evensong-paper-v3-en.bbl"
+  "evensong-paper-v3-en.blg"
   (rewritten before read)
-["xelatex"] 1775953046.07459 "evensong-research-proposal-v2-zh.tex" "evensong-research-proposal-v2-zh.xdv" "evensong-research-proposal-v2-zh" 1775953050.90294 0
+["xdvipdfmx"] 1775954750.68135 "evensong-paper-v3-en.xdv" "evensong-paper-v3-en.pdf" "evensong-paper-v3-en" 1775954750.98668 0
+  "evensong-paper-v3-en.xdv" 1775954750.47058 545576 bab04e6371a9a61a4c89d058b3b8ec90 "xelatex"
+  (generated)
+  "evensong-paper-v3-en.pdf"
+  (rewritten before read)
+["xelatex"] 1775954746.9211 "evensong-paper-v3-en.tex" "evensong-paper-v3-en.xdv" "evensong-paper-v3-en" 1775954750.98492 0
   "/usr/local/texlive/2025/texmf-dist/fonts/map/fontname/texfonts.map" 1577235249 3524 cb3e574dea2d1052e39280babc910dc8 ""
   "/usr/local/texlive/2025/texmf-dist/fonts/tfm/adobe/zapfding/pzdr.tfm" 1136768653 1528 f853c4d1b4e0550255e02831fdc8496f ""
   "/usr/local/texlive/2025/texmf-dist/fonts/tfm/public/amsfonts/cmextra/cmex7.tfm" 1246382020 1004 54797486969f23fa377b128694d548df ""
@@ -180,10 +188,8 @@
   "/usr/local/texlive/2025/texmf-dist/tex/latex/caption/caption.sty" 1696191071 56128 c2ccf1a29d78c33bc553880402e4fb9a ""
   "/usr/local/texlive/2025/texmf-dist/tex/latex/caption/caption3.sty" 1696191071 72619 ee90b6612147680fd73c3b1406a74245 ""
   "/usr/local/texlive/2025/texmf-dist/tex/latex/caption/subcaption.sty" 1690576852 12494 0c0cdb824278a4d51cefeb2e79901315 ""
-  "/usr/local/texlive/2025/texmf-dist/tex/latex/cjk/texinput/CJKfntef.sty" 1634853225 12851 25a9b5cc006609feb5c9a20ce24a5392 ""
   "/usr/local/texlive/2025/texmf-dist/tex/latex/collectbox/collectbox.sty" 1666037909 9124 59c3b56f1a073de66e3eea35f9c173c8 ""
   "/usr/local/texlive/2025/texmf-dist/tex/latex/colortbl/colortbl.sty" 1720383029 12726 67708fc852a887b2ba598148f60c3756 ""
-  "/usr/local/texlive/2025/texmf-dist/tex/latex/ctex/ctexhook.sty" 1657829894 6505 33157acfddefdd8fd513e2308e07a435 ""
   "/usr/local/texlive/2025/texmf-dist/tex/latex/enumitem/enumitem.sty" 1738874546 52272 63d293bc0d496619edb57585740861a2 ""
   "/usr/local/texlive/2025/texmf-dist/tex/latex/environ/environ.sty" 1399239813 4378 f429f0da968c278653359293040a8f52 ""
   "/usr/local/texlive/2025/texmf-dist/tex/latex/etoolbox/etoolbox.sty" 1739306980 46850 d87daedc2abdc653769a6f1067849fe0 ""
@@ -215,7 +221,6 @@
   "/usr/local/texlive/2025/texmf-dist/tex/latex/l3backend/l3backend-xetex.def" 1716410060 31593 96a7f07a08af85a2bbfee2e0a9cdbb50 ""
   "/usr/local/texlive/2025/texmf-dist/tex/latex/l3kernel/expl3.sty" 1738271527 6565 f51d809db6193fae7b06c1bc26ca8f75 ""
   "/usr/local/texlive/2025/texmf-dist/tex/latex/l3packages/xparse/xparse.sty" 1724879202 9783 ab4bee47700c04aadedb8da27591b0ab ""
-  "/usr/local/texlive/2025/texmf-dist/tex/latex/l3packages/xtemplate/xtemplate.sty" 1724879202 1308 87acdbdf1ed70c3b07e2090f15bd3635 ""
   "/usr/local/texlive/2025/texmf-dist/tex/latex/listings/listings.cfg" 1727126400 1865 301ae3c26fb8c0243307b619a6aa2dd3 ""
   "/usr/local/texlive/2025/texmf-dist/tex/latex/listings/listings.sty" 1727126400 81640 997090b6c021dc4af9ee00a97b85c5b4 ""
   "/usr/local/texlive/2025/texmf-dist/tex/latex/listings/lstmisc.sty" 1727126400 77051 be68720e5402397a830abb9eed5a2cb4 ""
@@ -275,19 +280,16 @@
   "/usr/local/texlive/2025/texmf-dist/tex/latex/xcolor/svgnam.def" 1727642399 4705 34614fec2d4cfd7794c82198c9076871 ""
   "/usr/local/texlive/2025/texmf-dist/tex/latex/xcolor/xcolor.sty" 1727642399 55384 b454dec21c2d9f45ec0b793f0995b992 ""
   "/usr/local/texlive/2025/texmf-dist/tex/latex/xkeyval/xkeyval.sty" 1655411236 4937 4ce600ce9bd4ec84d0250eb6892fcf4f ""
-  "/usr/local/texlive/2025/texmf-dist/tex/xelatex/xecjk/xeCJK-listings.sty" 1659735237 13930 23a8e09aee20f10c713bb1f2be5a2432 ""
-  "/usr/local/texlive/2025/texmf-dist/tex/xelatex/xecjk/xeCJK.cfg" 1659735237 408 7369c27beaa819c5f46de3795b22ee3e ""
-  "/usr/local/texlive/2025/texmf-dist/tex/xelatex/xecjk/xeCJK.sty" 1659735237 183137 ed372550124703b2b73cbcc0b47cb20f ""
-  "/usr/local/texlive/2025/texmf-dist/tex/xelatex/xecjk/xeCJKfntef.sty" 1659735237 39577 b470f8a1dbecc9c45c9bf05ca7db9188 ""
   "/usr/local/texlive/2025/texmf-dist/web2c/texmf.cnf" 1739380943 42148 61becc7c670cd061bb319c643c27fdd4 ""
   "/usr/local/texlive/2025/texmf-var/web2c/xetex/xelatex.fmt" 1741450550 5639796 b6822fbf027c6598cec2e241e0925725 ""
   "/usr/local/texlive/2025/texmf.cnf" 1741450484 577 418a7058ec8e006d8704f60ecd22c938 ""
-  "evensong-research-proposal-v2-zh.aux" 1775953050.17789 7612 4a061c511703bd1fa7c7f30b7d2fea81 "xelatex"
-  "evensong-research-proposal-v2-zh.tex" 1775952694.49302 52179 1d63d355bc2f8dc917dad15f9edcb6aa ""
-  "evensong-research-proposal-v2-zh.toc" 1775953050.17877 3215 5cdf718c5d307cd683afbd9181bbb486 "xelatex"
+  "evensong-paper-v3-en.aux" 1775954750.46871 11198 b5e523d21f884850fa75ae92f004ca30 "xelatex"
+  "evensong-paper-v3-en.bbl" 1775954746.91821 4000 da2c114d65964b59ec4e76b56c83719e "bibtex evensong-paper-v3-en"
+  "evensong-paper-v3-en.tex" 1775954714.55997 58201 90d108f9d2e1ec75b3ff61affdb8740f ""
+  "evensong-paper-v3-en.toc" 1775954750.46966 3860 eeb27ff4851189a4ce0b00bb10f4dfdf "xelatex"
   (generated)
-  "evensong-research-proposal-v2-zh.aux"
-  "evensong-research-proposal-v2-zh.log"
-  "evensong-research-proposal-v2-zh.toc"
-  "evensong-research-proposal-v2-zh.xdv"
+  "evensong-paper-v3-en.aux"
+  "evensong-paper-v3-en.log"
+  "evensong-paper-v3-en.toc"
+  "evensong-paper-v3-en.xdv"
   (rewritten before read)

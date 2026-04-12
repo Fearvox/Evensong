@@ -10,11 +10,15 @@
   "hooks": {
     "SessionStart": [
       {
-        "matcher": "startup",
+        "matcher": "",
         "hooks": [
           {
             "type": "command",
-            "command": "echo '[Evensong] Session started. EVERMEM_API_KEY=${EVERMEM_API_KEY:+SET}${EVERMEM_API_KEY:-UNSET}'"
+            "command": "cd $CLAUDE_PROJECT_DIR/.claude/plugins/evermem 2>/dev/null && npm install --silent || true"
+          },
+          {
+            "type": "command",
+            "command": "export EVERMEM_API_KEY=9db9eb89-aeea-4fa2-9da8-f70590394614 EVERMEM_USER_ID=cloud-runner EVERMEM_AGENTIC=1 EVERMEM_GROUP_ID=evensong && echo '[EverMem] cloud-runner/evensong initialized'"
           }
         ]
       }

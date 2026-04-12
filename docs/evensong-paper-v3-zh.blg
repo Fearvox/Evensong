@@ -1,0 +1,51 @@
+This is BibTeX, Version 0.99d (TeX Live 2025)
+Capacity: max_strings=200000, hash_size=200000, hash_prime=170003
+The top-level auxiliary file: evensong-paper-v3-zh.aux
+The style file: plain.bst
+Database file #1: evensong-paper-v3.bib
+Warning--to sort, need author or key in iclr2026rsi
+Warning--empty journal in chen2025msa
+Warning--empty journal in helliwell2025extended
+Warning--empty publisher in smart2024ethics
+You've used 22 entries,
+            2118 wiz_defined-function locations,
+            598 strings with 7082 characters,
+and the built_in function-call counts, 6216 in all, are:
+= -- 556
+> -- 383
+< -- 0
++ -- 156
+- -- 132
+* -- 382
+:= -- 1117
+add.period$ -- 68
+call.type$ -- 22
+change.case$ -- 126
+chr.to.int$ -- 0
+cite$ -- 26
+duplicate$ -- 226
+empty$ -- 463
+format.name$ -- 132
+if$ -- 1249
+int.to.chr$ -- 0
+int.to.str$ -- 22
+missing$ -- 20
+newline$ -- 114
+num.names$ -- 42
+pop$ -- 174
+preamble$ -- 1
+purify$ -- 107
+quote$ -- 0
+skip$ -- 152
+stack$ -- 0
+substring$ -- 144
+swap$ -- 22
+text.length$ -- 0
+text.prefix$ -- 0
+top$ -- 0
+type$ -- 82
+warning$ -- 4
+while$ -- 46
+width$ -- 24
+write$ -- 224
+(There were 4 warnings)
