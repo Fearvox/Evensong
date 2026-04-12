@@ -1,253 +1,239 @@
-import { describe, test, expect, beforeEach } from 'bun:test';
-import { createApp, resetStore } from '../app';
-import { post, get, put, patch, del } from '../../../shared/test-utils';
+// Notifications service — core tests
 
-const app = createApp();
+import { describe, it, expect, beforeEach } from "bun:test";
+import { handleRequest } from "../handlers";
+import { resetStores } from "../store";
 
-beforeEach(() => resetStore());
+const BASE = "http://localhost:3006/notifications";
 
-const validNotification = {
-  userId: 'user-1',
-  type: 'email' as const,
-  title: 'Welcome',
-  message: 'Welcome to our platform!',
-};
-
-async function createNotification(overrides = {}) {
-  const res = await post(app, '/notifications', { ...validNotification, ...overrides });
-  return res.data.data;
+function post(path: string, body: unknown) {
+  return handleRequest(
+    new Request(`${BASE}${path}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+    }),
+  );
 }
 
-describe('POST /notifications', () => {
-  test('creates a notification', async () => {
-    const res = await post(app, '/notifications', validNotification);
+function get(path: string) {
+  return handleRequest(new Request(`${BASE}${path}`));
+}
+
+function patch(path: string) {
+  return handleRequest(new Request(`${BASE}${path}`, { method: "PATCH" }));
+}
+
+function del(path: string) {
+  return handleRequest(new Request(`${BASE}${path}`, { method: "DELETE" }));
+}
+
+async function json(res: Response) {
+  return res.json();
+}
+
+const VALID = {
+  userId: "user-1",
+  type: "order",
+  channel: "email",
+  title: "Order Shipped",
+  body: "Your order #123 has shipped.",
+};
+
+describe("Notifications Service", () => {
+  beforeEach(() => resetStores());
+
+  // --- Health ---
+  it("GET /health returns ok", async () => {
+    const res = await get("/health");
+    const data = await json(res);
+    expect(res.status).toBe(200);
+    expect(data.data.status).toBe("ok");
+    expect(data.data.service).toBe("notifications");
+  });
+
+  // --- CRUD ---
+  it("POST / creates a notification", async () => {
+    const res = await post("", VALID);
+    const data = await json(res);
     expect(res.status).toBe(201);
-    expect(res.data.data.userId).toBe('user-1');
-    expect(res.data.data.type).toBe('email');
-    expect(res.data.data.status).toBe('pending');
-    expect(res.data.data.readAt).toBeNull();
+    expect(data.success).toBe(true);
+    expect(data.data.title).toBe("Order Shipped");
+    expect(data.data.read).toBe(false);
+    expect(data.data.sentAt).toBeUndefined();
   });
 
-  test('validates required fields', async () => {
-    const res = await post(app, '/notifications', {});
-    expect(res.status).toBe(400);
-    expect(res.data.errors.length).toBeGreaterThanOrEqual(4);
-  });
-
-  test('validates notification type', async () => {
-    const res = await post(app, '/notifications', { ...validNotification, type: 'fax' });
-    expect(res.status).toBe(400);
-  });
-
-  test('validates title min length', async () => {
-    const res = await post(app, '/notifications', { ...validNotification, title: '' });
-    expect(res.status).toBe(400);
-  });
-
-  test('validates message min length', async () => {
-    const res = await post(app, '/notifications', { ...validNotification, message: '' });
-    expect(res.status).toBe(400);
-  });
-
-  test('creates with metadata', async () => {
-    const res = await post(app, '/notifications', { ...validNotification, metadata: { priority: 'high' } });
-    expect(res.data.data.metadata.priority).toBe('high');
-  });
-
-  test('defaults metadata to empty object', async () => {
-    const res = await post(app, '/notifications', validNotification);
-    expect(res.data.data.metadata).toEqual({});
-  });
-
-  test('accepts all valid types', async () => {
-    for (const type of ['email', 'sms', 'push', 'in_app']) {
-      resetStore();
-      const res = await post(app, '/notifications', { ...validNotification, type });
-      expect(res.status).toBe(201);
-    }
-  });
-});
-
-describe('GET /notifications', () => {
-  test('lists all notifications', async () => {
-    await createNotification();
-    await createNotification({ title: 'Second' });
-    const res = await get(app, '/notifications');
+  it("GET /:id returns a notification", async () => {
+    const created = await json(await post("", VALID));
+    const res = await get(`/${created.data.id}`);
+    const data = await json(res);
     expect(res.status).toBe(200);
-    expect(res.data.data.length).toBe(2);
+    expect(data.data.id).toBe(created.data.id);
   });
 
-  test('filters by userId', async () => {
-    await createNotification({ userId: 'user-1' });
-    await createNotification({ userId: 'user-2' });
-    const res = await get(app, '/notifications?userId=user-1');
-    expect(res.data.data.length).toBe(1);
-  });
-
-  test('filters by status', async () => {
-    const n = await createNotification();
-    await put(app, `/notifications/${n.id}`, { status: 'sent' });
-    await createNotification({ title: 'Other' });
-    const res = await get(app, '/notifications?status=sent');
-    expect(res.data.data.length).toBe(1);
-  });
-
-  test('filters by type', async () => {
-    await createNotification({ type: 'email' });
-    await createNotification({ type: 'sms', title: 'SMS' });
-    const res = await get(app, '/notifications?type=sms');
-    expect(res.data.data.length).toBe(1);
-  });
-
-  test('paginates results', async () => {
-    for (let i = 0; i < 5; i++) await createNotification({ title: `N${i}` });
-    const res = await get(app, '/notifications?page=1&limit=3');
-    expect(res.data.data.length).toBe(3);
-    expect(res.data.total).toBe(5);
-  });
-
-  test('returns empty list', async () => {
-    const res = await get(app, '/notifications');
-    expect(res.data.data).toEqual([]);
-  });
-});
-
-describe('GET /notifications/:id', () => {
-  test('gets notification by id', async () => {
-    const n = await createNotification();
-    const res = await get(app, `/notifications/${n.id}`);
-    expect(res.status).toBe(200);
-    expect(res.data.data.title).toBe('Welcome');
-  });
-
-  test('returns 404 for missing notification', async () => {
-    const res = await get(app, '/notifications/nonexistent');
+  it("GET /:id returns 404 for unknown id", async () => {
+    const res = await get("/nonexistent");
     expect(res.status).toBe(404);
   });
-});
 
-describe('PUT /notifications/:id', () => {
-  test('updates status', async () => {
-    const n = await createNotification();
-    const res = await put(app, `/notifications/${n.id}`, { status: 'sent' });
+  it("GET / lists notifications with pagination", async () => {
+    await post("", VALID);
+    await post("", { ...VALID, title: "Second" });
+    const res = await get("?page=1&pageSize=1");
+    const data = await json(res);
+    expect(data.data.length).toBe(1);
+    expect(data.total).toBe(2);
+    expect(data.page).toBe(1);
+    expect(data.pageSize).toBe(1);
+  });
+
+  it("DELETE /:id removes a notification", async () => {
+    const created = await json(await post("", VALID));
+    const res = await del(`/${created.data.id}`);
     expect(res.status).toBe(200);
-    expect(res.data.data.status).toBe('sent');
-  });
-
-  test('updates title', async () => {
-    const n = await createNotification();
-    const res = await put(app, `/notifications/${n.id}`, { title: 'Updated Title' });
-    expect(res.data.data.title).toBe('Updated Title');
-  });
-
-  test('validates invalid status', async () => {
-    const n = await createNotification();
-    const res = await put(app, `/notifications/${n.id}`, { status: 'invalid' });
-    expect(res.status).toBe(400);
-  });
-
-  test('validates empty title', async () => {
-    const n = await createNotification();
-    const res = await put(app, `/notifications/${n.id}`, { title: '' });
-    expect(res.status).toBe(400);
-  });
-
-  test('validates empty message', async () => {
-    const n = await createNotification();
-    const res = await put(app, `/notifications/${n.id}`, { message: '' });
-    expect(res.status).toBe(400);
-  });
-
-  test('returns 404 for missing notification', async () => {
-    const res = await put(app, '/notifications/nonexistent', { status: 'sent' });
-    expect(res.status).toBe(404);
-  });
-});
-
-describe('DELETE /notifications/:id', () => {
-  test('deletes a notification', async () => {
-    const n = await createNotification();
-    const res = await del(app, `/notifications/${n.id}`);
-    expect(res.status).toBe(200);
-    const check = await get(app, `/notifications/${n.id}`);
+    const check = await get(`/${created.data.id}`);
     expect(check.status).toBe(404);
   });
 
-  test('returns 404 for missing notification', async () => {
-    const res = await del(app, '/notifications/nonexistent');
-    expect(res.status).toBe(404);
-  });
-});
-
-describe('POST /notifications/broadcast', () => {
-  test('broadcasts to multiple users', async () => {
-    const res = await post(app, '/notifications/broadcast', {
-      userIds: ['user-1', 'user-2', 'user-3'],
-      type: 'push',
-      title: 'System Update',
-      message: 'New features available!',
-    });
-    expect(res.status).toBe(201);
-    expect(res.data.data.length).toBe(3);
-    expect(res.data.total).toBe(3);
+  // --- Read / Unread ---
+  it("PATCH /:id/read marks as read", async () => {
+    const created = await json(await post("", VALID));
+    const res = await patch(`/${created.data.id}/read`);
+    const data = await json(res);
+    expect(data.data.read).toBe(true);
   });
 
-  test('validates required fields', async () => {
-    const res = await post(app, '/notifications/broadcast', {});
-    expect(res.status).toBe(400);
+  it("PATCH /:id/unread marks as unread", async () => {
+    const created = await json(await post("", VALID));
+    await patch(`/${created.data.id}/read`);
+    const res = await patch(`/${created.data.id}/unread`);
+    const data = await json(res);
+    expect(data.data.read).toBe(false);
   });
 
-  test('validates userIds is non-empty array', async () => {
-    const res = await post(app, '/notifications/broadcast', {
-      userIds: [],
-      type: 'email',
-      title: 'Test',
-      message: 'Test message',
-    });
-    expect(res.status).toBe(400);
+  it("PATCH /:id/read on already-read is idempotent", async () => {
+    const created = await json(await post("", VALID));
+    await patch(`/${created.data.id}/read`);
+    const res = await patch(`/${created.data.id}/read`);
+    const data = await json(res);
+    expect(data.data.read).toBe(true);
   });
 
-  test('validates notification type', async () => {
-    const res = await post(app, '/notifications/broadcast', {
-      userIds: ['user-1'],
-      type: 'telegram',
-      title: 'Test',
-      message: 'Test message',
-    });
-    expect(res.status).toBe(400);
-  });
-
-  test('skips non-string userIds', async () => {
-    const res = await post(app, '/notifications/broadcast', {
-      userIds: ['user-1', 123, 'user-2'],
-      type: 'email',
-      title: 'Test',
-      message: 'Test message',
-    });
-    expect(res.data.data.length).toBe(2);
-  });
-});
-
-describe('PATCH /notifications/:id/read', () => {
-  test('marks notification as read', async () => {
-    const n = await createNotification();
-    const res = await patch(app, `/notifications/${n.id}/read`);
+  // --- Send ---
+  it("POST /:id/send sets sentAt", async () => {
+    const created = await json(await post("", VALID));
+    const res = await post(`/${created.data.id}/send`, {});
+    const data = await json(res);
     expect(res.status).toBe(200);
-    expect(res.data.data.status).toBe('read');
-    expect(res.data.data.readAt).toBeDefined();
-    expect(res.data.data.readAt).not.toBeNull();
+    expect(data.data.sentAt).toBeDefined();
   });
 
-  test('idempotent - marking already-read notification', async () => {
-    const n = await createNotification();
-    await patch(app, `/notifications/${n.id}/read`);
-    const res = await patch(app, `/notifications/${n.id}/read`);
-    expect(res.status).toBe(200);
-    expect(res.data.data.status).toBe('read');
+  it("POST /:id/send fails if already sent", async () => {
+    const created = await json(await post("", VALID));
+    await post(`/${created.data.id}/send`, {});
+    const res = await post(`/${created.data.id}/send`, {});
+    expect(res.status).toBe(400);
   });
 
-  test('returns 404 for missing notification', async () => {
-    const res = await patch(app, '/notifications/nonexistent/read');
-    expect(res.status).toBe(404);
+  // --- User notifications ---
+  it("GET /user/:userId returns user notifications", async () => {
+    await post("", VALID);
+    await post("", { ...VALID, userId: "user-2" });
+    const res = await get("/user/user-1");
+    const data = await json(res);
+    expect(data.data.length).toBe(1);
+    expect(data.data[0].userId).toBe("user-1");
+  });
+
+  it("GET /user/:userId/unread returns count", async () => {
+    await post("", VALID);
+    await post("", VALID);
+    const created = await json(await post("", VALID));
+    await patch(`/${created.data.id}/read`);
+    const res = await get("/user/user-1/unread");
+    const data = await json(res);
+    expect(data.data.unread).toBe(2);
+  });
+
+  // --- Bulk mark as read ---
+  it("POST /bulk/read marks multiple as read", async () => {
+    const n1 = await json(await post("", VALID));
+    const n2 = await json(await post("", VALID));
+    const res = await post("/bulk/read", { ids: [n1.data.id, n2.data.id] });
+    const data = await json(res);
+    expect(data.data.updated).toBe(2);
+    const check1 = await json(await get(`/${n1.data.id}`));
+    expect(check1.data.read).toBe(true);
+  });
+
+  // --- Filtering ---
+  it("GET /?type=order filters by type", async () => {
+    await post("", VALID);
+    await post("", { ...VALID, type: "system" });
+    const res = await get("?type=order");
+    const data = await json(res);
+    expect(data.data.length).toBe(1);
+    expect(data.data[0].type).toBe("order");
+  });
+
+  it("GET /?channel=sms filters by channel", async () => {
+    await post("", VALID);
+    await post("", { ...VALID, channel: "sms" });
+    const res = await get("?channel=sms");
+    const data = await json(res);
+    expect(data.data.length).toBe(1);
+  });
+
+  it("GET /?read=false filters unread", async () => {
+    const created = await json(await post("", VALID));
+    await post("", VALID);
+    await patch(`/${created.data.id}/read`);
+    const res = await get("?read=false");
+    const data = await json(res);
+    expect(data.data.length).toBe(1);
+  });
+
+  it("GET /?userId=user-1 filters by userId", async () => {
+    await post("", VALID);
+    await post("", { ...VALID, userId: "user-2" });
+    const res = await get("?userId=user-1");
+    const data = await json(res);
+    expect(data.data.length).toBe(1);
+  });
+
+  // --- Stats ---
+  it("GET /stats returns statistics", async () => {
+    await post("", VALID);
+    await post("", { ...VALID, type: "system", channel: "push" });
+    const created = await json(await post("", VALID));
+    await post(`/${created.data.id}/send`, {});
+    const res = await get("/stats");
+    const data = await json(res);
+    expect(data.data.total).toBe(3);
+    expect(data.data.sent).toBe(1);
+    expect(data.data.unsent).toBe(2);
+    expect(data.data.byType.order).toBe(2);
+    expect(data.data.byType.system).toBe(1);
+  });
+
+  // --- Validation ---
+  it("POST / fails with missing userId", async () => {
+    const res = await post("", { ...VALID, userId: "" });
+    expect(res.status).toBe(400);
+  });
+
+  it("POST / fails with invalid type", async () => {
+    const res = await post("", { ...VALID, type: "invalid" });
+    expect(res.status).toBe(400);
+  });
+
+  it("POST / fails with invalid channel", async () => {
+    const res = await post("", { ...VALID, channel: "fax" });
+    expect(res.status).toBe(400);
+  });
+
+  it("POST / fails with empty title", async () => {
+    const res = await post("", { ...VALID, title: "" });
+    expect(res.status).toBe(400);
   });
 });

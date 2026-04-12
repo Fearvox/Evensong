@@ -1,230 +1,227 @@
-import { describe, test, expect, beforeEach } from 'bun:test';
-import { createApp, resetStore, getStore } from '../app';
-import { post, get, put, patch, del } from '../../../shared/test-utils';
+import { describe, it, expect, beforeEach } from "bun:test";
+import { handleRequest } from "../handlers";
+import { userStore } from "../store";
 
-const app = createApp();
+const BASE = "http://localhost:3002";
 
-beforeEach(() => resetStore());
-
-const validUser = {
-  email: 'john@example.com',
-  username: 'johndoe',
-  displayName: 'John Doe',
-};
-
-async function createUser(overrides = {}) {
-  const res = await post(app, '/users', { ...validUser, ...overrides });
-  return res.data.data;
+function req(method: string, path: string, body?: unknown): Request {
+  const opts: RequestInit = { method, headers: { "Content-Type": "application/json" } };
+  if (body !== undefined) opts.body = JSON.stringify(body);
+  return new Request(`${BASE}${path}`, opts);
 }
 
-describe('POST /users', () => {
-  test('creates a user', async () => {
-    const res = await post(app, '/users', validUser);
+async function json(r: Response) {
+  return r.json();
+}
+
+async function createUser(name = "Alice", email = "alice@test.com", role = "user") {
+  const res = await handleRequest(req("POST", "/users", { name, email, role }));
+  return { res, data: await json(res) };
+}
+
+describe("Users Service — CRUD", () => {
+  beforeEach(() => userStore.clear());
+
+  it("POST /users — creates a user", async () => {
+    const { res, data } = await createUser();
     expect(res.status).toBe(201);
-    expect(res.data.success).toBe(true);
-    expect(res.data.data.email).toBe('john@example.com');
-    expect(res.data.data.username).toBe('johndoe');
-    expect(res.data.data.id).toBeDefined();
-    expect(res.data.data.passwordHash).toBeUndefined();
+    expect(data.success).toBe(true);
+    expect(data.data.name).toBe("Alice");
+    expect(data.data.email).toBe("alice@test.com");
+    expect(data.data.role).toBe("user");
+    expect(data.data.active).toBe(true);
+    expect(data.data.id).toBeDefined();
   });
 
-  test('rejects duplicate email', async () => {
-    await post(app, '/users', validUser);
-    const res = await post(app, '/users', { ...validUser, username: 'other' });
+  it("GET /users/:id — retrieves a user", async () => {
+    const { data: created } = await createUser();
+    const res = await handleRequest(req("GET", `/users/${created.data.id}`));
+    const data = await json(res);
+    expect(res.status).toBe(200);
+    expect(data.data.email).toBe("alice@test.com");
+  });
+
+  it("GET /users/:id — 404 for non-existent", async () => {
+    const res = await handleRequest(req("GET", "/users/no-such-id"));
+    expect(res.status).toBe(404);
+  });
+
+  it("PUT /users/:id — updates a user", async () => {
+    const { data: created } = await createUser();
+    const res = await handleRequest(req("PUT", `/users/${created.data.id}`, { name: "Bob" }));
+    const data = await json(res);
+    expect(res.status).toBe(200);
+    expect(data.data.name).toBe("Bob");
+    expect(data.data.email).toBe("alice@test.com");
+  });
+
+  it("PUT /users/:id — updates email with duplicate check", async () => {
+    await createUser("Alice", "alice@test.com");
+    const { data: bob } = await createUser("Bob", "bob@test.com");
+    const res = await handleRequest(req("PUT", `/users/${bob.data.id}`, { email: "alice@test.com" }));
     expect(res.status).toBe(409);
   });
 
-  test('rejects duplicate username', async () => {
-    await post(app, '/users', validUser);
-    const res = await post(app, '/users', { ...validUser, email: 'other@example.com' });
-    expect(res.status).toBe(409);
+  it("PUT /users/:id — 404 for non-existent", async () => {
+    const res = await handleRequest(req("PUT", "/users/no-such-id", { name: "X" }));
+    expect(res.status).toBe(404);
   });
 
-  test('validates required fields', async () => {
-    const res = await post(app, '/users', {});
-    expect(res.status).toBe(400);
-    expect(res.data.errors.length).toBeGreaterThanOrEqual(3);
+  it("DELETE /users/:id — soft deletes", async () => {
+    const { data: created } = await createUser();
+    const res = await handleRequest(req("DELETE", `/users/${created.data.id}`));
+    const data = await json(res);
+    expect(res.status).toBe(200);
+    expect(data.data.deletedAt).toBeDefined();
+    expect(data.data.active).toBe(false);
   });
 
-  test('validates email format', async () => {
-    const res = await post(app, '/users', { ...validUser, email: 'invalid' });
-    expect(res.status).toBe(400);
+  it("DELETE /users/:id — 404 for non-existent", async () => {
+    const res = await handleRequest(req("DELETE", "/users/no-such-id"));
+    expect(res.status).toBe(404);
   });
 
-  test('validates username length', async () => {
-    const res = await post(app, '/users', { ...validUser, username: 'ab' });
-    expect(res.status).toBe(400);
-  });
-
-  test('creates user with empty preferences by default', async () => {
-    const res = await post(app, '/users', validUser);
-    expect(res.data.data.preferences).toEqual({});
-  });
-
-  test('creates user with provided preferences', async () => {
-    const res = await post(app, '/users', { ...validUser, preferences: { theme: 'dark' } });
-    expect(res.data.data.preferences).toEqual({ theme: 'dark' });
+  it("POST /users/:id/restore — restores deleted user", async () => {
+    const { data: created } = await createUser();
+    await handleRequest(req("DELETE", `/users/${created.data.id}`));
+    const res = await handleRequest(req("POST", `/users/${created.data.id}/restore`));
+    const data = await json(res);
+    expect(res.status).toBe(200);
+    expect(data.data.active).toBe(true);
+    expect(data.data.deletedAt).toBeUndefined();
   });
 });
 
-describe('GET /users', () => {
-  test('lists all users', async () => {
+describe("Users Service — List & Pagination", () => {
+  beforeEach(() => userStore.clear());
+
+  it("GET /users — lists users with pagination", async () => {
+    for (let i = 0; i < 5; i++) await createUser(`User${i}`, `u${i}@test.com`);
+    const res = await handleRequest(req("GET", "/users?page=1&pageSize=2"));
+    const data = await json(res);
+    expect(res.status).toBe(200);
+    expect(data.data.length).toBe(2);
+    expect(data.total).toBe(5);
+    expect(data.page).toBe(1);
+    expect(data.pageSize).toBe(2);
+  });
+
+  it("GET /users?role=admin — filters by role", async () => {
+    await createUser("Admin", "admin@test.com", "admin");
+    await createUser("User", "user@test.com", "user");
+    const res = await handleRequest(req("GET", "/users?role=admin"));
+    const data = await json(res);
+    expect(data.data.length).toBe(1);
+    expect(data.data[0].role).toBe("admin");
+  });
+
+  it("GET /users?active=false — filters by active status", async () => {
+    const { data: created } = await createUser();
+    await handleRequest(req("PUT", `/users/${created.data.id}`, { active: false }));
+    const res = await handleRequest(req("GET", "/users?active=false"));
+    const data = await json(res);
+    expect(data.data.length).toBe(1);
+    expect(data.data[0].active).toBe(false);
+  });
+
+  it("GET /users — excludes soft-deleted users", async () => {
+    const { data: created } = await createUser();
+    await createUser("Bob", "bob@test.com");
+    await handleRequest(req("DELETE", `/users/${created.data.id}`));
+    const res = await handleRequest(req("GET", "/users"));
+    const data = await json(res);
+    expect(data.total).toBe(1);
+  });
+});
+
+describe("Users Service — Search", () => {
+  beforeEach(() => userStore.clear());
+
+  it("GET /users/search?q=ali — searches by name", async () => {
+    await createUser("Alice", "alice@test.com");
+    await createUser("Bob", "bob@test.com");
+    const res = await handleRequest(req("GET", "/users/search?q=ali"));
+    const data = await json(res);
+    expect(data.data.length).toBe(1);
+    expect(data.data[0].name).toBe("Alice");
+  });
+
+  it("GET /users/search?q=bob@test — searches by email", async () => {
+    await createUser("Alice", "alice@test.com");
+    await createUser("Bob", "bob@test.com");
+    const res = await handleRequest(req("GET", "/users/search?q=bob@test"));
+    const data = await json(res);
+    expect(data.data.length).toBe(1);
+  });
+
+  it("GET /users/search?q= — returns empty for blank query", async () => {
     await createUser();
-    await createUser({ email: 'jane@example.com', username: 'janedoe' });
-    const res = await get(app, '/users');
-    expect(res.status).toBe(200);
-    expect(res.data.data.length).toBe(2);
-    expect(res.data.total).toBe(2);
-  });
-
-  test('returns empty list when no users', async () => {
-    const res = await get(app, '/users');
-    expect(res.status).toBe(200);
-    expect(res.data.data).toEqual([]);
-    expect(res.data.total).toBe(0);
-  });
-
-  test('paginates results', async () => {
-    for (let i = 0; i < 5; i++) {
-      await createUser({ email: `user${i}@example.com`, username: `user${i}` });
-    }
-    const res = await get(app, '/users?page=2&limit=2');
-    expect(res.status).toBe(200);
-    expect(res.data.data.length).toBe(2);
-    expect(res.data.total).toBe(5);
-    expect(res.data.page).toBe(2);
-  });
-
-  test('does not expose passwordHash', async () => {
-    await createUser();
-    const res = await get(app, '/users');
-    expect(res.data.data[0].passwordHash).toBeUndefined();
+    const res = await handleRequest(req("GET", "/users/search?q="));
+    const data = await json(res);
+    expect(data.data.length).toBe(0);
   });
 });
 
-describe('GET /users/:id', () => {
-  test('gets a user by id', async () => {
-    const user = await createUser();
-    const res = await get(app, `/users/${user.id}`);
+describe("Users Service — Activity", () => {
+  beforeEach(() => userStore.clear());
+
+  it("POST /users/:id/activity — logs activity", async () => {
+    const { data: created } = await createUser();
+    const res = await handleRequest(req("POST", `/users/${created.data.id}/activity`, { action: "login" }));
+    const data = await json(res);
     expect(res.status).toBe(200);
-    expect(res.data.data.email).toBe('john@example.com');
+    expect(data.data.logged).toBe(true);
   });
 
-  test('returns 404 for missing user', async () => {
-    const res = await get(app, '/users/nonexistent');
-    expect(res.status).toBe(404);
+  it("GET /users/:id/activity — retrieves activity log", async () => {
+    const { data: created } = await createUser();
+    await handleRequest(req("POST", `/users/${created.data.id}/activity`, { action: "login" }));
+    await handleRequest(req("POST", `/users/${created.data.id}/activity`, { action: "purchase" }));
+    const res = await handleRequest(req("GET", `/users/${created.data.id}/activity`));
+    const data = await json(res);
+    expect(data.data.length).toBe(2);
+    expect(data.data[0].action).toBe("login");
+    expect(data.data[1].action).toBe("purchase");
   });
 });
 
-describe('PUT /users/:id', () => {
-  test('updates user fields', async () => {
-    const user = await createUser();
-    const res = await put(app, `/users/${user.id}`, { displayName: 'Updated Name' });
+describe("Users Service — Bulk & Stats", () => {
+  beforeEach(() => userStore.clear());
+
+  it("POST /users/bulk/activate — activates multiple users", async () => {
+    const { data: u1 } = await createUser("A", "a@test.com");
+    const { data: u2 } = await createUser("B", "b@test.com");
+    await handleRequest(req("PUT", `/users/${u1.data.id}`, { active: false }));
+    await handleRequest(req("PUT", `/users/${u2.data.id}`, { active: false }));
+    const res = await handleRequest(req("POST", "/users/bulk/activate", { ids: [u1.data.id, u2.data.id] }));
+    const data = await json(res);
+    expect(data.data.activated).toBe(2);
+  });
+
+  it("POST /users/bulk/deactivate — deactivates multiple users", async () => {
+    const { data: u1 } = await createUser("A", "a@test.com");
+    const { data: u2 } = await createUser("B", "b@test.com");
+    const res = await handleRequest(req("POST", "/users/bulk/deactivate", { ids: [u1.data.id, u2.data.id] }));
+    const data = await json(res);
+    expect(data.data.deactivated).toBe(2);
+  });
+
+  it("GET /users/stats — returns user statistics", async () => {
+    await createUser("Admin", "admin@test.com", "admin");
+    await createUser("User1", "u1@test.com", "user");
+    await createUser("User2", "u2@test.com", "user");
+    const res = await handleRequest(req("GET", "/users/stats"));
+    const data = await json(res);
+    expect(data.data.total).toBe(3);
+    expect(data.data.active).toBe(3);
+    expect(data.data.byRole.admin).toBe(1);
+    expect(data.data.byRole.user).toBe(2);
+  });
+
+  it("GET /users/health — returns health status", async () => {
+    const res = await handleRequest(req("GET", "/users/health"));
+    const data = await json(res);
     expect(res.status).toBe(200);
-    expect(res.data.data.displayName).toBe('Updated Name');
-  });
-
-  test('updates email', async () => {
-    const user = await createUser();
-    const res = await put(app, `/users/${user.id}`, { email: 'newemail@example.com' });
-    expect(res.status).toBe(200);
-    expect(res.data.data.email).toBe('newemail@example.com');
-  });
-
-  test('rejects duplicate email on update', async () => {
-    const user1 = await createUser();
-    await createUser({ email: 'taken@example.com', username: 'taken' });
-    const res = await put(app, `/users/${user1.id}`, { email: 'taken@example.com' });
-    expect(res.status).toBe(409);
-  });
-
-  test('rejects duplicate username on update', async () => {
-    const user1 = await createUser();
-    await createUser({ email: 'taken@example.com', username: 'taken' });
-    const res = await put(app, `/users/${user1.id}`, { username: 'taken' });
-    expect(res.status).toBe(409);
-  });
-
-  test('returns 404 for missing user', async () => {
-    const res = await put(app, '/users/nonexistent', { displayName: 'Test' });
-    expect(res.status).toBe(404);
-  });
-
-  test('validates email format on update', async () => {
-    const user = await createUser();
-    const res = await put(app, `/users/${user.id}`, { email: 'bad-email' });
-    expect(res.status).toBe(400);
-  });
-});
-
-describe('DELETE /users/:id', () => {
-  test('deletes a user', async () => {
-    const user = await createUser();
-    const res = await del(app, `/users/${user.id}`);
-    expect(res.status).toBe(200);
-    const check = await get(app, `/users/${user.id}`);
-    expect(check.status).toBe(404);
-  });
-
-  test('returns 404 for missing user', async () => {
-    const res = await del(app, '/users/nonexistent');
-    expect(res.status).toBe(404);
-  });
-});
-
-describe('GET /users/:id/profile', () => {
-  test('gets user profile with account age', async () => {
-    const user = await createUser();
-    const res = await get(app, `/users/${user.id}/profile`);
-    expect(res.status).toBe(200);
-    expect(res.data.data.accountAge).toBeDefined();
-    expect(typeof res.data.data.accountAge).toBe('number');
-    expect(res.data.data.hasPreferences).toBe(false);
-  });
-
-  test('hasPreferences is true when preferences exist', async () => {
-    const user = await createUser({ preferences: { theme: 'dark' } });
-    const res = await get(app, `/users/${user.id}/profile`);
-    expect(res.data.data.hasPreferences).toBe(true);
-  });
-
-  test('returns 404 for missing user', async () => {
-    const res = await get(app, '/users/nonexistent/profile');
-    expect(res.status).toBe(404);
-  });
-});
-
-describe('PATCH /users/:id/preferences', () => {
-  test('updates user preferences', async () => {
-    const user = await createUser();
-    const res = await patch(app, `/users/${user.id}/preferences`, { theme: 'dark', lang: 'en' });
-    expect(res.status).toBe(200);
-    expect(res.data.data.preferences.theme).toBe('dark');
-    expect(res.data.data.preferences.lang).toBe('en');
-  });
-
-  test('merges with existing preferences', async () => {
-    const user = await createUser({ preferences: { theme: 'light' } });
-    const res = await patch(app, `/users/${user.id}/preferences`, { lang: 'fr' });
-    expect(res.data.data.preferences.theme).toBe('light');
-    expect(res.data.data.preferences.lang).toBe('fr');
-  });
-
-  test('returns 404 for missing user', async () => {
-    const res = await patch(app, '/users/nonexistent/preferences', { theme: 'dark' });
-    expect(res.status).toBe(404);
-  });
-
-  test('rejects non-object body', async () => {
-    const user = await createUser();
-    const res = await patch(app, `/users/${user.id}/preferences`, [1, 2, 3]);
-    expect(res.status).toBe(400);
-  });
-});
-
-describe('routing', () => {
-  test('returns 404 for unknown routes', async () => {
-    const res = await get(app, '/unknown');
-    expect(res.status).toBe(404);
+    expect(data.data.status).toBe("ok");
   });
 });

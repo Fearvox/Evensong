@@ -1,4 +1,16 @@
-import { createApp } from './app';
-const app = createApp();
-Bun.serve({ port: 3007, fetch: app });
-console.log('Analytics service running on :3007');
+import { handleRequest } from "./handlers";
+import { serverError } from "../shared/http";
+
+const server = Bun.serve({
+  port: 3007,
+  async fetch(req) {
+    try {
+      return await handleRequest(req);
+    } catch {
+      return serverError();
+    }
+  },
+});
+
+console.log(`Analytics service on :${server.port}`);
+export { server };

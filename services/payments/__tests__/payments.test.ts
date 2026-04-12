@@ -1,242 +1,241 @@
-import { describe, test, expect, beforeEach } from 'bun:test';
-import { createApp, resetStore } from '../app';
-import { post, get, put, del } from '../../../shared/test-utils';
+import { describe, test, expect, beforeEach } from "bun:test";
+import { handleRequest } from "../handlers";
+import { paymentStore } from "../store";
 
-const app = createApp();
-
-beforeEach(() => resetStore());
-
-const validPayment = {
-  orderId: 'order-1',
-  userId: 'user-1',
-  amount: 49.99,
-  currency: 'usd',
-  method: 'credit_card' as const,
-};
-
-async function createPayment(overrides = {}) {
-  const res = await post(app, '/payments', { ...validPayment, ...overrides });
-  return res.data.data;
+async function req(method: string, path: string, body?: unknown) {
+  const init: RequestInit = { method, headers: { "Content-Type": "application/json" } };
+  if (body !== undefined) init.body = JSON.stringify(body);
+  const res = await handleRequest(new Request(`http://localhost:3005${path}`, init));
+  return { status: res.status, json: (await res.json()) as any };
 }
 
-describe('POST /payments', () => {
-  test('creates a payment', async () => {
-    const res = await post(app, '/payments', validPayment);
-    expect(res.status).toBe(201);
-    expect(res.data.data.orderId).toBe('order-1');
-    expect(res.data.data.amount).toBe(49.99);
-    expect(res.data.data.currency).toBe('USD');
-    expect(res.data.data.status).toBe('pending');
-    expect(res.data.data.transactionRef).toMatch(/^txn_/);
-  });
+const valid = {
+  orderId: "order_001",
+  userId: "user_001",
+  amount: 99.99,
+  currency: "USD",
+  method: "credit_card",
+};
 
-  test('validates required fields', async () => {
-    const res = await post(app, '/payments', {});
-    expect(res.status).toBe(400);
-    expect(res.data.errors.length).toBeGreaterThanOrEqual(5);
-  });
+beforeEach(() => paymentStore.clear());
 
-  test('validates amount is positive', async () => {
-    const res = await post(app, '/payments', { ...validPayment, amount: 0 });
-    expect(res.status).toBe(400);
-  });
+// --- Health ---
 
-  test('validates payment method', async () => {
-    const res = await post(app, '/payments', { ...validPayment, method: 'bitcoin' });
-    expect(res.status).toBe(400);
-  });
-
-  test('validates currency length', async () => {
-    const res = await post(app, '/payments', { ...validPayment, currency: 'us' });
-    expect(res.status).toBe(400);
-  });
-
-  test('rejects duplicate active payment for same order', async () => {
-    await createPayment();
-    const res = await post(app, '/payments', { ...validPayment, orderId: 'order-1' });
-    expect(res.status).toBe(409);
-  });
-
-  test('allows new payment after previous one failed', async () => {
-    const payment = await createPayment();
-    await put(app, `/payments/${payment.id}`, { status: 'failed' });
-    const res = await post(app, '/payments', validPayment);
-    expect(res.status).toBe(201);
-  });
-
-  test('rounds amount to 2 decimal places', async () => {
-    const res = await post(app, '/payments', { ...validPayment, amount: 10.999, orderId: 'order-round' });
-    expect(res.data.data.amount).toBe(11);
+describe("GET /payments/health", () => {
+  test("returns ok", async () => {
+    const r = await req("GET", "/payments/health");
+    expect(r.status).toBe(200);
+    expect(r.json.data.status).toBe("ok");
+    expect(r.json.data.service).toBe("payments");
   });
 });
 
-describe('GET /payments', () => {
-  test('lists all payments', async () => {
-    await createPayment({ orderId: 'o1' });
-    await createPayment({ orderId: 'o2' });
-    const res = await get(app, '/payments');
-    expect(res.status).toBe(200);
-    expect(res.data.data.length).toBe(2);
+// --- Create ---
+
+describe("POST /payments", () => {
+  test("creates payment with valid data", async () => {
+    const r = await req("POST", "/payments", valid);
+    expect(r.status).toBe(201);
+    expect(r.json.success).toBe(true);
+    expect(r.json.data.orderId).toBe("order_001");
+    expect(r.json.data.userId).toBe("user_001");
+    expect(r.json.data.amount).toBe(99.99);
+    expect(r.json.data.currency).toBe("USD");
+    expect(r.json.data.method).toBe("credit_card");
+    expect(r.json.data.status).toBe("pending");
+    expect(r.json.data.id).toBeTruthy();
   });
 
-  test('filters by status', async () => {
-    const payment = await createPayment({ orderId: 'o1' });
-    await put(app, `/payments/${payment.id}`, { status: 'completed' });
-    await createPayment({ orderId: 'o2' });
-    const res = await get(app, '/payments?status=completed');
-    expect(res.data.data.length).toBe(1);
+  test("normalizes currency to uppercase", async () => {
+    const r = await req("POST", "/payments", { ...valid, currency: "eur" });
+    expect(r.status).toBe(201);
+    expect(r.json.data.currency).toBe("EUR");
   });
 
-  test('paginates results', async () => {
+  test("rejects missing orderId", async () => {
+    const r = await req("POST", "/payments", { ...valid, orderId: "" });
+    expect(r.status).toBe(400);
+    expect(r.json.error).toContain("orderId");
+  });
+
+  test("rejects negative amount", async () => {
+    const r = await req("POST", "/payments", { ...valid, amount: -10 });
+    expect(r.status).toBe(400);
+    expect(r.json.error).toContain("amount");
+  });
+
+  test("rejects zero amount", async () => {
+    const r = await req("POST", "/payments", { ...valid, amount: 0 });
+    expect(r.status).toBe(400);
+  });
+
+  test("rejects invalid method", async () => {
+    const r = await req("POST", "/payments", { ...valid, method: "paypal" });
+    expect(r.status).toBe(400);
+    expect(r.json.error).toContain("method");
+  });
+
+  test("rejects missing currency", async () => {
+    const r = await req("POST", "/payments", { ...valid, currency: "" });
+    expect(r.status).toBe(400);
+    expect(r.json.error).toContain("currency");
+  });
+
+  test("rejects empty body", async () => {
+    const res = await handleRequest(
+      new Request("http://localhost:3005/payments", { method: "POST" }),
+    );
+    expect(res.status).toBe(400);
+  });
+
+  test("rejects malformed JSON", async () => {
+    const res = await handleRequest(
+      new Request("http://localhost:3005/payments", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: "{bad json",
+      }),
+    );
+    expect(res.status).toBe(400);
+  });
+});
+
+// --- Read ---
+
+describe("GET /payments/:id", () => {
+  test("returns payment by ID", async () => {
+    const c = await req("POST", "/payments", valid);
+    const r = await req("GET", `/payments/${c.json.data.id}`);
+    expect(r.status).toBe(200);
+    expect(r.json.data.id).toBe(c.json.data.id);
+    expect(r.json.data.amount).toBe(99.99);
+  });
+
+  test("returns 404 for unknown ID", async () => {
+    const r = await req("GET", "/payments/nonexistent");
+    expect(r.status).toBe(404);
+  });
+});
+
+// --- List ---
+
+describe("GET /payments", () => {
+  test("lists all with pagination", async () => {
+    await req("POST", "/payments", valid);
+    await req("POST", "/payments", { ...valid, orderId: "order_002", amount: 50 });
+    const r = await req("GET", "/payments");
+    expect(r.status).toBe(200);
+    expect(r.json.data.length).toBe(2);
+    expect(r.json.total).toBe(2);
+    expect(r.json.page).toBe(1);
+  });
+
+  test("filters by orderId", async () => {
+    await req("POST", "/payments", valid);
+    await req("POST", "/payments", { ...valid, orderId: "order_002" });
+    const r = await req("GET", "/payments?orderId=order_002");
+    expect(r.json.data.length).toBe(1);
+    expect(r.json.data[0].orderId).toBe("order_002");
+  });
+
+  test("filters by userId", async () => {
+    await req("POST", "/payments", valid);
+    await req("POST", "/payments", { ...valid, userId: "user_002" });
+    const r = await req("GET", "/payments?userId=user_002");
+    expect(r.json.data.length).toBe(1);
+  });
+
+  test("filters by status", async () => {
+    const c = await req("POST", "/payments", valid);
+    await req("POST", `/payments/${c.json.data.id}/process`);
+    await req("POST", "/payments", { ...valid, orderId: "order_002" });
+    const r = await req("GET", "/payments?status=completed");
+    expect(r.json.data.length).toBe(1);
+    expect(r.json.data[0].status).toBe("completed");
+  });
+
+  test("filters by method", async () => {
+    await req("POST", "/payments", valid);
+    await req("POST", "/payments", { ...valid, method: "wallet" });
+    const r = await req("GET", "/payments?method=wallet");
+    expect(r.json.data.length).toBe(1);
+    expect(r.json.data[0].method).toBe("wallet");
+  });
+
+  test("paginates correctly", async () => {
     for (let i = 0; i < 5; i++) {
-      await createPayment({ orderId: `order-${i}` });
+      await req("POST", "/payments", { ...valid, orderId: `order_${i}` });
     }
-    const res = await get(app, '/payments?page=2&limit=2');
-    expect(res.data.data.length).toBe(2);
-    expect(res.data.total).toBe(5);
-  });
-
-  test('returns empty list', async () => {
-    const res = await get(app, '/payments');
-    expect(res.data.data).toEqual([]);
+    const r = await req("GET", "/payments?page=2&pageSize=2");
+    expect(r.json.data.length).toBe(2);
+    expect(r.json.page).toBe(2);
+    expect(r.json.total).toBe(5);
   });
 });
 
-describe('GET /payments/:id', () => {
-  test('gets payment by id', async () => {
-    const payment = await createPayment();
-    const res = await get(app, `/payments/${payment.id}`);
-    expect(res.status).toBe(200);
-    expect(res.data.data.orderId).toBe('order-1');
+// --- Process ---
+
+describe("POST /payments/:id/process", () => {
+  test("succeeds for amount <= 10000", async () => {
+    const c = await req("POST", "/payments", valid);
+    const r = await req("POST", `/payments/${c.json.data.id}/process`);
+    expect(r.status).toBe(200);
+    expect(r.json.data.status).toBe("completed");
+    expect(r.json.data.transactionRef).toBeTruthy();
   });
 
-  test('returns 404 for missing payment', async () => {
-    const res = await get(app, '/payments/nonexistent');
-    expect(res.status).toBe(404);
-  });
-});
-
-describe('PUT /payments/:id', () => {
-  test('updates payment status', async () => {
-    const payment = await createPayment();
-    const res = await put(app, `/payments/${payment.id}`, { status: 'completed' });
-    expect(res.status).toBe(200);
-    expect(res.data.data.status).toBe('completed');
+  test("fails for amount > 10000", async () => {
+    const c = await req("POST", "/payments", { ...valid, amount: 15000 });
+    const r = await req("POST", `/payments/${c.json.data.id}/process`);
+    expect(r.status).toBe(200);
+    expect(r.json.data.status).toBe("failed");
   });
 
-  test('rejects updating refunded payment', async () => {
-    const payment = await createPayment();
-    await put(app, `/payments/${payment.id}`, { status: 'completed' });
-    await post(app, `/payments/${payment.id}/refund`);
-    const res = await put(app, `/payments/${payment.id}`, { status: 'completed' });
-    expect(res.status).toBe(409);
+  test("rejects processing non-pending payment", async () => {
+    const c = await req("POST", "/payments", valid);
+    await req("POST", `/payments/${c.json.data.id}/process`);
+    const r = await req("POST", `/payments/${c.json.data.id}/process`);
+    expect(r.status).toBe(400);
+    expect(r.json.error).toContain("Cannot process");
   });
 
-  test('validates invalid status', async () => {
-    const payment = await createPayment();
-    const res = await put(app, `/payments/${payment.id}`, { status: 'invalid' });
-    expect(res.status).toBe(400);
-  });
-
-  test('returns 404 for missing payment', async () => {
-    const res = await put(app, '/payments/nonexistent', { status: 'completed' });
-    expect(res.status).toBe(404);
+  test("returns 404 for unknown ID", async () => {
+    const r = await req("POST", "/payments/nonexistent/process");
+    expect(r.status).toBe(404);
   });
 });
 
-describe('DELETE /payments/:id', () => {
-  test('deletes a pending payment', async () => {
-    const payment = await createPayment();
-    const res = await del(app, `/payments/${payment.id}`);
-    expect(res.status).toBe(200);
+// --- Refund ---
+
+describe("POST /payments/:id/refund", () => {
+  test("refunds a completed payment", async () => {
+    const c = await req("POST", "/payments", valid);
+    await req("POST", `/payments/${c.json.data.id}/process`);
+    const r = await req("POST", `/payments/${c.json.data.id}/refund`);
+    expect(r.status).toBe(201);
+    expect(r.json.data.original.status).toBe("refunded");
+    expect(r.json.data.refund.amount).toBe(-99.99);
   });
 
-  test('rejects deleting non-pending payment', async () => {
-    const payment = await createPayment();
-    await put(app, `/payments/${payment.id}`, { status: 'completed' });
-    const res = await del(app, `/payments/${payment.id}`);
-    expect(res.status).toBe(409);
+  test("rejects refund of pending payment", async () => {
+    const c = await req("POST", "/payments", valid);
+    const r = await req("POST", `/payments/${c.json.data.id}/refund`);
+    expect(r.status).toBe(400);
+    expect(r.json.error).toContain("completed");
   });
 
-  test('returns 404 for missing payment', async () => {
-    const res = await del(app, '/payments/nonexistent');
-    expect(res.status).toBe(404);
-  });
-});
-
-describe('POST /payments/:id/refund', () => {
-  test('refunds a completed payment (full)', async () => {
-    const payment = await createPayment();
-    await put(app, `/payments/${payment.id}`, { status: 'completed' });
-    const res = await post(app, `/payments/${payment.id}/refund`);
-    expect(res.status).toBe(200);
-    expect(res.data.data.status).toBe('refunded');
-    expect(res.data.data.refundAmount).toBe(49.99);
-    expect(res.data.data.refundRef).toMatch(/^ref_/);
+  test("rejects refund of failed payment", async () => {
+    const c = await req("POST", "/payments", { ...valid, amount: 15000 });
+    await req("POST", `/payments/${c.json.data.id}/process`);
+    const r = await req("POST", `/payments/${c.json.data.id}/refund`);
+    expect(r.status).toBe(400);
   });
 
-  test('refunds a partial amount', async () => {
-    const payment = await createPayment();
-    await put(app, `/payments/${payment.id}`, { status: 'completed' });
-    const res = await post(app, `/payments/${payment.id}/refund`, { amount: 20.00 });
-    expect(res.data.data.refundAmount).toBe(20.00);
-  });
-
-  test('rejects refund exceeding payment amount', async () => {
-    const payment = await createPayment();
-    await put(app, `/payments/${payment.id}`, { status: 'completed' });
-    const res = await post(app, `/payments/${payment.id}/refund`, { amount: 100.00 });
-    expect(res.status).toBe(409);
-  });
-
-  test('rejects refunding pending payment', async () => {
-    const payment = await createPayment();
-    const res = await post(app, `/payments/${payment.id}/refund`);
-    expect(res.status).toBe(409);
-  });
-
-  test('rejects refunding failed payment', async () => {
-    const payment = await createPayment();
-    await put(app, `/payments/${payment.id}`, { status: 'failed' });
-    const res = await post(app, `/payments/${payment.id}/refund`);
-    expect(res.status).toBe(409);
-  });
-
-  test('rejects invalid refund amount', async () => {
-    const payment = await createPayment();
-    await put(app, `/payments/${payment.id}`, { status: 'completed' });
-    const res = await post(app, `/payments/${payment.id}/refund`, { amount: -10 });
-    expect(res.status).toBe(400);
-  });
-
-  test('returns 404 for missing payment', async () => {
-    const res = await post(app, '/payments/nonexistent/refund');
-    expect(res.status).toBe(404);
-  });
-});
-
-describe('GET /payments/order/:orderId', () => {
-  test('gets payments for an order', async () => {
-    const payment = await createPayment({ orderId: 'order-1' });
-    await put(app, `/payments/${payment.id}`, { status: 'failed' });
-    await createPayment({ orderId: 'order-1' });
-    const res = await get(app, '/payments/order/order-1');
-    expect(res.status).toBe(200);
-    expect(res.data.data.length).toBe(2);
-    expect(res.data.total).toBe(2);
-  });
-
-  test('returns empty for order with no payments', async () => {
-    const res = await get(app, '/payments/order/order-99');
-    expect(res.data.data).toEqual([]);
-  });
-
-  test('sorts by createdAt descending', async () => {
-    const p1 = await createPayment({ orderId: 'order-1' });
-    await put(app, `/payments/${p1.id}`, { status: 'failed' });
-    await createPayment({ orderId: 'order-1' });
-    const res = await get(app, '/payments/order/order-1');
-    const dates = res.data.data.map((p: any) => new Date(p.createdAt).getTime());
-    expect(dates[0]).toBeGreaterThanOrEqual(dates[1]);
+  test("supports partial refund amount", async () => {
+    const c = await req("POST", "/payments", { ...valid, amount: 200 });
+    await req("POST", `/payments/${c.json.data.id}/process`);
+    const r = await req("POST", `/payments/${c.json.data.id}/refund`, { amount: 50, reason: "Partial" });
+    expect(r.status).toBe(201);
+    expect(r.json.data.refund.amount).toBe(-50);
   });
 });

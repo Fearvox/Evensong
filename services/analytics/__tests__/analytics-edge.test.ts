@@ -1,135 +1,201 @@
-import { describe, test, expect, beforeEach } from 'bun:test';
-import { createApp, resetStore } from '../app';
-import { post, get, put, del } from '../../../shared/test-utils';
+import { describe, test, expect, beforeEach } from "bun:test";
+import { handleRequest } from "../handlers";
+import { analyticsStore } from "../store";
 
-const app = createApp();
+beforeEach(() => analyticsStore.clear());
 
-beforeEach(() => resetStore());
+const BASE = "http://localhost:3007";
 
-const validEvent = {
-  userId: 'user-1',
-  eventType: 'page_view',
-  category: 'engagement',
-};
-
-async function createEvent(overrides = {}) {
-  const res = await post(app, '/analytics/events', { ...validEvent, ...overrides });
-  return res.data.data;
+async function req(method: string, path: string, body?: unknown): Promise<{ status: number; data: any }> {
+  const opts: RequestInit = { method, headers: { "Content-Type": "application/json" } };
+  if (body !== undefined) opts.body = JSON.stringify(body);
+  const res = await handleRequest(new Request(`${BASE}${path}`, opts));
+  return { status: res.status, data: await res.json() };
 }
 
-describe('creation edge cases', () => {
-  test('generates unique ids', async () => {
-    const e1 = await createEvent();
-    const e2 = await createEvent({ eventType: 'click' });
-    expect(e1.id).not.toBe(e2.id);
+async function trackEvent(overrides: Record<string, unknown> = {}) {
+  const r = await req("POST", "/analytics/events", { eventType: "page_view", userId: "u1", ...overrides });
+  return r.data.data;
+}
+
+describe("GET /analytics/user/:userId", () => {
+  test("returns user event history", async () => {
+    await trackEvent({ eventType: "login", userId: "u1" });
+    await trackEvent({ eventType: "click", userId: "u1" });
+    await trackEvent({ eventType: "login", userId: "u2" });
+    const r = await req("GET", "/analytics/user/u1");
+    expect(r.status).toBe(200);
+    expect(r.data.data).toHaveLength(2);
+    expect(r.data.data.every((e: any) => e.userId === "u1")).toBe(true);
   });
 
-  test('auto-generates sessionId if not provided', async () => {
-    const event = await createEvent();
-    expect(event.sessionId).toBeDefined();
-    expect(typeof event.sessionId).toBe('string');
+  test("returns empty array for unknown user", async () => {
+    const r = await req("GET", "/analytics/user/nobody");
+    expect(r.data.data).toHaveLength(0);
+  });
+});
+
+describe("GET /analytics/session/:sessionId", () => {
+  test("returns session events", async () => {
+    await trackEvent({ sessionId: "s1", eventType: "a" });
+    await trackEvent({ sessionId: "s1", eventType: "b" });
+    await trackEvent({ sessionId: "s2", eventType: "c" });
+    const r = await req("GET", "/analytics/session/s1");
+    expect(r.data.data).toHaveLength(2);
   });
 
-  test('auto-generates timestamp if not provided', async () => {
-    const event = await createEvent();
-    expect(event.timestamp).toBeDefined();
-    expect(new Date(event.timestamp).getTime()).toBeGreaterThan(0);
+  test("returns empty for unknown session", async () => {
+    const r = await req("GET", "/analytics/session/unknown-session");
+    expect(r.data.data).toHaveLength(0);
+  });
+});
+
+describe("GET /analytics/retention", () => {
+  test("counts users who did both events within window", async () => {
+    // u1 does signup then purchase (same timestamp ~ within 1 day)
+    await trackEvent({ eventType: "signup", userId: "u1" });
+    await trackEvent({ eventType: "purchase", userId: "u1" });
+    // u2 only does signup
+    await trackEvent({ eventType: "signup", userId: "u2" });
+    const r = await req("GET", "/analytics/retention?eventA=signup&eventB=purchase&days=7");
+    expect(r.data.data.count).toBe(1);
   });
 
-  test('rejects non-string eventType', async () => {
-    const res = await post(app, '/analytics/events', { ...validEvent, eventType: 123 });
+  test("returns zero when no users match", async () => {
+    await trackEvent({ eventType: "signup", userId: "u1" });
+    const r = await req("GET", "/analytics/retention?eventA=signup&eventB=purchase&days=7");
+    expect(r.data.data.count).toBe(0);
+  });
+
+  test("requires eventA and eventB", async () => {
+    const r = await req("GET", "/analytics/retention?eventA=signup");
+    expect(r.status).toBe(400);
+  });
+
+  test("defaults to 30 days", async () => {
+    await trackEvent({ eventType: "a", userId: "u1" });
+    await trackEvent({ eventType: "b", userId: "u1" });
+    const r = await req("GET", "/analytics/retention?eventA=a&eventB=b");
+    expect(r.status).toBe(200);
+    expect(r.data.data.count).toBe(1);
+  });
+});
+
+describe("GET /analytics/top", () => {
+  test("returns top event types by count", async () => {
+    await trackEvent({ eventType: "click" });
+    await trackEvent({ eventType: "click" });
+    await trackEvent({ eventType: "click" });
+    await trackEvent({ eventType: "view" });
+    await trackEvent({ eventType: "view" });
+    await trackEvent({ eventType: "purchase" });
+    const r = await req("GET", "/analytics/top?limit=2");
+    expect(r.data.data).toHaveLength(2);
+    expect(r.data.data[0].eventType).toBe("click");
+    expect(r.data.data[0].count).toBe(3);
+    expect(r.data.data[1].eventType).toBe("view");
+  });
+
+  test("defaults to limit 10", async () => {
+    await trackEvent({ eventType: "a" });
+    const r = await req("GET", "/analytics/top");
+    expect(r.status).toBe(200);
+    expect(r.data.data).toHaveLength(1);
+  });
+
+  test("returns empty when no events", async () => {
+    const r = await req("GET", "/analytics/top");
+    expect(r.data.data).toHaveLength(0);
+  });
+});
+
+describe("GET /analytics/stats", () => {
+  test("returns overall stats", async () => {
+    await trackEvent({ eventType: "a", userId: "u1", sessionId: "s1" });
+    await trackEvent({ eventType: "b", userId: "u2", sessionId: "s1" });
+    await trackEvent({ eventType: "c", userId: "u1", sessionId: "s2" });
+    const r = await req("GET", "/analytics/stats");
+    expect(r.data.data.totalEvents).toBe(3);
+    expect(r.data.data.uniqueUsers).toBe(2);
+    expect(r.data.data.uniqueSessions).toBe(2);
+    expect(r.data.data.eventsToday).toBe(3);
+  });
+
+  test("returns zeros when empty", async () => {
+    const r = await req("GET", "/analytics/stats");
+    expect(r.data.data.totalEvents).toBe(0);
+    expect(r.data.data.uniqueUsers).toBe(0);
+    expect(r.data.data.uniqueSessions).toBe(0);
+    expect(r.data.data.eventsToday).toBe(0);
+  });
+});
+
+describe("DELETE /analytics/events", () => {
+  test("deletes by eventType", async () => {
+    await trackEvent({ eventType: "click" });
+    await trackEvent({ eventType: "click" });
+    await trackEvent({ eventType: "view" });
+    const r = await req("DELETE", "/analytics/events?eventType=click");
+    expect(r.data.data.deleted).toBe(2);
+    expect(analyticsStore.count()).toBe(1);
+  });
+
+  test("deletes by before date", async () => {
+    await trackEvent({ eventType: "old" });
+    const future = new Date(Date.now() + 86400000).toISOString();
+    const r = await req("DELETE", `/analytics/events?before=${future}`);
+    expect(r.data.data.deleted).toBe(1);
+  });
+
+  test("requires at least one filter", async () => {
+    const r = await req("DELETE", "/analytics/events");
+    expect(r.status).toBe(400);
+  });
+
+  test("returns 0 when no events match filter", async () => {
+    await trackEvent({ eventType: "click" });
+    const r = await req("DELETE", "/analytics/events?eventType=nonexistent");
+    expect(r.data.data.deleted).toBe(0);
+  });
+});
+
+describe("GET /analytics/events date range filter", () => {
+  test("filters by from and to", async () => {
+    await trackEvent({ eventType: "a" });
+    const fromDate = new Date(Date.now() - 1000).toISOString();
+    const toDate = new Date(Date.now() + 1000).toISOString();
+    const r = await req("GET", `/analytics/events?from=${fromDate}&to=${toDate}`);
+    expect(r.data.data).toHaveLength(1);
+  });
+
+  test("excludes events outside range", async () => {
+    await trackEvent({ eventType: "a" });
+    const futureFrom = new Date(Date.now() + 86400000).toISOString();
+    const futureTo = new Date(Date.now() + 172800000).toISOString();
+    const r = await req("GET", `/analytics/events?from=${futureFrom}&to=${futureTo}`);
+    expect(r.data.data).toHaveLength(0);
+  });
+});
+
+describe("Edge: non-analytics prefix", () => {
+  test("returns 404 for non-analytics routes", async () => {
+    const r = await req("GET", "/users/health");
+    expect(r.status).toBe(404);
+  });
+});
+
+describe("Edge: batch validation", () => {
+  test("rejects missing body entirely", async () => {
+    const res = await handleRequest(new Request(`${BASE}/analytics/events/batch`, { method: "POST" }));
     expect(res.status).toBe(400);
   });
-
-  test('rejects non-string category', async () => {
-    const res = await post(app, '/analytics/events', { ...validEvent, category: true });
-    expect(res.status).toBe(400);
-  });
-
-  test('rejects non-string userId', async () => {
-    const res = await post(app, '/analytics/events', { ...validEvent, userId: 42 });
-    expect(res.status).toBe(400);
-  });
 });
 
-describe('filter combinations', () => {
-  test('filters by category and eventType together', async () => {
-    await createEvent({ category: 'engagement', eventType: 'page_view' });
-    await createEvent({ category: 'engagement', eventType: 'click' });
-    await createEvent({ category: 'conversion', eventType: 'purchase' });
-    const res = await get(app, '/analytics/events?category=engagement&eventType=click');
-    expect(res.data.data.length).toBe(1);
-  });
-
-  test('filters by all three dimensions', async () => {
-    await createEvent({ userId: 'user-1', category: 'engagement', eventType: 'page_view' });
-    await createEvent({ userId: 'user-2', category: 'engagement', eventType: 'page_view' });
-    const res = await get(app, '/analytics/events?userId=user-1&category=engagement&eventType=page_view');
-    expect(res.data.data.length).toBe(1);
-  });
-});
-
-describe('summary edge cases', () => {
-  test('counts unique sessions correctly', async () => {
-    await createEvent({ sessionId: 'session-1' });
-    await createEvent({ sessionId: 'session-1', eventType: 'click' });
-    await createEvent({ sessionId: 'session-2', eventType: 'purchase' });
-    const res = await get(app, '/analytics/summary');
-    expect(res.data.data.uniqueSessions).toBe(2);
-  });
-
-  test('eventsByType aggregation handles many types', async () => {
-    for (const type of ['view', 'click', 'scroll', 'submit', 'download']) {
-      await createEvent({ eventType: type });
-    }
-    const res = await get(app, '/analytics/summary');
-    expect(Object.keys(res.data.data.eventsByType).length).toBe(5);
-  });
-});
-
-describe('user activity edge cases', () => {
-  test('respects days parameter', async () => {
-    const oldDate = new Date(Date.now() - 60 * 24 * 60 * 60 * 1000).toISOString();
-    await createEvent({ userId: 'user-1', timestamp: oldDate });
-    await createEvent({ userId: 'user-1', eventType: 'click' }); // recent
-    const res = await get(app, '/analytics/users/user-1/activity?days=30');
-    expect(res.data.data.totalEvents).toBe(1); // only recent
-  });
-
-  test('clamps days to min 1', async () => {
-    const res = await get(app, '/analytics/users/user-1/activity?days=0');
-    expect(res.status).toBe(200);
-  });
-
-  test('clamps days to max 365', async () => {
-    const res = await get(app, '/analytics/users/user-1/activity?days=9999');
-    expect(res.status).toBe(200);
-  });
-
-  test('activity includes session count', async () => {
-    await createEvent({ userId: 'user-1', sessionId: 'a' });
-    await createEvent({ userId: 'user-1', sessionId: 'b', eventType: 'click' });
-    const res = await get(app, '/analytics/users/user-1/activity');
-    expect(res.data.data.totalSessions).toBe(2);
-  });
-});
-
-describe('update edge cases', () => {
-  test('preserves fields not in update', async () => {
-    const event = await createEvent({ properties: { key: 'value' } });
-    const res = await put(app, `/analytics/events/${event.id}`, { eventType: 'click' });
-    expect(res.data.data.category).toBe('engagement');
-    expect(res.data.data.userId).toBe('user-1');
-  });
-});
-
-describe('invalid JSON', () => {
-  test('rejects invalid JSON body', async () => {
-    const response = await app(new Request('http://test/analytics/events', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: '{bad',
-    }));
-    expect(response.status).toBe(400);
+describe("Edge: funnel with events but no userId", () => {
+  test("ignores events without userId in funnel", async () => {
+    await trackEvent({ eventType: "signup" }); // has default userId u1
+    await req("POST", "/analytics/events", { eventType: "signup" }); // no userId
+    const r = await req("GET", "/analytics/funnel?steps=signup");
+    expect(r.data.data[0].users).toBe(1);
   });
 });

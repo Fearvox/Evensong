@@ -1,404 +1,355 @@
-import { describe, test, expect, beforeEach } from 'bun:test';
-import { createApp as createAuthApp, resetStores as resetAuth } from '../../auth/app';
-import { createApp as createUsersApp, resetStore as resetUsers } from '../../users/app';
-import { createApp as createProductsApp, resetStore as resetProducts } from '../../products/app';
-import { createApp as createOrdersApp, resetStore as resetOrders } from '../../orders/app';
-import { createApp as createPaymentsApp, resetStore as resetPayments } from '../../payments/app';
-import { createApp as createNotificationsApp, resetStore as resetNotifications } from '../../notifications/app';
-import { createApp as createAnalyticsApp, resetStore as resetAnalytics } from '../../analytics/app';
-import { createApp as createSearchApp, resetStore as resetSearch } from '../../search/app';
-import { post, get, put, patch } from '../../../shared/test-utils';
+import { describe, test, expect, beforeEach } from "bun:test";
 
-const auth = createAuthApp();
-const users = createUsersApp();
-const products = createProductsApp();
-const orders = createOrdersApp();
-const payments = createPaymentsApp();
-const notifications = createNotificationsApp();
-const analytics = createAnalyticsApp();
-const search = createSearchApp();
+// Import handlers from each service
+import { handleRequest as authHandler } from "../../auth/handlers";
+import { handleRequest as usersHandler } from "../../users/handlers";
+import { handleRequest as productsHandler } from "../../products/handlers";
+import { handleRequest as ordersHandler } from "../../orders/handlers";
+import { handleRequest as paymentsHandler } from "../../payments/handlers";
+import { handleRequest as notificationsHandler } from "../../notifications/handlers";
+import { handleRequest as analyticsHandler } from "../../analytics/handlers";
+import { handleRequest as searchHandler } from "../../search/handlers";
 
-function resetAll() {
-  resetAuth();
-  resetUsers();
-  resetProducts();
-  resetOrders();
-  resetPayments();
-  resetNotifications();
-  resetAnalytics();
-  resetSearch();
+// Import stores to reset between tests
+import { authStore } from "../../auth/store";
+import { userStore } from "../../users/store";
+import { productStore } from "../../products/store";
+import { orderStore } from "../../orders/store";
+import { paymentStore } from "../../payments/store";
+import { notificationStore } from "../../notifications/store";
+import { analyticsStore } from "../../analytics/store";
+import { searchStore } from "../../search/store";
+
+function post(handler: Function, path: string, body: unknown) {
+  return handler(new Request(`http://localhost${path}`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body),
+  }));
 }
 
-beforeEach(() => resetAll());
+function get(handler: Function, path: string) {
+  return handler(new Request(`http://localhost${path}`));
+}
 
-describe('User Registration → Order → Payment → Notification workflow', () => {
-  test('complete e-commerce flow', async () => {
-    // 1. Register a user
-    const regRes = await post(auth, '/auth/register', {
-      email: 'buyer@example.com',
-      username: 'buyer',
-      password: 'securepass123',
-      displayName: 'Test Buyer',
-    });
-    expect(regRes.status).toBe(201);
-    const token = regRes.data.data.token;
-    const userId = regRes.data.data.user.id;
+function patch(handler: Function, path: string, body: unknown) {
+  return handler(new Request(`http://localhost${path}`, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body),
+  }));
+}
 
-    // 2. Verify the token is valid
-    const verifyRes = await post(auth, '/auth/verify', { token });
-    expect(verifyRes.data.data.valid).toBe(true);
-
-    // 3. Create a user profile entry
-    const userRes = await post(users, '/users', {
-      email: 'buyer@example.com',
-      username: 'buyer',
-      displayName: 'Test Buyer',
-    });
-    expect(userRes.status).toBe(201);
-
-    // 4. Create products
-    const product1 = await post(products, '/products', {
-      name: 'Widget A',
-      description: 'A quality widget',
-      price: 25.00,
-      stock: 50,
-      category: 'widgets',
-    });
-    expect(product1.status).toBe(201);
-
-    const product2 = await post(products, '/products', {
-      name: 'Widget B',
-      description: 'Premium widget',
-      price: 45.00,
-      stock: 30,
-      category: 'widgets',
-    });
-    expect(product2.status).toBe(201);
-
-    // 5. Reserve stock
-    const reserveRes = await post(products, `/products/${product1.data.data.id}/reserve`, { quantity: 2 });
-    expect(reserveRes.status).toBe(200);
-    expect(reserveRes.data.data.reservedStock).toBe(2);
-
-    const reserveRes2 = await post(products, `/products/${product2.data.data.id}/reserve`, { quantity: 1 });
-    expect(reserveRes2.status).toBe(200);
-
-    // 6. Create order
-    const orderRes = await post(orders, '/orders', {
-      userId,
-      items: [
-        { productId: product1.data.data.id, quantity: 2, unitPrice: 25.00 },
-        { productId: product2.data.data.id, quantity: 1, unitPrice: 45.00 },
-      ],
-      shippingAddress: '123 Main St, Springfield, IL 62701',
-    });
-    expect(orderRes.status).toBe(201);
-    expect(orderRes.data.data.totalAmount).toBe(95.00);
-    expect(orderRes.data.data.status).toBe('pending');
-
-    // 7. Process payment
-    const payRes = await post(payments, '/payments', {
-      orderId: orderRes.data.data.id,
-      userId,
-      amount: 95.00,
-      currency: 'USD',
-      method: 'credit_card',
-    });
-    expect(payRes.status).toBe(201);
-
-    // Complete the payment
-    const completeRes = await put(payments, `/payments/${payRes.data.data.id}`, { status: 'completed' });
-    expect(completeRes.data.data.status).toBe('completed');
-
-    // 8. Update order status
-    const confirmRes = await put(orders, `/orders/${orderRes.data.data.id}`, { status: 'confirmed' });
-    expect(confirmRes.data.data.status).toBe('confirmed');
-
-    // 9. Send notification
-    const notifRes = await post(notifications, '/notifications', {
-      userId,
-      type: 'email',
-      title: 'Order Confirmed',
-      message: `Your order ${orderRes.data.data.id} has been confirmed.`,
-      metadata: { orderId: orderRes.data.data.id },
-    });
-    expect(notifRes.status).toBe(201);
-
-    // 10. Track analytics events
-    await post(analytics, '/analytics/events', {
-      userId,
-      eventType: 'purchase',
-      category: 'conversion',
-      properties: { orderId: orderRes.data.data.id, amount: 95.00 },
-    });
-
-    // 11. Index products for search
-    await post(search, '/search/documents', {
-      type: 'product',
-      title: 'Widget A',
-      content: 'A quality widget for everyday use',
-      tags: ['widget', 'quality'],
-    });
-
-    // 12. Verify the full state
-    const orderCheck = await get(orders, `/orders/${orderRes.data.data.id}`);
-    expect(orderCheck.data.data.status).toBe('confirmed');
-
-    const paymentCheck = await get(payments, `/payments/order/${orderRes.data.data.id}`);
-    expect(paymentCheck.data.data[0].status).toBe('completed');
-
-    const userOrders = await get(orders, `/orders/user/${userId}`);
-    expect(userOrders.data.data.length).toBe(1);
-
-    const searchRes = await get(search, '/search?q=widget');
-    expect(searchRes.data.data.length).toBe(1);
-
-    const summaryRes = await get(analytics, '/analytics/summary');
-    expect(summaryRes.data.data.totalEvents).toBe(1);
-    expect(summaryRes.data.data.eventsByType.purchase).toBe(1);
+describe("Cross-Service Workflow: User Registration → Order → Payment → Notification", () => {
+  beforeEach(() => {
+    authStore.clear();
+    userStore.clear();
+    productStore.clear();
+    orderStore.clear();
+    paymentStore.clear();
+    notificationStore.clear();
+    analyticsStore.clear();
+    searchStore.clear();
   });
-});
 
-describe('Order Cancellation → Refund → Notification flow', () => {
-  test('cancels order and refunds payment', async () => {
-    // Setup: create order and payment
-    const orderRes = await post(orders, '/orders', {
-      userId: 'user-1',
-      items: [{ productId: 'prod-1', quantity: 1, unitPrice: 50.00 }],
-      shippingAddress: '456 Oak St, Springfield, IL 62701',
+  test("full e-commerce lifecycle", async () => {
+    // Step 1: Register user via auth service
+    const registerRes = await post(authHandler, "/auth/register", {
+      email: "buyer@test.com",
+      name: "Test Buyer",
+      password: "securePass123",
     });
-    const orderId = orderRes.data.data.id;
+    expect(registerRes.status).toBe(201);
+    const registerData = await registerRes.json();
+    expect(registerData.success).toBe(true);
+    const userId = registerData.data.user.id;
+    const token = registerData.data.token;
 
-    const payRes = await post(payments, '/payments', {
+    // Step 2: Create user profile in users service
+    const createUserRes = await post(usersHandler, "/users", {
+      name: "Test Buyer",
+      email: "buyer@test.com",
+      role: "user",
+    });
+    expect(createUserRes.status).toBe(201);
+
+    // Step 3: Create a product
+    const createProductRes = await post(productsHandler, "/products", {
+      name: "Wireless Mouse",
+      description: "Ergonomic wireless mouse",
+      price: 29.99,
+      currency: "USD",
+      category: "electronics",
+      stock: 100,
+      tags: ["mouse", "wireless"],
+    });
+    expect(createProductRes.status).toBe(201);
+    const productData = await createProductRes.json();
+    const productId = productData.data.id;
+
+    // Step 4: Create an order
+    const createOrderRes = await post(ordersHandler, "/orders", {
+      userId,
+      items: [{
+        productId,
+        name: "Wireless Mouse",
+        quantity: 2,
+        unitPrice: 29.99,
+      }],
+      currency: "USD",
+      shippingAddress: "123 Main St",
+    });
+    expect(createOrderRes.status).toBe(201);
+    const orderData = await createOrderRes.json();
+    const orderId = orderData.data.id;
+    expect(orderData.data.total).toBe(59.98);
+
+    // Step 5: Process payment
+    const createPaymentRes = await post(paymentsHandler, "/payments", {
       orderId,
-      userId: 'user-1',
-      amount: 50.00,
-      currency: 'USD',
-      method: 'debit_card',
+      userId,
+      amount: 59.98,
+      currency: "USD",
+      method: "credit_card",
     });
-    await put(payments, `/payments/${payRes.data.data.id}`, { status: 'completed' });
+    expect(createPaymentRes.status).toBe(201);
+    const paymentData = await createPaymentRes.json();
+    const paymentId = paymentData.data.id;
 
-    // Cancel the order
-    const cancelRes = await post(orders, `/orders/${orderId}/cancel`, { reason: 'Changed my mind' });
-    expect(cancelRes.data.data.status).toBe('cancelled');
+    // Process the payment
+    const processRes = await post(paymentsHandler, `/payments/${paymentId}/process`, {});
+    expect(processRes.status).toBe(200);
+    const processData = await processRes.json();
+    expect(processData.data.status).toBe("completed");
 
-    // Refund the payment
-    const refundRes = await post(payments, `/payments/${payRes.data.data.id}/refund`, { amount: 50.00 });
-    expect(refundRes.data.data.status).toBe('refunded');
-    expect(refundRes.data.data.refundAmount).toBe(50.00);
-
-    // Notify user
-    const notifRes = await post(notifications, '/notifications', {
-      userId: 'user-1',
-      type: 'email',
-      title: 'Order Cancelled & Refunded',
-      message: `Your order has been cancelled and $50.00 has been refunded.`,
+    // Step 6: Send notification
+    const notifyRes = await post(notificationsHandler, "/notifications", {
+      userId,
+      type: "order",
+      channel: "email",
+      title: "Order Confirmed",
+      body: `Your order ${orderId} has been paid.`,
     });
-    expect(notifRes.status).toBe(201);
+    expect(notifyRes.status).toBe(201);
+    const notifyData = await notifyRes.json();
+    const notificationId = notifyData.data.id;
 
-    // Mark notification as read
-    const readRes = await patch(notifications, `/notifications/${notifRes.data.data.id}/read`);
-    expect(readRes.data.data.status).toBe('read');
+    // Send the notification
+    const sendRes = await post(notificationsHandler, `/notifications/${notificationId}/send`, {});
+    expect(sendRes.status).toBe(200);
 
-    // Track cancellation analytics
-    await post(analytics, '/analytics/events', {
-      userId: 'user-1',
-      eventType: 'order_cancelled',
-      category: 'orders',
-      properties: { orderId, reason: 'Changed my mind' },
+    // Step 7: Track analytics event
+    const trackRes = await post(analyticsHandler, "/analytics/events", {
+      eventType: "purchase_completed",
+      userId,
+      properties: { orderId, amount: 59.98, currency: "USD" },
     });
+    expect(trackRes.status).toBe(201);
 
-    const activityRes = await get(analytics, '/analytics/users/user-1/activity');
-    expect(activityRes.data.data.totalEvents).toBe(1);
+    // Step 8: Index order in search
+    const indexRes = await post(searchHandler, "/search/index", {
+      collection: "orders",
+      content: { orderId, userId, total: 59.98 },
+      text: `order ${orderId} wireless mouse buyer`,
+    });
+    expect(indexRes.status).toBe(201);
+
+    // Verify: search for the indexed order
+    const searchRes = await get(searchHandler, "/search?q=wireless+mouse&collection=orders");
+    expect(searchRes.status).toBe(200);
+    const searchData = await searchRes.json();
+    expect(searchData.data.length).toBeGreaterThan(0);
   });
-});
 
-describe('Broadcast Notification → Analytics Tracking', () => {
-  test('broadcasts notification and tracks analytics', async () => {
-    const broadcastRes = await post(notifications, '/notifications/broadcast', {
-      userIds: ['user-1', 'user-2', 'user-3'],
-      type: 'push',
-      title: 'Flash Sale!',
-      message: '50% off all products for the next 24 hours!',
+  test("order status progression workflow", async () => {
+    // Create order
+    const orderRes = await post(ordersHandler, "/orders", {
+      userId: "user-1",
+      items: [{ productId: "p-1", name: "Laptop", quantity: 1, unitPrice: 999.99 }],
+      currency: "USD",
     });
-    expect(broadcastRes.status).toBe(201);
-    expect(broadcastRes.data.data.length).toBe(3);
+    const order = await orderRes.json();
+    const orderId = order.data.id;
 
-    // Track analytics for broadcast
-    await post(analytics, '/analytics/events', {
-      userId: 'system',
-      eventType: 'broadcast_sent',
-      category: 'notifications',
-      properties: { recipients: 3, type: 'push' },
-    });
+    // Progress: pending → confirmed → processing → shipped → delivered
+    const transitions = ["confirmed", "processing", "shipped", "delivered"];
+    for (const status of transitions) {
+      const res = await patch(ordersHandler, `/orders/${orderId}/status`, { status });
+      expect(res.status).toBe(200);
+      const data = await res.json();
+      expect(data.data.status).toBe(status);
+    }
 
-    const summary = await get(analytics, '/analytics/summary');
-    expect(summary.data.data.eventsByType.broadcast_sent).toBe(1);
+    // Verify final state
+    const finalRes = await get(ordersHandler, `/orders/${orderId}`);
+    const finalData = await finalRes.json();
+    expect(finalData.data.status).toBe("delivered");
   });
-});
 
-describe('Product Search and Stock Management', () => {
-  test('indexes products, searches, and manages stock', async () => {
-    // Create and index products
-    const p1 = await post(products, '/products', {
-      name: 'Laptop Pro 15',
-      description: 'High performance laptop',
-      price: 1299.99,
-      stock: 20,
-      category: 'computers',
-      tags: ['laptop', 'professional'],
+  test("payment and refund workflow", async () => {
+    // Create and process payment
+    const payRes = await post(paymentsHandler, "/payments", {
+      orderId: "order-1",
+      userId: "user-1",
+      amount: 150.00,
+      currency: "EUR",
+      method: "bank_transfer",
     });
+    const payment = await payRes.json();
+    const paymentId = payment.data.id;
 
-    const p2 = await post(products, '/products', {
-      name: 'Laptop Air 13',
-      description: 'Ultra lightweight laptop',
-      price: 999.99,
-      stock: 35,
-      category: 'computers',
-      tags: ['laptop', 'portable'],
+    await post(paymentsHandler, `/payments/${paymentId}/process`, {});
+
+    // Refund
+    const refundRes = await post(paymentsHandler, `/payments/${paymentId}/refund`, {});
+    expect(refundRes.status).toBe(200);
+    const refundData = await refundRes.json();
+    expect(refundData.data.status).toBe("refunded");
+
+    // Send refund notification
+    const notifyRes = await post(notificationsHandler, "/notifications", {
+      userId: "user-1",
+      type: "payment",
+      channel: "email",
+      title: "Refund Processed",
+      body: "Your payment of 150.00 EUR has been refunded.",
     });
-
-    // Index for search
-    await post(search, '/search/documents', {
-      type: 'product',
-      title: 'Laptop Pro 15',
-      content: 'High performance laptop for professionals. 16GB RAM, 512GB SSD.',
-      tags: ['laptop', 'professional', 'high-performance'],
-    });
-
-    await post(search, '/search/documents', {
-      type: 'product',
-      title: 'Laptop Air 13',
-      content: 'Ultra lightweight laptop for everyday use. 8GB RAM, 256GB SSD.',
-      tags: ['laptop', 'portable', 'lightweight'],
-    });
-
-    // Search
-    const searchRes = await get(search, '/search?q=laptop');
-    expect(searchRes.data.data.length).toBe(2);
-
-    const proSearch = await get(search, '/search?q=professional');
-    expect(proSearch.data.data.length).toBe(1);
-    expect(proSearch.data.data[0].title).toBe('Laptop Pro 15');
-
-    // Get suggestions
-    const suggestRes = await get(search, '/search/suggest?q=lap');
-    expect(suggestRes.data.data.length).toBeGreaterThan(0);
-
-    // Reserve stock and place order
-    await post(products, `/products/${p1.data.data.id}/reserve`, { quantity: 2 });
-    const productCheck = await get(products, `/products/${p1.data.data.id}`);
-    expect(productCheck.data.data.reservedStock).toBe(2);
-
-    // Release one
-    await post(products, `/products/${p1.data.data.id}/release`, { quantity: 1 });
-    const productCheck2 = await get(products, `/products/${p1.data.data.id}`);
-    expect(productCheck2.data.data.reservedStock).toBe(1);
+    expect(notifyRes.status).toBe(201);
   });
-});
 
-describe('Multi-user Order History', () => {
-  test('tracks orders across multiple users', async () => {
-    // User 1 places 2 orders
-    await post(orders, '/orders', {
-      userId: 'user-1',
-      items: [{ productId: 'p1', quantity: 1, unitPrice: 10 }],
-      shippingAddress: '123 Main St, City, ST 12345',
-    });
-    await post(orders, '/orders', {
-      userId: 'user-1',
-      items: [{ productId: 'p2', quantity: 2, unitPrice: 20 }],
-      shippingAddress: '123 Main St, City, ST 12345',
-    });
+  test("analytics funnel with multi-step user journey", async () => {
+    const userId = "funnel-user-1";
 
-    // User 2 places 1 order
-    await post(orders, '/orders', {
-      userId: 'user-2',
-      items: [{ productId: 'p1', quantity: 3, unitPrice: 10 }],
-      shippingAddress: '456 Oak Ave, Town, ST 67890',
-    });
+    // Track user journey events
+    const events = [
+      { eventType: "page_view", userId, properties: { page: "/products" } },
+      { eventType: "add_to_cart", userId, properties: { productId: "p-1" } },
+      { eventType: "checkout_start", userId, properties: {} },
+      { eventType: "purchase_completed", userId, properties: { amount: 99.99 } },
+    ];
 
-    const user1Orders = await get(orders, '/orders/user/user-1');
-    expect(user1Orders.data.data.length).toBe(2);
+    for (const event of events) {
+      const res = await post(analyticsHandler, "/analytics/events", event);
+      expect(res.status).toBe(201);
+    }
 
-    const user2Orders = await get(orders, '/orders/user/user-2');
-    expect(user2Orders.data.data.length).toBe(1);
-
-    const allOrders = await get(orders, '/orders');
-    expect(allOrders.data.total).toBe(3);
+    // Check funnel
+    const funnelRes = await get(analyticsHandler,
+      "/analytics/funnel?steps=page_view,add_to_cart,checkout_start,purchase_completed");
+    expect(funnelRes.status).toBe(200);
+    const funnelData = await funnelRes.json();
+    expect(funnelData.data).toBeDefined();
   });
-});
 
-describe('User Profile and Preferences', () => {
-  test('creates user, updates profile, sets preferences', async () => {
-    const userRes = await post(users, '/users', {
-      email: 'profile@example.com',
-      username: 'profileuser',
-      displayName: 'Profile User',
+  test("search across multiple collections", async () => {
+    // Index products
+    await post(searchHandler, "/search/index", {
+      collection: "products",
+      content: { name: "Gaming Keyboard" },
+      text: "gaming keyboard mechanical rgb backlit",
     });
-    const userId = userRes.data.data.id;
 
-    // Get profile
-    const profileRes = await get(users, `/users/${userId}/profile`);
-    expect(profileRes.data.data.hasPreferences).toBe(false);
-    expect(typeof profileRes.data.data.accountAge).toBe('number');
+    // Index users
+    await post(searchHandler, "/search/index", {
+      collection: "users",
+      content: { name: "John Gamer" },
+      text: "john gamer pro player esports",
+    });
 
-    // Set preferences
-    await patch(users, `/users/${userId}/preferences`, { theme: 'dark', language: 'en' });
-    const updatedProfile = await get(users, `/users/${userId}/profile`);
-    expect(updatedProfile.data.data.hasPreferences).toBe(true);
+    // Search across all collections
+    const allRes = await get(searchHandler, "/search?q=gaming");
+    expect(allRes.status).toBe(200);
+    const allData = await allRes.json();
+    expect(allData.data.length).toBeGreaterThanOrEqual(1);
 
-    // Update preferences
-    await patch(users, `/users/${userId}/preferences`, { notifications: true });
-    const finalUser = await get(users, `/users/${userId}`);
-    expect(finalUser.data.data.preferences.theme).toBe('dark');
-    expect(finalUser.data.data.preferences.notifications).toBe(true);
+    // Search specific collection
+    const prodRes = await get(searchHandler, "/search?q=gaming&collection=products");
+    expect(prodRes.status).toBe(200);
+    const prodData = await prodRes.json();
+    expect(prodData.data.length).toBe(1);
   });
-});
 
-describe('Password Change Security Flow', () => {
-  test('password change invalidates other sessions', async () => {
-    // Register
-    const reg = await post(auth, '/auth/register', {
-      email: 'secure@example.com',
-      username: 'secureuser',
-      password: 'password123',
-      displayName: 'Secure User',
+  test("notification template workflow", async () => {
+    // Create template
+    const templateRes = await post(notificationsHandler, "/notifications/template", {
+      name: "order_confirmation",
+      title: "Order {{orderId}} Confirmed",
+      body: "Hi {{userName}}, your order {{orderId}} for {{amount}} has been confirmed.",
     });
-    const token1 = reg.data.data.token;
+    expect(templateRes.status).toBe(201);
 
-    // Login from another device
-    const login = await post(auth, '/auth/login', {
-      email: 'secure@example.com',
-      password: 'password123',
+    // Use template to create notification
+    const fromTemplateRes = await post(notificationsHandler, "/notifications/from-template", {
+      templateName: "order_confirmation",
+      userId: "user-1",
+      channel: "email",
+      type: "order",
+      variables: {
+        orderId: "ORD-123",
+        userName: "Alice",
+        amount: "$59.99",
+      },
     });
-    const token2 = login.data.data.token;
+    expect(fromTemplateRes.status).toBe(201);
+    const notif = await fromTemplateRes.json();
+    expect(notif.data.title).toBe("Order ORD-123 Confirmed");
+    expect(notif.data.body).toContain("Alice");
+    expect(notif.data.body).toContain("$59.99");
+  });
 
-    // Both tokens valid
-    const v1 = await post(auth, '/auth/verify', { token: token1 });
-    expect(v1.data.data.valid).toBe(true);
-    const v2 = await post(auth, '/auth/verify', { token: token2 });
-    expect(v2.data.data.valid).toBe(true);
-
-    // Change password using token1
-    await post(auth, '/auth/change-password', {
-      currentPassword: 'password123',
-      newPassword: 'newSecure456',
-    }, { Authorization: `Bearer ${token1}` });
-
-    // token1 still works (it was the one used to change password)
-    const v3 = await post(auth, '/auth/verify', { token: token1 });
-    expect(v3.data.data.valid).toBe(true);
-
-    // token2 should be invalidated
-    const v4 = await post(auth, '/auth/verify', { token: token2 });
-    expect(v4.data.data.valid).toBe(false);
-
-    // Login with new password works
-    const newLogin = await post(auth, '/auth/login', {
-      email: 'secure@example.com',
-      password: 'newSecure456',
+  test("user activity tracking across services", async () => {
+    // Create user
+    const userRes = await post(usersHandler, "/users", {
+      name: "Active User",
+      email: "active@test.com",
+      role: "user",
     });
-    expect(newLogin.status).toBe(200);
+    const userData = await userRes.json();
+    const userId = userData.data.id;
+
+    // Log activity
+    await post(usersHandler, `/users/${userId}/activity`, { action: "logged_in" });
+    await post(usersHandler, `/users/${userId}/activity`, { action: "viewed_products" });
+    await post(usersHandler, `/users/${userId}/activity`, { action: "placed_order" });
+
+    // Check activity log
+    const activityRes = await get(usersHandler, `/users/${userId}/activity`);
+    expect(activityRes.status).toBe(200);
+    const activityData = await activityRes.json();
+    expect(activityData.data.length).toBe(3);
+
+    // Track same events in analytics
+    await post(analyticsHandler, "/analytics/events", {
+      eventType: "user_login", userId, properties: {},
+    });
+    await post(analyticsHandler, "/analytics/events", {
+      eventType: "product_view", userId, properties: {},
+    });
+
+    // Verify analytics has the events
+    const analyticsRes = await get(analyticsHandler, `/analytics/user/${userId}`);
+    expect(analyticsRes.status).toBe(200);
+    const analyticsData = await analyticsRes.json();
+    expect(analyticsData.data.length).toBe(2);
+  });
+
+  test("health checks across all services", async () => {
+    const checks = [
+      { handler: authHandler, path: "/auth/health" },
+      { handler: usersHandler, path: "/users/health" },
+      { handler: productsHandler, path: "/products/health" },
+      { handler: ordersHandler, path: "/orders/health" },
+      { handler: paymentsHandler, path: "/payments/health" },
+      { handler: notificationsHandler, path: "/notifications/health" },
+      { handler: analyticsHandler, path: "/analytics/health" },
+      { handler: searchHandler, path: "/search/health" },
+    ];
+
+    for (const { handler, path } of checks) {
+      const res = await get(handler, path);
+      expect(res.status).toBe(200);
+      const data = await res.json();
+      expect(data.success).toBe(true);
+    }
   });
 });

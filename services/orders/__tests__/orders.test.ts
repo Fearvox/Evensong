@@ -1,261 +1,242 @@
-import { describe, test, expect, beforeEach } from 'bun:test';
-import { createApp, resetStore } from '../app';
-import { post, get, put, del } from '../../../shared/test-utils';
+import { describe, test, expect, beforeEach } from "bun:test";
+import { OrderStore } from "../store";
+import { createRouter } from "../handlers";
 
-const app = createApp();
+const BASE = "http://localhost:3004";
+const store = new OrderStore();
+const handleRequest = createRouter(store);
 
-beforeEach(() => resetStore());
-
-const validOrder = {
-  userId: 'user-1',
-  items: [
-    { productId: 'prod-1', quantity: 2, unitPrice: 10.00 },
-    { productId: 'prod-2', quantity: 1, unitPrice: 25.50 },
-  ],
-  shippingAddress: '123 Main St, City, ST 12345',
-};
-
-async function createOrder(overrides = {}) {
-  const res = await post(app, '/orders', { ...validOrder, ...overrides });
-  return res.data.data;
+function post(path: string, body: unknown) {
+  return handleRequest(new Request(`${BASE}${path}`, {
+    method: "POST", headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body),
+  }));
+}
+function get(path: string) {
+  return handleRequest(new Request(`${BASE}${path}`));
+}
+function put(path: string, body: unknown) {
+  return handleRequest(new Request(`${BASE}${path}`, {
+    method: "PUT", headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body),
+  }));
+}
+function del(path: string) {
+  return handleRequest(new Request(`${BASE}${path}`, { method: "DELETE" }));
+}
+function patch(path: string, body: unknown) {
+  return handleRequest(new Request(`${BASE}${path}`, {
+    method: "PATCH", headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body),
+  }));
 }
 
-describe('POST /orders', () => {
-  test('creates an order', async () => {
-    const res = await post(app, '/orders', validOrder);
+const VALID_ITEM = { productId: "p1", name: "Widget", quantity: 2, unitPrice: 9.99 };
+const VALID_ORDER = { userId: "u1", items: [VALID_ITEM], currency: "USD", shippingAddress: "123 Main St" };
+
+async function json(res: Response) { return res.json(); }
+
+describe("Orders CRUD", () => {
+  beforeEach(() => store.clear());
+
+  test("POST /orders — create order", async () => {
+    const res = await post("/orders", VALID_ORDER);
     expect(res.status).toBe(201);
-    expect(res.data.data.userId).toBe('user-1');
-    expect(res.data.data.status).toBe('pending');
-    expect(res.data.data.items.length).toBe(2);
-    expect(res.data.data.totalAmount).toBe(45.50);
+    const body = await json(res);
+    expect(body.success).toBe(true);
+    expect(body.data.userId).toBe("u1");
+    expect(body.data.status).toBe("pending");
+    expect(body.data.total).toBe(19.98);
+    expect(body.data.items).toHaveLength(1);
   });
 
-  test('calculates total correctly', async () => {
-    const res = await post(app, '/orders', {
-      ...validOrder,
-      items: [{ productId: 'p1', quantity: 3, unitPrice: 9.99 }],
-    });
-    expect(res.data.data.totalAmount).toBe(29.97);
+  test("GET /orders/:id — get order", async () => {
+    const created = await json(await post("/orders", VALID_ORDER));
+    const res = await get(`/orders/${created.data.id}`);
+    const body = await json(res);
+    expect(body.success).toBe(true);
+    expect(body.data.id).toBe(created.data.id);
   });
 
-  test('validates required fields', async () => {
-    const res = await post(app, '/orders', {});
-    expect(res.status).toBe(400);
-    expect(res.data.errors.length).toBeGreaterThanOrEqual(3);
-  });
-
-  test('validates items must be non-empty array', async () => {
-    const res = await post(app, '/orders', { ...validOrder, items: [] });
-    expect(res.status).toBe(400);
-  });
-
-  test('validates item productId', async () => {
-    const res = await post(app, '/orders', {
-      ...validOrder,
-      items: [{ quantity: 1, unitPrice: 10 }],
-    });
-    expect(res.status).toBe(400);
-  });
-
-  test('validates item quantity', async () => {
-    const res = await post(app, '/orders', {
-      ...validOrder,
-      items: [{ productId: 'p1', quantity: 0, unitPrice: 10 }],
-    });
-    expect(res.status).toBe(400);
-  });
-
-  test('validates item unitPrice', async () => {
-    const res = await post(app, '/orders', {
-      ...validOrder,
-      items: [{ productId: 'p1', quantity: 1, unitPrice: -5 }],
-    });
-    expect(res.status).toBe(400);
-  });
-
-  test('validates shipping address length', async () => {
-    const res = await post(app, '/orders', { ...validOrder, shippingAddress: '123' });
-    expect(res.status).toBe(400);
-  });
-});
-
-describe('GET /orders', () => {
-  test('lists all orders', async () => {
-    await createOrder();
-    await createOrder({ userId: 'user-2' });
-    const res = await get(app, '/orders');
-    expect(res.status).toBe(200);
-    expect(res.data.data.length).toBe(2);
-  });
-
-  test('filters by status', async () => {
-    const order = await createOrder();
-    await put(app, `/orders/${order.id}`, { status: 'confirmed' });
-    await createOrder();
-    const res = await get(app, '/orders?status=confirmed');
-    expect(res.data.data.length).toBe(1);
-    expect(res.data.data[0].status).toBe('confirmed');
-  });
-
-  test('paginates results', async () => {
-    for (let i = 0; i < 5; i++) await createOrder({ userId: `user-${i}` });
-    const res = await get(app, '/orders?page=2&limit=2');
-    expect(res.data.data.length).toBe(2);
-    expect(res.data.total).toBe(5);
-  });
-
-  test('returns empty list', async () => {
-    const res = await get(app, '/orders');
-    expect(res.data.data).toEqual([]);
-  });
-});
-
-describe('GET /orders/:id', () => {
-  test('gets order by id', async () => {
-    const order = await createOrder();
-    const res = await get(app, `/orders/${order.id}`);
-    expect(res.status).toBe(200);
-    expect(res.data.data.userId).toBe('user-1');
-  });
-
-  test('returns 404 for missing order', async () => {
-    const res = await get(app, '/orders/nonexistent');
-    expect(res.status).toBe(404);
-  });
-});
-
-describe('PUT /orders/:id', () => {
-  test('updates order status', async () => {
-    const order = await createOrder();
-    const res = await put(app, `/orders/${order.id}`, { status: 'confirmed' });
-    expect(res.status).toBe(200);
-    expect(res.data.data.status).toBe('confirmed');
-  });
-
-  test('updates shipping address', async () => {
-    const order = await createOrder();
-    const res = await put(app, `/orders/${order.id}`, { shippingAddress: '456 Oak Ave, New City, NT 67890' });
-    expect(res.data.data.shippingAddress).toBe('456 Oak Ave, New City, NT 67890');
-  });
-
-  test('rejects updating cancelled order', async () => {
-    const order = await createOrder();
-    await put(app, `/orders/${order.id}`, { status: 'cancelled' });
-    const res = await put(app, `/orders/${order.id}`, { status: 'confirmed' });
-    expect(res.status).toBe(409);
-  });
-
-  test('rejects updating delivered order', async () => {
-    const order = await createOrder();
-    await put(app, `/orders/${order.id}`, { status: 'delivered' });
-    const res = await put(app, `/orders/${order.id}`, { status: 'shipped' });
-    expect(res.status).toBe(409);
-  });
-
-  test('validates invalid status', async () => {
-    const order = await createOrder();
-    const res = await put(app, `/orders/${order.id}`, { status: 'bogus' });
-    expect(res.status).toBe(400);
-  });
-
-  test('returns 404 for missing order', async () => {
-    const res = await put(app, '/orders/nonexistent', { status: 'confirmed' });
+  test("GET /orders/:id — not found", async () => {
+    const res = await get("/orders/nonexistent");
     expect(res.status).toBe(404);
   });
 
-  test('validates short shipping address', async () => {
-    const order = await createOrder();
-    const res = await put(app, `/orders/${order.id}`, { shippingAddress: 'XY' });
-    expect(res.status).toBe(400);
+  test("GET /orders — list orders", async () => {
+    await post("/orders", VALID_ORDER);
+    await post("/orders", { ...VALID_ORDER, userId: "u2" });
+    const res = await get("/orders");
+    const body = await json(res);
+    expect(body.success).toBe(true);
+    expect(body.data).toHaveLength(2);
+    expect(body.total).toBe(2);
+  });
+
+  test("GET /orders — pagination", async () => {
+    for (let i = 0; i < 5; i++) await post("/orders", VALID_ORDER);
+    const res = await get("/orders?page=2&pageSize=2");
+    const body = await json(res);
+    expect(body.data).toHaveLength(2);
+    expect(body.page).toBe(2);
+    expect(body.total).toBe(5);
+  });
+
+  test("GET /orders — filter by userId", async () => {
+    await post("/orders", VALID_ORDER);
+    await post("/orders", { ...VALID_ORDER, userId: "u2" });
+    const res = await get("/orders?userId=u2");
+    const body = await json(res);
+    expect(body.data).toHaveLength(1);
+    expect(body.data[0].userId).toBe("u2");
+  });
+
+  test("GET /orders — filter by status", async () => {
+    const c = await json(await post("/orders", VALID_ORDER));
+    await patch(`/orders/${c.data.id}/status`, { status: "confirmed" });
+    await post("/orders", VALID_ORDER); // stays pending
+    const res = await get("/orders?status=confirmed");
+    const body = await json(res);
+    expect(body.data).toHaveLength(1);
+  });
+
+  test("PUT /orders/:id — update shipping address", async () => {
+    const c = await json(await post("/orders", VALID_ORDER));
+    const res = await put(`/orders/${c.data.id}`, { shippingAddress: "456 Oak Ave" });
+    const body = await json(res);
+    expect(body.success).toBe(true);
+    expect(body.data.shippingAddress).toBe("456 Oak Ave");
+  });
+
+  test("DELETE /orders/:id — cancel pending order", async () => {
+    const c = await json(await post("/orders", VALID_ORDER));
+    const res = await del(`/orders/${c.data.id}`);
+    const body = await json(res);
+    expect(body.success).toBe(true);
+    expect(body.data.status).toBe("cancelled");
+  });
+
+  test("DELETE /orders/:id — cancel confirmed order", async () => {
+    const c = await json(await post("/orders", VALID_ORDER));
+    await patch(`/orders/${c.data.id}/status`, { status: "confirmed" });
+    const res = await del(`/orders/${c.data.id}`);
+    const body = await json(res);
+    expect(body.success).toBe(true);
+    expect(body.data.status).toBe("cancelled");
   });
 });
 
-describe('DELETE /orders/:id', () => {
-  test('deletes a pending order', async () => {
-    const order = await createOrder();
-    const res = await del(app, `/orders/${order.id}`);
-    expect(res.status).toBe(200);
+describe("Status transitions", () => {
+  beforeEach(() => store.clear());
+
+  test("pending -> confirmed", async () => {
+    const c = await json(await post("/orders", VALID_ORDER));
+    const res = await patch(`/orders/${c.data.id}/status`, { status: "confirmed" });
+    expect((await json(res)).data.status).toBe("confirmed");
   });
 
-  test('rejects deleting non-pending order', async () => {
-    const order = await createOrder();
-    await put(app, `/orders/${order.id}`, { status: 'confirmed' });
-    const res = await del(app, `/orders/${order.id}`);
+  test("confirmed -> processing", async () => {
+    const c = await json(await post("/orders", VALID_ORDER));
+    await patch(`/orders/${c.data.id}/status`, { status: "confirmed" });
+    const res = await patch(`/orders/${c.data.id}/status`, { status: "processing" });
+    expect((await json(res)).data.status).toBe("processing");
+  });
+
+  test("processing -> shipped", async () => {
+    const c = await json(await post("/orders", VALID_ORDER));
+    await patch(`/orders/${c.data.id}/status`, { status: "confirmed" });
+    await patch(`/orders/${c.data.id}/status`, { status: "processing" });
+    const res = await patch(`/orders/${c.data.id}/status`, { status: "shipped" });
+    expect((await json(res)).data.status).toBe("shipped");
+  });
+
+  test("shipped -> delivered", async () => {
+    const c = await json(await post("/orders", VALID_ORDER));
+    await patch(`/orders/${c.data.id}/status`, { status: "confirmed" });
+    await patch(`/orders/${c.data.id}/status`, { status: "processing" });
+    await patch(`/orders/${c.data.id}/status`, { status: "shipped" });
+    const res = await patch(`/orders/${c.data.id}/status`, { status: "delivered" });
+    expect((await json(res)).data.status).toBe("delivered");
+  });
+
+  test("delivered -> refunded", async () => {
+    const c = await json(await post("/orders", VALID_ORDER));
+    await patch(`/orders/${c.data.id}/status`, { status: "confirmed" });
+    await patch(`/orders/${c.data.id}/status`, { status: "processing" });
+    await patch(`/orders/${c.data.id}/status`, { status: "shipped" });
+    await patch(`/orders/${c.data.id}/status`, { status: "delivered" });
+    const res = await patch(`/orders/${c.data.id}/status`, { status: "refunded" });
+    expect((await json(res)).data.status).toBe("refunded");
+  });
+
+  test("confirmed -> cancelled", async () => {
+    const c = await json(await post("/orders", VALID_ORDER));
+    await patch(`/orders/${c.data.id}/status`, { status: "confirmed" });
+    const res = await patch(`/orders/${c.data.id}/status`, { status: "cancelled" });
+    expect((await json(res)).data.status).toBe("cancelled");
+  });
+
+  test("processing -> cancelled", async () => {
+    const c = await json(await post("/orders", VALID_ORDER));
+    await patch(`/orders/${c.data.id}/status`, { status: "confirmed" });
+    await patch(`/orders/${c.data.id}/status`, { status: "processing" });
+    const res = await patch(`/orders/${c.data.id}/status`, { status: "cancelled" });
+    expect((await json(res)).data.status).toBe("cancelled");
+  });
+
+  test("invalid: pending -> shipped", async () => {
+    const c = await json(await post("/orders", VALID_ORDER));
+    const res = await patch(`/orders/${c.data.id}/status`, { status: "shipped" });
     expect(res.status).toBe(409);
   });
 
-  test('returns 404 for missing order', async () => {
-    const res = await del(app, '/orders/nonexistent');
-    expect(res.status).toBe(404);
+  test("invalid: cancelled -> confirmed", async () => {
+    const c = await json(await post("/orders", VALID_ORDER));
+    await del(`/orders/${c.data.id}`);
+    const res = await patch(`/orders/${c.data.id}/status`, { status: "confirmed" });
+    expect(res.status).toBe(409);
+  });
+
+  test("invalid: refunded -> any", async () => {
+    const c = await json(await post("/orders", VALID_ORDER));
+    await patch(`/orders/${c.data.id}/status`, { status: "confirmed" });
+    await patch(`/orders/${c.data.id}/status`, { status: "processing" });
+    await patch(`/orders/${c.data.id}/status`, { status: "shipped" });
+    await patch(`/orders/${c.data.id}/status`, { status: "delivered" });
+    await patch(`/orders/${c.data.id}/status`, { status: "refunded" });
+    const res = await patch(`/orders/${c.data.id}/status`, { status: "pending" });
+    expect(res.status).toBe(409);
   });
 });
 
-describe('POST /orders/:id/cancel', () => {
-  test('cancels a pending order', async () => {
-    const order = await createOrder();
-    const res = await post(app, `/orders/${order.id}/cancel`, { reason: 'Changed my mind' });
-    expect(res.status).toBe(200);
-    expect(res.data.data.status).toBe('cancelled');
-    expect(res.data.data.cancellationReason).toBe('Changed my mind');
+describe("Items management", () => {
+  beforeEach(() => store.clear());
+
+  test("POST /orders/:id/items — add item", async () => {
+    const c = await json(await post("/orders", VALID_ORDER));
+    const newItem = { productId: "p2", name: "Gadget", quantity: 1, unitPrice: 14.99 };
+    const res = await post(`/orders/${c.data.id}/items`, newItem);
+    const body = await json(res);
+    expect(body.success).toBe(true);
+    expect(body.data.items).toHaveLength(2);
+    expect(body.data.total).toBeCloseTo(34.97);
   });
 
-  test('cancels a confirmed order', async () => {
-    const order = await createOrder();
-    await put(app, `/orders/${order.id}`, { status: 'confirmed' });
-    const res = await post(app, `/orders/${order.id}/cancel`);
-    expect(res.status).toBe(200);
-    expect(res.data.data.status).toBe('cancelled');
+  test("DELETE /orders/:id/items/:productId — remove item", async () => {
+    const order = { ...VALID_ORDER, items: [VALID_ITEM, { productId: "p2", name: "Gadget", quantity: 1, unitPrice: 5 }] };
+    const c = await json(await post("/orders", order));
+    const res = await del(`/orders/${c.data.id}/items/p1`);
+    const body = await json(res);
+    expect(body.success).toBe(true);
+    expect(body.data.items).toHaveLength(1);
+    expect(body.data.items[0].productId).toBe("p2");
   });
 
-  test('rejects cancelling shipped order', async () => {
-    const order = await createOrder();
-    await put(app, `/orders/${order.id}`, { status: 'shipped' });
-    const res = await post(app, `/orders/${order.id}/cancel`);
-    expect(res.status).toBe(409);
-  });
-
-  test('rejects cancelling delivered order', async () => {
-    const order = await createOrder();
-    await put(app, `/orders/${order.id}`, { status: 'delivered' });
-    const res = await post(app, `/orders/${order.id}/cancel`);
-    expect(res.status).toBe(409);
-  });
-
-  test('returns 404 for missing order', async () => {
-    const res = await post(app, '/orders/nonexistent/cancel');
-    expect(res.status).toBe(404);
-  });
-});
-
-describe('GET /orders/user/:userId', () => {
-  test('gets orders for a user', async () => {
-    await createOrder({ userId: 'user-1' });
-    await createOrder({ userId: 'user-1' });
-    await createOrder({ userId: 'user-2' });
-    const res = await get(app, '/orders/user/user-1');
-    expect(res.status).toBe(200);
-    expect(res.data.data.length).toBe(2);
-    expect(res.data.total).toBe(2);
-  });
-
-  test('returns empty for user with no orders', async () => {
-    const res = await get(app, '/orders/user/user-99');
-    expect(res.data.data).toEqual([]);
-  });
-
-  test('filters by status', async () => {
-    const order = await createOrder({ userId: 'user-1' });
-    await put(app, `/orders/${order.id}`, { status: 'confirmed' });
-    await createOrder({ userId: 'user-1' });
-    const res = await get(app, '/orders/user/user-1?status=confirmed');
-    expect(res.data.data.length).toBe(1);
-  });
-
-  test('orders sorted by createdAt descending', async () => {
-    await createOrder({ userId: 'user-1' });
-    await createOrder({ userId: 'user-1' });
-    const res = await get(app, '/orders/user/user-1');
-    const dates = res.data.data.map((o: any) => new Date(o.createdAt).getTime());
-    expect(dates[0]).toBeGreaterThanOrEqual(dates[1]);
+  test("DELETE last item — cancels order", async () => {
+    const c = await json(await post("/orders", VALID_ORDER));
+    const res = await del(`/orders/${c.data.id}/items/p1`);
+    const body = await json(res);
+    expect(body.success).toBe(true);
+    expect(body.data.status).toBe("cancelled");
   });
 });

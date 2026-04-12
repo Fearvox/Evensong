@@ -1,122 +1,256 @@
-import { describe, test, expect, beforeEach } from 'bun:test';
-import { createApp, resetStore } from '../app';
-import { post, get, put } from '../../../shared/test-utils';
+/**
+ * Products service — edge cases and validation tests
+ * Validation errors, bulk operations, boundary conditions, stock history
+ */
+import { describe, test, expect, beforeEach } from "bun:test";
+import { handleRequest } from "../handlers";
+import { productStore, categoryStore } from "../store";
 
-const app = createApp();
+// --- Helpers ---
 
-beforeEach(() => resetStore());
-
-const validProduct = {
-  name: 'Widget',
-  description: 'A useful widget',
-  price: 29.99,
-  stock: 100,
-  category: 'electronics',
-};
-
-async function createProduct(overrides = {}) {
-  const res = await post(app, '/products', { ...validProduct, ...overrides });
-  return res.data.data;
+async function req(method: string, path: string, body?: unknown) {
+  const init: RequestInit = { method, headers: { "Content-Type": "application/json" } };
+  if (body) init.body = JSON.stringify(body);
+  const res = await handleRequest(new Request(`http://localhost:3003${path}`, init));
+  return { status: res.status, json: (await res.json()) as any };
 }
 
-describe('creation edge cases', () => {
-  test('floors stock to integer', async () => {
-    const res = await post(app, '/products', { ...validProduct, stock: 10.7 });
-    expect(res.data.data.stock).toBe(10);
+const sample = {
+  name: "Edge Widget",
+  description: "For edge case testing",
+  price: 19.99,
+  stock: 50,
+  category: "testing",
+  tags: ["edge"],
+};
+
+beforeEach(() => {
+  productStore.clear();
+  categoryStore.clear();
+});
+
+// --- Validation ---
+
+describe("Validation", () => {
+  test("POST /products — missing name", async () => {
+    const res = await req("POST", "/products", { price: 10, stock: 5, category: "x" });
+    expect(res.status).toBe(400);
+    expect(res.json.success).toBe(false);
+    expect(res.json.error).toContain("name");
   });
 
-  test('defaults tags to empty array when not provided', async () => {
-    const res = await post(app, '/products', validProduct);
-    expect(res.data.data.tags).toEqual([]);
+  test("POST /products — missing price", async () => {
+    const res = await req("POST", "/products", { name: "X", stock: 5, category: "x" });
+    expect(res.status).toBe(400);
+    expect(res.json.error).toContain("price");
   });
 
-  test('sets createdAt and updatedAt', async () => {
-    const res = await post(app, '/products', validProduct);
-    expect(res.data.data.createdAt).toBeDefined();
-    expect(res.data.data.updatedAt).toBeDefined();
+  test("POST /products — negative price", async () => {
+    const res = await req("POST", "/products", { name: "X", price: -5, stock: 0, category: "x" });
+    expect(res.status).toBe(400);
+    expect(res.json.error).toContain("price");
   });
 
-  test('rejects negative price', async () => {
-    const res = await post(app, '/products', { ...validProduct, price: -5 });
+  test("POST /products — zero price rejected (must be positive)", async () => {
+    const res = await req("POST", "/products", { name: "X", price: 0, stock: 0, category: "x" });
+    expect(res.status).toBe(400);
+    expect(res.json.error).toContain("price");
+  });
+
+  test("POST /products — negative stock", async () => {
+    const res = await req("POST", "/products", { name: "X", price: 10, stock: -1, category: "x" });
+    expect(res.status).toBe(400);
+    expect(res.json.error).toContain("stock");
+  });
+
+  test("POST /products — missing category", async () => {
+    const res = await req("POST", "/products", { name: "X", price: 10, stock: 0 });
+    expect(res.status).toBe(400);
+    expect(res.json.error).toContain("category");
+  });
+
+  test("POST /products — invalid JSON body", async () => {
+    const rawRes = await handleRequest(
+      new Request("http://localhost:3003/products", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: "not json",
+      }),
+    );
+    expect(rawRes.status).toBe(400);
+  });
+
+  test("POST /products — tags must be array", async () => {
+    const res = await req("POST", "/products", {
+      ...sample,
+      tags: "not-array",
+    });
+    expect(res.status).toBe(400);
+    expect(res.json.error).toContain("tags");
+  });
+
+  test("PUT /products/:id — invalid price", async () => {
+    const created = await req("POST", "/products", sample);
+    const id = created.json.data.id;
+    const res = await req("PUT", `/products/${id}`, { price: -10 });
     expect(res.status).toBe(400);
   });
 
-  test('rejects empty name', async () => {
-    const res = await post(app, '/products', { ...validProduct, name: '' });
+  test("PUT /products/:id — invalid stock", async () => {
+    const created = await req("POST", "/products", sample);
+    const id = created.json.data.id;
+    const res = await req("PUT", `/products/${id}`, { stock: -5 });
     expect(res.status).toBe(400);
   });
 
-  test('rejects name exceeding max length', async () => {
-    const res = await post(app, '/products', { ...validProduct, name: 'a'.repeat(201) });
+  test("PUT /products/:id — empty name rejected", async () => {
+    const created = await req("POST", "/products", sample);
+    const id = created.json.data.id;
+    const res = await req("PUT", `/products/${id}`, { name: "" });
+    expect(res.status).toBe(400);
+  });
+
+  test("PUT /products/:id — tags must be array", async () => {
+    const created = await req("POST", "/products", sample);
+    const id = created.json.data.id;
+    const res = await req("PUT", `/products/${id}`, { tags: "not-array" });
+    expect(res.status).toBe(400);
+  });
+
+  test("PUT /products/:id — active must be boolean", async () => {
+    const created = await req("POST", "/products", sample);
+    const id = created.json.data.id;
+    const res = await req("PUT", `/products/${id}`, { active: "yes" });
+    expect(res.status).toBe(400);
+  });
+
+  test("POST /products/:id/stock — non-number quantity", async () => {
+    const created = await req("POST", "/products", sample);
+    const id = created.json.data.id;
+    const res = await req("POST", `/products/${id}/stock`, { quantity: "five" });
+    expect(res.status).toBe(400);
+  });
+
+  test("POST /products/:id/stock — non-existent product", async () => {
+    const res = await req("POST", "/products/nonexistent/stock", { quantity: 5 });
+    expect(res.status).toBe(404);
+  });
+
+  test("POST /products/categories — missing name", async () => {
+    const res = await req("POST", "/products/categories", {});
     expect(res.status).toBe(400);
   });
 });
 
-describe('list filtering edge cases', () => {
-  test('returns all when no filters', async () => {
-    await createProduct({ name: 'A', category: 'x' });
-    await createProduct({ name: 'B', category: 'y' });
-    const res = await get(app, '/products');
-    expect(res.data.data.length).toBe(2);
-  });
+// --- Bulk Price Update ---
 
-  test('combined category and price filter', async () => {
-    await createProduct({ name: 'Cheap', price: 5, category: 'x' });
-    await createProduct({ name: 'Expensive', price: 500, category: 'x' });
-    await createProduct({ name: 'Other', price: 50, category: 'y' });
-    const res = await get(app, '/products?category=x&minPrice=10');
-    expect(res.data.data.length).toBe(1);
-    expect(res.data.data[0].name).toBe('Expensive');
-  });
-});
-
-describe('reserve/release edge cases', () => {
-  test('reserves exact available amount', async () => {
-    const product = await createProduct({ stock: 10 });
-    const res = await post(app, `/products/${product.id}/reserve`, { quantity: 10 });
+describe("Bulk price update", () => {
+  test("increase price for category", async () => {
+    await req("POST", "/products", { ...sample, price: 100, category: "elec" });
+    await req("POST", "/products", { ...sample, price: 200, category: "elec" });
+    await req("POST", "/products", { ...sample, price: 50, category: "other" });
+    const res = await req("POST", "/products/bulk-price", {
+      category: "elec",
+      adjustment: 10,
+    });
     expect(res.status).toBe(200);
-    expect(res.data.data.reservedStock).toBe(10);
+    expect(res.json.data.updated).toBe(2);
+    expect(res.json.data.products[0].price).toBe(110);
+    expect(res.json.data.products[1].price).toBe(210);
   });
 
-  test('reserves then releases full amount', async () => {
-    const product = await createProduct({ stock: 20 });
-    await post(app, `/products/${product.id}/reserve`, { quantity: 15 });
-    const res = await post(app, `/products/${product.id}/release`, { quantity: 15 });
-    expect(res.data.data.reservedStock).toBe(0);
+  test("decrease price for category", async () => {
+    await req("POST", "/products", { ...sample, price: 100, category: "sale" });
+    const res = await req("POST", "/products/bulk-price", {
+      category: "sale",
+      adjustment: -20,
+    });
+    expect(res.json.data.products[0].price).toBe(80);
   });
 
-  test('multiple sequential reserves accumulate', async () => {
-    const product = await createProduct({ stock: 100 });
-    await post(app, `/products/${product.id}/reserve`, { quantity: 10 });
-    await post(app, `/products/${product.id}/reserve`, { quantity: 20 });
-    const check = await get(app, `/products/${product.id}`);
-    expect(check.data.data.reservedStock).toBe(30);
+  test("price cannot go below zero", async () => {
+    await req("POST", "/products", { ...sample, price: 10, category: "cheap" });
+    const res = await req("POST", "/products/bulk-price", {
+      category: "cheap",
+      adjustment: -20,
+    });
+    // Product with price 10 - 20 = -10, should be skipped (newPrice < 0)
+    expect(res.json.data.updated).toBe(0);
   });
 
-  test('reserve floors quantity to integer', async () => {
-    const product = await createProduct({ stock: 10 });
-    const res = await post(app, `/products/${product.id}/reserve`, { quantity: 3.7 });
-    expect(res.data.data.reservedStock).toBe(3);
-  });
-
-  test('rejects non-number quantity in reserve', async () => {
-    const product = await createProduct();
-    const res = await post(app, `/products/${product.id}/reserve`, { quantity: 'five' });
+  test("missing category returns error", async () => {
+    const res = await req("POST", "/products/bulk-price", { adjustment: 5 });
     expect(res.status).toBe(400);
   });
 
-  test('rejects non-number quantity in release', async () => {
-    const product = await createProduct();
-    const res = await post(app, `/products/${product.id}/release`, { quantity: 'ten' });
+  test("missing adjustment returns error", async () => {
+    const res = await req("POST", "/products/bulk-price", { category: "x" });
     expect(res.status).toBe(400);
   });
 });
 
-describe('update edge cases', () => {
-  test('update preserves fields not in payload', async () => {
-    const product = await createProduct({ tags: ['a', 'b'] });
-    const res = await put(app, `/products/${product.id}`, { name: 'New Name' });
-    expect(res.data.data.tags).toEqual(['a', 'b']);
-    expect(res.data.data.price).toBe(29.99);
+// --- Stock history ---
+
+describe("Stock history (store level)", () => {
+  test("stock changes are recorded", async () => {
+    const created = await req("POST", "/products", { ...sample, stock: 10 });
+    const id = created.json.data.id;
+    await req("POST", `/products/${id}/stock`, { quantity: 5 });
+    await req("POST", `/products/${id}/stock`, { quantity: -3 });
+    const history = productStore.getStockHistory(id);
+    // initial + 2 adjustments
+    expect(history.length).toBe(3);
+    expect(history[0].reason).toBe("initial");
+    expect(history[1].reason).toBe("add");
+    expect(history[2].reason).toBe("subtract");
+  });
+});
+
+// --- Edge cases ---
+
+describe("Edge cases", () => {
+  test("empty tags array is valid", async () => {
+    const res = await req("POST", "/products", { ...sample, tags: [] });
+    expect(res.status).toBe(201);
+    expect(res.json.data.tags).toEqual([]);
+  });
+
+  test("unknown route returns 404", async () => {
+    const res = await req("GET", "/unknown");
+    expect(res.status).toBe(404);
+  });
+
+  test("PUT updates only specified fields", async () => {
+    const created = await req("POST", "/products", sample);
+    const id = created.json.data.id;
+    await req("PUT", `/products/${id}`, { active: false });
+    const get = await req("GET", `/products/${id}`);
+    expect(get.json.data.active).toBe(false);
+    expect(get.json.data.name).toBe("Edge Widget"); // unchanged
+    expect(get.json.data.price).toBe(19.99); // unchanged
+  });
+
+  test("update with custom currency", async () => {
+    const created = await req("POST", "/products", { ...sample, currency: "EUR" });
+    const id = created.json.data.id;
+    expect(created.json.data.currency).toBe("EUR");
+    const res = await req("PUT", `/products/${id}`, { currency: "GBP" });
+    expect(res.json.data.currency).toBe("GBP");
+  });
+
+  test("multiple products same category counted in low-stock", async () => {
+    await req("POST", "/products", { ...sample, stock: 1 });
+    await req("POST", "/products", { ...sample, stock: 3 });
+    await req("POST", "/products", { ...sample, stock: 100 });
+    const res = await req("GET", "/products/low-stock?threshold=5");
+    expect(res.json.data.length).toBe(2);
+  });
+
+  test("search and category filter combined", async () => {
+    await req("POST", "/products", { ...sample, name: "Red Shoe", category: "shoes" });
+    await req("POST", "/products", { ...sample, name: "Red Hat", category: "hats" });
+    const res = await req("GET", "/products?category=shoes&search=red");
+    expect(res.json.data.length).toBe(1);
+    expect(res.json.data[0].name).toBe("Red Shoe");
   });
 });
