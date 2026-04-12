@@ -183,16 +183,23 @@ async function cmdRun(args: string[]): Promise<void> {
     }
   }
 
-  // Aggregate and save stats
-  if (results.length >= 2) {
-    const summary = aggregateStats(configName, results)
+  const validResults = results.filter(r => !r.invalid)
+  const invalidCount = results.length - validResults.length
+
+  if (invalidCount > 0) {
+    console.log(`\n  ⚠  ${invalidCount}/${results.length} runs invalid (rate-limited or errored)`)
+  }
+
+  // Aggregate and save stats (using only valid results)
+  if (validResults.length >= 2) {
+    const summary = aggregateStats(configName, validResults)
     const statsPath = saveStats(summary)
     printStats(summary)
     console.log(`  📊 Stats saved: ${statsPath}`)
-  } else if (results.length === 1) {
-    console.log(`\n  ⚠  Only 1/${repeatCount} runs succeeded — no stats aggregation`)
+  } else if (validResults.length === 1) {
+    console.log(`\n  ⚠  Only 1/${repeatCount} valid runs — no stats aggregation`)
   } else {
-    console.error(`\n  ❌ All ${repeatCount} runs failed — no results`)
+    console.error(`\n  ❌ All ${repeatCount} runs failed or invalid — no results`)
   }
 }
 

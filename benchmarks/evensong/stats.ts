@@ -82,20 +82,21 @@ function round2(n: number): number {
  * Aggregate multiple RunResults into a StatsSummary
  */
 export function aggregateStats(configName: string, results: RunResult[]): StatsSummary {
-  if (results.length === 0) throw new Error('No results to aggregate')
+  const valid = results.filter(r => !r.invalid)
+  if (valid.length === 0) throw new Error(`No valid results to aggregate (${results.length} total, all invalid)`)
 
-  const tests = results.map(r => r.tests)
-  const failures = results.map(r => r.failures)
-  const times = results.map(r => r.time_min)
-  const assertions = results.map(r => r.assertions).filter((a): a is number => a != null)
+  const tests = valid.map(r => r.tests)
+  const failures = valid.map(r => r.failures)
+  const times = valid.map(r => r.time_min)
+  const assertions = valid.map(r => r.assertions).filter((a): a is number => a != null)
 
   const testsMean = mean(tests)
   const testsStd = std(tests)
 
   return {
     config: configName,
-    n: results.length,
-    runs: results.map(r => r.run),
+    n: valid.length,
+    runs: valid.map(r => r.run),
     date: new Date().toISOString().split('T')[0],
 
     tests: descriptive(tests),
