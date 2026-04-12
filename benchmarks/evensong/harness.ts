@@ -177,8 +177,10 @@ export async function runBenchmark(config: RunConfig): Promise<RunResult> {
     grade: null,  // assigned manually or by emotion extraction
     notes: `${provider.name} ${config.pressure} ${config.memory}, ${logger.count} transcript entries`,
     transcript_path: transcriptPath,
-    invalid: rateLimited || undefined,
-    invalid_reason: rateLimited ? 'Rate limit hit during execution' : undefined,
+    // Only mark invalid if rate-limited AND no meaningful work was done
+    // (model may hit limit at very end after producing valid output)
+    invalid: (rateLimited && effectiveTests === 0) || undefined,
+    invalid_reason: (rateLimited && effectiveTests === 0) ? 'Rate limit hit during execution' : undefined,
   }
 
   // 9. Save result
