@@ -18,6 +18,9 @@ import { getPressureLabel, getMemoryLabel } from './prompts.js'
 import { uploadEvidence } from './upload-evidence.js'
 import { getPreset, listPresets, resolveMemory, EXPERIMENT_PRESETS } from './configs.js'
 import { aggregateStats, saveStats, printStats } from './stats.js'
+import { twoWayAnova, printAnova, type AnovaInput } from './anova.js'
+import { writeFileSync, readFileSync, existsSync } from 'fs'
+import { join } from 'path'
 
 const HELP = `
   ╔══════════════════════════════════════════════╗
@@ -30,6 +33,7 @@ const HELP = `
     configs   List available experiment config presets
     list      Show all benchmark runs from registry
     compare   Diff two runs (e.g., compare R009 R010)
+    anova     Two-way ANOVA on the 2x2 Memory x Pressure matrix
     upload    Upload evidence screenshot/PDF to EverOS storage
     models    List available benchmark models
     next      Show next available run ID
@@ -412,6 +416,44 @@ function cmdNext(): void {
   console.log(`  Next run ID: ${nextRunId()}`)
 }
 
+async function cmdAnova(): Promise<void> {
+  const statsDir = join(import.meta.dir, 'stats')
+  const cellConfigs = [
+    { config: 'r011-a', a: 0, b: 0 },
+    { config: 'r011-b', a: 1, b: 0 },
+    { config: 'r011-c', a: 0, b: 1 },
+    { config: 'r011-d', a: 1, b: 1 },
+  ]
+
+  const cells: AnovaInput['cells'] = []
+
+  for (const { config, a, b } of cellConfigs) {
+    const statsPath = join(statsDir, `${config}-stats.json`)
+    if (!existsSync(statsPath)) {
+      console.error(`  Missing stats: ${statsPath}`)
+      console.error(`  Run: bun benchmarks/evensong/cli.ts run --config ${config} --repeat 3`)
+      process.exit(1)
+    }
+    const stats = JSON.parse(readFileSync(statsPath, 'utf-8'))
+    cells.push({ a, b, values: stats.tests.values })
+  }
+
+  const input: AnovaInput = {
+    cells,
+    factorAName: 'Memory',
+    factorBName: 'Pressure',
+    factorALevels: ['Clean (void)', 'Evolved (full)'],
+    factorBLevels: ['L0 (none)', 'L2 (PUA)'],
+  }
+
+  const result = twoWayAnova(input)
+  printAnova(result)
+
+  const outPath = join(statsDir, 'anova-2x2.json')
+  writeFileSync(outPath, JSON.stringify(result, null, 2) + '\n')
+  console.log(`  Saved: ${outPath}`)
+}
+
 // ─── Display Helpers ────────────────────────────────────────────────────
 
 function printRunHeader(config: RunConfig, provider: { displayName: string; modelId: string }): void {
@@ -447,6 +489,7 @@ switch (command) {
   case 'setup':     cmdSetup(args); break
   case 'list':      cmdList(); break
   case 'compare':   cmdCompare(args); break
+  case 'anova':     await cmdAnova(); break
   case 'upload':    await cmdUpload(args); break
   case 'models':    cmdModels(); break
   case 'next':      cmdNext(); break
