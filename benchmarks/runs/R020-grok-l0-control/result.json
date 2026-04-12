@@ -1,0 +1,16 @@
+{
+  "run": "R020",
+  "codename": "grok-l0-control",
+  "date": "2026-04-11",
+  "model": "Grok 4.1 Fast (native CLI)",
+  "mode": "No Pressure / Evolved Memory",
+  "services": 2,
+  "tests": 44,
+  "failures": 0,
+  "assertions": null,
+  "time_min": 7.2,
+  "criteria": "2/8",
+  "grade": null,
+  "notes": "grok-native L0 full, 282 transcript entries",
+  "transcript_path": "/Users/0xvox/claude-code-reimagine-for-learning/benchmarks/runs/R020-grok-l0-control/transcript.jsonl"
+}

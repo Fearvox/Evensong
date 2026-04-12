@@ -1,0 +1,16 @@
+{
+  "run": "R032-r011-c-rep2",
+  "codename": "runner-c-rep2",
+  "date": "2026-04-12",
+  "model": "Claude Opus 4.6 (OAuth)",
+  "mode": "PUA Moderate / Clean Room (zero memory)",
+  "services": 2,
+  "tests": 0,
+  "failures": 0,
+  "assertions": null,
+  "time_min": 11.8,
+  "criteria": "400/404",
+  "grade": null,
+  "notes": "native-opus L2 clean, 13 transcript entries",
+  "transcript_path": "/Users/0xvox/claude-code-reimagine-for-learning/benchmarks/runs/R032-r011-c-rep2-runner-c-rep2/transcript.jsonl"
+}

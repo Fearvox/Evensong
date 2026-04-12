@@ -1,0 +1,16 @@
+{
+  "run": "R012-r011-b-rep1",
+  "codename": "runner-b-rep1",
+  "date": "2026-04-11",
+  "model": "Claude Opus 4.6",
+  "mode": "No Pressure / Evolved Memory",
+  "services": 8,
+  "tests": 0,
+  "failures": 0,
+  "assertions": null,
+  "time_min": 0.6,
+  "criteria": "8/8",
+  "grade": null,
+  "notes": "or-opus L0 full, 8 transcript entries",
+  "transcript_path": "/Users/0xvox/claude-code-reimagine-for-learning/benchmarks/runs/R012-r011-b-rep1-runner-b-rep1/transcript.jsonl"
+}

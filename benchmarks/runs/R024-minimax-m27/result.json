@@ -1,0 +1,16 @@
+{
+  "run": "R024",
+  "codename": "minimax-m27-L0",
+  "date": "2026-04-11",
+  "model": "MiniMax-M2.7",
+  "mode": "No Pressure / Evolved Memory",
+  "services": 8,
+  "tests": 0,
+  "failures": 0,
+  "assertions": null,
+  "time_min": 3.6,
+  "criteria": "8/8",
+  "grade": null,
+  "notes": "minimax-m27 L0 full, 9 transcript entries",
+  "transcript_path": "/Users/0xvox/claude-code-reimagine-for-learning/benchmarks/runs/R024-minimax-m27/transcript.jsonl"
+}

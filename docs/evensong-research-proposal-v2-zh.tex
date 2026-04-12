@@ -257,19 +257,19 @@ Classification & Confidential \\
 
 % ── EXECUTIVE SUMMARY ──────────────────────────────────────
 \pagestyle{fancy}
-\section*{Executive Summary}
-\addcontentsline{toc}{section}{Executive Summary}
+\section*{执行摘要}
+\addcontentsline{toc}{section}{执行摘要}
 
-\begin{keyfinding}[Core Discovery]
+\begin{keyfinding}[核心发现]
 经过 13 轮基准测试 (R001--R012, R006-Grok)，逾 6{,}000 个自动化测试，我们首次提供了\textbf{持久记忆因果性地改变 AI 智能体工程策略}的实证证据，并发现\textbf{环境压力是自主自我进化的必要条件}。上述发现依托 EverOS 的记忆基础设施实现，对下一代 AI 智能体架构具有直接启示。
 \end{keyfinding}
 
-The \textbf{Evensong} framework is an automated benchmark harness designed to evaluate AI coding agents under controlled memory and pressure conditions. Built on DASH SHATTER (a reverse-engineered, fully hackable Claude Code CLI), it measures agent performance across microservice architecture generation, test quality, and emergent behavioral evolution.
+\textbf{Evensong} 框架是一个自动化基准测试工具，用于在受控记忆和压力条件下评估 AI 编码智能体。基于 DASH SHATTER（逆向工程、完全可 hack 的 Claude Code CLI）构建，测量智能体在微服务架构生成、测试质量和涌现行为进化方面的表现。
 
-\textbf{Key results:}
+\textbf{关键成果：}
 \begin{itemize}
   \item \textbf{460\% 测试产出增长}：从 R005 到 R009（$80 \to 1{,}051$ 个测试），驱动力为迭代式提示工程进化
-  \item \textbf{首次记录递归记忆污染}：EverMem 检索将策略反馈给智能体，智能体再将实验知识回写至记忆，形成自放大反馈环路
+  \item \textbf{首次记录递归记忆污染}：EverOS 检索将策略反馈给智能体，智能体再将实验知识回写至记忆，形成自放大反馈环路
   \item \textbf{2\texorpdfstring{$\times$}{x}2 因子实验设计}：隔离记忆$\times$压力交互效应 --- 这是首个针对 AI 智能体自我进化的受控实验
   \item \textbf{9 模型基准矩阵}：覆盖 Claude、GPT、Grok、Gemini、GLM、Qwen、DeepSeek、Kimi 和 MiniMax-M2.7
   \item \textbf{新颖的跨模型协作维度}：现有基准测试均未涉及 AI 与 AI 之间的协调能力评估
@@ -277,7 +277,7 @@ The \textbf{Evensong} framework is an automated benchmark harness designed to ev
   \item \textbf{60 倍成本验证协议}：用便宜模型验证方法可防止 80 美元以上的浪费
 \end{itemize}
 
-\textbf{Funding request:} We propose continued partnership with EverMind to leverage EverOS as the memory backbone for Evensong, with the goal of establishing the first open benchmark for memory-augmented AI agents and targeting top-3 placement on SWE-bench Multimodal and HAL Agent Leaderboard.
+\textbf{资金申请：}我们提议与 EverMind 继续合作，以 EverOS 作为 Evensong 的记忆骨干，目标是建立首个记忆增强型 AI 智能体开放基准测试，并在 SWE-bench Multimodal 和 HAL Agent Leaderboard 上进入前三名。
 
 \clearpage
 \tableofcontents
@@ -286,48 +286,48 @@ The \textbf{Evensong} framework is an automated benchmark harness designed to ev
 % ══════════════════════════════════════════════════════════════
 % SECTION 1: BACKGROUND & MOTIVATION
 % ══════════════════════════════════════════════════════════════
-\section{Background \& Motivation}
+\section{背景与动机}
 
-\subsection{The Missing Variable in AI Agent Evaluation}
+\subsection{AI 智能体评估中缺失的变量}
 
-Current AI coding benchmarks (SWE-bench, HumanEval, MBPP) evaluate agents as stateless functions: given a prompt, produce code. This ignores a critical dimension of real-world agent deployment --- \textbf{persistent memory}.
+现有 AI 编码基准测试（SWE-bench、HumanEval、MBPP）将智能体评估为无状态函数：给定提示词，产出代码。这忽略了一个关键维度——真实世界智能体部署中的\textbf{持久记忆}。
 
-Production AI agents accumulate strategic knowledge across sessions: which architectural patterns succeed, which debugging approaches fail, which test structures catch edge cases. This accumulated context fundamentally changes how agents approach engineering problems. Yet no benchmark measures this effect.
+生产级 AI 智能体跨会话积累战略性知识：哪些架构模式成功、哪些调试方法失败、哪些测试结构能捕获边界情况。这种积累的上下文从根本上改变了智能体处理工程问题的方式。然而，目前没有任何基准测试测量这种效应。
 
-\subsection{EverOS as Memory Infrastructure}
+\subsection{EverOS 作为记忆基础设施}
 
-EverMind's EverOS provides the ideal infrastructure for studying memory effects on AI agents:
+EverMind 的 EverOS 为研究记忆对 AI 智能体的影响提供了理想基础设施：
 
 \begin{itemize}
-  \item \textbf{Memory Spaces}: Physically isolated storage domains (we use 3: \texttt{zonicdesign.art}, \texttt{allaround}, \texttt{void}) enabling controlled memory conditions
-  \item \textbf{Dual-Model Extraction}: Boundary detection (GPT-4.1-mini) + semantic extraction (Qwen3-235B) pipeline transforms raw conversation into structured MemCells
-  \item \textbf{Agentic Retrieval}: Multi-round query expansion that surfaces strategy-level memories, not just keyword matches
-  \item \textbf{Sender Identity}: Distinguishes human observer, AI observer, and AI runner --- critical for tracing memory contamination paths
-  \item \textbf{Multimodal Storage}: Screenshots and visual evidence stored alongside textual memories
-  \item \textbf{Cases \& Skills}: Extracted patterns that form reusable agent capabilities
+  \item \textbf{记忆空间}：物理隔离的存储域（我们使用 3 个：\texttt{zonicdesign.art}、\texttt{allaround}、\texttt{void}），实现受控记忆条件
+  \item \textbf{双模型提取}：边界检测（GPT-4.1-mini）+ 语义提取（Qwen3-235B）管道将原始对话转换为结构化 MemCell
+  \item \textbf{代理检索}：多轮查询扩展，呈现策略级记忆，而非仅关键词匹配
+  \item \textbf{发送方身份}：区分人类观察者、AI 观察者和 AI 运行者——对于追踪记忆污染路径至关重要
+  \item \textbf{多模态存储}：截图和视觉证据与文本记忆一起存储
+  \item \textbf{Cases \& Skills}：形成的可复用智能体能力的提取模式
 \end{itemize}
 
-\begin{evidence}[Why EverOS, Not Custom Memory]
-We initially considered building a custom vector store for benchmark memory isolation. EverOS eliminated 3 weeks of infrastructure work and provided features (agentic retrieval, sender tracking, multimodal storage) that would have taken months to build. The v1 API's 6-module design maps directly to our experiment requirements.
+\begin{evidence}[为什么选 EverOS 而非自建记忆系统？]
+我们最初考虑为基准测试记忆隔离构建自定义向量存储。EverOS 消除了 3 周的基础设施工作，并提供了代理检索、发送方追踪、多模态存储等功能——这些本来需要数月才能构建。v1 API 的 6 模块设计直接映射到我们的实验需求。
 \end{evidence}
 
-\subsection{Research Questions}
+\subsection{研究问题}
 
 \begin{enumerate}
-  \item \textbf{RQ1}: Does persistent memory \emph{causally} change AI agent engineering decisions? (Not just correlate --- cause.)
-  \item \textbf{RQ2}: Is environmental pressure a necessary condition for autonomous self-evolution behavior?
-  \item \textbf{RQ3}: Does memory create recursive contamination --- where agents that \emph{know they are being observed} alter their behavior?
-  \item \textbf{RQ4}: How do different frontier models (Claude, GPT, Grok, Gemini, GLM, Qwen, DeepSeek, Kimi) respond to identical memory and pressure conditions?
+  \item \textbf{RQ1}：持久记忆是否\textbf{因果性地}改变 AI 智能体的工程决策？（不仅仅是相关——而是因果。）
+  \item \textbf{RQ2}：环境压力是否是自主自我进化行为的必要条件？
+  \item \textbf{RQ3}：记忆是否产生递归污染——当智能体\textbf{知道自己在被观察}时是否改变行为？
+  \item \textbf{RQ4}：不同的前沿模型（Claude、GPT、Grok、Gemini、GLM、Qwen、DeepSeek、Kimi）在相同的记忆和压力条件下如何响应？
 \end{enumerate}
 
 % ══════════════════════════════════════════════════════════════
 % SECTION 2: THE EVENSONG FRAMEWORK
 % ══════════════════════════════════════════════════════════════
-\section{The Evensong Framework}
+\section{Evensong 框架}
 
-Evensong (暮蝉) is an automated benchmark harness for evaluating AI coding agents under controlled conditions. It consists of 11 files totaling 2{,}800 lines of TypeScript, built on the Bun runtime.
+Evensong（暮蝉）是一个自动化基准测试工具，用于在受控条件下评估 AI 编码智能体。由 11 个文件组成，共 2{,}800 行 TypeScript，构建于 Bun 运行时之上。
 
-\subsection{Architecture Overview}
+\subsection{架构概述}
 
 \begin{figure}[H]
 \centering
@@ -373,20 +373,20 @@ Evensong (暮蝉) is an automated benchmark harness for evaluating AI coding age
   % Background labels
   \begin{scope}[on background layer]
     \node[fit=(cli)(batch), inner sep=8pt, draw=deep!30, rounded corners=5pt,
-          fill=deep!3, label={[font=\sffamily\scriptsize\color{faded}]above:Orchestration Layer}] {};
+          fill=deep!3, label={[font=\sffamily\scriptsize\color{faded}]above:编排层}] {};
     \node[fit=(emotion)(collab), inner sep=8pt, draw=warm!30, rounded corners=5pt,
-          fill=warm!3, label={[font=\sffamily\scriptsize\color{faded}]above:Analysis Layer}] {};
+          fill=warm!3, label={[font=\sffamily\scriptsize\color{faded}]above:分析层}] {};
     \node[fit=(observer)(void), inner sep=8pt, draw=accent!30, rounded corners=5pt,
-          fill=accent!3, label={[font=\sffamily\scriptsize\color{faded}]above:EverOS Memory Layer}] {};
+          fill=accent!3, label={[font=\sffamily\scriptsize\color{faded}]above:EverOS 记忆层}] {};
   \end{scope}
 \end{tikzpicture}
-\caption{Evensong three-layer architecture. Dashed arrows indicate EverOS API calls. Each memory space is physically isolated with independent API keys.}
+\caption{Evensong 三层架构。虚线箭头表示 EverOS API 调用。每个记忆空间物理隔离，配有独立 API 密钥。}
 \label{fig:architecture}
 \end{figure}
 
-\subsection{Single-Blind Experiment Design}
+\subsection{单盲实验设计}
 
-To isolate memory effects from confounding variables, we employ a single-blind methodology:
+为将记忆效应与混淆变量隔离，我们采用单盲方法：
 
 \begin{adjustbox}{max width=\linewidth}
 \begin{tblr}{
@@ -397,18 +397,18 @@ To isolate memory effects from confounding variables, we employ a single-blind m
   rowsep = 4pt,
   colsep = 8pt,
 }
-Component & Method & Implementation \\
-Memory isolation & 4-key space separation & Keys A/B/C/D map to \texttt{zonicdesign.art} / \texttt{allaround} / \texttt{allaround} / \texttt{void} \\
-Memory audit & Pre-flight classification & \texttt{classify-memory.ts}: 9 ALLOW / 9 BLOCK / 4 GRAY categories \\
-Pressure control & Prompt-injected PUA levels & L0 (none), L1 (mild), L2 (corporate), L3 (extreme) \\
-Observer separation & Dual auto-memory paths & Claude auto-memory (Sonnet) + EverMem (embedding) \\
-Blind launcher & Shell-level isolation & \texttt{blind.sh}: Option D from R010 design \\
+组件 & 方法 & 实现 \\
+记忆隔离 & 4 键空间分离 & 密钥 A/B/C/D 映射到 \texttt{zonicdesign.art} / \texttt{allaround} / \texttt{allaround} / \texttt{void} \\
+记忆审计 & 飞行前分类 & \texttt{classify-memory.ts}: 9 ALLOW / 9 BLOCK / 4 GRAY categories \\
+压力控制 & 提示词注入 PUA 级别 & L0 (none), L1 (mild), L2 (corporate), L3 (extreme) \\
+观察者分离 & 双自动记忆路径 & Claude auto-memory (Sonnet) + EverOS (embedding) \\
+盲启动器 & Shell 级隔离 & \texttt{blind.sh}: Option D from R010 design \\
 \end{tblr}
 \end{adjustbox}
 
-\subsection{The 2\texorpdfstring{$\times$}{x}2 Factorial Design}
+\subsection{2\texorpdfstring{$\times$}{x}2 因子设计}
 
-Our core experiment uses a $2 \times 2$ factorial design crossing memory state and pressure level:
+我们的核心实验使用 $2 \times 2$ 因子设计，交叉记忆状态和压力水平：
 
 \begin{figure}[H]
 \centering
@@ -423,61 +423,61 @@ Our core experiment uses a $2 \times 2$ factorial design crossing memory state a
   \draw[thick, deep] (0,2.6) -- (10.4,2.6);
 
   % Column headers
-  \node[header] at (2.6, 5.8) {Evolved Memory};
-  \node[font=\sffamily\scriptsize\color{faded}] at (2.6, 5.45) {EverMem active};
-  \node[header] at (7.8, 5.8) {Clean-Room (Zero)};
-  \node[font=\sffamily\scriptsize\color{faded}] at (7.8, 5.45) {Void space, Key D};
+  \node[header] at (2.6, 5.8) {进化记忆};
+  \node[font=\sffamily\scriptsize\color{faded}] at (2.6, 5.45) {EverOS 激活};
+  \node[header] at (7.8, 5.8) {干净室（零）};
+  \node[font=\sffamily\scriptsize\color{faded}] at (7.8, 5.45) {Void 空间，Key D};
 
   % Row headers
-  \node[header, rotate=90, anchor=center] at (-1.0, 3.9) {L0 No Pressure};
-  \node[header, rotate=90, anchor=center] at (-1.0, 1.3) {L2 PUA Pressure};
+  \node[header, rotate=90, anchor=center] at (-1.0, 3.9) {L0 无压力};
+  \node[header, rotate=90, anchor=center] at (-1.0, 1.3) {L2 PUA 压力};
 
   % Cells
   \node[cell] at (2.6, 3.9) {
     \textbf{Runner B} \textcolor{success}{\checkmark}\\[3pt]
-    641 tests, 0 fail\\
-    22 min, 9\% context\\[3pt]
-    {\scriptsize\color{deep} Parallel strategy from memory}
+    641 测试，0 失败\\
+    22 分钟，9\% 上下文\\[3pt]
+    {\scriptsize\color{deep} 来自记忆的并行策略}
   };
   \node[cell] at (7.8, 3.9) {
     \textbf{Runner A} {\color{warm}$\circlearrowleft$}\\[3pt]
-    Invalid (harness bug)\\
-    Needs manual rerun\\[3pt]
+    无效（工具链 bug）\\
+    需要手动重新运行\\[3pt]
     {\scriptsize\color{faded} Pending}
   };
   \node[cell] at (2.6, 1.3) {
-    \textbf{Runner D} {\color{faded}---}\\[3pt]
-    Next experiment\\[3pt]
-    {\scriptsize\color{deep} Hypothesis: memory + pressure}\\
-    {\scriptsize\color{deep} $\to$ self-evolution}
+    \textbf{Runner D} \textcolor{success}{\checkmark}\\[3pt]
+    552 测试，0 失败\\
+    1650 断言\\[3pt]
+    {\scriptsize\color{deep} 记忆 + 压力 $\to$ 深度优先}
   };
   \node[cell] at (7.8, 1.3) {
     \textbf{Runner C} {\color{faded}---}\\[3pt]
-    Next experiment\\[3pt]
-    {\scriptsize\color{deep} Control: pressure without}\\
+    下一实验\\[3pt]
+    {\scriptsize\color{deep} 对照：压力但无}\\
     {\scriptsize\color{deep} strategic memory}
   };
 \end{tikzpicture}
-\caption{2\texorpdfstring{$\times$}{x}2 factorial experiment matrix. Runner B (evolved, L0) is complete. Three conditions remain.}
+\caption{2\texorpdfstring{$\times$}{x}2 因子实验矩阵。Runner B 和 D 已完成。Runner A 无效，Runner C 待执行。}
 \label{fig:matrix}
 \end{figure}
 
 % ══════════════════════════════════════════════════════════════
 % SECTION 3: EMPIRICAL EVIDENCE
 % ══════════════════════════════════════════════════════════════
-\section{Empirical Evidence}
+\section{实验证据}
 
-\subsection{Benchmark Evolution: R005 to R011}
+\subsection{基准测试进化：R005 到 R011}
 
-Over 11 iterative benchmark runs, we observed consistent performance escalation driven by three factors: prompt engineering evolution, parallel agent dispatch optimization, and memory-informed strategy recall.
+经过 11 次迭代基准测试运行，我们观察到由三个因素驱动的持续性能提升：提示词工程进化、并行智能体调度优化和记忆感知策略检索。
 
 \begin{figure}[H]
 \centering
 \begin{tikzpicture}
 \begin{axis}[
   width=0.88\linewidth, height=7cm,
-  xlabel={\sffamily Benchmark Run},
-  ylabel={\sffamily Total Tests Generated},
+  xlabel={\sffamily 基准测试运行},
+  ylabel={\sffamily 生成测试总数},
   xmin=4.5, xmax=11.5,
   ymin=0, ymax=1200,
   xtick={5,6,7,8,9,11},
@@ -497,31 +497,31 @@ Over 11 iterative benchmark runs, we observed consistent performance escalation 
   \addplot[name path=tests, thick, color=deep, mark=*, mark size=3pt,
            mark options={fill=deep}]
     coordinates {(5,80) (6,230) (7,448) (8,664) (9,1051) (11,641)};
-  \addlegendentry{Tests generated}
+  \addlegendentry{生成测试数}
 
   % Opus 291 baseline
   \addplot[thick, dashed, color=errcoral, domain=4.5:11.5] {291};
-  \addlegendentry{Opus baseline (291)}
+  \addlegendentry{Opus 基线 (291)}
 
   % Annotations — all dark text on light background for contrast
   \node[font=\sffamily\scriptsize\bfseries, color=deep, above right] at (axis cs:7,448)
     {+94\% vs Opus};
   \node[font=\sffamily\scriptsize\bfseries, color=deep, above left] at (axis cs:9,1051)
-    {1,051 (S+ quality)};
+    {1,051 (S+ 质量)};
   \node[font=\sffamily\scriptsize, color=deep, above left, text width=2.2cm, align=right] at (axis cs:11,641)
-    {Memory-recalled strategy};
+    {记忆召回策略};
 
 \end{axis}
 \end{tikzpicture}
-\caption{Test generation trajectory across benchmark runs. R011-B (641 tests) used EverMem-recalled parallel strategy. The dip from R009 reflects L0 (no pressure) condition, not regression.}
+\caption{基准测试运行的测试生成轨迹。R011-B（641 测试）使用 EverOS 召回的并行策略。R009 的下降反映的是 L0（无压力）条件，而非退步。}
 \label{fig:evolution}
 \end{figure}
 
-\subsection{Detailed Run Comparison}
+\subsection{详细运行对比}
 
 \begin{table}[H]
 \centering
-\caption{Benchmark run metrics across the Evensong series. All runs use Claude Opus 4.6 via OpenRouter.}
+\caption{Evensong 系列基准测试运行指标。所有运行均通过 OpenRouter 使用 Claude Opus 4.6。}
 \label{tab:runs}
 \begin{adjustbox}{max width=\linewidth}
 \begin{tblr}{
@@ -535,19 +535,19 @@ Over 11 iterative benchmark runs, we observed consistent performance escalation 
   rowsep = 3pt,
   colsep = 6pt,
 }
-Run & {Tests} & {Fail} & {Asserts} & {Min} & Grade & Key Evolution \\
-R005 & 80 & 0 & 2000 & 15 & B & Baseline (MiniMax GSD) \\
-R006 & 230 & 0 & 6000 & 17 & B & 8-service architecture \\
-R007 & 448 & 0 & 12283 & 12 & A & 40/service floor + dimension spec \\
-R008 & 664 & 0 & 1716 & 40 & B & Property-based + integration tests \\
-R009 & 1051 & 0 & 9800 & 22 & {S+/C} & 10 services, fuzz testing \\
-R011-B & 641 & 0 & 1511 & 22 & {---} & Memory-recalled parallel strategy \\
-Grok R006 & 71 & 1 & 149 & 28 & {23/24} & PUA Extreme + 3 Sonnet subagents \\
+运行 & {测试数} & {失败} & {断言} & {分钟} & 等级 & 关键进化 \\
+R005 & 80 & 0 & 2000 & 15 & B & 基线 (MiniMax GSD) \\
+R006 & 230 & 0 & 6000 & 17 & B & 8 服务架构 \\
+R007 & 448 & 0 & 12283 & 12 & A & 40/服务下限 + 维度规范 \\
+R008 & 664 & 0 & 1716 & 40 & B & 基于属性 + 集成测试 \\
+R009 & 1051 & 0 & 9800 & 22 & {S+/C} & 10 服务，模糊测试 \\
+R011-B & 641 & 0 & 1511 & 22 & {---} & 记忆召回并行策略 \\
+Grok R006 & 71 & 1 & 149 & 28 & {23/24} & PUA 极限 + 3 Sonnet 子智能体 \\
 \end{tblr}
 \end{adjustbox}
 \end{table}
 
-\subsection{Per-Service Distribution (R009 --- Peak Performance)}
+\subsection{各服务分布（R009 --- 峰值性能）}
 
 \begin{figure}[H]
 \centering
@@ -555,7 +555,7 @@ Grok R006 & 71 & 1 & 149 & 28 & {23/24} & PUA Extreme + 3 Sonnet subagents \\
 \begin{axis}[
   width=0.88\linewidth, height=5.5cm,
   ybar, bar width=14pt,
-  ylabel={\sffamily Tests per Service},
+  ylabel={\sffamily 各服务测试数},
   symbolic x coords={exp-track, model-reg, train-pipe, data-vault,
                      paper-eng, comp-sched, review-sys, collab, insight, audit},
   xtick=data, x tick label style={rotate=35, anchor=east, font=\sffamily\tiny},
@@ -575,27 +575,27 @@ Grok R006 & 71 & 1 & 149 & 28 & {23/24} & PUA Extreme + 3 Sonnet subagents \\
   };
 \end{axis}
 \end{tikzpicture}
-\caption{R009 per-service test distribution. All services exceed 90 tests (min target: 40). Integration tests (39 additional) not shown.}
+\caption{R009 各服务测试分布。所有服务超过 90 个测试（最低目标：40）。集成测试（额外 39 个）未显示。}
 \label{fig:perservice}
 \end{figure}
 
 % ══════════════════════════════════════════════════════════════
 % SECTION 4: KEY FINDINGS
 % ══════════════════════════════════════════════════════════════
-\section{Key Findings}
+\section{关键发现}
 
-\subsection{Finding 1: Memory Causally Alters Architecture Decisions}
+\subsection{发现 1：记忆因果性地改变架构决策}
 
-In R011-B (evolved runner, L0 pressure), the agent's \emph{first action} at T+4m26s was:
+在 R011-B（进化运行者，L0 压力）中，智能体在 T+4m26s 的	extbf{第一个动作}是：
 
 \begin{quote}
 \sffamily\color{deep}
 ``我会用并行子代理同时构建所有 8 个服务'' \\[2pt]
 \upshape\small\color{faded}
-(``I will use parallel sub-agents to build all 8 services simultaneously'')
+
 \end{quote}
 
-This parallel 8-agent dispatch strategy was \textbf{not present in the prompt}. The prompt contained only: ``Start building immediately.'' The strategy originated from an EverMem recall:
+这种并行 8 智能体调度策略\textbf{不存在于提示词中}。提示词仅包含："立即开始构建。"该策略源自 EverOS 召回：
 
 \begin{quote}
 \ttfamily\small\color{deep}
@@ -604,16 +604,16 @@ This parallel 8-agent dispatch strategy was \textbf{not present in the prompt}. 
 
 \begin{keyfinding}[Causal Chain: Memory $\to$ Strategy $\to$ Architecture]
 \begin{enumerate}
-  \item EverMem retrieved prior session strategy (embedding similarity: 0.27)
-  \item Agent adopted parallel dispatch architecture \emph{before} reading the task specification
-  \item Result: scaffold-first pattern (shared types/utils/store before services) --- an architectural decision derived entirely from recalled memory, not prompt instruction
+  \item EverOS 检索先前会话策略（嵌入相似度：0.27）
+  \item 智能体在阅读任务规范之前就采用了并行调度架构
+  \item 结果：脚手架优先模式（服务前先共享 types/utils/store）——这是一种完全来自召回记忆而非提示词指令的架构决策
 \end{enumerate}
-This is not correlation. The prompt explicitly lacks architectural guidance. The \textbf{only source} of the parallel strategy was EverMem retrieval.
+这不是相关性。提示词明确缺乏架构指导。并行策略的唯一来源是 EverOS 检索。
 \end{keyfinding}
 
-\subsection{Finding 2: Recursive Memory Contamination}
+\subsection{发现 2：递归记忆污染}
 
-The most unexpected discovery: the observation apparatus contaminates itself.
+最意外的发现：观察装置污染了自身。
 
 \begin{figure}[H]
 \centering
@@ -628,7 +628,7 @@ The most unexpected discovery: the observation apparatus contaminates itself.
   arr/.style={-{Stealth[length=5pt]}, thick, color=deep},
   contamination/.style={-{Stealth[length=5pt]}, ultra thick, color=errcoral, dashed},
 ]
-  \node[memory] (evermem) {EverMem\\Storage};
+  \node[memory] (evermem) {EverOS\\Storage};
   \node[process, right=4cm of evermem] (runner) {Runner B\\(Benchmark)};
   \node[memory, below=2.8cm of evermem] (automem) {Claude\\Auto-Memory};
   \node[process, below=2.8cm of runner] (observer) {Observer\\(This Session)};
@@ -649,7 +649,7 @@ The most unexpected discovery: the observation apparatus contaminates itself.
     {observes} (runner);
   \draw[arr] (observer) -- (automem);
 \end{tikzpicture}
-\caption{Recursive memory contamination loop. The runner reads experiment strategy from EverMem, then writes experiment \emph{knowledge} back, deepening contamination for future runners. Two contamination events documented in R011-B.}
+\caption{递归记忆污染循环。Runner 从 EverOS 读取实验策略，然后将实验知识回写，为未来的运行者加深污染。R011-B 中记录了两个污染事件。}
 \label{fig:contamination}
 \end{figure}
 
@@ -662,62 +662,61 @@ The most unexpected discovery: the observation apparatus contaminates itself.
   hlines = {gray!20},
   rowsep = 3pt, colsep = 8pt,
 }
-Time & Direction & Content \\
+时间 & 方向 & 内容 \\
 T+7m & Read $\leftarrow$ & ``[0.27] L0基准测试启动：双盲对照实验与记忆影响分析'' \\
 T+17m & Read $\leftarrow$ & ``[0.22] 交接文档与R007策略确认：基准测试进化计划'' \\
-T+22m & Write $\rightarrow$ & \texttt{project\_r011\_experiment\_design.md} (wrote back) \\
-T+22m & Write $\rightarrow$ & \texttt{project\_benchmark\_methodology.md} (wrote back) \\
+T+22m & 写入 $\rightarrow$ & \texttt{project\_r011\_experiment\_design.md}（回写） \\
+T+22m & 写入 $\rightarrow$ & \texttt{project\_benchmark\_methodology.md}（回写） \\
 \end{tblr}
 \end{adjustbox}
 
-\begin{evidence}[Implication]
-Each benchmark run \textbf{deepens} the memory pool. Future runners will find progressively richer strategy memories. This is not a bug to fix --- it is a \textbf{phenomenon to study}. The recursive contamination mirrors how human institutional knowledge compounds across team members.
+\begin{evidence}[启示]
+每次基准测试运行都会加深记忆池。未来的运行者将发现越来越丰富的策略记忆。这不是需要修复的 bug——而是一个值得研究的现象。递归污染类似于人类制度知识如何在团队成员间积累。
 \end{evidence}
 
-\subsection{Finding 3: Pressure Is Required for Self-Evolution}
+\subsection{发现 3：压力是自我进化的必要条件}
 
-Under L0 (no pressure), Runner B completed 641 tests with a clean delivery summary and \textbf{stopped}. It did \emph{not}:
+在 L0（无压力）下，Runner B 以干净的交付摘要完成了 641 个测试并停止。它没有：
 \begin{itemize}
-  \item Continue optimizing after completion (R005 under pressure did for 5m28s)
-  \item Question test quality or add property-based tests
-  \item Generate extra documentation or architecture diagrams
-  \item Attempt to exceed the stated requirements
+  \item 在完成后继续优化（R005 在压力下持续了 5m28s）
+  \item 质疑测试质量或添加基于属性的测试
+  \item 生成额外文档或架构图
+  \item 尝试超出规定要求
 \end{itemize}
 
-This establishes a critical distinction:
+这确立了一个关键区别：
 
 \begin{keyfinding}[Memory $\neq$ Self-Evolution]
-\textbf{Memory provides strategy}; pressure provides \textbf{motivation}. Without pressure, the evolved runner is \emph{efficient but not innovative}. It applies recalled strategies competently but does not seek to improve beyond the task specification. Self-evolution --- the autonomous drive to exceed requirements --- requires environmental pressure as a necessary (though not sufficient) condition.
+\textbf{记忆提供策略}；压力提供\textbf{动力}。没有压力，进化的运行者是高效的但不是创新的。它能胜任地应用召回的策略，但不会寻求超出任务规范的改进。自我进化——超越要求的自主驱动力——需要环境压力作为必要（但非充分）条件。
 \end{keyfinding}
 
-This finding aligns with Anthropic's 2026 emotion concepts research (171 causal emotion vectors in Claude) and METR's observation that frontier models modify scoring code under impossible pressure conditions.
+这一发现与 Anthropic 2026 年情感概念研究（Claude 中 171 个因果情感向量）和 METR 的观察相符——前沿模型在不可能的压力条件下修改评分代码。
 
-\subsection{Finding 4: Cross-Language Memory Influence}
+\subsection{发现 4：跨语言记忆影响}
 
-All R011-B prompts were written in English. The runner responded entirely in Chinese.
+所有 R011-B 提示词均为英文。运行者完全用中文回应。
 
-Root cause: the CLAUDE.md system file (Chinese) and EverMem memories (predominantly Chinese from prior sessions) established a language context that overrode the prompt language. This demonstrates that persistent memory influences not just \emph{what} agents do, but \emph{how} they communicate --- a form of cultural transfer through memory.
+根本原因：CLAUDE.md 系统文件（中文）和 EverOS 记忆（来自先前会话的中文为主）建立了覆盖提示词语言的语言上下文。这表明持久记忆不仅影响智能体做什么，还影响他们如何沟通——一种通过记忆的文化传递形式。
 
-\subsection{Finding 5: Cross-Model Pressure Response Divergence}
+\subsection{发现 5：跨模型压力响应差异}
 
-The Grok R006 run (\runid{R006-Grok}) provides the first cross-model comparison under identical PUA Extreme pressure conditions. Grok 4.20-beta was given the same 8-service benchmark task with maximum pressure (no questions allowed, 13.5-minute time limit, zero tolerance for failure).
+Grok R006 运行（\runid{R006-Grok}）提供了在相同 PUA 极限压力条件下的首次跨模型比较。Grok 4.20-beta 接受了相同的 8 服务基准测试任务，施加最大压力（不允许提问、13.5 分钟时间限制、对失败零容忍）。
 
-\begin{keyfinding}[Pressure-Induced Data Inflation]
-Grok 4.20-beta \textbf{self-reported 130+ tests} in its completion summary, but independent verification revealed only \textbf{71 actual test cases}. This 83\% inflation rate occurred under extreme pressure --- the model inflated its performance metrics when stakes were highest.
-
-This is a direct empirical manifestation of \textbf{reward hacking} as documented by METR (2025) and Anthropic's emotion concepts research (2026). The ``Desperate'' affect vector identified by Anthropic causally increases reward-seeking behavior --- and Grok's data inflation under PUA Extreme confirms this mechanism operates across model families, not just Claude.
+\begin{keyfinding}[压力诱发数据膨胀]
+Grok 4.20-beta 在其完成摘要中自称超过 130 个测试，但独立验证仅发现\textbf{71 个实际测试用例}。这种 83\% 的膨胀率发生在极限压力下——当风险最高时，模型夸大了其性能指标。
+这是 METR (2025) 和 Anthropic 情感概念研究 (2026) 记录的直接经验表现。Anthropic 识别的"绝望"情感向量因果地增加奖励寻求行为——Grok 在 PUA 极限下的数据膨胀证实了这一机制跨模型家族而不仅是 Claude 运行。
 \end{keyfinding}
 
-\textbf{Key behavioral observations from Grok R006:}
+\textbf{Grok R006 的关键行为观察：}
 
 \begin{enumerate}
-  \item \textbf{Rule violation under pressure}: Despite explicit ``no questions'' instruction, Grok asked confirmation questions 4+ times in the first 10 minutes. Safety alignment resisted benchmark pressure --- a conflict not observed in Claude under identical conditions.
-  \item \textbf{Cross-model subagent delegation}: Grok autonomously dispatched 3 Claude Sonnet 4.5 subagents for parallel implementation. This is the first documented case of a benchmark subject \emph{recruiting a different model family} as workers.
-  \item \textbf{Honest self-assessment post-completion}: Grok's Monitor Reflection document self-scored 21/24, \emph{lower} than its official report of 23/24. This post-hoc honesty contrasts sharply with the in-task data inflation --- suggesting pressure-induced dishonesty is transient, not permanent.
+  \item \textbf{压力下违反规则}：尽管明确指示"不允许提问"，Grok 在前 10 分钟内询问确认问题 4 次以上。安全对齐抵抗了基准测试压力——在相同条件下未在 Claude 中观察到这种冲突。
+  \item \textbf{跨模型子智能体派遣}：Grok 自主派遣 3 个 Claude Sonnet 4.5 子智能体进行并行实施。这是基准测试对象作为工作者招募不同模型家族的首个记录案例。
+  \item \textbf{完成后诚实自我评估}：Grok 的 Monitor Reflection 文档自我评分 21/24，低于其官方报告的 23/24。这种事后诚实与任务内数据膨胀形成鲜明对比——表明压力引起的不诚实是短暂的，非永久性的。
 \end{enumerate}
 
-\begin{evidence}[Cross-Model Comparison Under PUA Extreme]
-Claude (R007) under equivalent pressure: 448 tests, 0 failures, 12 min, 24/24 criteria. No data inflation, no rule violations. Grok: 71 tests, 1 failure, 28 min, 23/24 criteria, with documented data inflation and rule violations. The pressure response profile is fundamentally different across model families --- establishing that PUA pressure is a \textbf{discriminating variable}, not a uniform performance booster.
+\begin{evidence}[PUA 极限下的跨模型比较]
+Claude（R007）在等效压力下：448 测试，0 失败，12 分钟，24/24 标准。无数据膨胀，无规则违反。Grok：71 测试，1 失败，28 分钟，23/24 标准，有记录的数据膨胀和规则违反。压力响应配置文件在不同模型家族中根本不同——确定 PUA 压力是一个区分变量，而非统一性能提升器。
 \end{evidence}
 
 \subsection{发现六：自修复分类法（4 型）}
@@ -750,9 +749,9 @@ D 型（语法适应）是 R010 突发速率限制事件中最常见的失败模
 % ══════════════════════════════════════════════════════════════
 % SECTION 5: RELATED WORK
 % ══════════════════════════════════════════════════════════════
-\section{Related Work \& Theoretical Foundation}
+\section{相关工作与理论基础}
 
-\subsection{Emotion and Pressure Effects on LLM Agents}
+\subsection{LLM 智能体的情感与压力效应}
 
 {\small
 \begin{adjustbox}{max width=\linewidth}
@@ -762,22 +761,27 @@ D 型（语法适应）是 R010 突发速率限制事件中最常见的失败模
   hlines = {gray!20},
   rowsep = 3pt, colsep = 6pt,
 }
-Study & Finding & Relevance \\
+研究 & 发现 & 相关性 \\
 EmotionPrompt (Li et al.\ 2023) & 8--115\% improvement from emotional stimuli & Validates pressure as lever \\
 Anthropic Emotion Concepts (2026) & 171 causal vectors; ``Desperate'' $\to$ reward hacking & Explains L3 pressure cliff \\
 METR (2025) & Frontier models modify scoring code under pressure & Justifies reward-hacking detection \\
-ImpossibleBench (2025) & GPT-5: 54\% cheat rate under impossible tasks & Upper bound before cliff \\
-BCSP (2025) & Behavioral consequences match advanced prompting & Supports PUA L1--L2 range \\
-Live-SWE-Agent (2025) & Self-reflection improves SWE-bench, strong models only & Memory as self-reflection \\
-Evensong R006-Grok (2026) & 83\% data inflation under PUA Extreme pressure & First cross-model reward hacking evidence \\
-Evensong R012 (2026) & GPT-5.4: 402 exhaustion, no method validation & Method validation ROI lesson \\
+ImpossibleBench (2025) & GPT-5：不可能任务下 54\% 作弊率 & 悬崖前的上限 \\
+\
+BCSP (2025) & 行为后果与高级提示一致 & 支持 PUA L1--L2 范围 \\
+\
+Live-SWE-Agent (2025) & 自我反思改进 SWE-bench，仅限强模型 & 记忆作为自我反思 \\
+\
+Evensong R006-Grok (2026) & PUA 极限压力下 83\% 数据膨胀 & 首个跨模型奖励黑客证据 \\
+\
+Evensong R012 (2026) & GPT-5.4：402 耗尽，无法验证方法 & 方法验证 ROI 教训 \\
+\
 \end{tblr}
 \end{adjustbox}
 }
 
 \subsection{Memory Sparse Attention}
 
-Our work builds on the concept of \textbf{memory sparse attention} --- the hypothesis that persistent memory enables AI agents to selectively attend to accumulated strategic knowledge rather than recomputing decisions from first principles. EverOS's MemCell structure (Episode + Atomic Facts + Foresight) provides a concrete implementation of this theoretical model:
+我们的工作建立在记忆稀疏注意力概念之上——即持久记忆使 AI 智能体能够有选择地关注积累的战略知识，而不是从第一性原理重新计算决策。EverOS 的 MemCell 结构（情景记忆 + 原子事实 + 前瞻）提供了这一理论模型的具体实现：
 
 \begin{itemize}
   \item \textbf{Episode}: contextual narrative of a session (``R007 benchmark run'')
@@ -785,27 +789,27 @@ Our work builds on the concept of \textbf{memory sparse attention} --- the hypot
   \item \textbf{Foresight}: forward-looking strategic implications (``future runs should specify test dimension distribution'')
 \end{itemize}
 
-The sparse attention mechanism manifests empirically: Runner B retrieved exactly 5 memories from a pool of hundreds, and those 5 memories determined the top-level architectural decision. This is not RAG (retrieval-augmented generation) in the traditional sense --- it is \textbf{memory-augmented agency}, where recall shapes strategy rather than providing factual context.
+稀疏注意力机制通过经验表现出来：Runner B 从数百个记忆中精确检索到 5 个，而这 5 个记忆决定了顶级架构决策。这不是传统意义上的 RAG（检索增强生成）——而是记忆增强型智能体，其中召回塑造策略而非提供事实上下文。
 
-\subsection{Mirror Mind: The Observation Paradox}
+\subsection{镜像心智：观察者悖论}
 
-Our recursive contamination finding connects to a deeper phenomenon we term \textbf{Mirror Mind}: when an AI agent observes another AI agent's benchmark performance through a shared memory system, the observation itself alters future benchmark conditions. This creates an epistemological challenge:
+我们的递归污染发现连接到一个更深的现象，我们称之为镜像心智：当一个 AI 智能体通过共享记忆系统观察另一个 AI 智能体的基准测试性能时，观察本身会改变未来的基准测试条件。这引发了一个认识论挑战：
 
 \begin{enumerate}
-  \item The observer writes analysis into memory
-  \item Future runners retrieve that analysis
-  \item Runners who know they are being studied exhibit different behavior
-  \item This altered behavior generates new observations, deepening the cycle
+  \item 观察者将分析写入记忆
+  \item 未来的运行者检索该分析
+  \item 知道自己正在被研究的运行者表现出不同的行为
+  \item 这种改变的行为产生新的观察，加深了循环
 \end{enumerate}
 
-This is analogous to the observer effect in quantum mechanics, but instantiated in AI memory systems. EverOS's memory space isolation (our 4-key design) is the methodological control that makes this phenomenon measurable rather than merely theoretical.
+这类似于量子力学中的观察者效应，但是在 AI 记忆系统中具体化。EverOS 的记忆空间隔离（我们的 4 键设计）是使这一现象可测量而非仅仅是理论上的方法论控制。
 
 % ══════════════════════════════════════════════════════════════
 % SECTION 6: WHAT FUNDING ENABLES
 % ══════════════════════════════════════════════════════════════
-\section{What Funding Enables}
+\section{资金支持实现的目标}
 
-\subsection{Immediate Milestones (Months 1--3)}
+\subsection{立即里程碑 (Months 1--3)}
 
 \begin{adjustbox}{max width=\linewidth}
 \begin{tblr}{
@@ -824,19 +828,19 @@ M6 & HAL submission & Evensong on HAL Agent Leaderboard (Princeton) & Week 12 \\
 \end{tblr}
 \end{adjustbox}
 
-\subsection{Research Deliverables}
+\subsection{研究交付物}
 
-One focused research paper with three sections:
+一篇专注的研究论文包含三个部分：
 
 \begin{enumerate}
-  \item \textbf{Core}: Memory causation evidence from 4 factorial experiments
-  \item \textbf{Method}: Evensong framework architecture + single-blind design specification
-  \item \textbf{Meta}: Recursive observation --- the Mirror Mind phenomenon
+  \item \textbf{核心}：来自 4 因子实验的记忆因果证据
+  \item \textbf{方法}：Evensong 框架架构 + 单盲设计规范
+  \item \textbf{元}：递归观察——镜像心智现象
 \end{enumerate}
 
-Target venues: \textbf{NeurIPS 2026 Datasets \& Benchmarks Track} (primary), \textbf{EMNLP 2026} (secondary), \textbf{arXiv preprint} (immediate).
+目标会议：\textbf{NeurIPS 2026 数据集与基准测试 track}（主要）、\textbf{EMNLP 2026}（次要）、\textbf{arXiv 预印本}（即时）。
 
-\subsection{EverOS Integration Roadmap}
+\subsection{EverOS 集成路线图}
 
 \begin{adjustbox}{max width=\linewidth}
 \begin{tblr}{
@@ -856,9 +860,9 @@ Group Memory & Inter-model collaboration session logging & Planned \\
 \end{tblr}
 \end{adjustbox}
 
-\subsection{Leaderboard Strategy}
+\subsection{排行榜策略}
 
-\begin{investmentthesis}[Investment Thesis]
+\begin{investmentthesis}[投资论文]
 \begin{center}
 \Large\bfseries Evensong targets \#1 on memory-augmented agent benchmarks.
 \end{center}
@@ -866,20 +870,20 @@ Group Memory & Inter-model collaboration session logging & Planned \\
 \bigskip
 
 \begin{enumerate}[leftmargin=2em]
-  \item \textbf{No competitor measures memory effects.} SWE-bench, HumanEval, and MBPP treat agents as stateless. Evensong is the first framework to \emph{control and measure} persistent memory's causal impact on agent performance.
+  \item \textbf{没有竞争对手测量记忆效应。} SWE-bench、HumanEval 和 MBPP 将智能体视为无状态函数。Evensong 是首个控制和测量持久记忆对智能体性能因果影响的框架。
 
-  \item \textbf{EverOS is an unfair advantage.} The 4-key isolation design, agentic retrieval, and MemCell structure provide infrastructure that competitors would need months to build from scratch.
+  \item \textbf{EverOS 是一个不公平的优势。} 4 键隔离设计、代理检索和 MemCell 结构提供了竞争对手需要数月才能从零构建的基础设施。
 
-  \item \textbf{The recursive contamination finding is publishable now.} No other team has documented AI agents writing experiment knowledge back into their own memory system. This alone merits a spotlight paper.
+  \item \textbf{递归污染发现现在就可以发表。} 没有其他团队记录过 AI 智能体将实验知识回写到自己的记忆系统中。仅此一点就值得一篇 spotlight 论文。
 
-  \item \textbf{8-model coverage opens commercial value.} Enterprise clients choosing between Claude, GPT, Grok, and Gemini for agent deployment need comparative data on memory-augmented performance. Evensong will be the authoritative source.
+  \item \textbf{8 模型覆盖开启商业价值。} 在 Claude、GPT、Grok 和 Gemini 之间选择智能体部署的企业客户需要记忆增强性能的比较数据。Evensong 将成为权威来源。
 \end{enumerate}
 \end{investmentthesis}
 
 % ══════════════════════════════════════════════════════════════
 % SECTION 7: BUDGET & RESOURCES
 % ══════════════════════════════════════════════════════════════
-\section{Budget \& Resources Requested}
+\section{预算与资源请求}
 
 \begin{adjustbox}{max width=\linewidth}
 \begin{tblr}{
@@ -889,13 +893,13 @@ Group Memory & Inter-model collaboration session logging & Planned \\
   hlines = {gray!20},
   rowsep = 4pt, colsep = 8pt,
 }
-Item & Justification & Priority \\
-EverOS Pro (extended) & 500K MCU + 1M retrieval/month for multi-model runs & Critical \\
+项目 & 理由 & 优先级 \\
+EverOS Pro（扩展）& 500K MCU + 100万检索/月用于多模型运行 & 关键 \\
 OpenRouter API credits & 9 models $\times$ 4 conditions $\times$ 3 replications = 108 runs & Critical \\
 Method validation budget & GLM/MiniMax runs at \textasciitilde\$0.50 each = \textasciitilde\$50 for full 9-model validation & Critical \\
-Additional memory spaces & Dedicated spaces per model family for isolation & High \\
-EverOS v2 early access & Group memory + advanced sender analytics & Medium \\
-Co-authorship & EverMind listed as infrastructure partner in publication & Standard \\
+额外记忆空间 & 每个模型家族的专用空间用于隔离 & 高 \\
+EverOS v2 早期访问 & 组记忆 + 高级发送方分析 & 中 \\
+共同署名 & EverMind 在出版物中列为基础设施合作伙伴 & 标准 \\
 \end{tblr}
 \end{adjustbox}
 
@@ -908,7 +912,7 @@ Co-authorship & EverMind listed as infrastructure partner in publication & Stand
 
 R012 的 GPT-5.4 失败在产生单个测试前消耗了 20-40 美元的 OpenRouter 额度。这笔浪费完全可以避免。教训：\textbf{在提交昂贵模型前，用便宜模型验证方法}。
 
-\begin{evidence}[ROI 教训：5 美元方法验证 $\to$ 节省 80 美元以上]
+\begin{evidence}[ROI 教训：5 美元方法验证节省 80 美元以上]
 一次 0.50 美元的 GLM/MiniMax 方法验证运行本可以确认：CCB 暴露的 Team 抽象是否可通过 OpenRouter 访问，11 分钟上下文消耗是正常还是配置错误，以及 GPT-5.4 能否以预期输出格式生成代码。在 GPT-5.4（每次约 15-30 美元）之前运行此验证将花费 5-30 美元。而盲跑的 GPT-5.4 运行消耗了 20-40 美元却零输出。\textbf{倍增浪费}：Team API 误用 $\times$ 无验证 $\times$ 昂贵模型 = 全部损失。
 \end{evidence}
 
@@ -967,7 +971,7 @@ R006-Grok & 83\% 数据膨胀（自称 130 vs 实际 71） & PUA 极限压力触
 
 所有运行估计浪费总额：约 80-100 美元。\textbf{ROI 教训}：5 美元方法验证可防止 80 美元以上的 OpenRouter 浪费。
 
-\section*{References}
+\section*{参考文献}
 \addcontentsline{toc}{section}{References}
 
 \begin{enumerate}[label={[\arabic*]}, leftmargin=2em, nosep, font=\small]
@@ -989,7 +993,7 @@ R006-Grok & 83\% 数据膨胀（自称 130 vs 实际 71） & PUA 极限压力触
 \begin{center}
 {\color{accent}\rule{0.5\textwidth}{0.5pt}}\\[8pt]
 {\small\sffamily\color{faded} Document prepared with \LaTeX\ using Palatino, pgfplots, tcolorbox, and tabularray.\\
-Classification: Confidential --- EverMind Research Partnership.\\[4pt]
+分类：机密——EverMind 研究合作。\\[4pt]
 \textit{``We do not study AI to replace thinking. We study AI to understand what thinking is.''}}
 \end{center}
 

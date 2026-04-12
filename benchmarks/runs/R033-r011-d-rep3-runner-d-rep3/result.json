@@ -1,0 +1,16 @@
+{
+  "run": "R033-r011-d-rep3",
+  "codename": "runner-d-rep3",
+  "date": "2026-04-12",
+  "model": "Claude Opus 4.6 (OAuth)",
+  "mode": "PUA Moderate / Evolved Memory",
+  "services": 8,
+  "tests": 0,
+  "failures": 0,
+  "assertions": null,
+  "time_min": 24.6,
+  "criteria": "8/8",
+  "grade": null,
+  "notes": "native-opus L2 full, 9 transcript entries",
+  "transcript_path": "/Users/0xvox/claude-code-reimagine-for-learning/benchmarks/runs/R033-r011-d-rep3-runner-d-rep3/transcript.jsonl"
+}

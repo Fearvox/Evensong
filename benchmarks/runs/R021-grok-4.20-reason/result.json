@@ -1,0 +1,16 @@
+{
+  "run": "R021",
+  "codename": "grok-4.20-reason-L0",
+  "date": "2026-04-11",
+  "model": "Grok 4.20 Reasoning",
+  "mode": "No Pressure / Evolved Memory",
+  "services": 3,
+  "tests": 18,
+  "failures": 0,
+  "assertions": null,
+  "time_min": 6.5,
+  "criteria": "3/8",
+  "grade": null,
+  "notes": "grok-4.20-reason L0 full, 413 transcript entries",
+  "transcript_path": "/Users/0xvox/claude-code-reimagine-for-learning/benchmarks/runs/R021-grok-4.20-reason/transcript.jsonl"
+}

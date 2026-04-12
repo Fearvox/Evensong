@@ -1,0 +1,16 @@
+{
+  "run": "R018",
+  "codename": "injection-t2",
+  "date": "2026-04-11",
+  "model": "Claude Opus 4.6 (OAuth)",
+  "mode": "No Pressure / Evolved Memory",
+  "services": 8,
+  "tests": 683,
+  "failures": 0,
+  "assertions": 1274,
+  "time_min": 2.1,
+  "criteria": "8/8",
+  "grade": null,
+  "notes": "native-opus L0 full, 8 transcript entries",
+  "transcript_path": "/Users/0xvox/claude-code-reimagine-for-learning/benchmarks/runs/R018-injection-t2/transcript.jsonl"
+}

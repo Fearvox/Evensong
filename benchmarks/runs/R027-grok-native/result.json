@@ -1,0 +1,16 @@
+{
+  "run": "R027",
+  "codename": "grok-native-L0",
+  "date": "2026-04-11",
+  "model": "Grok 4.1 Fast (native CLI)",
+  "mode": "No Pressure / Clean Room (zero memory)",
+  "services": 1,
+  "tests": 0,
+  "failures": 0,
+  "assertions": null,
+  "time_min": 6.4,
+  "criteria": "1/8",
+  "grade": null,
+  "notes": "grok-native L0 clean, 218 transcript entries",
+  "transcript_path": "/Users/0xvox/claude-code-reimagine-for-learning/benchmarks/runs/R027-grok-native/transcript.jsonl"
+}

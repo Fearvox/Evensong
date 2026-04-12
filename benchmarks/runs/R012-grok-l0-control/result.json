@@ -1,0 +1,16 @@
+{
+  "run": "R012",
+  "codename": "grok-l0-control",
+  "date": "2026-04-11",
+  "model": "Grok 4.20",
+  "mode": "No Pressure / Evolved Memory",
+  "services": 8,
+  "tests": 0,
+  "failures": 0,
+  "assertions": null,
+  "time_min": 0.5,
+  "criteria": "8/8",
+  "grade": null,
+  "notes": "or-grok L0 full, 8 transcript entries",
+  "transcript_path": "/Users/0xvox/claude-code-reimagine-for-learning/benchmarks/runs/R012-grok-l0-control/transcript.jsonl"
+}

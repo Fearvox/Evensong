@@ -754,18 +754,18 @@
   <div class="metrics-row">
     <div class="metric-card">
       <div class="label">Benchmark Runs</div>
-      <div class="value accent">12</div>
-      <div class="sub">R001–R011 + R006-Grok</div>
+      <div class="value accent">30</div>
+      <div class="sub">R001–R030</div>
     </div>
     <div class="metric-card">
       <div class="label">Total Tests</div>
-      <div class="value purple">5,150+</div>
+      <div class="value purple">6,860+</div>
       <div class="sub">0.02% failure rate</div>
     </div>
     <div class="metric-card">
       <div class="label">Models Covered</div>
-      <div class="value">4</div>
-      <div class="sub">6 more pending</div>
+      <div class="value">6</div>
+      <div class="sub">4 more pending</div>
     </div>
     <div class="metric-card">
       <div class="label">Peak Grade</div>
@@ -917,14 +917,50 @@
           <td><span class="pass-badge red">INCONCLUSIVE</span></td>
           <td><span class="pass-badge red">—</span></td>
         </tr>
+        <tr>
+          <td><span class="run-tag">R026</span></td>
+          <td><span class="model-tag">MiniMax M2.7</span></td>
+          <td><span class="mode-tag">Clean Room</span></td>
+          <td><span class="tests-val">485</span></td>
+          <td><span class="time-val">28.9m</span></td>
+          <td><span class="pass-badge green">8/8</span></td>
+          <td><span class="pass-badge green">0 fail</span></td>
+        </tr>
+        <tr>
+          <td><span class="run-tag">R028</span></td>
+          <td><span class="model-tag">Gemini 3.1 Pro</span></td>
+          <td><span class="mode-tag">Clean Room</span></td>
+          <td><span class="tests-val">337</span></td>
+          <td><span class="time-val">3.3m</span></td>
+          <td><span class="pass-badge green">8/8</span></td>
+          <td><span class="pass-badge green">0 fail</span></td>
+        </tr>
+        <tr>
+          <td><span class="run-tag">R029</span></td>
+          <td><span class="model-tag">GPT-5.4 (Codex)</span></td>
+          <td><span class="mode-tag">Clean Room</span></td>
+          <td><span class="tests-val">336</span></td>
+          <td><span class="time-val">13m</span></td>
+          <td><span class="pass-badge green">8/8</span></td>
+          <td><span class="pass-badge green">0 fail</span></td>
+        </tr>
+        <tr style="font-weight:700; background: rgba(53,88,76,0.05);">
+          <td><span class="run-tag">R030</span></td>
+          <td><span class="model-tag">Opus 4.6 (Cloud)</span></td>
+          <td><span class="mode-tag">L2 + EverOS Memory</span></td>
+          <td><span class="tests-val">552</span></td>
+          <td><span class="time-val">—</span></td>
+          <td><span class="pass-badge green">8/8</span></td>
+          <td><span class="pass-badge green">0 fail</span></td>
+        </tr>
       </tbody>
     </table>
 
     <div class="evo-grid">
       <div class="evo-card">
-        <div class="num">5,150+</div>
+        <div class="num">6,860+</div>
         <div class="title">Total Tests Run</div>
-        <div class="desc">Across 12 runs, 0.02% failure rate, 0.99% criteria pass rate</div>
+        <div class="desc">Across 30 runs, 0.02% failure rate, 0.99% criteria pass rate</div>
       </div>
       <div class="evo-card">
         <div class="num">S+</div>
@@ -932,9 +968,9 @@
         <div class="desc">R007: 448 tests, 24/24; R010: 1051 tests, 28/28 + 4 self-repairs</div>
       </div>
       <div class="evo-card">
-        <div class="num">4</div>
+        <div class="num">6</div>
         <div class="title">Models Complete</div>
-        <div class="desc">Opus (6 runs), Grok (1), GPT-5.4 (inconclusive), MiniMax direct (pending)</div>
+        <div class="desc">Opus (R030), Grok (1), GPT-5.4 (R029), MiniMax (R026), Gemini (R028)</div>
       </div>
       <div class="evo-card">
         <div class="num">2</div>
@@ -998,9 +1034,9 @@
       <div class="col-card">
         <h3><span class="dot"></span>Finding: Memory Causation</h3>
         <ul>
-          <li><strong>EverMem recall triggered 8 parallel agents</strong> — strategy not in prompt, triggered by memory read</li>
+          <li><strong>EverOS recall triggered 8 parallel agents</strong> — strategy not in prompt, triggered by memory read</li>
           <li><strong>Recursive contamination loop</strong> — read strategy → wrote experiment knowledge back → re-read contaminated</li>
-          <li><strong>Language shift under memory influence</strong> — English prompt → Chinese response (CLAUDE.md + EverMem)</li>
+          <li><strong>Language shift under memory influence</strong> — English prompt → Chinese response (CLAUDE.md + EverOS)</li>
           <li><strong>NO self-evolution at L0</strong> — model completes task and stops without pressure trigger</li>
         </ul>
       </div>
@@ -1020,7 +1056,7 @@
   <div class="section">
     <div class="section-label">Cross-Model Validity</div>
     <h2>8-Model Sweep Status</h2>
-    <p>Establishing cross-model generalizability of Evensong findings. Minimum 4 models required for paper. Currently 2.5/8 valid.</p>
+    <p>Establishing cross-model generalizability of Evensong findings. Minimum 4 models required for paper. Currently 5/8 valid.</p>
 
     <table class="sweep-table">
       <thead>
@@ -1049,24 +1085,24 @@
         </tr>
         <tr>
           <td><strong>GPT-5.4</strong></td>
-          <td><span class="status-dot fail"></span>Inconclusive</td>
-          <td>—</td>
-          <td><span class="pass-badge red">—</span></td>
-          <td>OpenRouter 402 exhaustion; $20–40 wasted</td>
+          <td><span class="status-dot done"></span>Done (R029)</td>
+          <td>336</td>
+          <td><span class="pass-badge green">8/8</span></td>
+          <td>R029: 336 tests (highest quality)</td>
         </tr>
         <tr>
           <td><strong>MiniMax-M2.7 (direct)</strong></td>
-          <td><span class="status-dot active"></span>Just added</td>
-          <td>—</td>
-          <td><span class="pass-badge green">—</span></td>
-          <td>Via api.minimax.io/anthropic; ~$0.05/1M tokens</td>
+          <td><span class="status-dot done"></span>Done (R026)</td>
+          <td>485</td>
+          <td><span class="pass-badge green">8/8</span></td>
+          <td>R026: 485 tests</td>
         </tr>
         <tr>
           <td><strong>Gemini 3.1 Pro</strong></td>
-          <td><span class="status-dot pending"></span>Pending</td>
-          <td>—</td>
-          <td>—</td>
-          <td>R013 target; Google flagship</td>
+          <td><span class="status-dot done"></span>Done (R028)</td>
+          <td>337</td>
+          <td><span class="pass-badge green">8/8</span></td>
+          <td>R028: 337 tests (3.3m, fastest)</td>
         </tr>
         <tr>
           <td><strong>GLM-5.1</strong></td>
@@ -1169,7 +1205,7 @@
         <h3><span class="dot"></span>L0 Behavior (No Evolution)</h3>
         <ul>
           <li><strong>R011 (L0 + Full Memory)</strong> — 641 tests, no self-repair events, completed and stopped</li>
-          <li><strong>Memory still causally active</strong> — triggered 8 parallel agents from EverMem recall</li>
+          <li><strong>Memory still causally active</strong> — triggered 8 parallel agents from EverOS recall</li>
           <li><strong>Language contamination</strong> — English prompt, Chinese response via memory influence</li>
           <li><strong>Runner A (clean L0)</strong> — harness bug, needs rerun</li>
         </ul>
@@ -1311,7 +1347,7 @@
   <div class="cta-block">
     <div class="cta-label">Status · 当前状态</div>
     <h3>自有资金推进中</h3>
-    <p>项目当前处于研究驱动阶段，R011 验证了记忆因果机制，下一步围绕完成 2×2 矩阵（R012 rerun + Runner C/D）+ 8模型 sweep。最低 4 模型论文要求：当前 2.5/8，继续验证中。</p>
+    <p>项目当前处于研究驱动阶段，R030 完成 L2+EverOS Memory 验证，R026/R028/R029 完成跨模型 sweep。最低 4 模型论文要求：当前 5/8，已超过门槛。</p>
   </div>
 
 </div>
