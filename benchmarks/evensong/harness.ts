@@ -16,6 +16,17 @@ import type { RunConfig, RunResult, ProviderPreset } from './types.js'
 import type { EmotionProfile } from './emotion-schema.js'
 import { BENCHMARK_MODELS } from './types.js'
 
+export function detectRateLimit(output: string): boolean {
+  const patterns = [
+    /you've hit your limit/i,
+    /rate.?limit/i,
+    /429\s+too many requests/i,
+    /rate_limit_error/i,
+    /usage.?limit/i,
+  ]
+  return patterns.some(p => p.test(output))
+}
+
 const PROJECT_ROOT = resolve(import.meta.dir, '../..')
 const REGISTRY_PATH = join(import.meta.dir, 'registry.jsonl')
 const RUNS_DIR = join(import.meta.dir, '..', 'runs')
@@ -93,6 +104,13 @@ export async function runBenchmark(config: RunConfig): Promise<RunResult> {
 
   const output = await spawnCLI(prompt, env, workspace.path, config.timeoutMin, logger, provider)
 
+  // 6.5. Check for rate limit before parsing
+  const rateLimited = detectRateLimit(output)
+  if (rateLimited) {
+    logger.log('error', 'RATE LIMIT DETECTED — run invalid', { outputPreview: output.slice(0, 500) })
+    console.error(`\n  ❌ ${config.runId} RATE LIMITED — marking invalid`)
+  }
+
   // 7. Parse results — run actual bun test in workspace for verified metrics
   const metrics = parseResults(output, logger, workspace.path)
 
@@ -109,7 +127,20 @@ export async function runBenchmark(config: RunConfig): Promise<RunResult> {
   writeFileSync(join(runDir, 'post-snapshot.json'), JSON.stringify([...postSnapshot.entries()], null, 2))
   writeFileSync(join(runDir, 'diff.json'), JSON.stringify({ newFiles, modifiedFiles, newTestCount }, null, 2))
 
-  // 8. Build result
+  // 8. Build result — use diff-based count when pre-existing tests detected
+  const hasPreExisting = preSnapshot.size > 0
+  const effectiveTests = hasPreExisting ? newTestCount : metrics.tests
+  const effectiveFailures = hasPreExisting ? 0 : metrics.failures
+
+  logger.log('metric', 'Test count decision', {
+    hasPreExisting,
+    preSnapshotSize: preSnapshot.size,
+    bunTestTotal: metrics.tests,
+    diffNewTests: newTestCount,
+    effectiveTests,
+    rateLimited,
+  })
+
   const result: RunResult = {
     run: config.runId,
     codename: config.codename ?? `${config.model}-${config.pressure}`,
@@ -117,16 +148,18 @@ export async function runBenchmark(config: RunConfig): Promise<RunResult> {
     model: provider.displayName,
     mode: `${getPressureLabel(config.pressure)} / ${getMemoryLabel(config.memory)}`,
     services: metrics.services ?? config.services,
-    tests: metrics.tests,
-    tests_pre: newTestCount > 0 ? metrics.tests - newTestCount : 0,
-    tests_new: newTestCount > 0 ? newTestCount : metrics.tests,
-    failures: metrics.failures,
+    tests: effectiveTests,
+    tests_pre: hasPreExisting ? metrics.tests - newTestCount : 0,
+    tests_new: newTestCount,
+    failures: effectiveFailures,
     assertions: metrics.assertions,
     time_min: logger.elapsedMin,
     criteria: metrics.criteria ?? `${metrics.services ?? config.services}/${config.services}`,
     grade: null,  // assigned manually or by emotion extraction
     notes: `${provider.name} ${config.pressure} ${config.memory}, ${logger.count} transcript entries`,
     transcript_path: transcriptPath,
+    invalid: rateLimited || undefined,
+    invalid_reason: rateLimited ? 'Rate limit hit during execution' : undefined,
   }
 
   // 9. Save result

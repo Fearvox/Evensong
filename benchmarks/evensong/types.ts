@@ -26,6 +26,10 @@ export interface RunResult {
   criteria: string           // e.g., "24/24"
   grade: string | null
   notes: string
+  /** If true, run was invalidated (rate limit, harness error, etc.) */
+  invalid?: boolean
+  /** Reason for invalidation */
+  invalid_reason?: string
   transcript_path?: string   // optional — old registry entries don't have it
   emotion?: import('./emotion-schema.js').EmotionProfile  // optional — added by emotion extraction pipeline
 }
