@@ -25,7 +25,6 @@ export async function* runHermesSubagent({
   cwd,
   signal,
 }: HermesSubagentOptions): AsyncGenerator<Message> {
-  const taskId = randomUUID()
   const workingDir = cwd ?? getProjectRoot()
 
   logForDebugging(`[Hermes subagent] spawning: ${HERMES_BIN} -q "${prompt}" --directory ${workingDir}`)
@@ -54,13 +53,17 @@ export async function* runHermesSubagent({
   let stderr = ''
 
   // Collect stdout
-  for await (const chunk of child.stdout) {
-    stdout += chunk.toString()
+  if (child.stdout) {
+    for await (const chunk of child.stdout) {
+      stdout += chunk.toString()
+    }
   }
 
   // Collect stderr (log only)
-  for await (const chunk of child.stderr) {
-    stderr += chunk.toString()
+  if (child.stderr) {
+    for await (const chunk of child.stderr) {
+      stderr += chunk.toString()
+    }
   }
 
   // Wait for process to exit

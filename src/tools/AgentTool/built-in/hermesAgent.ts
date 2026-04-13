@@ -6,8 +6,7 @@ export const HERMES_AGENT: BuiltInAgentDefinition = {
     'Dispatch a task to the Hermes (NousResearch) subprocess agent. Use when the task benefits from Hermes\'s specialized context, skills, or model configuration. Hermes runs independently with its own memory.',
   source: 'built-in',
   baseDir: 'built-in',
-  // No tools — Hermes is a CLI subprocess, not an API agent
-  tools: [],
-  // No maxTurns — subprocess handles its own lifecycle
-  // CCR waits for stdout and yields it as the result
+  // Hermes is a CLI subprocess — tools: ['*'] satisfies the type but
+  // the actual execution path bypasses runAgent tools entirely
+  tools: ['*'],
 }

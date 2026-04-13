@@ -843,9 +843,9 @@ export const AgentTool = buildTool({
         // const capture for sound type narrowing inside the callback below
         const summaryTaskId = foregroundTaskId;
 
-        // Get async iterator for the agent
         // HERMES SPECIAL CASE: Hermes is a CLI subprocess — bypass runAgent().
-        let agentIterator: AsyncIterator<Message | StreamEvent | RequestStartEvent | ToolUseSummaryMessage | TombstoneMessage>
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        let agentIterator: AsyncIterator<any>
         if (selectedAgent?.agentType === 'hermes') {
           agentIterator = (runHermesSubagent({
             prompt,
