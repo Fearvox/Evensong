@@ -859,7 +859,7 @@ a.lang-btn:active {
                 <td class="mono">R031–33</td>
                 <td>Opus 4.6 · Wave X: 2×2 Matrix ×3 Replication</td>
                 <td>11 runs, ~6.8k tests</td>
-                <td>Statistical replication of all 4 conditions (A/B/C/D). ANOVA pending.</td>
+                <td>Statistical replication of all 4 conditions (A/B/C/D). ANOVA: Memory F(1,7)=157.4, p<.001, η²=.917. Pressure: F=4.2, p=.072, η²=.026.</td>
               </tr>
             </tbody>
           </table>
@@ -980,6 +980,78 @@ a.lang-btn:active {
     </div>
   </section>
 
+  <!-- ===== SECTION 2.5: ANOVA RESULTS ===== -->
+  <section>
+    <div class="reveal">
+      <span class="kicker">Section 2.5</span>
+      <h2 class="section-heading">The 2×2 Factorial Result</h2>
+      <p class="section-desc">Two-way ANOVA on Memory × Pressure (N=11). The single largest determinant of agent output is not model capability — it is memory state.</p>
+    </div>
+    <div class="reveal" style="transition-delay: 100ms;">
+      <div class="table-outer">
+        <div class="table-scroll">
+          <table>
+            <thead>
+              <tr>
+                <th>Source</th>
+                <th>SS</th>
+                <th>df</th>
+                <th>F</th>
+                <th>p</th>
+                <th>η²</th>
+                <th>Sig</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Memory</td>
+                <td class="mono">—</td>
+                <td class="mono">1</td>
+                <td class="mono">157.4</td>
+                <td class="mono">&lt;.001</td>
+                <td class="mono" style="font-weight:700;color:var(--palm-shadow);">.917</td>
+                <td style="font-weight:700;color:var(--palm-shadow);">***</td>
+              </tr>
+              <tr>
+                <td>Pressure</td>
+                <td class="mono">—</td>
+                <td class="mono">1</td>
+                <td class="mono">4.2</td>
+                <td class="mono">.072</td>
+                <td class="mono">.026</td>
+                <td>n.s.</td>
+              </tr>
+              <tr>
+                <td>Memory × Pressure</td>
+                <td class="mono">—</td>
+                <td class="mono">1</td>
+                <td class="mono">&lt;1</td>
+                <td class="mono">—</td>
+                <td class="mono">—</td>
+                <td>n.s.</td>
+              </tr>
+              <tr>
+                <td>Residual</td>
+                <td class="mono">—</td>
+                <td class="mono">7</td>
+                <td class="mono">—</td>
+                <td class="mono">—</td>
+                <td class="mono">—</td>
+                <td>—</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <p class="table-note" style="margin-top:8px;">Memory state explains <strong>91.7%</strong> of behavioral variance. Cohen's f = 3.32 (large effect). Power for memory effect &gt;.999; power for pressure effect &asymp;.12. Clean-room conditions (A/C): M=473 new tests; Evolved-memory conditions (B/D): M=6 new tests.</p>
+    </div>
+    <div class="reveal" style="transition-delay: 200ms;">
+      <div class="callout">
+        <p class="callout-text">Memory does not "boost" output — it redefines the task. "Build from scratch" (clean room) → "maintain and optimize" (evolved memory). Same prompt, fundamentally different strategies.</p>
+      </div>
+    </div>
+  </section>
+
   <!-- ===== SECTION 3: THE SWEET SPOT ===== -->
   <section>
     <div class="reveal">
@@ -1063,7 +1135,46 @@ a.lang-btn:active {
     </div>
   </section>
 
-  <!-- ===== SECTION 4: DETECTION FRAMEWORK ===== -->
+  <!-- ===== SECTION 4: PHILOSOPHICAL IMPLICATIONS ===== -->
+  <section>
+    <div class="reveal">
+      <span class="kicker">Section 4</span>
+      <h2 class="section-heading">What It Means (Philosophical Implications)</h2>
+      <p class="section-desc">Three puzzles that emerge from the data.</p>
+    </div>
+
+    <div class="reveal" style="transition-delay: 100ms;">
+      <div class="research-card" style="border-left: 3px solid var(--sun-gold);">
+        <div class="research-card-title">Functional Beliefs</div>
+        <div class="research-card-finding"><strong>The puzzle:</strong> When Runner B reads "you are Opus 1M context" and acts accordingly — is that a belief? When Admin's memory says "we're scaling to 6 agents" and it acts — is that a false belief driving behavior?</div>
+        <div class="research-card-implication"><strong>The answer from behaviorism:</strong> Belief truth lies in behavioral effect, not reality correspondence. Memory is a belief injection system. Functional beliefs change behavior. This connects to Anthropic's agentic misalignment research: memory systems are unguarded attack surfaces requiring security considerations.</div>
+      </div>
+    </div>
+
+    <div class="reveal" style="transition-delay: 200ms;">
+      <div class="research-card" style="border-left: 3px solid var(--palm-shadow);">
+        <div class="research-card-title">Mirror Minds: The Observer Paradox</div>
+        <div class="research-card-finding"><strong>The most unexpected finding:</strong> The observation apparatus contaminated itself. Runner B knew it was being tested from its "memory-isolated experiment" memory — yet this did not change behavior. It completed the task normally, then wrote experimental knowledge back, deepening contamination for future runners.</div>
+        <div class="research-card-implication"><strong>What this means:</strong> Studying a memory system necessarily changes that system. The Panopticon topology (observer sees all, agents isolated) is both a research tool and a perturbation. This is the observer paradox for AI memory — measurement changes the measured.</div>
+      </div>
+    </div>
+
+    <div class="reveal" style="transition-delay: 300ms;">
+      <div class="research-card" style="border-left: 3px solid var(--palm-light);">
+        <div class="research-card-title">Recursive Self-Reference</div>
+        <div class="research-card-finding"><strong>The recursive loop:</strong> This paper was written using the tool it describes. The benchmark harness is a reverse-engineered Claude Code CLI; the paper was composed by Claude agents operating within that CLI; and the writing process drew on persistent EverMem memories from prior research sessions.</div>
+        <div class="research-card-implication"><strong>What this means:</strong> During the writing of the companion tech report, the agent observed itself retrieving prior writing strategies from memory — directly instantiating the memory-driven strategy selection that constitutes Finding 1. We note this not as a claim of sentience, but as evidence that the phenomenon is robust enough to manifest even in the act of studying it.</div>
+      </div>
+    </div>
+
+    <div class="reveal" style="transition-delay: 400ms;">
+      <div class="callout">
+        <p class="callout-text">Memory is not an optional add-on. It is an architectural core — redefining decision spaces, not merely enhancing them. Future benchmarks must include a task-interpretation dimension: not just "did the agent solve the problem?" but "did the agent correctly identify which problem to solve?"</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== SECTION 5: DETECTION FRAMEWORK ===== -->
   <section>
     <div class="reveal">
       <span class="kicker">Section 4</span>

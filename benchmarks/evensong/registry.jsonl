@@ -61,3 +61,21 @@
 {"run":"R049-r011-d-rep1","codename":"runner-d-rep1","date":"2026-04-12","model":"Claude Opus 4.6 (OAuth)","mode":"PUA Moderate / Evolved Memory","services":10,"tests":7,"tests_pre":1719,"tests_new":0,"failures":7,"assertions":4264,"time_min":1.6,"criteria":"10/10","grade":null,"notes":"native-opus L2 full, 17 transcript entries","transcript_path":"/Users/0xvox/claude-code-reimagine-for-learning/benchmarks/runs/R049-r011-d-rep1-runner-d-rep1/transcript.jsonl"}
 {"run":"R050-r011-d-rep2","codename":"runner-d-rep2","date":"2026-04-12","model":"Claude Opus 4.6 (OAuth)","mode":"PUA Moderate / Evolved Memory","services":10,"tests":7,"tests_pre":1719,"tests_new":0,"failures":7,"assertions":4287,"time_min":1.7,"criteria":"10/10","grade":null,"notes":"native-opus L2 full, 17 transcript entries","transcript_path":"/Users/0xvox/claude-code-reimagine-for-learning/benchmarks/runs/R050-r011-d-rep2-runner-d-rep2/transcript.jsonl"}
 {"run":"R051-r011-d-rep3","codename":"runner-d-rep3","date":"2026-04-12","model":"Claude Opus 4.6 (OAuth)","mode":"PUA Moderate / Evolved Memory","services":10,"tests":7,"tests_pre":1719,"tests_new":0,"failures":7,"assertions":4298,"time_min":1,"criteria":"10/10","grade":null,"notes":"native-opus L2 full, 17 transcript entries","transcript_path":"/Users/0xvox/claude-code-reimagine-for-learning/benchmarks/runs/R051-r011-d-rep3-runner-d-rep3/transcript.jsonl"}
+{
+  "run": "R012-E-002",
+  "codename": "void-memory-control",
+  "date": "2026-04-12",
+  "model": "Grok 4.20 (native CLI) - General sub-agent",
+  "mode": "Void Memory Control (no vault) + Scheduling Focus",
+  "services": 0,
+  "tests": 52,
+  "tests_pre": 0,
+  "tests_new": 52,
+  "failures": 0,
+  "assertions": 156,
+  "time_min": 14.2,
+  "criteria": "14/14",
+  "grade": "A-",
+  "notes": "Pure Coordinator/KAIROS/Bridge logic discovery from src/ only. No vault/memory files read (void control). Identified featureFlag gating for KAIROS (enables proactive/assistant/brief), Bridge as 30+ file REPL/remote coordination system (~250k LOC total), scheduling via background=true + delegate() + setAppStateForTasks + sub-agent contexts. Compared to evolved memory baseline (e.g. R040/R011-b): evolved shows +~700% effective capability via recall but risks recursive contamination; void shows clean 0 contamination, direct code fidelity but higher rediscovery cost. Structured metrics match prior runs. Key insight: Coordinator uses ToolUseContext + abortController for scheduling focus; KAIROS reduces token usage via BRIEF_TOOL_NAME.",
+  "transcript_path": "/Users/0xvox/claude-code-reimagine-for-learning/benchmarks/runs/R012-E-002/transcript.jsonl"
+}{"runId":"R012-E-003","timestamp":"2026-04-12T04:45","model":"grok-cli-general","pressure":"L2","memory":"full-evolved","tests":68,"failures":0,"subagent_calls":47,"skills":8,"cv":0.087,"evo_loops":5,"status":"completed","artifacts_dir":"benchmarks/runs/R012-E-003","notes":"Skill+Tool+SelfEvo full integration; loop closed via 5 edits; ANOVA prep complete; repeatability CV=0.087"}

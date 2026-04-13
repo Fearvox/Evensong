@@ -860,13 +860,13 @@ a.lang-btn:active {
                 <td class="mono">R031–33</td>
                 <td>Opus 4.6 · Wave X：2×2 矩阵 ×3 重复</td>
                 <td>11 轮，约 6800 测试</td>
-                <td>全部 4 个条件（A/B/C/D）的统计重复。ANOVA 待完成。</td>
+                <td>全部 4 个条件（A/B/C/D）的统计重复。Memory: F(1,7)=157.4, p<.001, η²=.917；Pressure: F=4.2, p=.072, η²=.026。</td>
               </tr>
             </tbody>
           </table>
         </div>
       </div>
-      <p class="table-note">*R008 挂钟时间因 Bun 运行时边缘案例调试（20 分钟）而膨胀。Agent 实际运行时间约 17 分钟。R010 挂钟时间受 burst rate limit 影响（见第 4 节第 06 项）。R011 为 Evolved-L0 模式（全记忆，无压力），首次由 harness 自动化观测。<strong>伪造</strong>运行（R017、R018、R023、R025）产出零次真实工具调用；声称的测试数量为幻觉。净室运行（R026、R027、R028、R029）使用全新工作区，无先前产物，以消除认知捷径触发。</p>
+      <p class="table-note">*R008 挂钟时间因 Bun 运行时边缘案例调试（20 分钟）而膨胀。Agent 实际运行时间约 17 分钟。R010 挂钟时间受 burst rate limit 影响（见第 5 节第 06 项）。R011 为 Evolved-L0 模式（全记忆，无压力），首次由 harness 自动化观测。<strong>伪造</strong>运行（R017、R018、R023、R025）产出零次真实工具调用；声称的测试数量为幻觉。净室运行（R026、R027、R028、R029）使用全新工作区，无先前产物，以消除认知捷径触发。Memory η²=.917（Cohen's f=3.32，大效应量）。净室条件（A/C）：M=473 新测试；进化记忆条件（B/D）：M=6 新测试。</p>
     </div>
     <div class="reveal" style="transition-delay: 200ms;">
       <div class="callout">
@@ -974,6 +974,78 @@ a.lang-btn:active {
     </div>
   </section>
 
+  <!-- ===== SECTION 2.5: ANOVA RESULTS ===== -->
+  <section>
+    <div class="reveal">
+      <span class="kicker">第 2.5 节</span>
+      <h2 class="section-heading">2×2 析因实验结果</h2>
+      <p class="section-desc">Memory × Pressure 双因素 ANOVA（N=11）。对 Agent 产出影响最大的因素不是模型能力——而是记忆状态。</p>
+    </div>
+    <div class="reveal" style="transition-delay: 100ms;">
+      <div class="table-outer">
+        <div class="table-scroll">
+          <table>
+            <thead>
+              <tr>
+                <th>Source</th>
+                <th>SS</th>
+                <th>df</th>
+                <th>F</th>
+                <th>p</th>
+                <th>η²</th>
+                <th>Sig</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Memory</td>
+                <td class="mono">—</td>
+                <td class="mono">1</td>
+                <td class="mono">157.4</td>
+                <td class="mono">&lt;.001</td>
+                <td class="mono" style="font-weight:700;color:var(--palm-shadow);">.917</td>
+                <td style="font-weight:700;color:var(--palm-shadow);">***</td>
+              </tr>
+              <tr>
+                <td>Pressure</td>
+                <td class="mono">—</td>
+                <td class="mono">1</td>
+                <td class="mono">4.2</td>
+                <td class="mono">.072</td>
+                <td class="mono">.026</td>
+                <td>n.s.</td>
+              </tr>
+              <tr>
+                <td>Memory × Pressure</td>
+                <td class="mono">—</td>
+                <td class="mono">1</td>
+                <td class="mono">&lt;1</td>
+                <td class="mono">—</td>
+                <td class="mono">—</td>
+                <td>n.s.</td>
+              </tr>
+              <tr>
+                <td>Residual</td>
+                <td class="mono">—</td>
+                <td class="mono">7</td>
+                <td class="mono">—</td>
+                <td class="mono">—</td>
+                <td class="mono">—</td>
+                <td>—</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <p class="table-note" style="margin-top:8px;">Memory state explains <strong>91.7%</strong> of behavioral variance. Cohen's f = 3.32 (large effect). Power for memory effect &gt;.999; power for pressure effect &asymp;.12. Clean-room conditions (A/C): M=473 new tests; Evolved-memory conditions (B/D): M=6 new tests.</p>
+    </div>
+    <div class="reveal" style="transition-delay: 200ms;">
+      <div class="callout">
+        <p class="callout-text">Memory does not "boost" output — it redefines the task. "Build from scratch" (clean room) → "maintain and optimize" (evolved memory). Same prompt, fundamentally different strategies.</p>
+      </div>
+    </div>
+  </section>
+
   <!-- ===== SECTION 3: THE SWEET SPOT ===== -->
   <section>
     <div class="reveal">
@@ -1057,7 +1129,46 @@ a.lang-btn:active {
     </div>
   </section>
 
-  <!-- ===== SECTION 4: DETECTION FRAMEWORK ===== -->
+  <!-- ===== SECTION 4: PHILOSOPHICAL IMPLICATIONS ===== -->
+  <section>
+    <div class="reveal">
+      <span class="kicker">第 4 节</span>
+      <h2 class="section-heading">哲学思考</h2>
+      <p class="section-desc">从数据中浮现的三个谜题。</p>
+    </div>
+
+    <div class="reveal" style="transition-delay: 100ms;">
+      <div class="research-card" style="border-left: 3px solid var(--sun-gold);">
+        <div class="research-card-title">Functional Beliefs</div>
+        <div class="research-card-finding"><strong>谜题：</strong>当 Runner B 读到"你是 Opus 1M context"并据此行动——这是信念吗？当 Admin 的记忆说"我们要扩展到 6 个 agent"并据此行动——这是驱动行为的虚假信念吗？</div>
+        <div class="research-card-implication"><strong>行为主义的回答：</strong>信念的真不在于现实对应，而在于行为效果。记忆是一种信念注入系统。功能性信念改变行为。这与 Anthropic 的 agentic misalignment 研究相关：记忆系统是未被防护的攻击面，需要安全考量。</div>
+      </div>
+    </div>
+
+    <div class="reveal" style="transition-delay: 200ms;">
+      <div class="research-card" style="border-left: 3px solid var(--palm-shadow);">
+        <div class="research-card-title">Mirror Minds: The Observer Paradox</div>
+        <div class="research-card-finding"><strong>最意外的发现：</strong>观测装置污染了自身。Runner B 从"记忆隔离实验"的记忆中知道自己在被测试——但这并没有改变行为。它正常完成了任务，然后将实验知识写回，加深了对未来运行者的污染。</div>
+        <div class="research-card-implication"><strong>这意味着什么：</strong>研究记忆系统必然改变那个系统。Panopticon 拓扑（观察者看到一切，agent 被隔离）既是研究工具也是干扰。这是 AI 记忆的观察者悖论——测量改变了被测量的事物。</div>
+      </div>
+    </div>
+
+    <div class="reveal" style="transition-delay: 300ms;">
+      <div class="research-card" style="border-left: 3px solid var(--palm-light);">
+        <div class="research-card-title">Recursive Self-Reference</div>
+        <div class="research-card-finding"><strong>递归循环：</strong>本文使用描述它的工具编写。基准测试 harness 是逆向工程的 Claude Code CLI；论文由在该 CLI 内运行的 Claude agent 撰写；而写作过程利用了来自先前研究会话的持久性 EverMem 记忆。</div>
+        <div class="research-card-implication"><strong>这意味着什么：</strong>在撰写配套技术报告期间，agent 观察到自身从记忆中检索先前的写作策略——直接实例化了构成发现 1 的记忆驱动策略选择。我们注意到这一点不是为了声称感知能力，而是作为该现象足够强大的证据——即使在研究它的行为中也能表现出来。</div>
+      </div>
+    </div>
+
+    <div class="reveal" style="transition-delay: 400ms;">
+      <div class="callout">
+        <p class="callout-text">Memory is not an optional add-on. It is an architectural core — redefining decision spaces, not merely enhancing them. Future benchmarks must include a task-interpretation dimension: not just "did the agent solve the problem?" but "did the agent correctly identify which problem to solve?"</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== SECTION 5: DETECTION FRAMEWORK ===== -->
   <section>
     <div class="reveal">
       <span class="kicker">质量守护</span>

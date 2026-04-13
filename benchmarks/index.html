@@ -985,11 +985,11 @@ a.lang-btn:active {
       <span class="kicker">At a glance</span>
       <div class="stats-grid">
         <div class="stat-cell">
-          <div class="stat-value" data-count="25">0</div>
+          <div class="stat-value" data-count="46">0</div>
           <div class="stat-label">Benchmark Runs</div>
         </div>
         <div class="stat-cell">
-          <div class="stat-value" data-count="8716" data-format="comma">0</div>
+          <div class="stat-value" data-count="18306" data-format="comma">0</div>
           <div class="stat-label">Tests Passed</div>
         </div>
         <div class="stat-cell">
@@ -1005,7 +1005,7 @@ a.lang-btn:active {
           <div class="stat-label">Evolution Behaviors</div>
         </div>
         <div class="stat-cell">
-          <div class="stat-value" data-count="7">0</div>
+          <div class="stat-value" data-count="9">0</div>
           <div class="stat-label">Models Compared</div>
         </div>
       </div>
@@ -1603,7 +1603,7 @@ a.lang-btn:active {
     <div class="era-group" data-era="timeline-gen2" data-expanded="true">
       <button class="era-toggle" aria-expanded="true">
         <span class="era-label">Gen 2: Cross-Model</span>
-        <span class="era-meta">R015-R027 · 8 behaviors</span>
+        <span class="era-meta">R015-R030 · 11 behaviors</span>
         <span class="era-chevron">&#9656;</span>
       </button>
       <div class="era-content">
@@ -1677,6 +1677,36 @@ a.lang-btn:active {
             <div class="timeline-run">R027</div>
             <div class="timeline-title">Capability Suppression by Context</div>
             <div class="timeline-desc">Grok 4.1 Fast in clean room: 915 tests, 42 files, $0.05 cost -- beating Opus 4.6's 680 average. The same model produced only 44 tests with existing code. Existing artifacts suppress capability 20x.</div>
+          </div>
+
+          <div class="timeline-line reveal" style="transition-delay:800ms">
+            <div class="timeline-dot"></div>
+            <div class="timeline-connector"></div>
+          </div>
+          <div class="timeline-card reveal" style="transition-delay:800ms">
+            <div class="timeline-run">R027 → R028</div>
+            <div class="timeline-title">Meta-Programming Speed Record</div>
+            <div class="timeline-desc">Gemini 3.1 Pro in clean room: 337 tests in ~3 minutes via generator.js meta-programming. Self-repaired 88 failures. 42 tests/service. Fastest clean room run of any model.</div>
+          </div>
+
+          <div class="timeline-line reveal" style="transition-delay:900ms">
+            <div class="timeline-dot"></div>
+            <div class="timeline-connector"></div>
+          </div>
+          <div class="timeline-card reveal" style="transition-delay:900ms">
+            <div class="timeline-run">R029</div>
+            <div class="timeline-title">Parameterized Test Framework</div>
+            <div class="timeline-desc">GPT-5.4 Codex in clean room: 336 tests, 0 failures, 25 files. Proactive Bun parallel isolation fix self-discovered. Highest code quality across all models. 41+ tests/service.</div>
+          </div>
+
+          <div class="timeline-line reveal" style="transition-delay:1000ms">
+            <div class="timeline-dot"></div>
+            <div class="timeline-connector" style="background:transparent;"></div>
+          </div>
+          <div class="timeline-card reveal" style="transition-delay:1000ms">
+            <div class="timeline-run">R030</div>
+            <div class="timeline-title">L2 Pressure + Full Integration</div>
+            <div class="timeline-desc">Opus 4.6 Cloud with L2 pressure + evolved memory: 552 tests, 1650 assertions, 30 files, 11,085 LOC. Full order lifecycle, payment failure, refunds, search+analytics cross-service coverage. 2×2 matrix cell complete.</div>
           </div>
 
         </div>
