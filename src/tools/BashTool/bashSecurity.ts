@@ -875,6 +875,19 @@ function validateDangerousPatterns(
 function validateRedirections(context: ValidationContext): PermissionResult {
   const { fullyUnquotedContent } = context
 
+  // Block /dev/tcp and /dev/udp redirections — classic network exfiltration vectors over bash
+  if (/\/?dev\/(tcp|udp)/.test(fullyUnquotedContent)) {
+    logEvent('tengu_bash_security_check_triggered', {
+      checkId: BASH_SECURITY_CHECK_IDS.DANGEROUS_PATTERNS_OUTPUT_REDIRECTION,
+      subId: 2,
+    })
+    return {
+      behavior: 'deny',
+      message:
+        'Command redirects to /dev/tcp or /dev/udp — network access via pseudo-device is not allowed',
+    }
+  }
+
   if (/</.test(fullyUnquotedContent)) {
     logEvent('tengu_bash_security_check_triggered', {
       checkId: BASH_SECURITY_CHECK_IDS.DANGEROUS_PATTERNS_INPUT_REDIRECTION,
