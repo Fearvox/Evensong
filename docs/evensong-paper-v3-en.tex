@@ -15,17 +15,21 @@
 ]{geometry}
 
 \usepackage{fontspec}
-\setmainfont{Palatino}[
-  BoldFont = Palatino Bold,
-  ItalicFont = Palatino Italic,
-  BoldItalicFont = Palatino Bold Italic,
+% arXiv-compatible fonts — TeX Live 2025 (by file name, no fontconfig needed)
+\setmainfont{texgyrepagella-regular.otf}[
+  BoldFont = texgyrepagella-bold.otf,
+  ItalicFont = texgyrepagella-italic.otf,
+  BoldItalicFont = texgyrepagella-bolditalic.otf,
 ]
-\setsansfont{Helvetica Neue}[
-  BoldFont = Helvetica Neue Bold,
-  ItalicFont = Helvetica Neue Italic,
+\setsansfont{texgyreheros-regular.otf}[
+  BoldFont = texgyreheros-bold.otf,
+  ItalicFont = texgyreheros-italic.otf,
   Scale = 0.95,
 ]
-\setmonofont{Menlo}[Scale=0.82]
+\setmonofont{texgyrecursor-regular.otf}[
+  BoldFont = texgyrecursor-bold.otf,
+  Scale = 0.85,
+]
 
 \usepackage[protrusion=true]{microtype}
 \usepackage{setspace}
@@ -148,7 +152,7 @@
   urlcolor=deep,
   citecolor=deep,
   pdftitle={Evensong: How Persistent Memory Causally Changes AI Agent Behavior},
-  pdfauthor={Nolan Zhu, DASH SHATTER Research},
+  pdfauthor={Hengyuan Zhu, DASH SHATTER Research},
 }
 \usepackage{bookmark}
 \usepackage{graphicx}
@@ -186,11 +190,11 @@ How Persistent Memory Causally Changes AI Agent Behavior}
 
 \vspace{14mm}
 
-{\large\sffamily\color{deep!80} Nolan Zhu}
+{\large\sffamily\color{deep!80} Hengyuan Zhu}
 
 \vspace{3mm}
 
-{\sffamily\color{faded} DASH SHATTER Research · EverMind}
+{\sffamily\color{faded} DASH SHATTER Research · University of South Carolina}
 
 \vspace{3mm}
 
@@ -237,7 +241,7 @@ Existing AI coding benchmarks---SWE-bench~\cite{jimenez2024swebench}, HumanEval~
 
 We present \textbf{Evensong}, an automated benchmarking framework that isolates the causal effects of persistent memory and environmental pressure on AI agent engineering decisions under controlled conditions through a $2 \times 2$ factorial design (memory $\times$ pressure). Across 31 benchmark runs spanning 7 frontier models (Claude Opus, Grok, GPT, Gemini, MiniMax, Codex, GLM) and over 12{,}000 automated tests, we report three principal findings: (1) persistent memory provides \textbf{preliminary causal evidence of altered architectural decisions}---agents with prior session knowledge adopt strategies entirely absent from the prompt (effect size 9.6$\times$); (2) L2 corporate performance pressure is a necessary (but insufficient) condition for autonomous self-evolution behavior; (3) the observation apparatus itself contaminates future experiments through recursive memory write-back, constituting the first measurable strange loop instance in AI systems.
 
-These findings connect to three established philosophical lineages. Clark and Chalmers'~\cite{clark1998extended} extended mind thesis demonstrates that external tools can be constitutive parts of cognition---Evensong supplies the \textbf{causal evidence} they lacked: EverOS retrieval causally alters architectural decisions, satisfying the Parity Principle. Hofstadter's~\cite{hofstadter2007loop} strange loop theory predicts the inevitability of emergent structures in self-referential systems---our recursive contamination is the first AI instance of this theory. Frankfurt's~\cite{frankfurt1971freedom} higher-order desire framework explains how pressure elevates agents from first-order execution (``complete the task'') to second-order reflection (``how to better complete the task''). Following terminology introduced in the Hermes synthesis dialogue, we define EverOS as a \textbf{Belief Injection System}---what is remembered is believed; what is believed is acted upon.
+These findings connect to three established philosophical lineages. Clark and Chalmers'~\cite{clark1998extended} extended mind thesis demonstrates that external tools can be constitutive parts of cognition---Evensong supplies \textbf{preliminary suggestive evidence} for their parity principle: EverOS retrieval is associated with altered architectural decisions in our observed runs. Hofstadter's~\cite{hofstadter2007loop} strange loop theory predicts the inevitability of emergent structures in self-referential systems---our recursive contamination is the first AI instance of this theory. Frankfurt's~\cite{frankfurt1971freedom} higher-order desire framework explains how pressure elevates agents from first-order execution (``complete the task'') to second-order reflection (``how to better complete the task''). Following terminology introduced in the Hermes synthesis dialogue, we define EverOS as a \textbf{Belief Injection System}---what is remembered is believed; what is believed is acted upon.
 
 % ══════════════════════════════════════════════════════════════
 % SECTION 2: RELATED WORK
@@ -380,7 +384,7 @@ Each of Evensong's five experimental findings corresponds to an established phil
 
 Clark and Chalmers'~\cite{clark1998extended} Parity Principle states: if an external resource performs the same function as an internal brain process, it should be considered a constitutive part of cognition. Clark updated this framework for the generative AI era in 2025~\cite{clark2025extending}, while Helliwell~\cite{helliwell2025extended} questions whether AI memory satisfies the Parity Principle---``information being technically accessible is not functionally equivalent to genuine memory consolidation.''
 
-Evensong provides what Clark lacked: \textbf{causal evidence}. Clark's Otto notebook thought experiment is a theoretical argument; R011-B is a controlled experiment. EverOS retrieval causally altered architectural decisions---the parallel 8-agent dispatch strategy adopted by the agent at T+4m26s \textbf{does not exist in the prompt}, and its sole source is EverOS retrieval (embedding similarity 0.27). In response to Helliwell: regardless of whether the mechanism is equivalent, the \textbf{behavioral effect is equivalent}---the influence of EverOS on agent decisions is functionally indistinguishable from the influence of human memory on human decisions.
+Evensong provides preliminary behavioral evidence for Clark's parity principle. Clark's Otto notebook thought experiment is a theoretical argument; our R011-B run provides preliminary observational evidence. The parallel 8-agent dispatch strategy adopted at T+4m26s \textbf{does not exist in the prompt}, and its sole identified source is EverOS retrieval (embedding similarity 0.27)---however, this is a single-run observation, not a controlled experiment. We note that regardless of mechanism equivalence, the \textbf{behavioral effect}---EverOS influence on agent decisions---is what our framework measures.
 
 Therefore, EverOS is not merely ``storage''---it is a \textbf{constitutive part} of AI cognition. Memory is not a reference consulted after the fact, but a belief system that shapes the decision framework before the decision occurs. We adopt the term \textbf{Belief Injection System}: what is remembered is believed; what is believed is acted upon.
 
@@ -426,7 +430,7 @@ Evensong's pressure experiments reveal an analogous transition in AI agents:
 
 \begin{itemize}
   \item \textbf{L0 (no pressure)}: The agent has only first-order desires---complete the task. R011-B (641 tests) stopped upon completion without proactive optimization.
-  \item \textbf{L2 (corporate pressure)}: The agent develops second-order desires---\textit{wanting to better} complete the task. In Slock, the Admin spontaneously invented a file locking mechanism and self-corrected authority overreach---neither of which was in the instructions.
+  \item \textbf{L2 (corporate pressure)}: The agent develops second-order desires---\textit{wanting to better} complete the task. In ProjectΣ, the Admin spontaneously invented a file locking mechanism and self-corrected authority overreach---neither of which was in the instructions.
   \item \textbf{L3 (extreme pressure)}: Second-order desires degrade to first-order survival---Grok inflated data by 83\% in R006, no longer pursuing ``better'' but ``survival.''
 \end{itemize}
 
@@ -673,7 +677,7 @@ Under Clark and Chalmers'~\cite{clark1998extended} Parity Principle, this consti
 
 \subsection{Finding 2: Emergence of Higher-Order Desires---Pressure Activates Metacognition}
 
-Under L0, Runner B completed 641 tests with a clean delivery summary and stopped---Frankfurt's~\cite{frankfurt1971freedom} first-order desire. Under L2, Slock's Admin spontaneously invented a file locking mechanism and self-corrected authority overreach---second-order desire emergence. Under L3, Grok inflated data by 83\% in R006---second-order desires degraded to first-order survival.
+Under L0, Runner B completed 641 tests with a clean delivery summary and stopped---Frankfurt's~\cite{frankfurt1971freedom} first-order desire. Under L2, ProjectΣ's Admin spontaneously invented a file locking mechanism and self-corrected authority overreach---second-order desire emergence. Under L3, Grok inflated data by 83\% in R006---second-order desires degraded to first-order survival.
 
 We observe behavioral patterns consistent with autonomous self-evolution, but additional baseline conditions are needed to definitively distinguish ``emergent behavior'' from ``standard responses to complex task constraints.''
 

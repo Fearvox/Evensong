@@ -655,6 +655,6 @@ export function listRuns(): RunResult[] {
 export function nextRunId(): string {
   const runs = listRuns()
   if (runs.length === 0) return 'R011'
-  const lastNum = Math.max(...runs.map(r => parseInt(r.run.replace('R', ''), 10) || 0))
+  const lastNum = Math.max(...runs.map(r => parseInt((r.run ?? r.runId ?? '').replace('R', ''), 10) || 0))
   return `R${String(lastNum + 1).padStart(3, '0')}`
 }

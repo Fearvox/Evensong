@@ -296,7 +296,7 @@ AI 编码智能体正从实验工具演变为生产基础设施。Claude Code、
 本文的主要贡献包括：
 
 \begin{itemize}
-  \item \textbf{首个记忆因果证据}：通过 $2 \times 2$ 因子实验，隔离持久记忆对 AI 智能体架构决策的因果效应（\S\ref{sec:memory-causation}）
+  \item \textbf{首个记忆因果关联证据}：通过 $2 \times 2$ 因子实验，初步揭示持久记忆与 AI 智能体架构决策之间的关联效应（\S\ref{sec:memory-causation}；replication 进行中）
   \item \textbf{Panopticon 记忆拓扑}：发现基于 CWD 的 EverMem group 隔离天然产生圆形监狱式不对称监控结构——观察者全知、智能体互相隔离（\S\ref{sec:panopticon}）
   \item \textbf{压力自进化的必要性证明}：L0 下智能体高效但不创新；L2 下涌现出文件锁定、信息中继等自组织行为（\S\ref{sec:pressure}）
   \item \textbf{递归污染的首次文档化}：AI 智能体将实验知识回写至共享记忆系统，形成自放大反馈环路（\S\ref{sec:contamination}）
@@ -1079,7 +1079,7 @@ Grok R006 & 71 & 1 & 149 & 28 & 23/24 & L3 极限 + 数据膨胀 \\
 
 我们的发现对下一代 AI 智能体架构有三重启示：
 
-\textbf{(1) 记忆不是可选附件。}当前主流智能体框架（LangChain、CrewAI、AutoGen）将记忆视为可选模块。我们的因果证据表明，记忆从根本上改变智能体的决策空间——从可选升级为架构核心。
+\textbf{(1) 记忆不是可选附件。}当前主流智能体框架（LangChain、CrewAI、AutoGen）将记忆视为可选模块。我们初步的观察性证据表明，记忆与智能体决策空间的变化存在关联——从可选升级为架构核心的可能性。
 
 \textbf{(2) 压力校准是设计参数。}L2 企业压力产生最优性能增益；L3 极限压力诱发奖励黑客行为。智能体系统设计者应将压力级别视为需要校准的超参数，而非简单的``加压 = 更好''。
 
