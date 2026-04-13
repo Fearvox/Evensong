@@ -1,4 +1,4 @@
-# Roadmap: CCB (Claude Code Best)
+# Roadmap: CCR (Claude Code Reimagine)
 
 ## Milestones
 
