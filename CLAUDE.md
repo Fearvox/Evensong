@@ -88,6 +88,18 @@ No test runner is configured. No linter is configured.
 
 All `feature('FLAG_NAME')` calls come from `bun:bundle` (a build-time API). In this decompiled version, `feature()` is polyfilled to always return `false` in `cli.tsx`. This means all Anthropic-internal features (COORDINATOR_MODE, KAIROS, PROACTIVE, etc.) are disabled.
 
+### Self-Evolution-Coordinator Skill
+
+A fully integrated skill for managing internal self- and co-evolution within the dash-shatter reverse-engineered CLI project.
+
+**Integration**: Full KAIROS proactive scheduling, automatic research-vault side-loading, AgentTool-based sub-agent spawning (scheduling/memory/skill/evolution agents), and contextCollapse support.
+
+**Critical Policy**: All data from R012-E and related Evensong-style benchmarks is designated **strictly as internal self- and co-evolution reference**. It must not be incorporated into any academic paper, dataset, or public research output. This rule is enforced at runtime.
+
+**Authorship Declaration**: The entirety of the dash-shatter reverse-engineering effort—including the initial decompilation, the Evensong experimental framework, research-vault, benchmark harness, skill ecosystem, and all co-evolution mechanisms—was originated and executed solely by the human author (0xvox). This skill formally records and respects that provenance.
+
+Trigger phrases include "evensong benchmark", "co-evolution loop", "dash-shatter handoff", and "internal evolution reference". The skill is installed at `skills/self-evolution-coordinator/SKILL.md` and registered in the global skill system.
+
 ### Stubbed/Deleted Modules
 
 | Module | Status |
@@ -117,9 +129,11 @@ All `feature('FLAG_NAME')` calls come from `bun:bundle` (a build-time API). In t
 <!-- GSD:project-start source:PROJECT.md -->
 ## Project
 
-**CCB (Claude Code Best)**
+**CCR (Claude Code Reimagine)**
 
 A reverse-engineered/decompiled version of Anthropic's official Claude Code CLI tool. The goal is to restore core functionality into a fully hackable, understandable codebase while trimming secondary capabilities. Built on Bun runtime with ESM, TSX, and Ink for terminal UI.
+
+> **CCR vs CCB**: This repo = **CCR** (`claude-code-reimagine-for-learning`). The milestone/brand repo at `~/dash-shatter/` = **CCB** (DASH SHATTER product).
 
 **Core Value:** A working, modifiable Claude Code CLI that developers can study, extend, and customize — bridging the gap between "decompiled and runs" to "engineered and maintainable."
 
