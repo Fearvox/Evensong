@@ -53,6 +53,7 @@ import type { AgentDefinition } from './loadAgentsDir.js';
 import { filterAgentsByMcpRequirements, hasRequiredMcpServers, isBuiltInAgent } from './loadAgentsDir.js';
 import { getPrompt } from './prompt.js';
 import { runAgent } from './runAgent.js';
+import { runHermesSubagent } from './runHermesSubagent.js';
 import { renderGroupedAgentToolUse, renderToolResultMessage, renderToolUseErrorMessage, renderToolUseMessage, renderToolUseProgressMessage, renderToolUseRejectedMessage, renderToolUseTag, userFacingName, userFacingNameBackgroundColor } from './UI.js';
 
 /* eslint-disable @typescript-eslint/no-require-imports */
@@ -843,19 +844,29 @@ export const AgentTool = buildTool({
         const summaryTaskId = foregroundTaskId;
 
         // Get async iterator for the agent
-        const agentIterator = runAgent({
-          ...runAgentParams,
-          override: {
-            ...runAgentParams.override,
-            agentId: syncAgentId
-          },
-          onCacheSafeParams: summaryTaskId && getSdkAgentProgressSummariesEnabled() ? (params: CacheSafeParams) => {
-            const {
-              stop
-            } = startAgentSummarization(summaryTaskId, syncAgentId, params, rootSetAppState);
-            stopForegroundSummarization = stop;
-          } : undefined
-        })[Symbol.asyncIterator]();
+        // HERMES SPECIAL CASE: Hermes is a CLI subprocess — bypass runAgent().
+        let agentIterator: AsyncIterator<Message | StreamEvent | RequestStartEvent | ToolUseSummaryMessage | TombstoneMessage>
+        if (selectedAgent?.agentType === 'hermes') {
+          agentIterator = (runHermesSubagent({
+            prompt,
+            cwd: cwdOverridePath ?? worktreeInfo?.worktreePath,
+            signal: toolUseContext.abortController.signal,
+          }))[Symbol.asyncIterator]()
+        } else {
+          agentIterator = runAgent({
+            ...runAgentParams,
+            override: {
+              ...runAgentParams.override,
+              agentId: syncAgentId
+            },
+            onCacheSafeParams: summaryTaskId && getSdkAgentProgressSummariesEnabled() ? (params: CacheSafeParams) => {
+              const {
+                stop
+              } = startAgentSummarization(summaryTaskId, syncAgentId, params, rootSetAppState);
+              stopForegroundSummarization = stop;
+            } : undefined
+          })[Symbol.asyncIterator]()
+        }
 
         // Track if an error occurred during iteration
         let syncAgentError: Error | undefined;
