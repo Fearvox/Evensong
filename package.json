@@ -4,12 +4,19 @@
   "target": "bun",
   "type": "module",
   "scripts": {
-    "dev": "echo 'Run individual services with: bun --watch services/*/server.ts'",
+    "dev": "echo 'See README.md for service startup commands (uses services/*/index.ts)'",
     "test": "bun test",
     "test:watch": "bun test --watch",
-    "test:services": "find services -name '*.test.ts' -exec bun test {} \\;",
-    "start:auth": "bun --watch services/auth/server.ts",
-    "start:users": "bun --watch services/users/server.ts"
+    "test:services": "bun services/run-tests.ts",
+    "test:all": "bun test services/",
+    "start:auth": "bun --watch services/auth/index.ts",
+    "start:users": "bun --watch services/users/index.ts",
+    "start:products": "bun --watch services/products/index.ts",
+    "start:orders": "bun --watch services/orders/index.ts",
+    "start:payments": "bun --watch services/payments/index.ts",
+    "start:notifications": "bun --watch services/notifications/index.ts",
+    "start:analytics": "bun --watch services/analytics/index.ts",
+    "start:search": "bun --watch services/search/index.ts"
   },
   "devDependencies": {
     "bun-types": "latest"
