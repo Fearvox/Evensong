@@ -1,16 +1,12 @@
+// Notifications microservice entry point
+
 import { handleRequest } from "./handlers";
-import { serverError } from "../shared/http";
+
+const PORT = 3006;
 
 const server = Bun.serve({
-  port: 3006,
-  async fetch(req) {
-    try {
-      return await handleRequest(req);
-    } catch {
-      return serverError();
-    }
-  },
+  port: PORT,
+  fetch: handleRequest,
 });
 
-console.log(`Notifications service on :${server.port}`);
-export { server };
+console.log(`Notifications service running on http://localhost:${server.port}`);

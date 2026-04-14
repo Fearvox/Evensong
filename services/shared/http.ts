@@ -1,73 +1,46 @@
-// Shared HTTP utilities for all microservices
+// HTTP utilities for request handling and response building
 
-import type { ApiResponse, PaginatedResponse } from "./types";
+import type { ApiResponse } from "./types";
 
-export function json<T>(data: T, status = 200): Response {
-  return new Response(JSON.stringify(data), {
+export function jsonResponse<T>(data: T, status = 200): Response {
+  const body: ApiResponse<T> = { success: status < 400, data };
+  return new Response(JSON.stringify(body), {
     status,
     headers: { "Content-Type": "application/json" },
   });
 }
 
-export function success<T>(data: T, status = 200): Response {
-  const body: ApiResponse<T> = { success: true, data };
-  return json(body, status);
+export function errorResponse(error: string, status: number): Response {
+  const body: ApiResponse = { success: false, error };
+  return new Response(JSON.stringify(body), {
+    status,
+    headers: { "Content-Type": "application/json" },
+  });
 }
 
-export function paginated<T>(
-  data: T[],
-  total: number,
-  page: number,
-  pageSize: number,
-): Response {
-  const body: PaginatedResponse<T> = {
-    success: true,
-    data,
-    total,
-    page,
-    pageSize,
-  };
-  return json(body, 200);
-}
-
-export function error(message: string, status = 400): Response {
-  const body: ApiResponse = { success: false, error: message };
-  return json(body, status);
-}
-
-export function notFound(message = "Not found"): Response {
-  return error(message, 404);
-}
-
-export function unauthorized(message = "Unauthorized"): Response {
-  return error(message, 401);
-}
-
-export function conflict(message: string): Response {
-  return error(message, 409);
-}
-
-export function serverError(message = "Internal server error"): Response {
-  return error(message, 500);
+export function metaResponse<T>(data: T, meta: ApiResponse["meta"], status = 200): Response {
+  const body: ApiResponse<T> = { success: true, data, meta };
+  return new Response(JSON.stringify(body), {
+    status,
+    headers: { "Content-Type": "application/json" },
+  });
 }
 
 export async function parseBody<T = Record<string, unknown>>(req: Request): Promise<T | null> {
   try {
-    const text = await req.text();
-    if (!text) return null;
-    return JSON.parse(text) as T;
+    return (await req.json()) as T;
   } catch {
     return null;
   }
 }
 
-export function getPathSegments(url: string): string[] {
-  const u = new URL(url);
-  return u.pathname.split("/").filter(Boolean);
+export function getPathSegments(req: Request): string[] {
+  const url = new URL(req.url);
+  return url.pathname.split("/").filter(Boolean);
 }
 
-export function getQueryParams(url: string): URLSearchParams {
-  return new URL(url).searchParams;
+export function getQueryParams(req: Request): URLSearchParams {
+  return new URL(req.url).searchParams;
 }
 
 export function generateId(): string {

@@ -1,268 +1,294 @@
+// Users service request handler — pure function, no server dependency
+
+import type { User } from "../shared/types";
 import {
-  success,
-  paginated,
-  error,
-  notFound,
-  unauthorized,
-  conflict,
+  jsonResponse,
+  errorResponse,
+  metaResponse,
   parseBody,
   getPathSegments,
   getQueryParams,
+  generateId,
+  now,
 } from "../shared/http";
 import {
   isNonEmptyString,
   isValidEmail,
-  isInEnum,
-  isArray,
+  isValidEnum,
   validate,
-  formatValidationErrors,
 } from "../shared/validation";
 import { userStore } from "./store";
-import type { User } from "../shared/types";
 
-const VALID_ROLES = ["admin", "user", "moderator"] as const;
+const ROLES = ["user", "admin"] as const;
+const STATUSES = ["active", "suspended", "deleted"] as const;
 
 export async function handleRequest(req: Request): Promise<Response> {
   const method = req.method;
-  const segments = getPathSegments(req.url);
-  const params = getQueryParams(req.url);
+  const segments = getPathSegments(req); // e.g. ["users"] or ["users","abc"]
 
-  // All routes require /users prefix
+  // Must start with "users"
   if (segments[0] !== "users") {
-    return notFound("Route not found");
+    return errorResponse("Not found", 404);
   }
 
-  // Health check: GET /users/health
-  if (method === "GET" && segments[1] === "health" && segments.length === 2) {
-    return success({ status: "ok", service: "users" });
-  }
+  // --- Collection-level routes ---
 
-  // Stats: GET /users/stats
+  // GET /users/stats
   if (method === "GET" && segments[1] === "stats" && segments.length === 2) {
-    return success(userStore.stats());
+    return handleStats();
   }
 
-  // Search: GET /users/search?q=term
-  if (method === "GET" && segments[1] === "search" && segments.length === 2) {
-    const q = params.get("q") ?? "";
-    if (!q.trim()) {
-      return success([]);
-    }
-    return success(userStore.search(q));
+  // POST /users/bulk-status
+  if (method === "POST" && segments[1] === "bulk-status" && segments.length === 2) {
+    return handleBulkStatus(req);
   }
 
-  // Bulk activate: POST /users/bulk/activate
-  if (
-    method === "POST" &&
-    segments[1] === "bulk" &&
-    segments[2] === "activate" &&
-    segments.length === 3
-  ) {
-    const body = await parseBody<{ ids: unknown }>(req);
-    if (!body || !isArray(body.ids)) {
-      return error("ids must be a non-empty array");
-    }
-    const ids = body.ids as string[];
-    if (ids.length === 0) {
-      return error("ids must be a non-empty array");
-    }
-    const count = userStore.bulkActivate(ids);
-    return success({ activated: count });
-  }
-
-  // Bulk deactivate: POST /users/bulk/deactivate
-  if (
-    method === "POST" &&
-    segments[1] === "bulk" &&
-    segments[2] === "deactivate" &&
-    segments.length === 3
-  ) {
-    const body = await parseBody<{ ids: unknown }>(req);
-    if (!body || !isArray(body.ids)) {
-      return error("ids must be a non-empty array");
-    }
-    const ids = body.ids as string[];
-    if (ids.length === 0) {
-      return error("ids must be a non-empty array");
-    }
-    const count = userStore.bulkDeactivate(ids);
-    return success({ deactivated: count });
-  }
-
-  // Activity log: POST /users/:id/activity
-  if (method === "POST" && segments[2] === "activity" && segments.length === 3) {
-    const id = segments[1];
-    const user = userStore.get(id);
-    if (!user) return notFound("User not found");
-    const body = await parseBody<{ action: unknown }>(req);
-    if (!body || !isNonEmptyString(body.action)) {
-      return error("action is required and must be a non-empty string");
-    }
-    userStore.logActivity(id, body.action as string);
-    return success({ logged: true });
-  }
-
-  // Activity log: GET /users/:id/activity
-  if (method === "GET" && segments[2] === "activity" && segments.length === 3) {
-    const id = segments[1];
-    const user = userStore.get(id);
-    if (!user) return notFound("User not found");
-    return success(userStore.getActivity(id));
-  }
-
-  // Restore: POST /users/:id/restore
-  if (method === "POST" && segments[2] === "restore" && segments.length === 3) {
-    const id = segments[1];
-    const user = userStore.get(id);
-    if (!user) return notFound("User not found");
-    if (!user.deletedAt) return error("User is not deleted", 400);
-    const restored = userStore.restore(id);
-    return success(restored);
-  }
-
-  // Create user: POST /users
-  if (method === "POST" && segments.length === 1) {
-    const body = await parseBody<{
-      name: unknown;
-      email: unknown;
-      role: unknown;
-    }>(req);
-    if (!body) return error("Invalid or missing request body");
-
-    const errors = validate([
-      {
-        field: "name",
-        valid: isNonEmptyString(body.name),
-        message: "name is required",
-      },
-      {
-        field: "email",
-        valid: isValidEmail(body.email),
-        message: "valid email is required",
-      },
-      {
-        field: "role",
-        valid: isInEnum(body.role, VALID_ROLES),
-        message: "role must be admin, user, or moderator",
-      },
-    ]);
-    if (errors.length > 0) return error(formatValidationErrors(errors));
-
-    const existing = userStore.findByEmail(body.email as string);
-    if (existing) return conflict("Email already exists");
-
-    const user = userStore.create({
-      name: body.name as string,
-      email: body.email as string,
-      role: body.role as User["role"],
-    });
-    return success(user, 201);
-  }
-
-  // List users: GET /users (supports pagination + role/active/search filtering)
+  // GET /users
   if (method === "GET" && segments.length === 1) {
-    const roleFilter = params.get("role");
-    const activeFilter = params.get("active");
-    const searchFilter = params.get("search");
-
-    // Build filtered list
-    let users = userStore.getActive();
-
-    if (searchFilter !== null) {
-      // ?search= with empty value returns all active users; non-empty filters
-      if (searchFilter.trim()) {
-        users = userStore.search(searchFilter);
-      }
-    } else if (roleFilter) {
-      users = userStore.filterByRole(roleFilter as User["role"]);
-    } else if (activeFilter !== null) {
-      const activeValue = activeFilter === "true";
-      users = userStore.filterByActive(activeValue);
-    }
-
-    const total = users.length;
-
-    // Pagination — only apply when page or pageSize params present
-    const pageParam = params.get("page");
-    const pageSizeParam = params.get("pageSize");
-
-    if (pageParam !== null || pageSizeParam !== null) {
-      let page = parseInt(pageParam ?? "1", 10);
-      let pageSize = parseInt(pageSizeParam ?? "20", 10);
-
-      if (isNaN(page) || page < 1) page = 1;
-      if (isNaN(pageSize) || pageSize < 1) pageSize = 1;
-
-      const start = (page - 1) * pageSize;
-      const data = users.slice(start, start + pageSize);
-
-      return paginated(data, total, page, pageSize);
-    }
-
-    return paginated(users, total, 1, total || 20);
+    return handleList(req);
   }
 
-  // Get user: GET /users/:id
-  if (method === "GET" && segments.length === 2) {
-    const id = segments[1];
-    const user = userStore.get(id);
-    if (!user) return notFound("User not found");
-    return success(user);
+  // POST /users
+  if (method === "POST" && segments.length === 1) {
+    return handleCreate(req);
   }
 
-  // Update user: PUT /users/:id
-  if (method === "PUT" && segments.length === 2) {
-    const id = segments[1];
-    const user = userStore.get(id);
-    if (!user) return notFound("User not found");
+  // --- Item-level routes ---
+  const userId = segments[1];
+  if (!userId) return errorResponse("Not found", 404);
 
-    const body = await parseBody<{
-      name?: unknown;
-      email?: unknown;
-      role?: unknown;
-      active?: unknown;
-    }>(req);
-    if (!body) return error("Invalid or missing request body");
+  // Sub-resource routes (3 segments)
+  if (segments.length === 3) {
+    const sub = segments[2];
 
-    const updates: Partial<Pick<User, "name" | "email" | "role" | "active">> = {};
+    if (method === "PUT" && sub === "role") return handleChangeRole(req, userId);
+    if (method === "PUT" && sub === "suspend") return handleSuspend(userId);
+    if (method === "PUT" && sub === "activate") return handleActivate(userId);
+    if (method === "GET" && sub === "activity") return handleGetActivity(userId);
+    if (method === "POST" && sub === "activity") return handleLogActivity(req, userId);
 
-    if (body.name !== undefined) {
-      if (!isNonEmptyString(body.name))
-        return error("name must be a non-empty string");
-      updates.name = body.name as string;
-    }
-    if (body.email !== undefined) {
-      if (!isValidEmail(body.email))
-        return error("valid email is required");
-      const existing = userStore.findByEmail(body.email as string);
-      if (existing && existing.id !== id)
-        return conflict("Email already exists");
-      updates.email = body.email as string;
-    }
-    if (body.role !== undefined) {
-      if (!isInEnum(body.role, VALID_ROLES))
-        return error("role must be admin, user, or moderator");
-      updates.role = body.role as User["role"];
-    }
-    if (body.active !== undefined) {
-      if (typeof body.active !== "boolean")
-        return error("active must be a boolean");
-      updates.active = body.active;
-    }
-
-    const updated = userStore.update(id, updates);
-    return success(updated);
+    return errorResponse("Not found", 404);
   }
 
-  // Soft delete: DELETE /users/:id
-  if (method === "DELETE" && segments.length === 2) {
-    const id = segments[1];
-    const user = userStore.get(id);
-    if (!user) return notFound("User not found");
-    if (user.deletedAt) return error("User already deleted", 400);
-    const deleted = userStore.softDelete(id);
-    return success(deleted);
+  // Direct item routes (2 segments)
+  if (segments.length === 2) {
+    if (method === "GET") return handleGetById(userId);
+    if (method === "PUT") return handleUpdate(req, userId);
+    if (method === "DELETE") return handleDelete(userId);
   }
 
-  return notFound("Route not found");
+  return errorResponse("Not found", 404);
+}
+
+// --- Handlers ---
+
+function handleList(req: Request): Response {
+  const params = getQueryParams(req);
+  let users = userStore.getAll();
+
+  const role = params.get("role");
+  if (role && isValidEnum(role, ROLES)) {
+    users = users.filter((u) => u.role === role);
+  }
+
+  const status = params.get("status");
+  if (status && isValidEnum(status, STATUSES)) {
+    users = users.filter((u) => u.status === status);
+  }
+
+  const search = params.get("search");
+  if (search) {
+    const q = search.toLowerCase();
+    users = users.filter(
+      (u) => u.name.toLowerCase().includes(q) || u.email.toLowerCase().includes(q)
+    );
+  }
+
+  const total = users.length;
+  const page = Math.max(1, parseInt(params.get("page") || "1", 10) || 1);
+  const limit = Math.max(1, Math.min(100, parseInt(params.get("limit") || "20", 10) || 20));
+  const start = (page - 1) * limit;
+  const paged = users.slice(start, start + limit);
+
+  return metaResponse(paged, { total, page, limit });
+}
+
+async function handleCreate(req: Request): Promise<Response> {
+  const body = await parseBody<Partial<User>>(req);
+  if (!body) return errorResponse("Invalid JSON body", 400);
+
+  const errors = validate([
+    [isNonEmptyString(body.name), "name", "Name is required"],
+    [isValidEmail(body.email), "email", "Valid email is required"],
+  ]);
+  if (errors.length > 0) {
+    return errorResponse(errors.map((e) => e.message).join("; "), 400);
+  }
+
+  // Check duplicate email
+  if (userStore.findByEmail(body.email!)) {
+    return errorResponse("Email already exists", 409);
+  }
+
+  const timestamp = now();
+  const user: User = {
+    id: generateId(),
+    email: body.email!,
+    name: body.name!,
+    role: isValidEnum(body.role, ROLES) ? body.role : "user",
+    status: "active",
+    createdAt: timestamp,
+    updatedAt: timestamp,
+  };
+
+  const created = userStore.create(user);
+  userStore.logActivity(created.id, "created", "User account created");
+  return jsonResponse(created, 201);
+}
+
+function handleGetById(id: string): Response {
+  const user = userStore.getById(id);
+  if (!user) return errorResponse("User not found", 404);
+  return jsonResponse(user);
+}
+
+async function handleUpdate(req: Request, id: string): Promise<Response> {
+  const user = userStore.getById(id);
+  if (!user) return errorResponse("User not found", 404);
+
+  const body = await parseBody<Partial<User>>(req);
+  if (!body) return errorResponse("Invalid JSON body", 400);
+
+  // Validate optional fields if provided
+  if (body.email !== undefined && !isValidEmail(body.email)) {
+    return errorResponse("Valid email is required", 400);
+  }
+  if (body.name !== undefined && !isNonEmptyString(body.name)) {
+    return errorResponse("Name cannot be empty", 400);
+  }
+
+  // Check email uniqueness if changing
+  if (body.email && body.email !== user.email && userStore.findByEmail(body.email)) {
+    return errorResponse("Email already exists", 409);
+  }
+
+  const updates: Partial<User> = { updatedAt: now() };
+  if (body.name) updates.name = body.name;
+  if (body.email) updates.email = body.email;
+
+  const updated = userStore.update(id, updates);
+  userStore.logActivity(id, "updated", "User profile updated");
+  return jsonResponse(updated);
+}
+
+function handleDelete(id: string): Response {
+  const user = userStore.getById(id);
+  if (!user) return errorResponse("User not found", 404);
+
+  const deleted = userStore.softDelete(id);
+  userStore.logActivity(id, "deleted", "User soft-deleted");
+  return jsonResponse(deleted);
+}
+
+async function handleChangeRole(req: Request, id: string): Promise<Response> {
+  const user = userStore.getById(id);
+  if (!user) return errorResponse("User not found", 404);
+
+  const body = await parseBody<{ role?: string }>(req);
+  if (!body) return errorResponse("Invalid JSON body", 400);
+
+  if (!isValidEnum(body.role, ROLES)) {
+    return errorResponse("Invalid role. Must be 'user' or 'admin'", 400);
+  }
+
+  const updated = userStore.update(id, { role: body.role as User["role"], updatedAt: now() });
+  userStore.logActivity(id, "role_changed", `Role changed to ${body.role}`);
+  return jsonResponse(updated);
+}
+
+function handleSuspend(id: string): Response {
+  const user = userStore.getById(id);
+  if (!user) return errorResponse("User not found", 404);
+  if (user.status === "deleted") return errorResponse("Cannot suspend a deleted user", 400);
+
+  const updated = userStore.update(id, { status: "suspended" as const, updatedAt: now() });
+  userStore.logActivity(id, "suspended", "User suspended");
+  return jsonResponse(updated);
+}
+
+function handleActivate(id: string): Response {
+  const user = userStore.getById(id);
+  if (!user) return errorResponse("User not found", 404);
+  if (user.status === "deleted") return errorResponse("Cannot activate a deleted user", 400);
+
+  const updated = userStore.update(id, { status: "active" as const, updatedAt: now() });
+  userStore.logActivity(id, "activated", "User activated");
+  return jsonResponse(updated);
+}
+
+function handleGetActivity(userId: string): Response {
+  const user = userStore.getById(userId);
+  if (!user) return errorResponse("User not found", 404);
+
+  const activity = userStore.getActivity(userId);
+  return jsonResponse(activity);
+}
+
+async function handleLogActivity(req: Request, userId: string): Promise<Response> {
+  const user = userStore.getById(userId);
+  if (!user) return errorResponse("User not found", 404);
+
+  const body = await parseBody<{ action?: string; details?: string }>(req);
+  if (!body) return errorResponse("Invalid JSON body", 400);
+
+  if (!isNonEmptyString(body.action)) {
+    return errorResponse("Action is required", 400);
+  }
+
+  const entry = userStore.logActivity(userId, body.action!, body.details);
+  return jsonResponse(entry, 201);
+}
+
+function handleStats(): Response {
+  const all = userStore.getAll();
+  const stats = {
+    total: all.length,
+    byRole: {
+      user: all.filter((u) => u.role === "user").length,
+      admin: all.filter((u) => u.role === "admin").length,
+    },
+    byStatus: {
+      active: all.filter((u) => u.status === "active").length,
+      suspended: all.filter((u) => u.status === "suspended").length,
+      deleted: all.filter((u) => u.status === "deleted").length,
+    },
+  };
+  return jsonResponse(stats);
+}
+
+async function handleBulkStatus(req: Request): Promise<Response> {
+  const body = await parseBody<{ userIds?: string[]; status?: string }>(req);
+  if (!body) return errorResponse("Invalid JSON body", 400);
+
+  if (!Array.isArray(body.userIds) || body.userIds.length === 0) {
+    return errorResponse("userIds array is required", 400);
+  }
+  if (!isValidEnum(body.status, STATUSES)) {
+    return errorResponse("Invalid status. Must be 'active', 'suspended', or 'deleted'", 400);
+  }
+
+  const results: { id: string; success: boolean; error?: string }[] = [];
+
+  for (const uid of body.userIds) {
+    const user = userStore.getById(uid);
+    if (!user) {
+      results.push({ id: uid, success: false, error: "User not found" });
+      continue;
+    }
+    userStore.update(uid, { status: body.status as User["status"], updatedAt: now() });
+    userStore.logActivity(uid, "status_changed", `Status changed to ${body.status}`);
+    results.push({ id: uid, success: true });
+  }
+
+  return jsonResponse(results);
 }

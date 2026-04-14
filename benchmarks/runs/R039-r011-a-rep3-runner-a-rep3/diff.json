@@ -1,0 +1,21 @@
+{
+  "newFiles": [
+    "services/payments/payments.test.ts",
+    "services/payments/payments-process.test.ts",
+    "services/products/products.test.ts",
+    "services/products/products-stock.test.ts",
+    "services/auth/auth.test.ts",
+    "services/search/search-relevance.test.ts",
+    "services/search/search.test.ts",
+    "services/users/users.test.ts",
+    "services/users/users-search.test.ts",
+    "services/orders/orders-status.test.ts",
+    "services/orders/orders.test.ts",
+    "services/notifications/notifications.test.ts",
+    "services/notifications/notifications-bulk.test.ts",
+    "services/analytics/analytics.test.ts",
+    "services/analytics/analytics-reports.test.ts"
+  ],
+  "modifiedFiles": [],
+  "newTestCount": 522
+}

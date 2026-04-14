@@ -1,0 +1,34 @@
+{
+  "newFiles": [
+    "services/payments/__tests__/payments-business.test.ts",
+    "services/payments/__tests__/payments-crud.test.ts",
+    "services/payments/__tests__/payments-processing.test.ts",
+    "services/products/__tests__/products-crud.test.ts",
+    "services/products/__tests__/products-filters.test.ts",
+    "services/products/__tests__/products-business.test.ts",
+    "services/auth/__tests__/auth-registration.test.ts",
+    "services/auth/__tests__/auth-login.test.ts",
+    "services/auth/__tests__/auth-profile.test.ts",
+    "services/auth/__tests__/auth-password.test.ts",
+    "services/search/__tests__/search-index.test.ts",
+    "services/search/__tests__/search-query.test.ts",
+    "services/search/__tests__/search-business.test.ts",
+    "services/users/__tests__/users-business.test.ts",
+    "services/users/__tests__/users-filters.test.ts",
+    "services/users/__tests__/users-crud.test.ts",
+    "services/orders/__tests__/orders-status.test.ts",
+    "services/orders/__tests__/orders-business.test.ts",
+    "services/orders/__tests__/orders-crud.test.ts",
+    "services/notifications/__tests__/notifications-business.test.ts",
+    "services/notifications/__tests__/notifications-crud.test.ts",
+    "services/notifications/__tests__/notifications-delivery.test.ts",
+    "services/analytics/__tests__/analytics-events.test.ts",
+    "services/analytics/__tests__/analytics-queries.test.ts",
+    "services/analytics/__tests__/analytics-business.test.ts"
+  ],
+  "modifiedFiles": [
+    "services/integration/cross-service.test.ts",
+    "services/integration/__tests__/workflow.test.ts"
+  ],
+  "newTestCount": 490
+}

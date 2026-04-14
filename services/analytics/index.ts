@@ -1,16 +1,12 @@
+// Analytics microservice entry point
+
 import { handleRequest } from "./handlers";
-import { serverError } from "../shared/http";
+
+const PORT = 3007;
 
 const server = Bun.serve({
-  port: 3007,
-  async fetch(req) {
-    try {
-      return await handleRequest(req);
-    } catch {
-      return serverError();
-    }
-  },
+  port: PORT,
+  fetch: handleRequest,
 });
 
-console.log(`Analytics service on :${server.port}`);
-export { server };
+console.log(`Analytics service running on http://localhost:${server.port}`);

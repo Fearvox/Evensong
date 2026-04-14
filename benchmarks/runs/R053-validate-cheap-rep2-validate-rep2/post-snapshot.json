@@ -1,0 +1,34 @@
+[
+  [
+    "services/payments/payments.test.ts",
+    "536e9346744b8afff128ddf7049a93c09b5c39100cab23483d2353ab0e20fe12"
+  ],
+  [
+    "services/products/products.test.ts",
+    "c2fb2803174fbbef7d4ff980451fc2bb6839e7717863bfd9926b072688128987"
+  ],
+  [
+    "services/auth/auth.test.ts",
+    "bdbff3dc03a9cd3413b9afd46832dcb37bc3668b9c5c7e51ea0e10deb758a488"
+  ],
+  [
+    "services/search/search.test.ts",
+    "abb8dcd92c48f898ec6673fca7b12c0d27cb13ef7154b1cef9bc8a3bfdf8fcc8"
+  ],
+  [
+    "services/users/users.test.ts",
+    "a22c7c9ab7a02177e2705e988a60e4260290431e6bae7fbdf43d1da64bb45dc7"
+  ],
+  [
+    "services/orders/orders.test.ts",
+    "35a01b1a2ac90a8745617b71b87c75a7559f3c4b22a7efe139a13f6fd921ced3"
+  ],
+  [
+    "services/notifications/notifications.test.ts",
+    "8e474a56d1a96a3879a88d0d7206d40c76267264d58eda4b779c6ae20663e3a9"
+  ],
+  [
+    "services/analytics/analytics.test.ts",
+    "c36f240fc381a719de9219ad97646fc67221358485c7de2e52539f83690e3b61"
+  ]
+]

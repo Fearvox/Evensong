@@ -1,0 +1,17 @@
+{
+  "run_id": "R012-E-001",
+  "codename": "Evolved Memory + Full 4-Topic Swarm",
+  "files_analyzed": 47,
+  "insights_depth": 9,
+  "subagent_calls": 28,
+  "repeatability_factors": 6,
+  "vault_utilization": 0.94,
+  "focus_areas": ["sub-agent scheduling", "memory side-loading"],
+  "parallel_tools_used": 12,
+  "key_causation": "Memory recall of parallel strategy increased subagent_calls by 3.5x baseline",
+  "artifacts_generated": 5,
+  "harness_style_match": "exact",
+  "open_risks": ["potential recursive contamination at L2 pressure", "registry update pending"],
+  "timestamp": "2026-04-12T04:30:00Z",
+  "parent_summary_ready": true
+}

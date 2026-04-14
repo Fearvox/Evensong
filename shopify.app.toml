@@ -1,0 +1,13 @@
+name = "dash-studio"
+client_id = "f7128cb8cd9a1bbd4dce0e9a887d66b5"
+application_url = "https://example.com"
+embedded = true
+
+[access_scopes]
+scopes = "read_products,read_customers,write_customers"
+
+[auth]
+redirect_urls = ["https://example.com/auth/callback"]
+
+[webhooks]
+api_version = "2026-04"

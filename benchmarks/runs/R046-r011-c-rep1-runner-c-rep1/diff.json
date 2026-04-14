@@ -1,0 +1,29 @@
+{
+  "newFiles": [
+    "services/payments/tests/handlers.test.ts",
+    "services/payments/tests/workflow.test.ts",
+    "services/payments/tests/validation.test.ts",
+    "services/products/tests/handlers.test.ts",
+    "services/products/tests/search.test.ts",
+    "services/products/tests/business.test.ts",
+    "services/auth/tests/handlers.test.ts",
+    "services/auth/tests/validation.test.ts",
+    "services/search/tests/handlers.test.ts",
+    "services/search/tests/search.test.ts",
+    "services/search/tests/bulk.test.ts",
+    "services/users/tests/handlers.test.ts",
+    "services/users/tests/search.test.ts",
+    "services/users/tests/validation.test.ts",
+    "services/orders/tests/handlers.test.ts",
+    "services/orders/tests/workflow.test.ts",
+    "services/orders/tests/validation.test.ts",
+    "services/notifications/tests/handlers.test.ts",
+    "services/notifications/tests/bulk.test.ts",
+    "services/notifications/tests/validation.test.ts",
+    "services/analytics/tests/handlers.test.ts",
+    "services/analytics/tests/metrics.test.ts",
+    "services/analytics/tests/batch.test.ts"
+  ],
+  "modifiedFiles": [],
+  "newTestCount": 506
+}

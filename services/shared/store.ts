@@ -8,7 +8,7 @@ export class MemoryStore<T extends { id: string }> {
     return { ...item };
   }
 
-  get(id: string): T | undefined {
+  getById(id: string): T | undefined {
     const item = this.data.get(id);
     return item ? { ...item } : undefined;
   }

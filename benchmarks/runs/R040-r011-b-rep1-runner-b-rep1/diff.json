@@ -1,0 +1,9 @@
+{
+  "newFiles": [],
+  "modifiedFiles": [
+    "services/integration/cross-service.test.ts",
+    "services/integration/__tests__/workflow.test.ts",
+    "services/__tests__/integration.test.ts"
+  ],
+  "newTestCount": 0
+}

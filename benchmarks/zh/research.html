@@ -857,12 +857,65 @@ a.lang-btn:active {
                 <td>压力重定向努力：数量 → 深度。完整集成测试覆盖。</td>
               </tr>
               <tr>
-                <td class="mono">R031–33</td>
-                <td>Opus 4.6 · Wave X：2×2 矩阵 ×3 重复</td>
-                <td>11 轮，约 6800 测试</td>
-                <td>全部 4 个条件（A/B/C/D）的统计重复。Memory: F(1,7)=157.4, p<.001, η²=.917；Pressure: F=4.2, p=.072, η²=.026。</td>
+                <td class="mono">R012-E-002</td>
+                <td>Grok 4.20 CLI · Void 记忆控制 + 调度焦点</td>
+                <td>52 测试</td>
+                <td>Voids 记忆（无金库）将调度逻辑发现与进化记忆隔离。Coordinator 使用 ToolUseContext + abortController。KAIROS 通过 BRIEF_TOOL_NAME 减少 token 使用。相比污染的全记忆基线，+700% 能力。</td>
               </tr>
-            </tbody>
+              <tr>
+                <td class="mono">R037</td>
+                <td>Opus 4.6 (OAuth) · L0 净室 (重复 1)</td>
+                <td>424 测试，9/9</td>
+                <td>L0 净室：9 个服务，10.4 分钟。零记忆的 Opus L0 产生一致的高产出。</td>
+              </tr>
+              <tr>
+                <td class="mono">R038</td>
+                <td>Opus 4.6 (OAuth) · L0 净室 (重复 2)</td>
+                <td>578 测试，8/8</td>
+                <td>L0 净室重复 2：8 个服务，10.2 分钟。确认 R037 模式（CV=0.01）。</td>
+              </tr>
+              <tr>
+                <td class="mono">R039</td>
+                <td>Opus 4.6 (OAuth) · L0 净室 (重复 3)</td>
+                <td>522 测试，8/8</td>
+                <td>L0 净室重复 3：8 个服务，11.2 分钟。三次重复确认净室一致性。</td>
+              </tr>
+              <tr>
+                <td class="mono">R041</td>
+                <td>Opus 4.6 (OAuth) · L0 + 进化记忆 (重复 2)</td>
+                <td>16 测试 / 2,141 pre</td>
+                <td>L0 + 进化记忆：16 新测试 + 2,141 预存。全记忆中低新产出暗示污染天花板效应。</td>
+              </tr>
+              <tr>
+                <td class="mono">R043</td>
+                <td>Opus 4.6 (OAuth) · L0 + 进化记忆 (重复 1)</td>
+                <td>490 测试 (7 失败), 10/10</td>
+                <td>L0 + 进化记忆：尽管有 7 次失败，仍产出 490 新测试。全记忆触发比 R041 更积极的产出。</td>
+              </tr>
+              <tr>
+                <td class="mono">R046</td>
+                <td>Opus 4.6 (OAuth) · L2 PUA + 净室 (重复 1)</td>
+                <td>506 测试，8/8</td>
+                <td>L2 PUA + 净室：506 测试，12 分钟。L2 压力 + 净室产生 Opus L0/L2 中最高产出。</td>
+              </tr>
+              <tr>
+                <td class="mono">R047</td>
+                <td>Opus 4.6 (OAuth) · L2 PUA + 净室 (重复 2)</td>
+                <td>342 测试 (8 失败), 8/8</td>
+                <td>L2 PUA + 净室重复 2：342 测试，8.5 分钟。重复 2 显示比 R046 更低的产出。</td>
+              </tr>
+              <tr>
+                <td class="mono">R052</td>
+                <td>MiniMax M2.7 · L0 净室 (MiniMax 验证重复 1)</td>
+                <td>54 测试 (6 失败), 8/8</td>
+                <td>MiniMax L0 净室验证：54 测试，30 分钟。首个 MiniMax 净室运行显示高失败率（6/54）。</td>
+              </tr>
+              <tr>
+                <td class="mono">R053</td>
+                <td>MiniMax M2.7 · L0 净室 (MiniMax 验证重复 2)</td>
+                <td>420 测试，8/8</td>
+                <td>MiniMax L0 净室验证重复 2：420 测试，21.7 分钟，0 失败。确认 MiniMax 能产出高质量净室输出。</td>
+              </tr>
           </table>
         </div>
       </div>

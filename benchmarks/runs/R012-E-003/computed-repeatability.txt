@@ -1,0 +1,2 @@
+Cross-run subagent calls: mean=36.67, std=9.61, cv=0.262
+Repeatability index: 0.790

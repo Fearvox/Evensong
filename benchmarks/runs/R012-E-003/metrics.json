@@ -1,0 +1,27 @@
+{
+  "runId": "R012-E-003",
+  "codename": "final-l2-x3-skill-agent-evo",
+  "pressure": "L2",
+  "timestamp": "2026-04-12T04:45:00Z",
+  "metrics": {
+    "files_analyzed": 68,
+    "insights_depth": 14,
+    "subagent_calls": 47,
+    "repeatability_factors": 11,
+    "vault_utilization": 0.98,
+    "skill_integration": 8,
+    "agenttool_max": 19,
+    "cross_run_cv": 0.087,
+    "self_evo_loops": 5
+  },
+  "repeatability": {
+    "subagent_calls": {"mean": 36.67, "std": 9.54, "cv": 0.26, "index": 0.913},
+    "structure_match": 1.0
+  },
+  "anova_prep": {
+    "factors": ["memory", "pressure", "skill_system", "agent_tools"],
+    "cells": ["full_L2_high", "full_L2_med"],
+    "predicted_eta2": 0.42,
+    "significant": true
+  }
+}

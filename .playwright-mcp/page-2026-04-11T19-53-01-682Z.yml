@@ -1,0 +1,431 @@
+- generic [active] [ref=e1]:
+  - generic:
+    - region "Toast message":
+      - heading "0 notifications total" [level=2] [ref=e3]
+      - alert
+  - region [ref=e4]
+  - generic [ref=e5]:
+    - generic [ref=e7]:
+      - button "Skip to search" [ref=e8] [cursor=pointer]:
+        - generic [ref=e9]: Skip to search
+      - button "Skip to main content" [ref=e10] [cursor=pointer]:
+        - generic [ref=e11]: Skip to main content
+      - button "Keyboard shortcuts" [ref=e12] [cursor=pointer]:
+        - generic [ref=e13]: Keyboard shortcuts
+      - button "Close jump menu" [ref=e14] [cursor=pointer]:
+        - img [ref=e15]
+        - generic [ref=e17]: Close jump menu
+    - banner "Global Navigation" [ref=e18]:
+      - generic [ref=e19]:
+        - link "LinkedIn" [ref=e20] [cursor=pointer]:
+          - /url: https://www.linkedin.com/feed/?nis=true
+          - img "LinkedIn" [ref=e23]:
+            - img [ref=e24]
+        - generic [ref=e28]:
+          - combobox "I’m looking for..." [ref=e29]
+          - generic:
+            - img
+        - navigation "Primary Navigation" [ref=e30]:
+          - list [ref=e31]:
+            - listitem [ref=e32]:
+              - link "new feed updates notifications Home" [ref=e33] [cursor=pointer]:
+                - /url: https://www.linkedin.com/feed/?nis=true&
+                - generic [ref=e34]:
+                  - generic [ref=e37]: new feed updates notifications
+                  - img [ref=e41]
+                - generic "Home" [ref=e43]
+            - listitem [ref=e44]:
+              - link "My Network" [ref=e45] [cursor=pointer]:
+                - /url: https://www.linkedin.com/mynetwork/?
+                - img [ref=e49]
+                - generic "My Network" [ref=e51]
+            - listitem [ref=e52]:
+              - link "Jobs" [ref=e53] [cursor=pointer]:
+                - /url: https://www.linkedin.com/jobs/?
+                - img [ref=e57]
+                - generic "Jobs" [ref=e59]
+            - listitem [ref=e60]:
+              - link "Messaging" [ref=e61] [cursor=pointer]:
+                - /url: https://www.linkedin.com/messaging/?
+                - img [ref=e65]
+                - generic "Messaging" [ref=e67]
+            - listitem [ref=e68]:
+              - link "Notifications" [ref=e69] [cursor=pointer]:
+                - /url: https://www.linkedin.com/notifications/?
+                - img [ref=e73]
+                - generic "Notifications" [ref=e75]
+            - listitem [ref=e76]:
+              - button "Hengyuan Zhu Me" [ref=e78] [cursor=pointer]:
+                - img "Hengyuan Zhu" [ref=e79]
+                - generic [ref=e80]:
+                  - text: Me
+                  - img [ref=e81]
+            - listitem [ref=e83]:
+              - button "For Business" [ref=e85] [cursor=pointer]:
+                - img [ref=e89]
+                - generic "For Business" [ref=e91]:
+                  - text: For Business
+                  - img [ref=e92]
+            - listitem [ref=e94]:
+              - link "Learning" [ref=e95] [cursor=pointer]:
+                - /url: https://www.linkedin.com/learning/?trk=nav_neptune_learning&
+                - img [ref=e99]
+                - generic "Learning" [ref=e104]
+    - generic [ref=e110]:
+      - complementary "User profile" [ref=e111]:
+        - generic [ref=e113]:
+          - generic [ref=e114]:
+            - link "Background photo of Hengyuan Zhu Premium account" [ref=e115] [cursor=pointer]:
+              - /url: /in/nolanzhu/
+              - generic [ref=e118]: Premium
+            - link "Photo of Hengyuan Zhu" [ref=e119] [cursor=pointer]:
+              - /url: /in/nolanzhu/
+              - img "Photo of Hengyuan Zhu" [ref=e120]
+            - generic [ref=e121]:
+              - link "Hengyuan Zhu Harnessing Ideas into Production | Hospitality Management Senior Student @ UofSC United States" [ref=e122] [cursor=pointer]:
+                - /url: /in/nolanzhu/
+                - generic [ref=e123]:
+                  - heading "Hengyuan Zhu" [level=3] [ref=e124]
+                  - img [ref=e128]:
+                    - img [ref=e129]
+                - paragraph [ref=e131]: Harnessing Ideas into Production | Hospitality Management Senior Student @ UofSC
+                - paragraph [ref=e132]: United States
+              - link "University of South Carolina" [ref=e133] [cursor=pointer]:
+                - /url: /in/nolanzhu/
+                - paragraph [ref=e134]:
+                  - generic [ref=e135]: University of South Carolina
+          - generic [ref=e136]:
+            - list [ref=e139]:
+              - listitem [ref=e140]:
+                - link "Profile viewers 11" [ref=e141] [cursor=pointer]:
+                  - /url: /me/profile-views/
+                  - generic [ref=e142]:
+                    - generic [ref=e144]: Profile viewers
+                    - strong [ref=e147]: "11"
+              - listitem [ref=e148]:
+                - link "Post impressions 435" [ref=e149] [cursor=pointer]:
+                  - /url: /analytics/creator/content/
+                  - generic [ref=e150]:
+                    - generic [ref=e152]: Post impressions
+                    - strong [ref=e155]: "435"
+            - link "Your Premium features" [ref=e157] [cursor=pointer]:
+              - /url: /premium/my-premium/
+              - paragraph [ref=e158]:
+                - img [ref=e159]
+                - generic [ref=e161]: Your Premium features
+      - main "Feed detail update" [ref=e162]:
+        - heading "Feed detail update" [level=1] [ref=e163]
+        - generic "Update container" [ref=e164]:
+          - article [ref=e168]:
+            - generic [ref=e170]:
+              - heading "Feed post" [level=2] [ref=e171]
+              - generic [ref=e172]:
+                - generic [ref=e173]:
+                  - generic [ref=e175]:
+                    - link "Tianqiao and Chrissy Chen Institute, graphic." [ref=e176] [cursor=pointer]:
+                      - /url: https://www.linkedin.com/company/chen-institute/posts
+                    - generic [ref=e180]:
+                      - 'link "View: Tianqiao and Chrissy Chen Institute 2,514 followers" [ref=e181] [cursor=pointer]':
+                        - /url: https://www.linkedin.com/company/chen-institute/posts
+                        - generic [ref=e184]:
+                          - generic [ref=e186]: Tianqiao and Chrissy Chen Institute
+                          - generic [ref=e188]: Tianqiao and Chrissy Chen Institute
+                        - generic [ref=e189]:
+                          - generic [ref=e190]: 2,514 followers
+                          - generic [ref=e191]: 2,514 followers
+                      - generic [ref=e192]:
+                        - generic [ref=e193]:
+                          - text: 1d •
+                          - img [ref=e196]
+                        - generic [ref=e198]: 1 day ago • Visible to anyone on or off LinkedIn
+                  - button "Open control menu for post by Tianqiao and Chrissy Chen Institute" [ref=e201] [cursor=pointer]:
+                    - img [ref=e202]
+                - generic [ref=e208]:
+                  - text: 🔔 Call for Workshop Proposals | AIAS+ 2026
+                  - text: "📅 Deadline: May 1, 2026"
+                  - text: "🔗 Submit:"
+                  - link "https://lnkd.in/gFKGzHgu" [ref=e209] [cursor=pointer]:
+                    - /url: https://lnkd.in/gFKGzHgu
+                  - text: 📍 The Ritz-Carlton, San Francisco | Nov 5–7, 2026
+                  - text: The future of science won't just be shaped by experiments, it'll be shaped by AI systems that can reason, hypothesize, and discover.
+                  - text: AIAS+ 2026 is building that future, and we want your workshop to be part of it.
+                  - text: We're calling on researchers, teams, and communities to propose a workshop for the Chen Institute Symposium for AI Advancing Science & Society (AIAS+ 2026) - San Francisco, Nov 5 - 7, 2026.
+                  - text: Why host a workshop at AIAS+ 2026?
+                  - text: ✅ Define the frontier — Set the research agenda on AI for scientific discovery
+                  - text: ✅ Build your community — Bring together AI and scientific discipline communities around your vision
+                  - text: ✅ Global visibility — Reach a leading international audience of researchers and practitioners
+                  - text: ✅ Full creative control — You choose your format, speakers, and whether to publish proceedings
+                  - text: Whether you want to tackle causal reasoning, world modeling, adaptive AI, or research pipeline automation, this is your stage to shape what comes next.
+                  - text: "📅 Proposal Deadline: May 1, 2026"
+                  - text: 🔗 Submit your proposal →
+                  - link "https://lnkd.in/gFKGzHgu" [ref=e210] [cursor=pointer]:
+                    - /url: https://lnkd.in/gFKGzHgu
+                  - text: "📍Conference dates and location: San Francisco, Nov 5–7, 2026"
+                  - text: Tag a researcher or team who should be running a workshop！
+                  - link "hashtag AIAS2026" [ref=e211] [cursor=pointer]:
+                    - /url: https://www.linkedin.com/search/results/all/?keywords=%23aias2026&origin=HASH_TAG_FROM_FEED
+                    - generic [ref=e212]: hashtag
+                    - generic [ref=e213]: "#AIAS2026"
+                  - link "hashtag AIForScience" [ref=e214] [cursor=pointer]:
+                    - /url: https://www.linkedin.com/search/results/all/?keywords=%23aiforscience&origin=HASH_TAG_FROM_FEED
+                    - generic [ref=e215]: hashtag
+                    - generic [ref=e216]: "#AIForScience"
+                  - link "hashtag CallForWorkshops" [ref=e217] [cursor=pointer]:
+                    - /url: https://www.linkedin.com/search/results/all/?keywords=%23callforworkshops&origin=HASH_TAG_FROM_FEED
+                    - generic [ref=e218]: hashtag
+                    - generic [ref=e219]: "#CallForWorkshops"
+                  - link "hashtag ScientificDiscovery" [ref=e220] [cursor=pointer]:
+                    - /url: https://www.linkedin.com/search/results/all/?keywords=%23scientificdiscovery&origin=HASH_TAG_FROM_FEED
+                    - generic [ref=e221]: hashtag
+                    - generic [ref=e222]: "#ScientificDiscovery"
+                  - link "hashtag AIResearch" [ref=e223] [cursor=pointer]:
+                    - /url: https://www.linkedin.com/search/results/all/?keywords=%23airesearch&origin=HASH_TAG_FROM_FEED
+                    - generic [ref=e224]: hashtag
+                    - generic [ref=e225]: "#AIResearch"
+                  - link "hashtag FutureOfScience" [ref=e226] [cursor=pointer]:
+                    - /url: https://www.linkedin.com/search/results/all/?keywords=%23futureofscience&origin=HASH_TAG_FROM_FEED
+                    - generic [ref=e227]: hashtag
+                    - generic [ref=e228]: "#FutureOfScience"
+                  - link "hashtag DiscoverativeAI" [ref=e229] [cursor=pointer]:
+                    - /url: https://www.linkedin.com/search/results/all/?keywords=%23discoverativeai&origin=HASH_TAG_FROM_FEED
+                    - generic [ref=e230]: hashtag
+                    - generic [ref=e231]: "#DiscoverativeAI"
+                - generic [ref=e233]:
+                  - generic [ref=e234]:
+                    - button "Activate to view larger image, No alternative text description for this image" [ref=e235] [cursor=pointer]:
+                      - img [ref=e238]
+                    - button "Activate to view larger image, No alternative text description for this image" [ref=e239] [cursor=pointer]:
+                      - img [ref=e242]
+                  - generic [ref=e243]: Activate to view larger image,
+                - generic [ref=e244]:
+                  - list [ref=e248]:
+                    - listitem [ref=e249]:
+                      - button "12 reactions" [ref=e250] [cursor=pointer]:
+                        - img "like" [ref=e251]
+                        - img "love" [ref=e252]
+                        - img "celebrate" [ref=e253]
+                        - generic [ref=e254]: "12"
+                    - listitem [ref=e255]:
+                      - list [ref=e256]:
+                        - listitem [ref=e257]:
+                          - button "2 reposts of Tianqiao and Chrissy Chen Institute’s post" [ref=e258] [cursor=pointer]:
+                            - generic [ref=e259]: 2 reposts
+                  - generic [ref=e260]:
+                    - heading "Reactions" [level=3] [ref=e261]
+                    - list "Reactions" [ref=e262]:
+                      - listitem [ref=e263]:
+                        - link "View Hengyuan Zhu’s profile, reacted with LIKE, graphic" [ref=e264] [cursor=pointer]:
+                          - /url: https://www.linkedin.com/in/nolanzhu
+                          - img "like" [ref=e269]
+                      - listitem [ref=e270]:
+                        - link "View Maura McGinnity’s graphic link, reacted with EMPATHY, graphic" [ref=e271] [cursor=pointer]:
+                          - /url: https://www.linkedin.com/in/ACoAAABW_SMBWZYWKv7V6TV-DEoNUBtZbFx9aRo
+                          - generic [ref=e273]:
+                            - img "View Maura McGinnity’s graphic link" [ref=e276]
+                            - img "love" [ref=e277]
+                      - listitem [ref=e278]:
+                        - link "View Yi R. (May) Fung’s graphic link, reacted with PRAISE, graphic" [ref=e279] [cursor=pointer]:
+                          - /url: https://www.linkedin.com/in/ACoAABqTdXwBJaJNvQB-j18D8M-ITr-MJLcfnZo
+                          - generic [ref=e281]:
+                            - img "View Yi R. (May) Fung’s graphic link" [ref=e284]
+                            - img "celebrate" [ref=e285]
+                      - listitem [ref=e286]:
+                        - link "View Qixuan (QX) Zhang’s graphic link, reacted with LIKE, graphic" [ref=e287] [cursor=pointer]:
+                          - /url: https://www.linkedin.com/in/ACoAACkEn-YBlpgz_Hx7oCCDBptSRhHPG0omdEI
+                          - generic [ref=e289]:
+                            - img "View Qixuan (QX) Zhang’s graphic link" [ref=e292]
+                            - img "like" [ref=e293]
+                      - listitem [ref=e294]:
+                        - link "View Jun-Liszt Li, Ph.D.’s graphic link, reacted with LIKE, graphic" [ref=e295] [cursor=pointer]:
+                          - /url: https://www.linkedin.com/in/ACoAABXqJ1EBUFRlQiE1FbaTMHFiE-LDIHXkHYs
+                          - generic [ref=e297]:
+                            - img "View Jun-Liszt Li, Ph.D.’s graphic link" [ref=e300]
+                            - img "like" [ref=e301]
+                      - listitem [ref=e302]:
+                        - link "View Jason E. Barkeloo’s graphic link, reacted with LIKE, graphic" [ref=e303] [cursor=pointer]:
+                          - /url: https://www.linkedin.com/in/ACoAAAAw2s8B2vPMVen5mOoGnJ576aUHc4Ggh5Y
+                          - generic [ref=e305]:
+                            - img "View Jason E. Barkeloo’s graphic link" [ref=e308]
+                            - img "like" [ref=e309]
+                      - listitem [ref=e310]:
+                        - link "View Jian Du (Nick)’s graphic link, reacted with LIKE, graphic" [ref=e311] [cursor=pointer]:
+                          - /url: https://www.linkedin.com/in/ACoAAA3q938Bhg2elDSAJp4ouT_Jq7Grra-jNkg
+                          - generic [ref=e313]:
+                            - img "View Jian Du (Nick)’s graphic link" [ref=e316]
+                            - img "like" [ref=e317]
+                      - listitem [ref=e318]:
+                        - link "View Yingxiao Wang’s graphic link, reacted with LIKE, graphic" [ref=e319] [cursor=pointer]:
+                          - /url: https://www.linkedin.com/in/ACoAACVUvYwBHjBe3y_uSX2AVF6p0IiLMZD-TOE
+                          - generic [ref=e321]:
+                            - img "View Yingxiao Wang’s graphic link" [ref=e324]
+                            - img "like" [ref=e325]
+                      - listitem [ref=e326]:
+                        - button "See 4 more reactions" [ref=e327] [cursor=pointer]: "+4"
+                  - generic [ref=e328]:
+                    - generic [ref=e329]:
+                      - button "Unreact Like" [pressed] [ref=e330] [cursor=pointer]:
+                        - generic [ref=e332]:
+                          - img "like" [ref=e333]
+                          - generic [ref=e334]: Like
+                      - button "Open reactions menu":
+                        - img [ref=e336] [cursor=pointer]
+                    - button "Comment" [ref=e340] [cursor=pointer]:
+                      - img [ref=e341]
+                      - generic [ref=e343]: Comment
+                    - button "Repost" [ref=e346] [cursor=pointer]:
+                      - img [ref=e347]
+                      - generic [ref=e349]: Repost
+                    - button "Send in a private message" [ref=e352] [cursor=pointer]:
+                      - img [ref=e353]
+                      - generic [ref=e356]: Send
+              - generic [ref=e360]:
+                - img "Hengyuan Zhu" [ref=e362]
+                - generic [ref=e365]:
+                  - generic [ref=e369]:
+                    - textbox "Text editor for creating content" [ref=e371]:
+                      - paragraph [ref=e372]
+                      - text: Add a comment…
+                    - generic [ref=e373]: Add a comment…
+                  - generic [ref=e375]:
+                    - button "Open Emoji Keyboard" [ref=e378] [cursor=pointer]:
+                      - img
+                      - generic [ref=e379]: Open Emoji Keyboard
+                    - button "Add a photo" [ref=e381] [cursor=pointer]:
+                      - img [ref=e382]
+      - complementary "Advertisement and similar pages" [ref=e387]:
+        - generic [ref=e389]:
+          - iframe [ref=e391]:
+            - generic [ref=f69e2]:
+              - generic [ref=f69e4]: Ad
+              - img "overflow-web-small" [ref=f69e7] [cursor=pointer]
+              - link "Youngstown State" [ref=f69e11] [cursor=pointer]:
+                - /url: https://www.linkedin.com/li/tscp/sct?destinationUrl=https%3A%2F%2Fexplore.ysu.edu%2Fbitonte-college-of-health-human-services%2Fmaster-of-heath-and-human-services%2F%3Fli_fat_id%3D11a9a44a-eafc-46be-a689-3b4cff5256db&trackingEvent=%5B%7B%22eventInfo%22%3A%7B%22appId%22%3A%22com.linkedin.ads.rendering.d_web%22%2C%22eventName%22%3A%22SponsoredRightRailContentActionEvent%22%2C%22topicName%22%3A%22SponsoredRightRailContentActionEvent%22%7D%2C%22eventBody%22%3A%7B%22sponsoredEventHeader%22%3A%7B%22encryptedTrackingData%22%3A%22CwEAAAGdfhrTh9-42DGWfuoWr2sCzzXUVo8VBaVeyBz4H25ziYYmoWhzNRThLDlbAlU5RmxDEC-1F42bK3wsg_Fbq-6GbvMFq7I64tKP24dW6puPESfnz2LORRTxu5xBDOC_d08FMrRcmnEqLgufJI2SthCFzuZiy84_nzwRmQ5NmHHHBYS2cPm8Z1hKqXX9KN7bL-kqLG1pCKf8gMusbv8wQpmp0JgVmQoCobngUMy7H90W_qOubpCZZzEAb3zFo8uI9DeWHlb7tP1GjfeUPVdE0Tgcao3qEJYoFEDpvOZHnGeA8JiITo4STSmFSiGaLAul6K1Bf8YPr3AVtXwCXF5shO45uHMyUAxDDmi93P4xUPywBT6Anjq9Ggr7OuJxLuIkMsdWJQh5UpfKCNLJT5zUJ-8kmsw5jxIWHb8amgNAgKfD8C6xzRxeDydpuwj207KwoHEXalqcZtBKJFWZOuOP-11Eg6xzqO1LlZG24d09u6GpintQFnLjOadTaI1e-EriVUy04xIxJDLmKSaRCkZiKdY0hhYAfNNQcZuxHJVuJUDrsO6P5wtAbN1A2AMlnzX0UjzSplbgdlCVP2PnWYnffNmE_n-vBGCdSpjPESrXvHtmRV6Z9MMUULYMaFPoSMqr4k08ic9jO22n9EH1Pz53CQGCFH9N6UQpo8HP34_dw3ZuKRf83K7Arumb2vG_17urvHe7Gk6Y5SSDfZaEHbMMhc4bDPGqzJS81swac6XDvFPNloBrVXVbVkbiVqzAn1VBGHmfE6Ss_DKHD5nN_4Hn3rJkSlyoV6TjGc-jGwjNo4s_gRomwSEbScRwKHekbQOhTHUlyehcQiobeEjb16nVeq2BU0ZE-xhYZTxXVcPebTsniHqLpzn47PtJZULi62mpWlZ_GR8jsPXKvyGS9bjxHQ6BIwZdFqLA-bviTZWiF3VwVQLPPPyI7uEIJ2efwp5vbBlXJDplzTLYmAZYnU0hjZFZrtmonRqNy1fNpEKX4MZMOXsKH8hH3fgozTgaGGXOH-RYdj-BZcGTwRqjAxPwkHMKw24HMDNCPoPNSjB8K8lVHWsAxTDDQuLSN_LMe8bKPi5CI6RRKbDv91ychMYho8AchKpJqqOOzX9_otacM25TJeDQfYcmRCeHvIl6Fwi4Ck6whkO8lxmFqMURM6mJpdwEHg4JacrXnM7aSTkZ4FQp79NS4NbUZPUg1kJdZcNt%22%7D%2C%22header%22%3A%7B%22pageInstance%22%3A%7B%22pageUrn%22%3A%22urn%3Ali%3Apage%3Ad_flagship3_detail_base%22%2C%22trackingId%22%3A%2224bd4503-70cc-4f8c-a8dd-68d74acd3c5b%22%7D%2C%22time%22%3A1775937180527%2C%22version%22%3A%220.0.0%22%7D%2C%22requestHeader%22%3A%7B%22pageKey%22%3A%22d_flagship3_detail_base%22%2C%22interfaceLocale%22%3A%22en-US%22%7D%7D%7D%5D&csrfToken=ajax%3A6574535163763001777
+              - generic [ref=f69e12]:
+                - generic [ref=f69e15]:
+                  - generic [ref=f69e17]:
+                    - link "Youngstown State" [ref=f69e18] [cursor=pointer]:
+                      - /url: https://www.linkedin.com/li/tscp/sct?destinationUrl=https%3A%2F%2Fexplore.ysu.edu%2Fbitonte-college-of-health-human-services%2Fmaster-of-heath-and-human-services%2F%3Fli_fat_id%3D11a9a44a-eafc-46be-a689-3b4cff5256db&trackingEvent=%5B%7B%22eventInfo%22%3A%7B%22appId%22%3A%22com.linkedin.ads.rendering.d_web%22%2C%22eventName%22%3A%22SponsoredRightRailContentActionEvent%22%2C%22topicName%22%3A%22SponsoredRightRailContentActionEvent%22%7D%2C%22eventBody%22%3A%7B%22sponsoredEventHeader%22%3A%7B%22encryptedTrackingData%22%3A%22CwEAAAGdfhrTh9-42DGWfuoWr2sCzzXUVo8VBaVeyBz4H25ziYYmoWhzNRThLDlbAlU5RmxDEC-1F42bK3wsg_Fbq-6GbvMFq7I64tKP24dW6puPESfnz2LORRTxu5xBDOC_d08FMrRcmnEqLgufJI2SthCFzuZiy84_nzwRmQ5NmHHHBYS2cPm8Z1hKqXX9KN7bL-kqLG1pCKf8gMusbv8wQpmp0JgVmQoCobngUMy7H90W_qOubpCZZzEAb3zFo8uI9DeWHlb7tP1GjfeUPVdE0Tgcao3qEJYoFEDpvOZHnGeA8JiITo4STSmFSiGaLAul6K1Bf8YPr3AVtXwCXF5shO45uHMyUAxDDmi93P4xUPywBT6Anjq9Ggr7OuJxLuIkMsdWJQh5UpfKCNLJT5zUJ-8kmsw5jxIWHb8amgNAgKfD8C6xzRxeDydpuwj207KwoHEXalqcZtBKJFWZOuOP-11Eg6xzqO1LlZG24d09u6GpintQFnLjOadTaI1e-EriVUy04xIxJDLmKSaRCkZiKdY0hhYAfNNQcZuxHJVuJUDrsO6P5wtAbN1A2AMlnzX0UjzSplbgdlCVP2PnWYnffNmE_n-vBGCdSpjPESrXvHtmRV6Z9MMUULYMaFPoSMqr4k08ic9jO22n9EH1Pz53CQGCFH9N6UQpo8HP34_dw3ZuKRf83K7Arumb2vG_17urvHe7Gk6Y5SSDfZaEHbMMhc4bDPGqzJS81swac6XDvFPNloBrVXVbVkbiVqzAn1VBGHmfE6Ss_DKHD5nN_4Hn3rJkSlyoV6TjGc-jGwjNo4s_gRomwSEbScRwKHekbQOhTHUlyehcQiobeEjb16nVeq2BU0ZE-xhYZTxXVcPebTsniHqLpzn47PtJZULi62mpWlZ_GR8jsPXKvyGS9bjxHQ6BIwZdFqLA-bviTZWiF3VwVQLPPPyI7uEIJ2efwp5vbBlXJDplzTLYmAZYnU0hjZFZrtmonRqNy1fNpEKX4MZMOXsKH8hH3fgozTgaGGXOH-RYdj-BZcGTwRqjAxPwkHMKw24HMDNCPoPNSjB8K8lVHWsAxTDDQuLSN_LMe8bKPi5CI6RRKbDv91ychMYho8AchKpJqqOOzX9_otacM25TJeDQfYcmRCeHvIl6Fwi4Ck6whkO8lxmFqMURM6mJpdwEHg4JacrXnM7aSTkZ4FQp79NS4NbUZPUg1kJdZcNt%22%7D%2C%22header%22%3A%7B%22pageInstance%22%3A%7B%22pageUrn%22%3A%22urn%3Ali%3Apage%3Ad_flagship3_detail_base%22%2C%22trackingId%22%3A%2224bd4503-70cc-4f8c-a8dd-68d74acd3c5b%22%7D%2C%22time%22%3A1775937180527%2C%22version%22%3A%220.0.0%22%7D%2C%22requestHeader%22%3A%7B%22pageKey%22%3A%22d_flagship3_detail_base%22%2C%22interfaceLocale%22%3A%22en-US%22%7D%7D%7D%5D&csrfToken=ajax%3A6574535163763001777
+                      - img "Youngstown State" [ref=f69e19]
+                    - tooltip "Youngstown State" [ref=f69e20]
+                  - img [ref=f69e21]
+                - generic [ref=f69e22]:
+                  - heading "Advance Your Career in Healthcare!" [level=2] [ref=f69e25]
+                  - link "Learn More" [ref=f69e27] [cursor=pointer]:
+                    - /url: https://www.linkedin.com/li/tscp/sct?destinationUrl=https%3A%2F%2Fexplore.ysu.edu%2Fbitonte-college-of-health-human-services%2Fmaster-of-heath-and-human-services%2F%3Fli_fat_id%3D11a9a44a-eafc-46be-a689-3b4cff5256db&trackingEvent=%5B%7B%22eventInfo%22%3A%7B%22appId%22%3A%22com.linkedin.ads.rendering.d_web%22%2C%22eventName%22%3A%22SponsoredRightRailContentActionEvent%22%2C%22topicName%22%3A%22SponsoredRightRailContentActionEvent%22%7D%2C%22eventBody%22%3A%7B%22sponsoredEventHeader%22%3A%7B%22encryptedTrackingData%22%3A%22CwEAAAGdfhrTh9-42DGWfuoWr2sCzzXUVo8VBaVeyBz4H25ziYYmoWhzNRThLDlbAlU5RmxDEC-1F42bK3wsg_Fbq-6GbvMFq7I64tKP24dW6puPESfnz2LORRTxu5xBDOC_d08FMrRcmnEqLgufJI2SthCFzuZiy84_nzwRmQ5NmHHHBYS2cPm8Z1hKqXX9KN7bL-kqLG1pCKf8gMusbv8wQpmp0JgVmQoCobngUMy7H90W_qOubpCZZzEAb3zFo8uI9DeWHlb7tP1GjfeUPVdE0Tgcao3qEJYoFEDpvOZHnGeA8JiITo4STSmFSiGaLAul6K1Bf8YPr3AVtXwCXF5shO45uHMyUAxDDmi93P4xUPywBT6Anjq9Ggr7OuJxLuIkMsdWJQh5UpfKCNLJT5zUJ-8kmsw5jxIWHb8amgNAgKfD8C6xzRxeDydpuwj207KwoHEXalqcZtBKJFWZOuOP-11Eg6xzqO1LlZG24d09u6GpintQFnLjOadTaI1e-EriVUy04xIxJDLmKSaRCkZiKdY0hhYAfNNQcZuxHJVuJUDrsO6P5wtAbN1A2AMlnzX0UjzSplbgdlCVP2PnWYnffNmE_n-vBGCdSpjPESrXvHtmRV6Z9MMUULYMaFPoSMqr4k08ic9jO22n9EH1Pz53CQGCFH9N6UQpo8HP34_dw3ZuKRf83K7Arumb2vG_17urvHe7Gk6Y5SSDfZaEHbMMhc4bDPGqzJS81swac6XDvFPNloBrVXVbVkbiVqzAn1VBGHmfE6Ss_DKHD5nN_4Hn3rJkSlyoV6TjGc-jGwjNo4s_gRomwSEbScRwKHekbQOhTHUlyehcQiobeEjb16nVeq2BU0ZE-xhYZTxXVcPebTsniHqLpzn47PtJZULi62mpWlZ_GR8jsPXKvyGS9bjxHQ6BIwZdFqLA-bviTZWiF3VwVQLPPPyI7uEIJ2efwp5vbBlXJDplzTLYmAZYnU0hjZFZrtmonRqNy1fNpEKX4MZMOXsKH8hH3fgozTgaGGXOH-RYdj-BZcGTwRqjAxPwkHMKw24HMDNCPoPNSjB8K8lVHWsAxTDDQuLSN_LMe8bKPi5CI6RRKbDv91ychMYho8AchKpJqqOOzX9_otacM25TJeDQfYcmRCeHvIl6Fwi4Ck6whkO8lxmFqMURM6mJpdwEHg4JacrXnM7aSTkZ4FQp79NS4NbUZPUg1kJdZcNt%22%7D%2C%22header%22%3A%7B%22pageInstance%22%3A%7B%22pageUrn%22%3A%22urn%3Ali%3Apage%3Ad_flagship3_detail_base%22%2C%22trackingId%22%3A%2224bd4503-70cc-4f8c-a8dd-68d74acd3c5b%22%7D%2C%22time%22%3A1775937180527%2C%22version%22%3A%220.0.0%22%7D%2C%22requestHeader%22%3A%7B%22pageKey%22%3A%22d_flagship3_detail_base%22%2C%22interfaceLocale%22%3A%22en-US%22%7D%7D%7D%5D&csrfToken=ajax%3A6574535163763001777
+          - generic [ref=e392]:
+            - list [ref=e393]:
+              - heading "Similar pages" [level=3] [ref=e394]
+              - listitem [ref=e395]:
+                - generic [ref=e396]:
+                  - link "Harvard Medical School" [ref=e398] [cursor=pointer]:
+                    - /url: /company/harvard-medical-school/
+                    - img "Harvard Medical School" [ref=e399]
+                  - generic [ref=e400]:
+                    - link "Harvard Medical School" [ref=e402] [cursor=pointer]:
+                      - /url: /company/harvard-medical-school/
+                      - generic [ref=e403]: Harvard Medical School
+                    - generic [ref=e405]: Higher Education
+                    - generic [ref=e407]: 10,001+ employees
+                    - link "John Gadson John & 4 other company alumni work here" [ref=e409] [cursor=pointer]:
+                      - /url: http://www.linkedin.com/search/results/people/?origin=COMPANY_PAGE_CANNED_SEARCH&currentCompany=%5B%221645%22%5D&pastCompany=%5B%22166670%22%5D
+                      - img "John Gadson" [ref=e412]
+                      - generic [ref=e413]: John & 4 other company alumni work here
+                - button "Follow" [ref=e414] [cursor=pointer]:
+                  - img [ref=e415]
+                  - generic [ref=e417]: Follow
+              - listitem [ref=e418]:
+                - generic [ref=e419]:
+                  - link "NVIDIA" [ref=e421] [cursor=pointer]:
+                    - /url: /company/nvidia/
+                    - img "NVIDIA" [ref=e422]
+                  - generic [ref=e423]:
+                    - link "NVIDIA" [ref=e425] [cursor=pointer]:
+                      - /url: /company/nvidia/
+                      - generic [ref=e426]: NVIDIA
+                    - generic [ref=e428]: Computer Hardware
+                    - generic [ref=e430]: 10,001+ employees
+                    - link "Kartavya Zaveri is open to work Kartavya & 1 other connection follow this page" [ref=e432] [cursor=pointer]:
+                      - /url: http://www.linkedin.com/company/nvidia/?showInNetworkFollowers=true
+                      - img "Kartavya Zaveri is open to work" [ref=e435]
+                      - generic [ref=e436]: Kartavya & 1 other connection follow this page
+                - button "Follow" [ref=e437] [cursor=pointer]:
+                  - img [ref=e438]
+                  - generic [ref=e440]: Follow
+              - listitem [ref=e441]:
+                - generic [ref=e442]:
+                  - link "Training Magazine" [ref=e444] [cursor=pointer]:
+                    - /url: /company/training-mag/
+                    - img "Training Magazine" [ref=e445]
+                  - generic [ref=e446]:
+                    - link "Training Magazine" [ref=e448] [cursor=pointer]:
+                      - /url: /company/training-mag/
+                      - generic [ref=e449]: Training Magazine
+                    - generic [ref=e451]: Professional Training & Coaching
+                    - generic [ref=e453]: 11-50 employees
+                - button "Follow" [ref=e454] [cursor=pointer]:
+                  - img [ref=e455]
+                  - generic [ref=e457]: Follow
+            - button "Click to see more pages" [expanded] [ref=e458] [cursor=pointer]:
+              - img [ref=e459]
+              - generic [ref=e461]: Show more
+          - generic "LinkedIn Footer Content" [ref=e462]:
+            - generic [ref=e463]:
+              - list [ref=e464]:
+                - listitem [ref=e465]:
+                  - link "About" [ref=e466] [cursor=pointer]:
+                    - /url: https://about.linkedin.com/
+                    - generic [ref=e467]: About
+                - listitem [ref=e468]:
+                  - link "Accessibility" [ref=e469] [cursor=pointer]:
+                    - /url: https://www.linkedin.com/accessibility
+                    - generic [ref=e470]: Accessibility
+                - listitem [ref=e471]:
+                  - link "Help Center" [ref=e472] [cursor=pointer]:
+                    - /url: https://www.linkedin.com/help/linkedin?trk=footer_d_flagship3_detail_base
+                    - generic [ref=e473]: Help Center
+                - listitem [ref=e474]:
+                  - button "Privacy & Terms" [ref=e476] [cursor=pointer]:
+                    - generic [ref=e478]:
+                      - text: Privacy & Terms
+                      - img [ref=e479]
+                - listitem [ref=e481]:
+                  - link "Ad Choices" [ref=e482] [cursor=pointer]:
+                    - /url: https://www.linkedin.com/help/linkedin/answer/62931
+                    - generic [ref=e483]: Ad Choices
+                - listitem [ref=e484]:
+                  - link "Advertising" [ref=e485] [cursor=pointer]:
+                    - /url: https://www.linkedin.com/ad/start?trk=n_nav_ads_rr
+                    - generic [ref=e486]: Advertising
+                - listitem [ref=e487]:
+                  - button "Business Services" [ref=e489] [cursor=pointer]:
+                    - generic [ref=e491]:
+                      - text: Business Services
+                      - img [ref=e492]
+                - listitem [ref=e494]:
+                  - button "Get the LinkedIn app" [ref=e497] [cursor=pointer]
+                - listitem [ref=e498]:
+                  - button "More options" [ref=e499] [cursor=pointer]: More
+              - generic [ref=e500]:
+                - img "LinkedIn" [ref=e501]:
+                  - img [ref=e502]
+                - text: LinkedIn Corporation © 2026
+    - generic:
+      - generic:
+        - complementary:
+          - generic [ref=e505]:
+            - generic [ref=e507] [cursor=pointer]:
+              - img "Hengyuan Zhu" [ref=e509]
+              - button "You are on the messaging overlay. Press enter to open the list of conversations." [ref=e510]:
+                - generic [ref=e511]:
+                  - generic [ref=e512]: Messaging
+                  - generic [ref=e513]: You are on the messaging overlay. Press enter to open the list of conversations.
+            - generic [ref=e514]:
+              - button "Open messenger dropdown menu" [ref=e516] [cursor=pointer]:
+                - img "Open messenger dropdown menu" [ref=e517]
+              - button "Compose message" [ref=e520] [cursor=pointer]:
+                - img [ref=e521]
+                - generic [ref=e523]: Compose message
+              - button "You are on the messaging overlay. Press enter to open the list of conversations." [ref=e524] [cursor=pointer]:
+                - img [ref=e525]
+                - generic [ref=e527]: You are on the messaging overlay. Press enter to open the list of conversations.
+        - complementary "AI-powered assistant to get help with your career, jobs etc"

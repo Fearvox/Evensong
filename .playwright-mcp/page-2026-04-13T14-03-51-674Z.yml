@@ -1,0 +1,158 @@
+- generic [active] [ref=e1]:
+  - button "开启读屏标签" [ref=e2]
+  - generic: 读屏标签已关闭
+  - generic [ref=e4]:
+    - generic [ref=e6]:
+      - link [ref=e7] [cursor=pointer]:
+        - /url: //www.douyin.com/jingxuan
+      - generic [ref=e13]:
+        - generic [ref=e15]:
+          - link "精选" [ref=e19] [cursor=pointer]:
+            - /url: https://www.douyin.com/jingxuan?from_nav=1
+            - generic [ref=e22]: 精选
+          - link "推荐" [ref=e26] [cursor=pointer]:
+            - /url: https://www.douyin.com/?recommend=1&from_nav=1
+            - generic [ref=e29]: 推荐
+          - link "搜索" [ref=e33] [cursor=pointer]:
+            - /url: https://www.douyin.com/aisearch?from_nav=1
+            - generic [ref=e36]: 搜索
+          - link "关注" [ref=e40] [cursor=pointer]:
+            - /url: https://www.douyin.com/follow?from_nav=1
+            - generic [ref=e43]: 关注
+          - link "朋友" [ref=e47] [cursor=pointer]:
+            - /url: https://www.douyin.com/friend?from_nav=1
+            - generic [ref=e50]: 朋友
+          - link "我的" [ref=e54] [cursor=pointer]:
+            - /url: https://www.douyin.com/user/self?from_nav=1
+            - generic [ref=e57]: 我的
+          - link "直播" [ref=e63] [cursor=pointer]:
+            - /url: https://live.douyin.com/?from_nav=1
+            - generic [ref=e66]: 直播
+          - link "放映厅" [ref=e70] [cursor=pointer]:
+            - /url: https://www.douyin.com/vs?from_nav=1
+            - generic [ref=e73]: 放映厅
+          - link "短剧" [ref=e77] [cursor=pointer]:
+            - /url: https://www.douyin.com/series?from_nav=1
+            - generic [ref=e80]: 短剧
+        - generic [ref=e82]:
+          - img [ref=e85] [cursor=pointer]
+          - img [ref=e89] [cursor=pointer]
+          - img [ref=e93] [cursor=pointer]
+    - generic [ref=e95]:
+      - banner [ref=e98]:
+        - generic [ref=e100]:
+          - generic [ref=e104]:
+            - textbox "搜索你感兴趣的内容" [ref=e106]
+            - button "搜索" [ref=e108] [cursor=pointer]:
+              - img [ref=e109]
+              - generic [ref=e111]: 搜索
+          - generic [ref=e115]:
+            - generic [ref=e117] [cursor=pointer]:
+              - img [ref=e119]:
+                - img [ref=e120]
+              - paragraph [ref=e122]: 充钻石
+            - link "客户端" [ref=e127] [cursor=pointer]:
+              - /url: ""
+              - generic [ref=e129]:
+                - img [ref=e131]:
+                  - img [ref=e132]
+                - paragraph [ref=e135]: 客户端
+            - generic [ref=e137] [cursor=pointer]:
+              - img [ref=e139]:
+                - img [ref=e140]
+              - paragraph [ref=e142]: 壁纸
+            - list [ref=e143]:
+              - generic [ref=e146] [cursor=pointer]:
+                - img [ref=e148]:
+                  - img [ref=e149]
+                - paragraph [ref=e152]: 通知
+            - list [ref=e153]:
+              - generic [ref=e156] [cursor=pointer]:
+                - img [ref=e158]:
+                  - img [ref=e159]
+                - paragraph [ref=e163]: 私信
+            - generic [ref=e167] [cursor=pointer]:
+              - img [ref=e169]:
+                - img [ref=e170]
+              - paragraph [ref=e172]: 投稿
+            - link [ref=e175] [cursor=pointer]:
+              - /url: //www.douyin.com/user/self
+              - listitem [ref=e176]
+      - generic [ref=e178]:
+        - generic [ref=e182]: 视频数据加载中
+        - contentinfo [ref=e183]:
+          - generic [ref=e184]:
+            - generic [ref=e185]:
+              - link "广告投放" [ref=e187] [cursor=pointer]:
+                - /url: https://www.oceanengine.com/resource/douyin
+              - link "用户服务协议" [ref=e189] [cursor=pointer]:
+                - /url: https://www.douyin.com/agreements/?id=6773906068725565448
+              - link "隐私政策" [ref=e191] [cursor=pointer]:
+                - /url: https://www.douyin.com/agreements/?id=6773901168964798477
+              - link "账号找回" [ref=e193] [cursor=pointer]:
+                - /url: https://www.douyin.com/recovery_account/
+              - link "联系我们" [ref=e195] [cursor=pointer]:
+                - /url: https://www.douyin.com/aboutus/
+              - link "加入我们" [ref=e197] [cursor=pointer]:
+                - /url: https://www.douyin.com/aboutus/
+              - link "营业执照" [ref=e199] [cursor=pointer]:
+                - /url: https://www.douyin.com/business_license/
+              - link "友情链接" [ref=e201] [cursor=pointer]:
+                - /url: https://www.douyin.com/friend_links
+              - link "站点地图" [ref=e203] [cursor=pointer]:
+                - /url: https://www.douyin.com/htmlmap/hotauthor_0_1
+              - link "下载抖音" [ref=e205] [cursor=pointer]:
+                - /url: https://www.douyin.com/downloadpage/pc
+              - link "抖音电商" [ref=e207] [cursor=pointer]:
+                - /url: https://mix.jinritemai.com/falcon/mix_page/index.html
+            - generic [ref=e208]:
+              - link "网络谣言曝光台 ｜" [ref=e210] [cursor=pointer]:
+                - /url: https://www.piyao.org.cn/yybgt/index.htm
+              - link "网上有害信息举报" [ref=e212] [cursor=pointer]:
+                - /url: https://www.12377.cn/
+              - generic [ref=e213]: ｜ 违法和不良信息举报：400-140-2108 ｜ 算法推荐专项举报：sfjubao@bytedance.com ｜ 网络内容从业人员违法违规行为举报：feedback@douyin.com | 体育饭圈专项举报：tyfq@bytedance.com
+            - generic [ref=e214]:
+              - link "京ICP备16016397号-3" [ref=e216] [cursor=pointer]:
+                - /url: https://beian.miit.gov.cn/
+              - link "｜ 广播电视节目制作经营许可证" [ref=e218] [cursor=pointer]:
+                - /url: https://lf3-static.bytednsdoc.com/obj/eden-cn/ild_jw_upfbvk_lm/ljhwZthlaukjlkulzlp/license/jiemuzhizuojingying.jpg
+              - link "｜ 京B2-20170846" [ref=e220] [cursor=pointer]:
+                - /url: https://lf3-static.bytednsdoc.com/obj/eden-cn/ild_jw_upfbvk_lm/ljhwZthlaukjlkulzlp/license/zengzhixuke.jpg
+              - link "｜ 网络文化许可证-京网文-（2025）0181-061号 ｜" [ref=e222] [cursor=pointer]:
+                - /url: https://lf-douyin-pc-web.douyinstatic.com/obj/douyin-pc-web/20250519-201253.jpeg
+              - generic [ref=e223]:
+                - img "icon" [ref=e224]
+                - link "京公网安备 11000002002046号" [ref=e225] [cursor=pointer]:
+                  - /url: http://www.beian.gov.cn/portal/registerSystemInfo
+              - generic [ref=e226]: ｜ 互联网宗教信息服务许可证 京（2025）0000017
+            - generic [ref=e227]:
+              - generic [ref=e229]: 热门：
+              - link "抖音电脑版" [ref=e231] [cursor=pointer]:
+                - /url: https://www.douyin.com/jingxuan
+              - link "抖音网页版入口" [ref=e233] [cursor=pointer]:
+                - /url: https://www.douyin.com/jingxuan
+              - link "拾壹烟花小镇" [ref=e235] [cursor=pointer]:
+                - /url: https://www.douyin.com/user/MS4wLjABAAAAMtrrYYNqp9IF0aLQbAZ-AyfJ6CC22aej5wfVmOdmGu_ByNDNx94041XHuKjyxOFN
+              - 'link "#化学 #推断题 #化学老师 推断题是中考比较难的一类题目，要求知识的储备要足够全面，一定要引起重视。" [ref=e237] [cursor=pointer]':
+                - /url: https://www.douyin.com/video/7628234357367948718
+              - link "新桥高考" [ref=e239] [cursor=pointer]:
+                - /url: https://www.douyin.com/topic/7509864716605360182
+              - link "苏州园区高考考场" [ref=e241] [cursor=pointer]:
+                - /url: https://www.douyin.com/shipin/7509925069594921011
+              - link "太原理工大学提前批" [ref=e243] [cursor=pointer]:
+                - /url: https://www.douyin.com/search/%E5%A4%AA%E5%8E%9F%E7%90%86%E5%B7%A5%E5%A4%A7%E5%AD%A6%E6%8F%90%E5%89%8D%E6%89%B9
+              - link "小树本就该在森林里长大" [ref=e245] [cursor=pointer]:
+                - /url: https://www.douyin.com/video/7627023307295984948?source=Baiduspider
+              - 'link "在日本做四川年夜饭菜品「甜烧白」的视频教程 甜烧白 夹沙肉 甜品还是主食？ 四川传统家常年夜饭不可或缺的菜品 学起来吧 #年夜饭 #美食教程 #川菜 #春节 #甜烧白" [ref=e247] [cursor=pointer]':
+                - /url: https://www.douyin.com/video/7332125413197614374?source=Baiduspider
+              - 'link "假如木星突然消失，地球上的人类文明会因此而终结吗？ #宇宙 #探索宇宙 #太阳系 #木星 #地球 #月球" [ref=e249] [cursor=pointer]':
+                - /url: https://www.douyin.com/video/7331683315939904794?source=Baiduspider
+              - generic [ref=e250]:
+                - link:
+                  - /url: https://www.douyin.com/video/7586862050329234747?source=Baiduspider-sdc
+              - 'link "他才是这首歌的原唱/蓝草乡村的传奇巨星Keith Whitley(凯斯惠特利)《When You Say Nothing at All》一切尽在不言中 #每日推荐音乐 #音乐分享 #乡村音乐 #经典老歌 #用音乐治愈心灵" [ref=e252] [cursor=pointer]':
+                - /url: https://www.douyin.com/video/7179124705545178405?source=Baiduspider
+              - 'link "为什么把原配夫妻称为\"结发夫妻\"?美女老师讲得头头是道！ #网红老师 #作文技巧 #一分钟小课堂 #语文老师" [ref=e254] [cursor=pointer]':
+                - /url: https://www.douyin.com/video/7224069226372418872?source=Baiduspider
+              - 'link "【坦克世界】机炮还能点1.7w？？ #坦克世界 #坦克世界一发入魂" [ref=e256] [cursor=pointer]':
+                - /url: https://www.douyin.com/video/7530997962831351066?source=Baiduspider-sdc

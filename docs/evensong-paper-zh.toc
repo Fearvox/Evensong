@@ -41,15 +41,15 @@
 \contentsline {section}{\numberline {7}自修复分类法}{17}{section.7}%
 \contentsline {section}{\numberline {8}基准测试进化轨迹}{17}{section.8}%
 \contentsline {subsection}{\numberline {8.1}R005 到 R011：测试产出}{18}{subsection.8.1}%
-\contentsline {subsection}{\numberline {8.2}完整运行指标}{18}{subsection.8.2}%
-\contentsline {subsection}{\numberline {8.3}各服务分布（R009 --- 峰值）}{19}{subsection.8.3}%
-\contentsline {section}{\numberline {9}讨论}{19}{section.9}%
-\contentsline {subsection}{\numberline {9.1}对智能体架构的启示}{19}{subsection.9.1}%
-\contentsline {subsection}{\numberline {9.2}记忆作为认知框架}{19}{subsection.9.2}%
-\contentsline {subsection}{\numberline {9.3}局限性}{20}{subsection.9.3}%
-\contentsline {subsection}{\numberline {9.4}伦理考虑}{20}{subsection.9.4}%
-\contentsline {section}{\numberline {10}结论}{20}{section.10}%
-\contentsline {section}{\numberline {A}附录 A：记忆衰退模型}{21}{appendix.A}%
-\contentsline {section}{\numberline {B}附录 B：事故记录}{21}{appendix.B}%
-\contentsline {section}{\numberline {C}附录 C：ProjectΣ 多智能体配置}{22}{appendix.C}%
-\contentsline {section}{参考文献}{23}{appendix.C}%
+\contentsline {subsection}{\numberline {8.2}完整运行指标}{19}{subsection.8.2}%
+\contentsline {subsection}{\numberline {8.3}各服务分布（R009 --- 峰值）}{20}{subsection.8.3}%
+\contentsline {section}{\numberline {9}讨论}{20}{section.9}%
+\contentsline {subsection}{\numberline {9.1}对智能体架构的启示}{20}{subsection.9.1}%
+\contentsline {subsection}{\numberline {9.2}记忆作为认知框架}{20}{subsection.9.2}%
+\contentsline {subsection}{\numberline {9.3}局限性}{21}{subsection.9.3}%
+\contentsline {subsection}{\numberline {9.4}伦理考虑}{21}{subsection.9.4}%
+\contentsline {section}{\numberline {10}结论}{21}{section.10}%
+\contentsline {section}{\numberline {A}附录 A：记忆衰退模型}{22}{appendix.A}%
+\contentsline {section}{\numberline {B}附录 B：事故记录}{23}{appendix.B}%
+\contentsline {section}{\numberline {C}附录 C：ProjectΣ 多智能体配置}{24}{appendix.C}%
+\contentsline {section}{参考文献}{25}{appendix.C}%

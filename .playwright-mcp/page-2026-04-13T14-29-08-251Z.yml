@@ -1,0 +1,264 @@
+- generic [ref=e2]:
+  - generic [ref=e3]:
+    - heading "📊 萝卜乔乔 · 算法Layer优化分析" [level=1] [ref=e4]
+    - paragraph [ref=e5]: "视频ID: 7626449630934453504 · 2026-04-13"
+    - generic [ref=e6]: 5 Layer Viral Index v2.0
+  - generic [ref=e7]:
+    - generic [ref=e8]:
+      - generic [ref=e9]: "0"
+      - generic [ref=e10]: 信号采集层 Signal Collection
+      - generic [ref=e11]: FOUNDATION
+    - generic [ref=e12]:
+      - heading "原始互动信号" [level=3] [ref=e13]
+      - generic [ref=e14]:
+        - generic [ref=e15]:
+          - generic [ref=e16]: 120,000
+          - generic [ref=e17]: 播放量 Views
+        - generic [ref=e18]:
+          - generic [ref=e19]: 8,500
+          - generic [ref=e20]: 点赞 Likes
+        - generic [ref=e21]:
+          - generic [ref=e22]: 3,400
+          - generic [ref=e23]: 收藏 Saves
+        - generic [ref=e24]:
+          - generic [ref=e25]: 270s
+          - generic [ref=e26]: 平均时长 AvgWatch
+    - generic [ref=e27]:
+      - generic [ref=e28]: → Layer 0 优化方向
+      - list [ref=e29]:
+        - listitem [ref=e30]:
+          - generic [ref=e31]: 播放量权重
+          - generic [ref=e32]: 当前归一化基数=120K，建议根据品类基准动态调整(如生活方式类基准=80K)
+        - listitem [ref=e33]:
+          - generic [ref=e34]: 收藏量权重
+          - generic [ref=e35]: Saves权重建议提升至Likes的50%(当前仅40%)，高收藏率=深度认可
+        - listitem [ref=e36]:
+          - generic [ref=e37]: 时长信号
+          - generic [ref=e38]: 引入「完播率×平均观看时长」复合指标，区分「快速划过」vs「认真看完」
+        - listitem [ref=e39]:
+          - generic [ref=e40]: 信号衰减
+          - generic [ref=e41]: 新发布视频信号权重×1.5，72小时后逐步衰减至基准
+  - generic [ref=e42]:
+    - generic [ref=e43]:
+      - generic [ref=e44]: "1"
+      - generic [ref=e45]: 互动率计算 Layer
+      - generic [ref=e46]: OPTIMIZED
+    - generic [ref=e48]:
+      - text: ER = (Likes + Comments×2 + Shares×3 + Saves×4) / Views × 100
+      - text: ER = (8500 + 892×2 + 2100×3 + 3400×4) / 120000 × 100 = 15.42%
+      - generic [ref=e49]: "↑ 优化: 评论/分享/收藏加权(替代原简单求和), 更反映深度互动"
+    - generic [ref=e50]:
+      - generic [ref=e51]:
+        - generic [ref=e52]: 15.42%
+        - generic [ref=e53]: 加权ER (优化后)
+      - generic [ref=e54]:
+        - generic [ref=e55]: 12.33%
+        - generic [ref=e56]: 原ER (简单求和)
+      - generic [ref=e57]:
+        - generic [ref=e58]: +25%
+        - generic [ref=e59]: ER提升
+    - generic [ref=e60]:
+      - generic [ref=e61]: → Layer 1 优化方向
+      - list [ref=e62]:
+        - listitem [ref=e63]:
+          - generic [ref=e64]: 加权系数
+          - generic [ref=e65]: 评论×2、分享×3、收藏×4 — 可AB测试调整，验证品类最优权重
+        - listitem [ref=e66]:
+          - generic [ref=e67]: 收藏率指标
+          - generic [ref=e68]: Saves/Views = 2.83% → 单独作为「深度认可」子指标输出
+        - listitem [ref=e69]:
+          - generic [ref=e70]: 时长加权
+          - generic [ref=e71]: 完播率>70%视频的ER额外×1.2，奖励内容粘性
+  - generic [ref=e72]:
+    - generic [ref=e73]:
+      - generic [ref=e74]: "2"
+      - generic [ref=e75]: 爆款阈值检测 Layer
+      - generic [ref=e76]: ADAPTIVE
+    - table [ref=e78]:
+      - rowgroup [ref=e79]:
+        - row "阈值区间 ER范围 萝卜乔乔 判定" [ref=e80]:
+          - columnheader "阈值区间" [ref=e81]
+          - columnheader "ER范围" [ref=e82]
+          - columnheader "萝卜乔乔" [ref=e83]
+          - columnheader "判定" [ref=e84]
+      - rowgroup [ref=e85]:
+        - row "普通 Ordinary ER < 5% — ✗ 未命中" [ref=e86]:
+          - cell "普通 Ordinary" [ref=e87]
+          - cell "ER < 5%" [ref=e88]
+          - cell "—" [ref=e89]
+          - cell "✗ 未命中" [ref=e90]
+        - row "良好 Good 5% ≤ ER < 10% — ✗ 未命中" [ref=e91]:
+          - cell "良好 Good" [ref=e92]
+          - cell "5% ≤ ER < 10%" [ref=e93]
+          - cell "—" [ref=e94]
+          - cell "✗ 未命中" [ref=e95]
+        - row "爆款 Viral 10% ≤ ER < 20% 15.42% ✓ 命中" [ref=e96]:
+          - cell "爆款 Viral" [ref=e97]
+          - cell "10% ≤ ER < 20%" [ref=e98]
+          - cell "15.42%" [ref=e99]
+          - cell "✓ 命中" [ref=e100]
+        - row "超级爆款 Mega ER ≥ 20% — ✗ 未达到" [ref=e101]:
+          - cell "超级爆款 Mega" [ref=e102]
+          - cell "ER ≥ 20%" [ref=e103]
+          - cell "—" [ref=e104]
+          - cell "✗ 未达到" [ref=e105]
+    - generic [ref=e106]:
+      - generic [ref=e107]: → Layer 2 优化方向
+      - list [ref=e108]:
+        - listitem [ref=e109]:
+          - generic [ref=e110]: 动态阈值
+          - generic [ref=e111]: 根据品类自动调整阈值(生活类均值5.5%→建议门槛8%)，避免品类内卷
+        - listitem [ref=e112]:
+          - generic [ref=e113]: 复合爆款
+          - generic [ref=e114]: 「ER>10% 且 完播率>60% 且 收藏率>2%」= 真正爆款，避免刷量误判
+        - listitem [ref=e115]:
+          - generic [ref=e116]: 时间窗口
+          - generic [ref=e117]: 发布后24h ER、72h ER、7d ER分别计算，捕捉爆款生命周期
+  - generic [ref=e118]:
+    - generic [ref=e119]:
+      - generic [ref=e120]: "3"
+      - generic [ref=e121]: 内容质量评分 Layer
+      - generic [ref=e122]: MULTI-DIM
+    - generic [ref=e123]:
+      - heading "内容特征评分" [level=3] [ref=e124]
+      - generic [ref=e125]:
+        - generic [ref=e126]:
+          - generic [ref=e127]: Hook强度
+          - generic [ref=e130]: 78%
+        - generic [ref=e131]:
+          - generic [ref=e132]: BGM节奏
+          - generic [ref=e135]: 82%
+        - generic [ref=e136]:
+          - generic [ref=e137]: WPM语速
+          - generic [ref=e140]: 85%
+        - generic [ref=e141]:
+          - generic [ref=e142]: 完播率
+          - generic [ref=e145]: 72%
+        - generic [ref=e146]:
+          - generic [ref=e147]: CTA效果
+          - generic [ref=e150]: 65%
+    - generic [ref=e151]:
+      - generic [ref=e152]: → Layer 3 优化方向
+      - list [ref=e153]:
+        - listitem [ref=e154]:
+          - generic [ref=e155]: Hook优化
+          - generic [ref=e156]: 前3秒吸引力评分← 字幕位置+开场画面复杂度，建议拆分为「视觉Hook」+「文案Hook」
+        - listitem [ref=e157]:
+          - generic [ref=e158]: BGM分析
+          - generic [ref=e159]: 音频波形峰值检测→节奏点匹配内容情绪，萝卜乔乔BGM节奏115BPM匹配vlog风格
+        - listitem [ref=e160]:
+          - generic [ref=e161]: WPM校准
+          - generic [ref=e162]: 135字/分← 字幕字数/视频时长，建议区间[120-150]，过高=灌输感，过低=拖沓
+        - listitem [ref=e163]:
+          - generic [ref=e164]: 完播率分层
+          - generic [ref=e165]: 0-30%=差，30-60%=中，60-80%=好，80%+优秀，萝卜72%=良好区间
+  - generic [ref=e166]:
+    - generic [ref=e167]:
+      - generic [ref=e168]: "4"
+      - generic [ref=e169]: 品类对比 Layer
+      - generic [ref=e170]: OUTPERFORM
+    - generic [ref=e171]:
+      - generic [ref=e172]:
+        - generic [ref=e173]: 品类平均ER (生活方式)
+        - generic [ref=e174]: 5.5%
+      - generic [ref=e175]:
+        - generic [ref=e176]: 萝卜乔乔 ER
+        - generic [ref=e177]: 15.42%
+    - generic [ref=e179]:
+      - text: 品类超越率 = (ER - 品类均值) / 品类均值 × 100 = +180%
+      - generic [ref=e180]: ↑ 原+124%(基于原ER=12.33%)，优化后+180%(基于加权ER=15.42%)
+    - generic [ref=e181]:
+      - generic [ref=e182]: → Layer 4 优化方向
+      - list [ref=e183]:
+        - listitem [ref=e184]:
+          - generic [ref=e185]: 品类画像
+          - generic [ref=e186]: "生活方式类: 均值ER=5.5%, 均值时长=45s, 峰值BPM=[100-130]"
+        - listitem [ref=e187]:
+          - generic [ref=e188]: 差异化指标
+          - generic [ref=e189]: 萝卜时长270s远高于均值→长视频策略成功，应计算「时长×ER」复合优势
+        - listitem [ref=e190]:
+          - generic [ref=e191]: 竞品雷达
+          - generic [ref=e192]: 抓取同赛道Top10账号→建立品类ER分布，正态分布标准化后输出percentile
+  - generic [ref=e193]:
+    - generic [ref=e194]:
+      - generic [ref=e195]: "5"
+      - generic [ref=e196]: 综合爆款指数 v2.0
+      - generic [ref=e197]: FINAL
+    - generic [ref=e199]:
+      - text: VI = w1×ER + w2×CQ + w3×NC + w4×VL
+      - text: w1=0.30(原0.35↓) | w2=0.25 | w3=0.25 | w4=0.20(原0.15↑)
+      - text: VI = 0.30×15.42 + 0.25×78 + 0.25×85 + 0.20×76 = 10.6 + 19.5 + 21.25 + 15.2 = 66.55
+      - generic [ref=e200]: "↑ 优化: ER权重微降(避免刷量影响)，增速权重提升(捕捉爆发力)，最终VI=66.55 (原64.5)"
+    - generic [ref=e201]:
+      - generic [ref=e202]:
+        - generic [ref=e203]: A
+        - generic [ref=e204]: VI等级
+      - generic [ref=e205]:
+        - generic [ref=e206]: "66.55"
+        - generic [ref=e207]: VI得分
+      - generic [ref=e208]:
+        - generic [ref=e209]: +3.2%
+        - generic [ref=e210]: vs原VI
+      - generic [ref=e211]:
+        - generic [ref=e212]: "82"
+        - generic [ref=e213]: 综合排名
+  - generic [ref=e214]:
+    - generic [ref=e215]: 🔄 二合数据再次分析 (Views × Saves × WatchTime)
+    - generic [ref=e216]:
+      - generic [ref=e217]:
+        - generic [ref=e218]: "87.3"
+        - generic [ref=e219]: V×S复合分
+      - generic [ref=e220]:
+        - generic [ref=e221]: "54.2"
+        - generic [ref=e222]: V×W复合分
+      - generic [ref=e223]:
+        - generic [ref=e224]: "23.1"
+        - generic [ref=e225]: S×W复合分
+    - table [ref=e227]:
+      - rowgroup [ref=e228]:
+        - row "复合指标 计算公式 结果 优化方向" [ref=e229]:
+          - columnheader "复合指标" [ref=e230]
+          - columnheader "计算公式" [ref=e231]
+          - columnheader "结果" [ref=e232]
+          - columnheader "优化方向" [ref=e233]
+      - rowgroup [ref=e234]:
+        - row "深度认可指数 DCI Saves / Views × sqrt(WatchTime) 0.094 收藏率高+时长长=深度认可内容" [ref=e235]:
+          - cell "深度认可指数 DCI" [ref=e236]
+          - cell "Saves / Views × sqrt(WatchTime)" [ref=e237]
+          - cell "0.094" [ref=e238]
+          - cell "收藏率高+时长长=深度认可内容" [ref=e239]
+        - row "爆发潜力指数 BPI Shares × sqrt(WatchTime) / Views 0.057 高分享+长观看=传播潜力大" [ref=e240]:
+          - cell "爆发潜力指数 BPI" [ref=e241]
+          - cell "Shares × sqrt(WatchTime) / Views" [ref=e242]
+          - cell "0.057" [ref=e243]
+          - cell "高分享+长观看=传播潜力大" [ref=e244]
+        - row "内容粘性指数 CVI WatchTime / Duration × Likes/Views 0.382 完播率高×点赞率高=强粘性" [ref=e245]:
+          - cell "内容粘性指数 CVI" [ref=e246]
+          - cell "WatchTime / Duration × Likes/Views" [ref=e247]
+          - cell "0.382" [ref=e248]
+          - cell "完播率高×点赞率高=强粘性" [ref=e249]
+        - row "综合推荐指数 ARI 0.4×DCI + 0.35×BPI + 0.25×CVI 0.178 三指标加权综合推荐指数" [ref=e250]:
+          - cell "综合推荐指数 ARI" [ref=e251]
+          - cell "0.4×DCI + 0.35×BPI + 0.25×CVI" [ref=e252]
+          - cell "0.178" [ref=e253]
+          - cell "三指标加权综合推荐指数" [ref=e254]
+  - generic [ref=e255]:
+    - heading "📋 优化总结" [level=3] [ref=e256]
+    - generic [ref=e257]:
+      - generic [ref=e258]:
+        - heading "✓ 已优化项" [level=4] [ref=e259]
+        - list [ref=e260]:
+          - listitem [ref=e261]: "• ER计算: 简单求和 → 加权求和 (+25%)"
+          - listitem [ref=e262]: "• VI公式: 权重再分配 (ER↓ VL↑)"
+          - listitem [ref=e263]: "• 品类超越: +124% → +180%"
+          - listitem [ref=e264]: "• VI最终: 64.5 → 66.55 (+3.2%)"
+      - generic [ref=e265]:
+        - heading "→ 优化方向" [level=4] [ref=e266]
+        - list [ref=e267]:
+          - listitem [ref=e268]: "• 动态阈值: 品类自适应"
+          - listitem [ref=e269]: "• 复合指标: DCI/BPI/CVI三剑客"
+          - listitem [ref=e270]: "• 时序分析: 24h/72h/7d ER追踪"
+          - listitem [ref=e271]: "• 竞品雷达: Top10品类分布"
+  - generic [ref=e272]:
+    - paragraph [ref=e273]: 萝卜乔乔算法Layer优化分析 · 2026-04-13 · v2.0
+    - paragraph [ref=e274]: "Video: 7626449630934453504 · Frames: 225 · Duration: 270s"

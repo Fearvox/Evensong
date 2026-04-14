@@ -4,26 +4,20 @@ export interface ApiResponse<T = unknown> {
   success: boolean;
   data?: T;
   error?: string;
-  message?: string;
-}
-
-export interface PaginatedResponse<T> extends ApiResponse<T[]> {
-  total: number;
-  page: number;
-  pageSize: number;
+  meta?: { total?: number; page?: number; limit?: number };
 }
 
 export interface User {
   id: string;
   email: string;
   name: string;
-  role: "admin" | "user" | "moderator";
-  active: boolean;
+  role: "user" | "admin";
+  status: "active" | "suspended" | "deleted";
   createdAt: string;
   updatedAt: string;
 }
 
-export interface Session {
+export interface AuthSession {
   id: string;
   userId: string;
   token: string;
@@ -36,10 +30,9 @@ export interface Product {
   name: string;
   description: string;
   price: number;
-  currency: string;
-  category: string;
   stock: number;
-  active: boolean;
+  category: string;
+  status: "active" | "inactive" | "archived";
   tags: string[];
   createdAt: string;
   updatedAt: string;
@@ -49,29 +42,19 @@ export interface Order {
   id: string;
   userId: string;
   items: OrderItem[];
-  status: OrderStatus;
+  status: "pending" | "confirmed" | "processing" | "shipped" | "delivered" | "cancelled";
   total: number;
-  currency: string;
-  shippingAddress?: string;
+  shippingAddress: string;
   createdAt: string;
   updatedAt: string;
 }
 
 export interface OrderItem {
   productId: string;
-  name: string;
+  productName: string;
   quantity: number;
   unitPrice: number;
 }
-
-export type OrderStatus =
-  | "pending"
-  | "confirmed"
-  | "processing"
-  | "shipped"
-  | "delivered"
-  | "cancelled"
-  | "refunded";
 
 export interface Payment {
   id: string;
@@ -79,30 +62,24 @@ export interface Payment {
   userId: string;
   amount: number;
   currency: string;
-  method: PaymentMethod;
-  status: PaymentStatus;
-  transactionRef?: string;
+  method: "credit_card" | "debit_card" | "paypal" | "bank_transfer";
+  status: "pending" | "processing" | "completed" | "failed" | "refunded";
+  transactionRef: string;
   createdAt: string;
   updatedAt: string;
 }
 
-export type PaymentMethod = "credit_card" | "debit_card" | "bank_transfer" | "wallet" | "crypto";
-export type PaymentStatus = "pending" | "processing" | "completed" | "failed" | "refunded";
-
 export interface Notification {
   id: string;
   userId: string;
-  type: NotificationType;
-  channel: NotificationChannel;
+  type: "email" | "sms" | "push" | "in_app";
   title: string;
-  body: string;
-  read: boolean;
-  sentAt?: string;
+  message: string;
+  status: "pending" | "sent" | "delivered" | "failed" | "read";
+  metadata?: Record<string, unknown>;
   createdAt: string;
+  readAt?: string;
 }
-
-export type NotificationType = "order" | "payment" | "promotion" | "system" | "alert";
-export type NotificationChannel = "email" | "sms" | "push" | "in_app";
 
 export interface AnalyticsEvent {
   id: string;
@@ -118,6 +95,7 @@ export interface SearchDocument {
   collection: string;
   content: Record<string, unknown>;
   text: string;
+  tags: string[];
   score?: number;
   indexedAt: string;
 }

@@ -1,20 +1,12 @@
-import { OrderStore } from "./store";
-import { createRouter } from "./handlers";
-import { serverError } from "../shared/http";
+// Orders microservice entry point
 
-const store = new OrderStore();
-const router = createRouter(store);
+import { handleRequest } from "./handlers";
+
+const PORT = 3004;
 
 const server = Bun.serve({
-  port: 3004,
-  async fetch(req) {
-    try {
-      return await router(req);
-    } catch {
-      return serverError();
-    }
-  },
+  port: PORT,
+  fetch: handleRequest,
 });
 
-console.log(`Orders service on :${server.port}`);
-export { server };
+console.log(`Orders service running on http://localhost:${server.port}`);

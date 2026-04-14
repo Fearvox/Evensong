@@ -1,16 +1,12 @@
+// Payments microservice entry point
+
 import { handleRequest } from "./handlers";
-import { serverError } from "../shared/http";
+
+const PORT = 3005;
 
 const server = Bun.serve({
-  port: 3005,
-  async fetch(req) {
-    try {
-      return await handleRequest(req);
-    } catch {
-      return serverError();
-    }
-  },
+  port: PORT,
+  fetch: handleRequest,
 });
 
-console.log(`Payments service on :${server.port}`);
-export { server };
+console.log(`Payments service running on http://localhost:${server.port}`);

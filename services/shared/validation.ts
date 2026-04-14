@@ -1,40 +1,40 @@
-// Shared validation utilities
+// Input validation utilities
 
-export function isNonEmptyString(value: unknown): value is string {
-  return typeof value === "string" && value.trim().length > 0;
+export function isNonEmptyString(val: unknown): val is string {
+  return typeof val === "string" && val.trim().length > 0;
 }
 
-export function isValidEmail(value: unknown): value is string {
-  if (typeof value !== "string") return false;
-  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
+export function isValidEmail(val: unknown): val is string {
+  if (typeof val !== "string") return false;
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val);
 }
 
-export function isPositiveNumber(value: unknown): value is number {
-  return typeof value === "number" && value > 0 && isFinite(value);
+export function isPositiveNumber(val: unknown): val is number {
+  return typeof val === "number" && val > 0 && Number.isFinite(val);
 }
 
-export function isNonNegativeNumber(value: unknown): value is number {
-  return typeof value === "number" && value >= 0 && isFinite(value);
+export function isNonNegativeNumber(val: unknown): val is number {
+  return typeof val === "number" && val >= 0 && Number.isFinite(val);
 }
 
-export function isPositiveInteger(value: unknown): value is number {
-  return typeof value === "number" && Number.isInteger(value) && value > 0;
+export function isPositiveInteger(val: unknown): val is number {
+  return typeof val === "number" && Number.isInteger(val) && val > 0;
 }
 
-export function isNonNegativeInteger(value: unknown): value is number {
-  return typeof value === "number" && Number.isInteger(value) && value >= 0;
+export function isNonNegativeInteger(val: unknown): val is number {
+  return typeof val === "number" && Number.isInteger(val) && val >= 0;
 }
 
-export function isInEnum<T extends string>(value: unknown, values: readonly T[]): value is T {
-  return typeof value === "string" && values.includes(value as T);
+export function isValidEnum<T extends string>(val: unknown, values: readonly T[]): val is T {
+  return typeof val === "string" && values.includes(val as T);
 }
 
-export function isArray(value: unknown): value is unknown[] {
-  return Array.isArray(value);
+export function isArray(val: unknown): val is unknown[] {
+  return Array.isArray(val);
 }
 
-export function isObject(value: unknown): value is Record<string, unknown> {
-  return typeof value === "object" && value !== null && !Array.isArray(value);
+export function isObject(val: unknown): val is Record<string, unknown> {
+  return typeof val === "object" && val !== null && !Array.isArray(val);
 }
 
 export interface ValidationError {
@@ -42,12 +42,8 @@ export interface ValidationError {
   message: string;
 }
 
-export function validate(
-  rules: Array<{ field: string; valid: boolean; message: string }>,
-): ValidationError[] {
-  return rules.filter((r) => !r.valid).map(({ field, message }) => ({ field, message }));
-}
-
-export function formatValidationErrors(errors: ValidationError[]): string {
-  return errors.map((e) => `${e.field}: ${e.message}`).join("; ");
+export function validate(rules: Array<[boolean, string, string]>): ValidationError[] {
+  return rules
+    .filter(([valid]) => !valid)
+    .map(([, field, message]) => ({ field, message }));
 }

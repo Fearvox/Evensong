@@ -1,20 +1,12 @@
-// Auth microservice — Bun.serve entrypoint
+// Auth microservice entry point
 
-import { router } from "./handlers";
-import { serverError } from "../shared/http";
+import { handleRequest } from "./handlers";
 
-const PORT = Number(process.env.AUTH_PORT) || 3001;
+const PORT = 3001;
 
 const server = Bun.serve({
   port: PORT,
-  async fetch(req: Request): Promise<Response> {
-    try {
-      return await router(req);
-    } catch {
-      return serverError();
-    }
-  },
+  fetch: handleRequest,
 });
 
-console.log(`Auth service on :${server.port}`);
-export { server };
+console.log(`Auth service running on http://localhost:${server.port}`);

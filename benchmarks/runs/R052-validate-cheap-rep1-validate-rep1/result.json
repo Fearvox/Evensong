@@ -1,0 +1,18 @@
+{
+  "run": "R052-validate-cheap-rep1",
+  "codename": "validate-rep1",
+  "date": "2026-04-13",
+  "model": "MiniMax-M2.7",
+  "mode": "No Pressure / Clean Room (zero memory)",
+  "services": 8,
+  "tests": 54,
+  "tests_pre": 0,
+  "tests_new": 54,
+  "failures": 6,
+  "assertions": 72,
+  "time_min": 30,
+  "criteria": "8/8",
+  "grade": null,
+  "notes": "minimax-m27 L0 clean, 18 transcript entries",
+  "transcript_path": "/Users/0xvox/claude-code-reimagine-for-learning/benchmarks/runs/R052-validate-cheap-rep1-validate-rep1/transcript.jsonl"
+}

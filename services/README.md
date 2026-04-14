@@ -6,73 +6,67 @@ Production-ready microservice suite built with TypeScript and Bun runtime.
 
 ```
 services/
-├── shared/          # Shared types, HTTP utils, MemoryStore, validation
+├── shared/          # Shared types, HTTP utilities, in-memory store, validation
 ├── auth/            # Authentication & session management (port 3001)
-├── users/           # User management with soft-delete (port 3002)
+├── users/           # User management & profiles (port 3002)
 ├── products/        # Product catalog & inventory (port 3003)
 ├── orders/          # Order lifecycle management (port 3004)
 ├── payments/        # Payment processing & refunds (port 3005)
 ├── notifications/   # Multi-channel notifications (port 3006)
-├── analytics/       # Event tracking & funnel analysis (port 3007)
-├── search/          # Full-text search with TF scoring (port 3008)
-├── integration/     # Cross-service workflow tests
-├── run-tests.sh     # Test runner script
-└── README.md
+├── analytics/       # Event tracking & analysis (port 3007)
+├── search/          # Full-text search & indexing (port 3008)
+└── integration/     # Cross-service workflow tests
 ```
-
-## Quick Start
-
-```bash
-# Run all tests
-bash services/run-tests.sh
-
-# Run a single service's tests
-bun test services/auth/__tests__/
-
-# Start a service
-bun run services/auth/index.ts
-```
-
-## Services
-
-| Service | Port | Endpoints | Description |
-|---------|------|-----------|-------------|
-| auth | 3001 | 12 | Registration, login, sessions, password reset |
-| users | 3002 | 13 | User CRUD, soft-delete, search, bulk ops |
-| products | 3003 | 12 | Product catalog, stock management, categories |
-| orders | 3004 | 12 | Order lifecycle, status transitions, items |
-| payments | 3005 | 12 | Payment processing, refunds, receipts |
-| notifications | 3006 | 14 | Multi-channel, templates, bulk read |
-| analytics | 3007 | 13 | Event tracking, funnels, retention |
-| search | 3008 | 13 | Full-text search, autocomplete, facets |
 
 ## Design Decisions
 
-- **Pure function handlers**: Each service exports `handleRequest(req)`. No server needed for testing.
-- **In-memory stores**: `MemoryStore<T>` base class provides type-safe CRUD.
-- **Shared infrastructure**: Types, HTTP helpers, validation in `shared/`.
-- **Direct handler testing**: Tests call handlers with `new Request()` — no HTTP overhead.
+- **Pure function handlers**: Each service exports `handleRequest(req: Request): Promise<Response>` — no server startup needed for testing
+- **In-memory stores**: Based on `Map<string, T>` via `MemoryStore<T>` base class — O(1) CRUD, easy to reset between tests
+- **Zero external dependencies**: Only Bun built-ins and `bun:test`
+- **Shared infrastructure**: Common types, HTTP response builders, validation utilities ensure consistency
 
-## Testing
+## Running Tests
 
-```typescript
-import { handleRequest } from "../handlers";
+```bash
+# All tests
+bun test services/
 
-test("creates user", async () => {
-  const res = await handleRequest(new Request("http://localhost/users", {
-    method: "POST",
-    body: JSON.stringify({ name: "Alice", email: "alice@test.com", role: "user" }),
-  }));
-  expect(res.status).toBe(201);
-  const data = await res.json();
-  expect(data.success).toBe(true);
-});
+# Single service
+bun test services/auth/
+
+# Test runner with summary
+bun run services/run-tests.ts
+
+# Shell runner
+bash services/run-tests.sh
 ```
 
-## Cross-Service Workflow
+## Running Services
+
+```bash
+# Start individual service
+bun run services/auth/index.ts
+bun run services/users/index.ts
+# etc.
+```
+
+## Service Overview
+
+| Service | Port | Endpoints | Key Features |
+|---------|------|-----------|-------------|
+| auth | 3001 | 12 | Registration, login, sessions, password reset, token validation |
+| users | 3002 | 12 | CRUD, roles, suspend/activate, activity log, bulk ops |
+| products | 3003 | 12 | Catalog, stock management, categories, bulk pricing, search |
+| orders | 3004 | 12 | Order lifecycle, status transitions, item management, stats |
+| payments | 3005 | 12 | Processing simulation, refunds, multi-currency, receipts |
+| notifications | 3006 | 12 | Multi-channel, templates, bulk send, read tracking |
+| analytics | 3007 | 13 | Event tracking, funnel analysis, retention, trends |
+| search | 3008 | 12 | Full-text search, TF scoring, autocomplete, facets |
+
+## Cross-Service Workflows
 
 Integration tests cover:
-1. User registration (auth) → User creation (users)
-2. Product lookup (products) → Order creation (orders)
-3. Payment processing (payments) → Notification delivery (notifications)
-4. Event tracking (analytics) → Search indexing (search)
+1. **User Registration Flow**: Register → Login → Get Profile
+2. **Order Workflow**: Create User → Add Products → Create Order → Process Payment
+3. **Notification Pipeline**: Payment Complete → Send Notification → Mark Read
+4. **Analytics Tracking**: Track events across user journey, verify funnel conversion

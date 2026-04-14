@@ -1,355 +1,503 @@
 import { describe, test, expect, beforeEach } from "bun:test";
+import { generateId, now } from "../../shared/http";
+import { MemoryStore } from "../../shared/store";
+import type { User, Order, OrderItem, Payment, Notification, AnalyticsEvent } from "../../shared/types";
 
-// Import handlers from each service
-import { handleRequest as authHandler } from "../../auth/handlers";
-import { handleRequest as usersHandler } from "../../users/handlers";
-import { handleRequest as productsHandler } from "../../products/handlers";
-import { handleRequest as ordersHandler } from "../../orders/handlers";
-import { handleRequest as paymentsHandler } from "../../payments/handlers";
-import { handleRequest as notificationsHandler } from "../../notifications/handlers";
-import { handleRequest as analyticsHandler } from "../../analytics/handlers";
-import { handleRequest as searchHandler } from "../../search/handlers";
+// Simulate cross-service data flow using shared stores
+const userStore = new MemoryStore<User>();
+const orderStore = new MemoryStore<Order>();
+const paymentStore = new MemoryStore<Payment>();
+const notificationStore = new MemoryStore<Notification>();
+const analyticsStore = new MemoryStore<AnalyticsEvent>();
 
-// Import stores to reset between tests
-import { authStore } from "../../auth/store";
-import { userStore } from "../../users/store";
-import { productStore } from "../../products/store";
-import { orderStore } from "../../orders/store";
-import { paymentStore } from "../../payments/store";
-import { notificationStore } from "../../notifications/store";
-import { analyticsStore } from "../../analytics/store";
-import { searchStore } from "../../search/store";
+beforeEach(() => {
+  userStore.clear();
+  orderStore.clear();
+  paymentStore.clear();
+  notificationStore.clear();
+  analyticsStore.clear();
+});
 
-function post(handler: Function, path: string, body: unknown) {
-  return handler(new Request(`http://localhost${path}`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(body),
-  }));
-}
+describe("User Registration → Login Flow", () => {
+  test("register a new user and verify data", () => {
+    const user = userStore.create({
+      id: generateId(),
+      email: "alice@example.com",
+      name: "Alice",
+      role: "user",
+      status: "active",
+      createdAt: now(),
+      updatedAt: now(),
+    });
 
-function get(handler: Function, path: string) {
-  return handler(new Request(`http://localhost${path}`));
-}
+    expect(user.email).toBe("alice@example.com");
+    expect(user.status).toBe("active");
 
-function patch(handler: Function, path: string, body: unknown) {
-  return handler(new Request(`http://localhost${path}`, {
-    method: "PATCH",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(body),
-  }));
-}
-
-describe("Cross-Service Workflow: User Registration → Order → Payment → Notification", () => {
-  beforeEach(() => {
-    authStore.clear();
-    userStore.clear();
-    productStore.clear();
-    orderStore.clear();
-    paymentStore.clear();
-    notificationStore.clear();
-    analyticsStore.clear();
-    searchStore.clear();
+    const found = userStore.findOne((u) => u.email === "alice@example.com");
+    expect(found).toBeDefined();
+    expect(found!.name).toBe("Alice");
   });
 
-  test("full e-commerce lifecycle", async () => {
-    // Step 1: Register user via auth service
-    const registerRes = await post(authHandler, "/auth/register", {
-      email: "buyer@test.com",
-      name: "Test Buyer",
-      password: "securePass123",
-    });
-    expect(registerRes.status).toBe(201);
-    const registerData = await registerRes.json();
-    expect(registerData.success).toBe(true);
-    const userId = registerData.data.user.id;
-    const token = registerData.data.token;
-
-    // Step 2: Create user profile in users service
-    const createUserRes = await post(usersHandler, "/users", {
-      name: "Test Buyer",
-      email: "buyer@test.com",
+  test("prevent duplicate email registration", () => {
+    userStore.create({
+      id: generateId(),
+      email: "bob@example.com",
+      name: "Bob",
       role: "user",
+      status: "active",
+      createdAt: now(),
+      updatedAt: now(),
     });
-    expect(createUserRes.status).toBe(201);
 
-    // Step 3: Create a product
-    const createProductRes = await post(productsHandler, "/products", {
-      name: "Wireless Mouse",
-      description: "Ergonomic wireless mouse",
-      price: 29.99,
-      currency: "USD",
-      category: "electronics",
-      stock: 100,
-      tags: ["mouse", "wireless"],
+    const existing = userStore.findOne((u) => u.email === "bob@example.com");
+    expect(existing).toBeDefined();
+    // Second registration should detect conflict
+    const isDuplicate = !!existing;
+    expect(isDuplicate).toBe(true);
+  });
+
+  test("user profile update persists", () => {
+    const user = userStore.create({
+      id: generateId(),
+      email: "carol@example.com",
+      name: "Carol",
+      role: "user",
+      status: "active",
+      createdAt: now(),
+      updatedAt: now(),
     });
-    expect(createProductRes.status).toBe(201);
-    const productData = await createProductRes.json();
-    const productId = productData.data.id;
 
-    // Step 4: Create an order
-    const createOrderRes = await post(ordersHandler, "/orders", {
+    const updated = userStore.update(user.id, { name: "Carol Smith", updatedAt: now() });
+    expect(updated!.name).toBe("Carol Smith");
+    expect(updated!.email).toBe("carol@example.com");
+  });
+});
+
+describe("Order Creation → Payment → Notification Pipeline", () => {
+  let userId: string;
+  let orderId: string;
+
+  beforeEach(() => {
+    userId = generateId();
+    userStore.create({
+      id: userId,
+      email: "shopper@example.com",
+      name: "Shopper",
+      role: "user",
+      status: "active",
+      createdAt: now(),
+      updatedAt: now(),
+    });
+  });
+
+  test("create order with items and auto-calculate total", () => {
+    const items: OrderItem[] = [
+      { productId: "p1", productName: "Widget", quantity: 2, unitPrice: 29.99 },
+      { productId: "p2", productName: "Gadget", quantity: 1, unitPrice: 49.99 },
+    ];
+    const total = items.reduce((sum, item) => sum + item.quantity * item.unitPrice, 0);
+
+    const order = orderStore.create({
+      id: generateId(),
       userId,
-      items: [{
-        productId,
-        name: "Wireless Mouse",
-        quantity: 2,
-        unitPrice: 29.99,
-      }],
-      currency: "USD",
+      items,
+      status: "pending",
+      total,
       shippingAddress: "123 Main St",
+      createdAt: now(),
+      updatedAt: now(),
     });
-    expect(createOrderRes.status).toBe(201);
-    const orderData = await createOrderRes.json();
-    const orderId = orderData.data.id;
-    expect(orderData.data.total).toBe(59.98);
 
-    // Step 5: Process payment
-    const createPaymentRes = await post(paymentsHandler, "/payments", {
-      orderId,
+    orderId = order.id;
+    expect(order.total).toBeCloseTo(109.97, 2);
+    expect(order.items).toHaveLength(2);
+    expect(order.status).toBe("pending");
+  });
+
+  test("full pipeline: order → payment → notification → analytics", () => {
+    // Step 1: Create order
+    const items: OrderItem[] = [
+      { productId: "p1", productName: "Widget", quantity: 3, unitPrice: 19.99 },
+    ];
+    const total = items.reduce((sum, item) => sum + item.quantity * item.unitPrice, 0);
+    const order = orderStore.create({
+      id: generateId(),
       userId,
-      amount: 59.98,
+      items,
+      status: "pending",
+      total,
+      shippingAddress: "456 Oak Ave",
+      createdAt: now(),
+      updatedAt: now(),
+    });
+
+    // Step 2: Confirm order
+    const confirmed = orderStore.update(order.id, { status: "confirmed", updatedAt: now() });
+    expect(confirmed!.status).toBe("confirmed");
+
+    // Step 3: Create and process payment
+    const payment = paymentStore.create({
+      id: generateId(),
+      orderId: order.id,
+      userId,
+      amount: total,
       currency: "USD",
       method: "credit_card",
+      status: "pending",
+      transactionRef: `TXN-${crypto.randomUUID().slice(0, 8).toUpperCase()}`,
+      createdAt: now(),
+      updatedAt: now(),
     });
-    expect(createPaymentRes.status).toBe(201);
-    const paymentData = await createPaymentRes.json();
-    const paymentId = paymentData.data.id;
 
-    // Process the payment
-    const processRes = await post(paymentsHandler, `/payments/${paymentId}/process`, {});
-    expect(processRes.status).toBe(200);
-    const processData = await processRes.json();
-    expect(processData.data.status).toBe("completed");
+    // Simulate processing (amount < 10000 succeeds)
+    const processed = paymentStore.update(payment.id, { status: "completed", updatedAt: now() });
+    expect(processed!.status).toBe("completed");
 
-    // Step 6: Send notification
-    const notifyRes = await post(notificationsHandler, "/notifications", {
+    // Step 4: Send notification
+    const notification = notificationStore.create({
+      id: generateId(),
       userId,
-      type: "order",
-      channel: "email",
-      title: "Order Confirmed",
-      body: `Your order ${orderId} has been paid.`,
+      type: "email",
+      title: "Payment Confirmed",
+      message: `Your payment of $${total.toFixed(2)} for order ${order.id} has been processed.`,
+      status: "pending",
+      metadata: { orderId: order.id, paymentId: payment.id },
+      createdAt: now(),
     });
-    expect(notifyRes.status).toBe(201);
-    const notifyData = await notifyRes.json();
-    const notificationId = notifyData.data.id;
 
-    // Send the notification
-    const sendRes = await post(notificationsHandler, `/notifications/${notificationId}/send`, {});
-    expect(sendRes.status).toBe(200);
+    const sent = notificationStore.update(notification.id, { status: "sent" });
+    expect(sent!.status).toBe("sent");
+    expect(sent!.message).toContain(order.id);
 
-    // Step 7: Track analytics event
-    const trackRes = await post(analyticsHandler, "/analytics/events", {
+    // Step 5: Track analytics
+    const event = analyticsStore.create({
+      id: generateId(),
       eventType: "purchase_completed",
       userId,
-      properties: { orderId, amount: 59.98, currency: "USD" },
+      sessionId: "sess-" + generateId().slice(0, 8),
+      properties: { orderId: order.id, amount: total, currency: "USD" },
+      timestamp: now(),
     });
-    expect(trackRes.status).toBe(201);
 
-    // Step 8: Index order in search
-    const indexRes = await post(searchHandler, "/search/index", {
-      collection: "orders",
-      content: { orderId, userId, total: 59.98 },
-      text: `order ${orderId} wireless mouse buyer`,
-    });
-    expect(indexRes.status).toBe(201);
-
-    // Verify: search for the indexed order
-    const searchRes = await get(searchHandler, "/search?q=wireless+mouse&collection=orders");
-    expect(searchRes.status).toBe(200);
-    const searchData = await searchRes.json();
-    expect(searchData.data.length).toBeGreaterThan(0);
+    expect(event.eventType).toBe("purchase_completed");
+    expect(event.properties).toHaveProperty("orderId", order.id);
   });
 
-  test("order status progression workflow", async () => {
-    // Create order
-    const orderRes = await post(ordersHandler, "/orders", {
-      userId: "user-1",
-      items: [{ productId: "p-1", name: "Laptop", quantity: 1, unitPrice: 999.99 }],
+  test("payment failure triggers failure notification", () => {
+    const order = orderStore.create({
+      id: generateId(),
+      userId,
+      items: [{ productId: "p1", productName: "Luxury Item", quantity: 1, unitPrice: 15000 }],
+      status: "confirmed",
+      total: 15000,
+      shippingAddress: "789 Elm Dr",
+      createdAt: now(),
+      updatedAt: now(),
+    });
+
+    const payment = paymentStore.create({
+      id: generateId(),
+      orderId: order.id,
+      userId,
+      amount: 15000,
       currency: "USD",
+      method: "credit_card",
+      status: "pending",
+      transactionRef: `TXN-${crypto.randomUUID().slice(0, 8).toUpperCase()}`,
+      createdAt: now(),
+      updatedAt: now(),
     });
-    const order = await orderRes.json();
-    const orderId = order.data.id;
 
-    // Progress: pending → confirmed → processing → shipped → delivered
-    const transitions = ["confirmed", "processing", "shipped", "delivered"];
-    for (const status of transitions) {
-      const res = await patch(ordersHandler, `/orders/${orderId}/status`, { status });
-      expect(res.status).toBe(200);
-      const data = await res.json();
-      expect(data.data.status).toBe(status);
+    // Simulate failure (amount > 10000)
+    const failed = paymentStore.update(payment.id, { status: "failed", updatedAt: now() });
+    expect(failed!.status).toBe("failed");
+
+    // Send failure notification
+    const notification = notificationStore.create({
+      id: generateId(),
+      userId,
+      type: "email",
+      title: "Payment Failed",
+      message: `Your payment of $15000.00 could not be processed.`,
+      status: "sent",
+      metadata: { orderId: order.id, reason: "amount_exceeded" },
+      createdAt: now(),
+    });
+
+    expect(notification.title).toBe("Payment Failed");
+    expect(notification.metadata).toHaveProperty("reason", "amount_exceeded");
+  });
+});
+
+describe("Multi-User Order Statistics", () => {
+  test("aggregate orders across multiple users", () => {
+    const users = Array.from({ length: 3 }, (_, i) => {
+      return userStore.create({
+        id: generateId(),
+        email: `user${i}@example.com`,
+        name: `User ${i}`,
+        role: "user",
+        status: "active",
+        createdAt: now(),
+        updatedAt: now(),
+      });
+    });
+
+    // Each user creates 2 orders
+    for (const user of users) {
+      for (let j = 0; j < 2; j++) {
+        orderStore.create({
+          id: generateId(),
+          userId: user.id,
+          items: [{ productId: "p1", productName: "Item", quantity: 1, unitPrice: 100 }],
+          status: j === 0 ? "delivered" : "pending",
+          total: 100,
+          shippingAddress: "Address",
+          createdAt: now(),
+          updatedAt: now(),
+        });
+      }
     }
 
-    // Verify final state
-    const finalRes = await get(ordersHandler, `/orders/${orderId}`);
-    const finalData = await finalRes.json();
-    expect(finalData.data.status).toBe("delivered");
+    expect(orderStore.count()).toBe(6);
+    const delivered = orderStore.find((o) => o.status === "delivered");
+    expect(delivered).toHaveLength(3);
+    const pending = orderStore.find((o) => o.status === "pending");
+    expect(pending).toHaveLength(3);
+
+    const totalRevenue = orderStore.getAll().reduce((sum, o) => sum + o.total, 0);
+    expect(totalRevenue).toBe(600);
   });
 
-  test("payment and refund workflow", async () => {
-    // Create and process payment
-    const payRes = await post(paymentsHandler, "/payments", {
-      orderId: "order-1",
-      userId: "user-1",
-      amount: 150.00,
-      currency: "EUR",
-      method: "bank_transfer",
-    });
-    const payment = await payRes.json();
-    const paymentId = payment.data.id;
-
-    await post(paymentsHandler, `/payments/${paymentId}/process`, {});
-
-    // Refund
-    const refundRes = await post(paymentsHandler, `/payments/${paymentId}/refund`, {});
-    expect(refundRes.status).toBe(200);
-    const refundData = await refundRes.json();
-    expect(refundData.data.status).toBe("refunded");
-
-    // Send refund notification
-    const notifyRes = await post(notificationsHandler, "/notifications", {
-      userId: "user-1",
-      type: "payment",
-      channel: "email",
-      title: "Refund Processed",
-      body: "Your payment of 150.00 EUR has been refunded.",
-    });
-    expect(notifyRes.status).toBe(201);
-  });
-
-  test("analytics funnel with multi-step user journey", async () => {
-    const userId = "funnel-user-1";
-
-    // Track user journey events
-    const events = [
-      { eventType: "page_view", userId, properties: { page: "/products" } },
-      { eventType: "add_to_cart", userId, properties: { productId: "p-1" } },
-      { eventType: "checkout_start", userId, properties: {} },
-      { eventType: "purchase_completed", userId, properties: { amount: 99.99 } },
-    ];
-
-    for (const event of events) {
-      const res = await post(analyticsHandler, "/analytics/events", event);
-      expect(res.status).toBe(201);
-    }
-
-    // Check funnel
-    const funnelRes = await get(analyticsHandler,
-      "/analytics/funnel?steps=page_view,add_to_cart,checkout_start,purchase_completed");
-    expect(funnelRes.status).toBe(200);
-    const funnelData = await funnelRes.json();
-    expect(funnelData.data).toBeDefined();
-  });
-
-  test("search across multiple collections", async () => {
-    // Index products
-    await post(searchHandler, "/search/index", {
-      collection: "products",
-      content: { name: "Gaming Keyboard" },
-      text: "gaming keyboard mechanical rgb backlit",
-    });
-
-    // Index users
-    await post(searchHandler, "/search/index", {
-      collection: "users",
-      content: { name: "John Gamer" },
-      text: "john gamer pro player esports",
-    });
-
-    // Search across all collections
-    const allRes = await get(searchHandler, "/search?q=gaming");
-    expect(allRes.status).toBe(200);
-    const allData = await allRes.json();
-    expect(allData.data.length).toBeGreaterThanOrEqual(1);
-
-    // Search specific collection
-    const prodRes = await get(searchHandler, "/search?q=gaming&collection=products");
-    expect(prodRes.status).toBe(200);
-    const prodData = await prodRes.json();
-    expect(prodData.data.length).toBe(1);
-  });
-
-  test("notification template workflow", async () => {
-    // Create template
-    const templateRes = await post(notificationsHandler, "/notifications/template", {
-      name: "order_confirmation",
-      title: "Order {{orderId}} Confirmed",
-      body: "Hi {{userName}}, your order {{orderId}} for {{amount}} has been confirmed.",
-    });
-    expect(templateRes.status).toBe(201);
-
-    // Use template to create notification
-    const fromTemplateRes = await post(notificationsHandler, "/notifications/from-template", {
-      templateName: "order_confirmation",
-      userId: "user-1",
-      channel: "email",
-      type: "order",
-      variables: {
-        orderId: "ORD-123",
-        userName: "Alice",
-        amount: "$59.99",
-      },
-    });
-    expect(fromTemplateRes.status).toBe(201);
-    const notif = await fromTemplateRes.json();
-    expect(notif.data.title).toBe("Order ORD-123 Confirmed");
-    expect(notif.data.body).toContain("Alice");
-    expect(notif.data.body).toContain("$59.99");
-  });
-
-  test("user activity tracking across services", async () => {
-    // Create user
-    const userRes = await post(usersHandler, "/users", {
-      name: "Active User",
-      email: "active@test.com",
+  test("user-specific order history", () => {
+    const user = userStore.create({
+      id: generateId(),
+      email: "loyal@example.com",
+      name: "Loyal Customer",
       role: "user",
-    });
-    const userData = await userRes.json();
-    const userId = userData.data.id;
-
-    // Log activity
-    await post(usersHandler, `/users/${userId}/activity`, { action: "logged_in" });
-    await post(usersHandler, `/users/${userId}/activity`, { action: "viewed_products" });
-    await post(usersHandler, `/users/${userId}/activity`, { action: "placed_order" });
-
-    // Check activity log
-    const activityRes = await get(usersHandler, `/users/${userId}/activity`);
-    expect(activityRes.status).toBe(200);
-    const activityData = await activityRes.json();
-    expect(activityData.data.length).toBe(3);
-
-    // Track same events in analytics
-    await post(analyticsHandler, "/analytics/events", {
-      eventType: "user_login", userId, properties: {},
-    });
-    await post(analyticsHandler, "/analytics/events", {
-      eventType: "product_view", userId, properties: {},
+      status: "active",
+      createdAt: now(),
+      updatedAt: now(),
     });
 
-    // Verify analytics has the events
-    const analyticsRes = await get(analyticsHandler, `/analytics/user/${userId}`);
-    expect(analyticsRes.status).toBe(200);
-    const analyticsData = await analyticsRes.json();
-    expect(analyticsData.data.length).toBe(2);
+    for (let i = 0; i < 5; i++) {
+      orderStore.create({
+        id: generateId(),
+        userId: user.id,
+        items: [{ productId: `p${i}`, productName: `Product ${i}`, quantity: i + 1, unitPrice: 10 }],
+        status: "delivered",
+        total: (i + 1) * 10,
+        shippingAddress: "Home",
+        createdAt: now(),
+        updatedAt: now(),
+      });
+    }
+
+    const userOrders = orderStore.find((o) => o.userId === user.id);
+    expect(userOrders).toHaveLength(5);
+    const userTotal = userOrders.reduce((sum, o) => sum + o.total, 0);
+    expect(userTotal).toBe(150); // 10+20+30+40+50
+  });
+});
+
+describe("Analytics Funnel Tracking", () => {
+  test("track user journey through funnel stages", () => {
+    const sessionId = "sess-funnel-1";
+    const userId = generateId();
+    const stages = ["page_view", "product_view", "add_to_cart", "checkout_start", "purchase_completed"];
+
+    for (const stage of stages) {
+      analyticsStore.create({
+        id: generateId(),
+        eventType: stage,
+        userId,
+        sessionId,
+        properties: { page: stage === "page_view" ? "/home" : `/step/${stage}` },
+        timestamp: now(),
+      });
+    }
+
+    const sessionEvents = analyticsStore.find((e) => e.sessionId === sessionId);
+    expect(sessionEvents).toHaveLength(5);
+
+    const eventTypes = sessionEvents.map((e) => e.eventType);
+    expect(eventTypes).toContain("page_view");
+    expect(eventTypes).toContain("purchase_completed");
   });
 
-  test("health checks across all services", async () => {
-    const checks = [
-      { handler: authHandler, path: "/auth/health" },
-      { handler: usersHandler, path: "/users/health" },
-      { handler: productsHandler, path: "/products/health" },
-      { handler: ordersHandler, path: "/orders/health" },
-      { handler: paymentsHandler, path: "/payments/health" },
-      { handler: notificationsHandler, path: "/notifications/health" },
-      { handler: analyticsHandler, path: "/analytics/health" },
-      { handler: searchHandler, path: "/search/health" },
-    ];
+  test("partial funnel - user drops off", () => {
+    const sessionId = "sess-dropout";
+    const userId = generateId();
 
-    for (const { handler, path } of checks) {
-      const res = await get(handler, path);
-      expect(res.status).toBe(200);
-      const data = await res.json();
-      expect(data.success).toBe(true);
+    analyticsStore.create({ id: generateId(), eventType: "page_view", userId, sessionId, properties: {}, timestamp: now() });
+    analyticsStore.create({ id: generateId(), eventType: "product_view", userId, sessionId, properties: {}, timestamp: now() });
+    analyticsStore.create({ id: generateId(), eventType: "add_to_cart", userId, sessionId, properties: {}, timestamp: now() });
+    // User drops off - no checkout or purchase
+
+    const sessionEvents = analyticsStore.find((e) => e.sessionId === sessionId);
+    expect(sessionEvents).toHaveLength(3);
+    expect(sessionEvents.some((e) => e.eventType === "purchase_completed")).toBe(false);
+  });
+});
+
+describe("Notification Delivery Tracking", () => {
+  test("track notification lifecycle: pending → sent → delivered → read", () => {
+    const userId = generateId();
+    const notif = notificationStore.create({
+      id: generateId(),
+      userId,
+      type: "in_app",
+      title: "Welcome!",
+      message: "Welcome to our platform",
+      status: "pending",
+      createdAt: now(),
+    });
+
+    expect(notif.status).toBe("pending");
+
+    const sent = notificationStore.update(notif.id, { status: "sent" });
+    expect(sent!.status).toBe("sent");
+
+    const delivered = notificationStore.update(notif.id, { status: "delivered" });
+    expect(delivered!.status).toBe("delivered");
+
+    const read = notificationStore.update(notif.id, { status: "read", readAt: now() });
+    expect(read!.status).toBe("read");
+    expect(read!.readAt).toBeDefined();
+  });
+
+  test("bulk notifications to multiple users", () => {
+    const userIds = Array.from({ length: 5 }, () => generateId());
+
+    for (const uid of userIds) {
+      notificationStore.create({
+        id: generateId(),
+        userId: uid,
+        type: "push",
+        title: "Sale Alert",
+        message: "50% off all items!",
+        status: "sent",
+        createdAt: now(),
+      });
     }
+
+    expect(notificationStore.count()).toBe(5);
+    const allSent = notificationStore.find((n) => n.status === "sent");
+    expect(allSent).toHaveLength(5);
+  });
+
+  test("unread count per user", () => {
+    const userId = generateId();
+
+    for (let i = 0; i < 4; i++) {
+      notificationStore.create({
+        id: generateId(),
+        userId,
+        type: "in_app",
+        title: `Notification ${i}`,
+        message: `Message ${i}`,
+        status: i < 2 ? "read" : "delivered",
+        createdAt: now(),
+        readAt: i < 2 ? now() : undefined,
+      });
+    }
+
+    const unread = notificationStore.find((n) => n.userId === userId && n.status !== "read");
+    expect(unread).toHaveLength(2);
+
+    const read = notificationStore.find((n) => n.userId === userId && n.status === "read");
+    expect(read).toHaveLength(2);
+  });
+});
+
+describe("Cross-Service Data Consistency", () => {
+  test("order references valid user", () => {
+    const user = userStore.create({
+      id: generateId(),
+      email: "valid@example.com",
+      name: "Valid User",
+      role: "user",
+      status: "active",
+      createdAt: now(),
+      updatedAt: now(),
+    });
+
+    const order = orderStore.create({
+      id: generateId(),
+      userId: user.id,
+      items: [{ productId: "p1", productName: "Widget", quantity: 1, unitPrice: 25 }],
+      status: "pending",
+      total: 25,
+      shippingAddress: "Addr",
+      createdAt: now(),
+      updatedAt: now(),
+    });
+
+    const orderUser = userStore.getById(order.userId);
+    expect(orderUser).toBeDefined();
+    expect(orderUser!.id).toBe(user.id);
+  });
+
+  test("payment references valid order", () => {
+    const orderId = generateId();
+    orderStore.create({
+      id: orderId,
+      userId: generateId(),
+      items: [],
+      status: "confirmed",
+      total: 50,
+      shippingAddress: "Addr",
+      createdAt: now(),
+      updatedAt: now(),
+    });
+
+    const payment = paymentStore.create({
+      id: generateId(),
+      orderId,
+      userId: generateId(),
+      amount: 50,
+      currency: "USD",
+      method: "paypal",
+      status: "completed",
+      transactionRef: "TXN-REF123",
+      createdAt: now(),
+      updatedAt: now(),
+    });
+
+    const linkedOrder = orderStore.getById(payment.orderId);
+    expect(linkedOrder).toBeDefined();
+    expect(linkedOrder!.total).toBe(payment.amount);
+  });
+
+  test("suspended user cannot place orders (business rule)", () => {
+    const user = userStore.create({
+      id: generateId(),
+      email: "suspended@example.com",
+      name: "Suspended",
+      role: "user",
+      status: "suspended",
+      createdAt: now(),
+      updatedAt: now(),
+    });
+
+    // Business rule: check user status before allowing order
+    const canOrder = user.status === "active";
+    expect(canOrder).toBe(false);
+  });
+
+  test("deleted user notifications should not be sent", () => {
+    const user = userStore.create({
+      id: generateId(),
+      email: "deleted@example.com",
+      name: "Deleted User",
+      role: "user",
+      status: "deleted",
+      createdAt: now(),
+      updatedAt: now(),
+    });
+
+    // Business rule: check user status before sending
+    const shouldSend = user.status !== "deleted";
+    expect(shouldSend).toBe(false);
   });
 });

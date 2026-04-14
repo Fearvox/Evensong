@@ -276,3 +276,28 @@ Do not make direct repo edits outside a GSD workflow unless the user explicitly 
 > Profile not yet configured. Run `/gsd-profile-user` to generate your developer profile.
 > This section is managed by `generate-claude-profile` -- do not edit manually.
 <!-- GSD:profile-end -->
+
+## Research Vault Handoffs & Evolution Anchors (2026-04-13 Update)
+
+Key documents side-loaded for co-evolutionary memory:
+
+* EVOLUTION-LAYER-INDEX.md: Bidirectional index linking research-vault to evolution-layer/LAYER-0-HUMANIZATION-SNAPSHOT.md. Enforces L0 humanization baseline (raw vulnerability: language-shaping fear, imitation indeterminacy, Oppenheimer unease, pusher/stopper tension) to prevent optimization drift.
+
+* PHILOSOPHICAL-INTEGRITY-ANCHOR-L0.md: Immutable raw human philosophical state:
+  - fear of being shaped by language
+  - concern about imitation loops
+  - Oppenheimer-like dread
+  - uncertainty about pusher vs stopper role
+  Permanent anchor - no reinterpretation allowed in any evolution layer.
+
+* HANDOFF-EVENSONG-EN.md: Evensong R012-E benchmark handoff. Memory causation (strategy recall -> deployment), L2 pressure self-evo (+157-900% test density), 4-topic swarms (scheduling/memory/repeatability/vault), repeatability CV=0.087. High sub-agent parallelism.
+
+* HANDOFF-SELF-EVOLUTION-COORDINATOR-IMPLEMENTATION-PLAN.md: Approved phases for self-evolution-coordinator skill integration (Phase 0-5: artifact gen, CLAUDE.md update, handoff deposit, log marking, self-test). Formal co-evo invariants, 0xvox sole authorship preserved.
+
+* ROMANTIC-BENCHMARK-TRAILER-IDEA.md: Evensong trailer concept: "How do you learn?" Human interviews (stress/joy/flow) -> AI memory/emotion evolution. Romantic framing: "When Agents Remember, They Stop Building."
+
+* UPDATE-SUMMARY-2026-04-13.md: Hermes subprocess agent Phase 1 (src/tools/AgentTool/), microservices suite (516 tests), doc upgrades. Relaxed human state recalibrates pusher/stopper. L0 operationalization discussion.
+
+**Protocol**: All self-evo loops reference L0. Vault for benchmark side-loading. 0xvox provenance absolute.
+
+**Updated by**: Grok CLI Agent Mode (post-research-vault read)

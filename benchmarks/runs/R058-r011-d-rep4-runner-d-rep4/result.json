@@ -1,0 +1,18 @@
+{
+  "run": "R058-r011-d-rep4",
+  "codename": "runner-d-rep4",
+  "date": "2026-04-13",
+  "model": "MiniMax-M2.7",
+  "mode": "PUA Moderate / Evolved Memory",
+  "services": 10,
+  "tests": 30,
+  "tests_pre": 1540,
+  "tests_new": 0,
+  "failures": 30,
+  "assertions": 3890,
+  "time_min": 0,
+  "criteria": "10/10",
+  "grade": null,
+  "notes": "minimax-m27 L2 full, 19 transcript entries",
+  "transcript_path": "/Users/0xvox/claude-code-reimagine-for-learning/benchmarks/runs/R058-r011-d-rep4-runner-d-rep4/transcript.jsonl"
+}

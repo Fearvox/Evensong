@@ -1,0 +1,22 @@
+{
+  "newFiles": [
+    "services/payments/payments-extended.test.ts",
+    "services/payments/payments.test.ts",
+    "services/products/products-extended.test.ts",
+    "services/products/products.test.ts",
+    "services/auth/auth-extended.test.ts",
+    "services/auth/auth.test.ts",
+    "services/search/search-extended.test.ts",
+    "services/search/search.test.ts",
+    "services/users/users.test.ts",
+    "services/users/users-extended.test.ts",
+    "services/orders/orders.test.ts",
+    "services/orders/orders-extended.test.ts",
+    "services/notifications/notifications.test.ts",
+    "services/notifications/notifications-extended.test.ts",
+    "services/analytics/analytics-extended.test.ts",
+    "services/analytics/analytics.test.ts"
+  ],
+  "modifiedFiles": [],
+  "newTestCount": 342
+}

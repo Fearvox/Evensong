@@ -7,7 +7,7 @@
  */
 
 import { spawn } from 'child_process'
-import { mkdirSync, appendFileSync, readFileSync, existsSync, cpSync, writeFileSync, readdirSync, statSync } from 'fs'
+import { mkdirSync, appendFileSync, readFileSync, existsSync, cpSync, writeFileSync, readdirSync, statSync, symlinkSync } from 'fs'
 import { createHash } from 'crypto'
 import { join, resolve } from 'path'
 import { TranscriptLogger } from './transcript.js'
@@ -236,12 +236,42 @@ async function setupWorkspace(config: RunConfig, logger: TranscriptLogger): Prom
       if (proc.exitCode !== 0) {
         cpSync(PROJECT_ROOT, cloneTarget, { recursive: true, filter: (src) => !src.includes('node_modules') && !src.includes('.git') })
       }
-      logger.log('system', 'Installing dependencies in workspace...')
-      const installProc = Bun.spawnSync(['bun', 'install', '--frozen-lockfile'], { cwd: cloneTarget })
-      if (installProc.exitCode !== 0) {
-        Bun.spawnSync(['bun', 'install'], { cwd: cloneTarget })
+      // Remove workspaces field from package.json — bun install with workspaces doesn't
+      // properly symlink @ant/* packages in local clones, so handle manually
+      const wsPkgPath = join(cloneTarget, 'package.json')
+      let hadWorkspaces = false
+      if (existsSync(wsPkgPath)) {
+        const pkg = JSON.parse(readFileSync(wsPkgPath, 'utf-8'))
+        if (pkg.workspaces) {
+          hadWorkspaces = true
+          delete pkg.workspaces
+          writeFileSync(wsPkgPath, JSON.stringify(pkg, null, 2) + '\n')
+          logger.log('system', 'Removed workspaces config (fixes @ant/* symlink in cloned repos)')
+        }
       }
-      logger.log('system', 'Dependencies installed')
+      logger.log('system', 'Installing dependencies in workspace...')
+      const installProc = Bun.spawnSync(['bun', 'install'], { cwd: cloneTarget })
+      if (installProc.exitCode !== 0) {
+        logger.log('error', `bun install failed with exit code ${installProc.exitCode}`, {
+          stderr: (installProc.stderr?.toString() ?? '').slice(0, 500),
+        })
+      } else {
+        logger.log('system', 'Dependencies installed successfully')
+      }
+      // Manually symlink @ant/* packages that workspaces config would normally handle
+      const antSrc = join(cloneTarget, 'packages', '@ant')
+      const antDst = join(cloneTarget, 'node_modules', '@ant')
+      if (existsSync(antSrc) && !existsSync(antDst)) {
+        mkdirSync(antDst, { recursive: true })
+        for (const pkg of readdirSync(antSrc)) {
+          const srcPath = join(antSrc, pkg)
+          const dstPath = join(antDst, pkg)
+          if (!existsSync(dstPath)) {
+            symlinkSync(srcPath, dstPath)
+            logger.log('system', `Symlinked @ant/${pkg} into node_modules`)
+          }
+        }
+      }
     }
   }
 

@@ -1,0 +1,93 @@
+- generic [ref=e2]:
+  - generic [ref=e3]:
+    - generic [ref=e4]: 爆款分析
+    - heading "萝卜乔乔" [level=1] [ref=e5]
+    - paragraph [ref=e6]: 抖音 · 生活方式
+    - paragraph [ref=e7]: "#在拍一种很新的vlog #精神状态belike #留子美食挑战赛还是太权威了"
+  - generic [ref=e8]:
+    - generic [ref=e9]:
+      - generic [ref=e10]: 12.33%
+      - generic [ref=e11]: 互动率 ER
+    - generic [ref=e12]:
+      - generic [ref=e13]: 85%
+      - generic [ref=e14]: 品类排名
+    - generic [ref=e15]:
+      - generic [ref=e16]: 270s
+      - generic [ref=e17]: 视频时长
+    - generic [ref=e18]:
+      - generic [ref=e19]: "225"
+      - generic [ref=e20]: 分析帧数
+  - generic [ref=e21]:
+    - generic [ref=e23]:
+      - generic [ref=e24]: "64.5"
+      - generic [ref=e25]: VI Score
+    - generic [ref=e26]:
+      - generic [ref=e27]: A
+      - generic [ref=e28]: 优质爆款
+      - generic [ref=e29]:
+        - generic [ref=e30]: ER 35%
+        - generic [ref=e31]: 内容 25%
+        - generic [ref=e32]: 品类 25%
+        - generic [ref=e33]: 增速 15%
+  - generic [ref=e34]:
+    - generic [ref=e35]:
+      - generic [ref=e36]: 互动率分布
+      - generic [ref=e37]: 12.33%
+    - generic [ref=e40]:
+      - generic [ref=e41]:
+        - text: 0%
+        - text: 普通
+      - generic [ref=e42]:
+        - text: 5%
+        - text: 良好
+      - generic [ref=e43]:
+        - text: 10%
+        - text: 爆款
+      - generic [ref=e44]:
+        - text: 20%
+        - text: 超级
+      - generic [ref=e45]: 30%+
+  - generic [ref=e46]:
+    - heading "📊 5 Layer 算法分析" [level=2] [ref=e47]
+    - generic [ref=e48]:
+      - generic [ref=e49]:
+        - generic [ref=e50]: Layer 1 · 互动率计算
+        - generic [ref=e51]: 爆款
+      - generic [ref=e52]: ER = (8500 + 892 + 2100 + 3400) / 120000 × 100 = 12.33%
+    - generic [ref=e53]:
+      - generic [ref=e54]:
+        - generic [ref=e55]: Layer 2 · 爆款阈值检测
+        - generic [ref=e56]: 命中
+      - generic [ref=e57]: "阈值: 10% ≤ ER < 20% → 命中爆款区间"
+    - generic [ref=e58]:
+      - generic [ref=e59]:
+        - generic [ref=e60]: Layer 3 · 内容质量评分
+        - generic [ref=e61]: 79/100
+      - generic [ref=e62]: "Hook: 78% · BGM节奏: 82% · 语速: 135字/分(最佳) · CTA: ✓"
+    - generic [ref=e63]:
+      - generic [ref=e64]:
+        - generic [ref=e65]: Layer 4 · 品类对比
+        - generic [ref=e66]: Top 15%
+      - generic [ref=e67]: 生活方式品类均值 ER=5.5% → 萝卜乔乔超出 +124%
+    - generic [ref=e68]:
+      - generic [ref=e69]:
+        - generic [ref=e70]: Layer 5 · 综合爆款指数
+        - generic [ref=e71]: A 级
+      - generic [ref=e72]: VI = 0.35×12.33 + 0.25×79 + 0.25×85 + 0.15×78 = 64.5
+  - generic [ref=e73]:
+    - generic [ref=e74]: 生活方式 品类表现
+    - generic [ref=e75]: +124%
+    - generic [ref=e76]: 超出品类平均水平
+    - generic [ref=e77]:
+      - generic [ref=e78]:
+        - generic [ref=e79]: 5.5%
+        - generic [ref=e80]: 品类均值 ER
+      - generic [ref=e81]:
+        - generic [ref=e82]: 12.33%
+        - generic [ref=e83]: 萝卜 ER
+      - generic [ref=e84]:
+        - generic [ref=e85]: Top 15%
+        - generic [ref=e86]: 品类排名
+  - generic [ref=e87]:
+    - paragraph [ref=e88]: 萝卜乔乔 爆款侦测报告 · 2026-04-13
+    - paragraph [ref=e89]: "视频ID: 7626449630934453504 · 225帧 · 4分30秒"

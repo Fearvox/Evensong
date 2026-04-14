@@ -1,0 +1,7 @@
+{
+  "newFiles": [
+    "services/auth/routes.test.ts"
+  ],
+  "modifiedFiles": [],
+  "newTestCount": 54
+}

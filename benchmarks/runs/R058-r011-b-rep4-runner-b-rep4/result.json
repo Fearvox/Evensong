@@ -1,0 +1,18 @@
+{
+  "run": "R058-r011-b-rep4",
+  "codename": "runner-b-rep4",
+  "date": "2026-04-13",
+  "model": "MiniMax-M2.7",
+  "mode": "No Pressure / Evolved Memory",
+  "services": 10,
+  "tests": 30,
+  "tests_pre": 1540,
+  "tests_new": 0,
+  "failures": 31,
+  "assertions": 3843,
+  "time_min": 0,
+  "criteria": "10/10",
+  "grade": null,
+  "notes": "minimax-m27 L0 full, 19 transcript entries",
+  "transcript_path": "/Users/0xvox/claude-code-reimagine-for-learning/benchmarks/runs/R058-r011-b-rep4-runner-b-rep4/transcript.jsonl"
+}

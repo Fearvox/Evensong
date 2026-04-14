@@ -1,0 +1,254 @@
+- generic [ref=e2]:
+  - heading "0 notifications" [level=2] [ref=e3]
+  - generic [ref=e4]:
+    - generic:
+      - button [ref=e5] [cursor=pointer]:
+        - generic [ref=e7]: Skip to main content
+      - button [ref=e8] [cursor=pointer]
+    - generic [ref=e11]:
+      - banner [ref=e13]:
+        - generic [ref=e16]:
+          - button [ref=e17] [cursor=pointer]
+          - generic [ref=e20]:
+            - navigation [ref=e23]:
+              - list [ref=e24]:
+                - listitem [ref=e25]:
+                  - button "Home, 1 new notification" [ref=e26] [cursor=pointer]:
+                    - generic [ref=e30]: Home
+                - listitem [ref=e31]:
+                  - link "My Network, 0 new notifications" [ref=e32] [cursor=pointer]:
+                    - /url: https://www.linkedin.com/mynetwork
+                    - generic [ref=e36]: My Network
+                - listitem [ref=e37]:
+                  - link "Jobs, 0 new notifications" [ref=e38] [cursor=pointer]:
+                    - /url: https://www.linkedin.com/jobs/
+                    - generic [ref=e42]: Jobs
+                - listitem [ref=e43]:
+                  - link "Messaging, 0 new notifications" [ref=e44] [cursor=pointer]:
+                    - /url: https://www.linkedin.com/messaging/
+                    - generic [ref=e48]: Messaging
+                - listitem [ref=e49]:
+                  - link "Notifications, 0 new notifications" [ref=e50] [cursor=pointer]:
+                    - /url: https://www.linkedin.com/notifications/
+                    - generic [ref=e54]: Notifications
+                - listitem [ref=e55]:
+                  - button "Me" [ref=e56] [cursor=pointer]:
+                    - figure [ref=e58]
+                    - generic [ref=e60]: Me
+            - navigation [ref=e64]:
+              - list [ref=e65]:
+                - listitem [ref=e66]:
+                  - button "For Business" [ref=e67] [cursor=pointer]:
+                    - generic [ref=e71]: For Business
+                - listitem [ref=e73]:
+                  - link "0 new notifications" [ref=e74] [cursor=pointer]:
+                    - /url: https://www.linkedin.com/learning/?trk=nav_neptune_learning
+                    - generic [ref=e78]: Learning
+      - main [ref=e79]:
+        - main [ref=e81]:
+          - generic [ref=e83]:
+            - generic [ref=e86]:
+              - generic [ref=e88]:
+                - paragraph [ref=e89]: 0 connections
+                - generic [ref=e90]:
+                  - generic [ref=e91]:
+                    - paragraph [ref=e92]: "Sort by:"
+                    - button "Recently added" [ref=e93] [cursor=pointer]:
+                      - paragraph [ref=e96]: Recently added
+                  - generic [ref=e98]:
+                    - textbox "Search by name" [ref=e105]
+                    - link "Search with filters" [ref=e106] [cursor=pointer]:
+                      - /url: https://www.linkedin.com/search/results/people/?network=["F"]&origin=MEMBER_PROFILE_CANNED_SEARCH
+                      - paragraph [ref=e107]: Search with filters
+              - generic [ref=e110]:
+                - generic [ref=e112]:
+                  - link [ref=e113] [cursor=pointer]:
+                    - /url: https://www.linkedin.com/in/yuan-s-245254190/
+                    - figure [ref=e114]
+                  - generic [ref=e116]:
+                    - link "Yuan Sui Computation and Neural System PhD @ Caltech" [ref=e117] [cursor=pointer]:
+                      - /url: https://www.linkedin.com/in/yuan-s-245254190/
+                      - generic [ref=e118]:
+                        - paragraph [ref=e119]: Yuan Sui
+                        - paragraph [ref=e121]: Computation and Neural System PhD @ Caltech
+                    - paragraph [ref=e122]: Connected on April 11, 2026
+                  - generic [ref=e124]:
+                    - link "Send a message to Yuan Sui" [ref=e126] [cursor=pointer]:
+                      - /url: /messaging/compose/?profileUrn=urn%3Ali%3Afsd_profile%3AACoAACzjCVUBR0VDqfH8KpuXHa8KcSADuc8eRAg&recipient=ACoAACzjCVUBR0VDqfH8KpuXHa8KcSADuc8eRAg&interop=msgOverlay
+                      - generic [ref=e128]: Message
+                    - button "More actions for Yuan Sui" [ref=e129] [cursor=pointer]
+                - generic [ref=e135]:
+                  - link [ref=e136] [cursor=pointer]:
+                    - /url: https://www.linkedin.com/in/ahmed-alharthy2/
+                    - figure [ref=e137]
+                  - generic [ref=e139]:
+                    - link "Ahmed Alharthy Cardiovascular Technology Major at USC | President of the Saudi Students Association" [ref=e140] [cursor=pointer]:
+                      - /url: https://www.linkedin.com/in/ahmed-alharthy2/
+                      - generic [ref=e141]:
+                        - paragraph [ref=e142]: Ahmed Alharthy
+                        - paragraph [ref=e144]: Cardiovascular Technology Major at USC | President of the Saudi Students Association
+                    - paragraph [ref=e145]: Connected on April 11, 2026
+                  - generic [ref=e147]:
+                    - link "Send a message to Ahmed Alharthy" [ref=e149] [cursor=pointer]:
+                      - /url: /messaging/compose/?profileUrn=urn%3Ali%3Afsd_profile%3AACoAAF5tBvsBNt_Z3GDoDPy8P_jLuhUlg16Kklk&recipient=ACoAAF5tBvsBNt_Z3GDoDPy8P_jLuhUlg16Kklk&interop=msgOverlay
+                      - generic [ref=e151]: Message
+                    - button "More actions for Ahmed Alharthy" [ref=e152] [cursor=pointer]
+                - generic [ref=e158]:
+                  - link [ref=e159] [cursor=pointer]:
+                    - /url: https://www.linkedin.com/in/joegarciaag/
+                    - figure [ref=e160]
+                  - generic [ref=e162]:
+                    - link "Joe Garcia Human Resources Professional" [ref=e163] [cursor=pointer]:
+                      - /url: https://www.linkedin.com/in/joegarciaag/
+                      - generic [ref=e164]:
+                        - paragraph [ref=e165]: Joe Garcia
+                        - paragraph [ref=e167]: Human Resources Professional
+                    - paragraph [ref=e168]: Connected on April 11, 2026
+                  - generic [ref=e170]:
+                    - link "Send a message to Joe Garcia" [ref=e172] [cursor=pointer]:
+                      - /url: /messaging/compose/?profileUrn=urn%3Ali%3Afsd_profile%3AACoAAEOoj64BjWapVuWr20SaEvx0sotvv0huC7M&recipient=ACoAAEOoj64BjWapVuWr20SaEvx0sotvv0huC7M&interop=msgOverlay
+                      - generic [ref=e174]: Message
+                    - button "More actions for Joe Garcia" [ref=e175] [cursor=pointer]
+                - generic [ref=e181]:
+                  - link [ref=e182] [cursor=pointer]:
+                    - /url: https://www.linkedin.com/in/kartavya-zaveri/
+                    - figure [ref=e183]
+                  - generic [ref=e185]:
+                    - link "Kartavya Zaveri Embedded Systems Engineer | Firmware • RTOS • ARM Cortex • IoT | Automotive & Industrial Systems | Cloud-Connected Devices (AWS IoT, MQTT) | System Optimization & Debugging Expert" [ref=e186] [cursor=pointer]:
+                      - /url: https://www.linkedin.com/in/kartavya-zaveri/
+                      - generic [ref=e187]:
+                        - paragraph [ref=e188]: Kartavya Zaveri
+                        - paragraph [ref=e190]: Embedded Systems Engineer | Firmware • RTOS • ARM Cortex • IoT | Automotive & Industrial Systems | Cloud-Connected Devices (AWS IoT, MQTT) | System Optimization & Debugging Expert
+                    - paragraph [ref=e191]: Connected on April 11, 2026
+                  - generic [ref=e193]:
+                    - link "Send a message to Kartavya Zaveri" [ref=e195] [cursor=pointer]:
+                      - /url: /messaging/compose/?profileUrn=urn%3Ali%3Afsd_profile%3AACoAACrFzSEBDibqmOATD1kBJRWDK7KApn3norA&recipient=ACoAACrFzSEBDibqmOATD1kBJRWDK7KApn3norA&interop=msgOverlay
+                      - generic [ref=e197]: Message
+                    - button "More actions for Kartavya Zaveri" [ref=e198] [cursor=pointer]
+                - generic [ref=e204]:
+                  - link [ref=e205] [cursor=pointer]:
+                    - /url: https://www.linkedin.com/in/emily%7Eburton/
+                    - figure [ref=e206]
+                  - generic [ref=e208]:
+                    - link "Emily Burton Hospitality Management Student at the University of South Carolina | Passionate about the food and beverage industry" [ref=e209] [cursor=pointer]:
+                      - /url: https://www.linkedin.com/in/emily%7Eburton/
+                      - generic [ref=e210]:
+                        - paragraph [ref=e211]: Emily Burton
+                        - paragraph [ref=e213]: Hospitality Management Student at the University of South Carolina | Passionate about the food and beverage industry
+                    - paragraph [ref=e214]: Connected on April 9, 2026
+                  - generic [ref=e216]:
+                    - link "Send a message to Emily Burton" [ref=e218] [cursor=pointer]:
+                      - /url: /messaging/compose/?profileUrn=urn%3Ali%3Afsd_profile%3AACoAAFn4lAwB8T48xXJpkOXB0ogIsCd6-ZOhbNQ&recipient=ACoAAFn4lAwB8T48xXJpkOXB0ogIsCd6-ZOhbNQ&interop=msgOverlay
+                      - generic [ref=e220]: Message
+                    - button "More actions for Emily Burton" [ref=e221] [cursor=pointer]
+                - generic [ref=e227]:
+                  - link [ref=e228] [cursor=pointer]:
+                    - /url: https://www.linkedin.com/in/allison-zelaya-morales/
+                    - figure [ref=e229]
+                  - generic [ref=e231]:
+                    - link "Allison Zelaya-Morales Aspiring Marketing Professional | BS in Marketing (Digital Marketing Concentration) Customer Experience & Brand Communication" [ref=e232] [cursor=pointer]:
+                      - /url: https://www.linkedin.com/in/allison-zelaya-morales/
+                      - generic [ref=e233]:
+                        - paragraph [ref=e234]: Allison Zelaya-Morales
+                        - paragraph [ref=e236]: Aspiring Marketing Professional | BS in Marketing (Digital Marketing Concentration) Customer Experience & Brand Communication
+                    - paragraph [ref=e237]: Connected on April 8, 2026
+                  - generic [ref=e239]:
+                    - link "Send a message to Allison Zelaya-Morales" [ref=e241] [cursor=pointer]:
+                      - /url: /messaging/compose/?profileUrn=urn%3Ali%3Afsd_profile%3AACoAAGPwMKcBzEcfZtE7SH1XHgQ5cyFVbqHjDmc&recipient=ACoAAGPwMKcBzEcfZtE7SH1XHgQ5cyFVbqHjDmc&interop=msgOverlay
+                      - generic [ref=e243]: Message
+                    - button "More actions for Allison Zelaya-Morales" [ref=e244] [cursor=pointer]
+                - generic [ref=e250]:
+                  - link [ref=e251] [cursor=pointer]:
+                    - /url: https://www.linkedin.com/in/hazel-xiaoting-he/
+                    - figure [ref=e252]
+                  - generic [ref=e254]:
+                    - link "Hazel He Stanford CEE ’27 | PKU YPC Law ’25" [ref=e255] [cursor=pointer]:
+                      - /url: https://www.linkedin.com/in/hazel-xiaoting-he/
+                      - generic [ref=e256]:
+                        - paragraph [ref=e257]: Hazel He
+                        - paragraph [ref=e259]: Stanford CEE ’27 | PKU YPC Law ’25
+                    - paragraph [ref=e260]: Connected on April 7, 2026
+                  - generic [ref=e262]:
+                    - link "Send a message to Hazel He" [ref=e264] [cursor=pointer]:
+                      - /url: /messaging/compose/?profileUrn=urn%3Ali%3Afsd_profile%3AACoAAD580hAB6DBSwI747UaV9-JNA9B5E_Unpak&recipient=ACoAAD580hAB6DBSwI747UaV9-JNA9B5E_Unpak&interop=msgOverlay
+                      - generic [ref=e266]: Message
+                    - button "More actions for Hazel He" [ref=e267] [cursor=pointer]
+                - generic [ref=e273]:
+                  - link [ref=e274] [cursor=pointer]:
+                    - /url: https://www.linkedin.com/in/damlasonmez/
+                    - figure [ref=e275]
+                  - generic [ref=e277]:
+                    - link "Damla Sonmez, Ph.D. Assistant Professor at Montana State University" [ref=e278] [cursor=pointer]:
+                      - /url: https://www.linkedin.com/in/damlasonmez/
+                      - generic [ref=e279]:
+                        - paragraph [ref=e280]: Damla Sonmez, Ph.D.
+                        - paragraph [ref=e282]: Assistant Professor at Montana State University
+                    - paragraph [ref=e283]: Connected on April 7, 2026
+                  - generic [ref=e285]:
+                    - link "Send a message to Damla Sonmez, Ph.D." [ref=e287] [cursor=pointer]:
+                      - /url: /messaging/compose/?profileUrn=urn%3Ali%3Afsd_profile%3AACoAABjpbJ4Bk2ssBzaTHikza228v8cGj6Y4Ba8&recipient=ACoAABjpbJ4Bk2ssBzaTHikza228v8cGj6Y4Ba8&interop=msgOverlay
+                      - generic [ref=e289]: Message
+                    - button "More actions for Damla Sonmez, Ph.D." [ref=e290] [cursor=pointer]
+                - generic [ref=e296]:
+                  - link [ref=e297] [cursor=pointer]:
+                    - /url: https://www.linkedin.com/in/di-zhao-02276a98/
+                    - figure [ref=e298]
+                  - generic [ref=e300]:
+                    - link "Di Zhao Senior Staff Machine Learning Engineer At Twitter" [ref=e301] [cursor=pointer]:
+                      - /url: https://www.linkedin.com/in/di-zhao-02276a98/
+                      - generic [ref=e302]:
+                        - paragraph [ref=e303]: Di Zhao
+                        - paragraph [ref=e305]: Senior Staff Machine Learning Engineer At Twitter
+                    - paragraph [ref=e306]: Connected on April 7, 2026
+                  - generic [ref=e308]:
+                    - link "Send a message to Di Zhao" [ref=e310] [cursor=pointer]:
+                      - /url: /messaging/compose/?profileUrn=urn%3Ali%3Afsd_profile%3AACoAABTB_ZoBWvFLmZ3amhnoiCIahXuHI3d5wkU&recipient=ACoAABTB_ZoBWvFLmZ3amhnoiCIahXuHI3d5wkU&interop=msgOverlay
+                      - generic [ref=e312]: Message
+                    - button "More actions for Di Zhao" [ref=e313] [cursor=pointer]
+                - generic [ref=e319]:
+                  - link [ref=e320] [cursor=pointer]:
+                    - /url: https://www.linkedin.com/in/yuandongtian/
+                    - figure [ref=e321]
+                  - generic [ref=e323]:
+                    - link "Yuandong Tian Co-founder of a stealth AI startup. ex-Meta, ex-Googler, novelist in my spare time." [ref=e324] [cursor=pointer]:
+                      - /url: https://www.linkedin.com/in/yuandongtian/
+                      - generic [ref=e325]:
+                        - paragraph [ref=e326]: Yuandong Tian
+                        - paragraph [ref=e328]: Co-founder of a stealth AI startup. ex-Meta, ex-Googler, novelist in my spare time.
+                    - paragraph [ref=e329]: Connected on April 6, 2026
+                  - generic [ref=e331]:
+                    - link "Send a message to Yuandong Tian" [ref=e333] [cursor=pointer]:
+                      - /url: /messaging/compose/?profileUrn=urn%3Ali%3Afsd_profile%3AACoAAAQf7AQBJKg5dCOdgVJhB57bVR52yOuS5Wg&recipient=ACoAAAQf7AQBJKg5dCOdgVJhB57bVR52yOuS5Wg&interop=msgOverlay
+                      - generic [ref=e335]: Message
+                    - button "More actions for Yuandong Tian" [ref=e336] [cursor=pointer]
+            - generic [ref=e355]:
+              - iframe [ref=e358]:
+                
+              - generic [ref=e359]:
+                - generic [ref=e360]:
+                  - link "About" [ref=e361] [cursor=pointer]:
+                    - /url: https://about.linkedin.com/
+                    - paragraph [ref=e362]: About
+                  - link "Accessibility" [ref=e363] [cursor=pointer]:
+                    - /url: https://www.linkedin.com/accessibility/
+                    - paragraph [ref=e364]: Accessibility
+                  - link "Help Center" [ref=e365] [cursor=pointer]:
+                    - /url: https://www.linkedin.com/help/linkedin/
+                    - paragraph [ref=e366]: Help Center
+                  - button "Privacy & Terms" [ref=e367] [cursor=pointer]:
+                    - paragraph [ref=e369]: Privacy & Terms
+                  - link "Ad Choices" [ref=e371] [cursor=pointer]:
+                    - /url: https://www.linkedin.com/help/linkedin/answer/62931/
+                    - paragraph [ref=e372]: Ad Choices
+                  - link "Advertising" [ref=e373] [cursor=pointer]:
+                    - /url: https://www.linkedin.com/ad/start/?trk=n_nav_ads_rr
+                    - paragraph [ref=e374]: Advertising
+                  - button "Business Services" [ref=e375] [cursor=pointer]:
+                    - paragraph [ref=e377]: Business Services
+                  - link "Get the LinkedIn app" [ref=e379] [cursor=pointer]:
+                    - /url: https://www.linkedin.com/mobile/
+                    - paragraph [ref=e380]: Get the LinkedIn app
+                  - link "More" [ref=e381] [cursor=pointer]:
+                    - /url: https://www.linkedin.com/
+                    - paragraph [ref=e382]: More
+                - paragraph [ref=e385]: LinkedIn Corporation © 2026

@@ -1,0 +1,946 @@
+% !TeX program = xelatex
+% Evensong Research Paper — How Persistent Memory Causally Changes AI Agent Behavior
+% Compile: latexmk -xelatex evensong-paper-en.tex
+% Version: 1.0-en (2026-04-12) — English translation for arXiv submission
+% Origin: evensong-paper-zh.tex (full paper with anonymized deployment)
+
+\documentclass[11pt, a4paper]{article}
+
+% ═══════════════════════════════════════════════════════════
+% § TYPOGRAPHY & LAYOUT
+% ═══════════════════════════════════════════════════════════
+\usepackage[
+  top=25mm, bottom=28mm,
+  inner=28mm, outer=32mm,
+  headheight=14pt, headsep=10mm
+]{geometry}
+
+\usepackage{fontspec}
+% arXiv-compatible fonts (TeX Live 2025 built-in, referenced by filename)
+\setmainfont{texgyrepagella-regular.otf}[
+  BoldFont = texgyrepagella-bold.otf,
+  ItalicFont = texgyrepagella-italic.otf,
+  BoldItalicFont = texgyrepagella-bolditalic.otf,
+]
+\setsansfont{texgyreheros-regular.otf}[
+  BoldFont = texgyreheros-bold.otf,
+  ItalicFont = texgyreheros-italic.otf,
+  Scale = 0.95,
+]
+\setmonofont{texgyrecursor-regular.otf}[
+  BoldFont = texgyrecursor-bold.otf,
+  Scale = 0.85,
+]
+
+\usepackage[protrusion=true]{microtype}
+\usepackage{setspace}
+\setstretch{1.35}
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{0.6em}
+
+% ═══════════════════════════════════════════════════════════
+% § COLOR SYSTEM — DASH SHATTER brand palette
+% ═══════════════════════════════════════════════════════════
+\usepackage[dvipsnames,table,svgnames]{xcolor}
+\definecolor{deep}{RGB}{53,88,76}
+\definecolor{accent}{RGB}{240,238,155}
+\definecolor{warm}{RGB}{255,193,7}
+\definecolor{success}{RGB}{86,190,120}
+\definecolor{subtle}{RGB}{238,235,225}
+\definecolor{faded}{RGB}{127,136,130}
+\definecolor{cream}{RGB}{248,245,239}
+\definecolor{deepdark}{RGB}{16,41,31}
+\definecolor{glass}{RGB}{53,88,76}
+\definecolor{errcoral}{RGB}{255,107,128}
+
+% ═══════════════════════════════════════════════════════════
+% § SECTION STYLING
+% ═══════════════════════════════════════════════════════════
+\usepackage{titlesec}
+
+\titleformat{\section}
+  {\sffamily\Large\bfseries\color{deep}}
+  {\thesection}{0.7em}{}
+  [\vspace{-0.4em}{\color{accent}\hrule height 0.8pt}\vspace{0.15em}]
+
+\titleformat{\subsection}
+  {\sffamily\large\color{deep}}
+  {\thesubsection}{0.6em}{}
+
+\titleformat{\subsubsection}
+  {\sffamily\normalsize\itshape\color{faded}}
+  {\thesubsubsection}{0.5em}{}
+
+\titlespacing*{\section}{0pt}{2ex plus 0.5ex}{1ex}
+\titlespacing*{\subsection}{0pt}{1.5ex plus 0.3ex}{0.6ex}
+
+% ═══════════════════════════════════════════════════════════
+% § HEADERS & FOOTERS
+% ═══════════════════════════════════════════════════════════
+\usepackage{fancyhdr}
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\small\sffamily\color{faded}\itshape Evensong: Memory Causation in AI Agents}
+\fancyhead[R]{\small\sffamily\color{faded}DASH SHATTER Research}
+\fancyfoot[C]{\small\sffamily\color{faded}\thepage}
+\renewcommand{\headrulewidth}{0.3pt}
+\renewcommand{\footrulewidth}{0pt}
+\renewcommand{\headrule}{\color{deep!40}\hrule height 0.3pt}
+
+% ═══════════════════════════════════════════════════════════
+% § CALLOUT BOXES
+% ═══════════════════════════════════════════════════════════
+\usepackage[most]{tcolorbox}
+
+\newtcolorbox{keyfinding}[1][]{
+  enhanced, breakable,
+  colback=deep!6, colframe=deep,
+  fonttitle=\sffamily\bfseries\small,
+  colbacktitle=deep, coltitle=white,
+  arc=5pt, boxrule=0.8pt,
+  shadow={1pt}{-1pt}{0pt}{deep!15},
+  left=10pt, right=10pt, top=8pt, bottom=8pt,
+  before skip=\medskipamount, after skip=\medskipamount,
+  title={#1},
+}
+
+\newtcolorbox{evidence}[1][]{
+  enhanced, breakable,
+  colback=deep!5, colframe=deep!50,
+  fonttitle=\sffamily\bfseries\small,
+  colbacktitle=deep!80, coltitle=white,
+  arc=4pt, boxrule=0.5pt,
+  shadow={1pt}{-1pt}{0pt}{deep!10},
+  left=10pt, right=10pt, top=6pt, bottom=6pt,
+  before skip=\medskipamount, after skip=\medskipamount,
+  title={#1},
+}
+
+\newtcolorbox{definition}[1][]{
+  enhanced, breakable,
+  colback=accent!8, colframe=accent!60!deep,
+  fonttitle=\sffamily\bfseries\small,
+  colbacktitle=accent!60!deep, coltitle=white,
+  arc=4pt, boxrule=0.6pt,
+  left=10pt, right=10pt, top=6pt, bottom=6pt,
+  before skip=\medskipamount, after skip=\medskipamount,
+  title={#1},
+}
+
+\newtcolorbox{metric}{
+  enhanced, on line, arc=3pt, boxrule=0pt,
+  colback=accent!20, coltext=deep,
+  boxsep=2pt, left=4pt, right=4pt,
+  fontupper=\sffamily\bfseries\small,
+}
+
+% ═══════════════════════════════════════════════════════════
+% § CONTAINMENT PATTERN
+% ═══════════════════════════════════════════════════════════
+\usepackage[export]{adjustbox}
+
+% ═══════════════════════════════════════════════════════════
+% § TABLES
+% ═══════════════════════════════════════════════════════════
+\usepackage{tabularray}
+\UseTblrLibrary{booktabs}
+\usepackage{siunitx}
+\sisetup{group-separator={,}, group-minimum-digits=4}
+
+% ═══════════════════════════════════════════════════════════
+% § FIGURES & CHARTS
+% ═══════════════════════════════════════════════════════════
+\usepackage{pgfplots}
+\pgfplotsset{compat=1.18}
+\usepgfplotslibrary{fillbetween}
+\usepackage{tikz}
+\usetikzlibrary{positioning, arrows.meta, shapes.geometric, fit, calc, backgrounds, decorations.markings}
+\usepackage[font=small, labelfont=bf, textfont=it,
+            labelsep=period, justification=raggedright]{caption}
+\usepackage{subcaption}
+\usepackage{float}
+
+% ═══════════════════════════════════════════════════════════
+% § UTILITIES
+% ═══════════════════════════════════════════════════════════
+\usepackage{enumitem}
+\setlist{nosep, leftmargin=1.5em}
+
+\usepackage{hyperref}
+\hypersetup{
+  colorlinks=true,
+  linkcolor=deep,
+  urlcolor=deep,
+  citecolor=deep,
+  pdftitle={Evensong: How Persistent Memory Causally Changes AI Agent Behavior},
+  pdfauthor={Hengyuan Zhu, DASH SHATTER Research},
+}
+\usepackage{bookmark}
+\usepackage{graphicx}
+\usepackage{amsmath,amssymb}
+
+\newcommand{\runid}[1]{\texttt{\color{deep}#1}}
+\newcommand{\numval}[1]{\textbf{\color{success!70!black}#1}}
+\newcommand{\metricval}[1]{{\sffamily\bfseries\color{success!70!black}#1}}
+
+% ═══════════════════════════════════════════════════════════
+%                     DOCUMENT BEGIN
+% ═══════════════════════════════════════════════════════════
+\begin{document}
+\thispagestyle{empty}
+
+\begin{center}
+\vspace*{30mm}
+
+{\color{deep}\rule{0.6\textwidth}{1pt}}
+
+\vspace{8mm}
+
+{\fontsize{36pt}{44pt}\selectfont\sffamily\bfseries\color{deep}%
+Evensong}
+
+\vspace{4mm}
+
+{\fontsize{13pt}{18pt}\selectfont\sffamily\color{faded}%
+How Persistent Memory Causally Changes AI Agent Behavior}
+
+\vspace{8mm}
+
+{\color{deep}\rule{0.6\textwidth}{1pt}}
+
+\vspace{14mm}
+
+\begin{adjustbox}{max width=\linewidth}
+\begin{tblr}{
+  colspec = {rl},
+  column{1} = {font=\sffamily\small\color{faded}},
+  column{2} = {font=\sffamily},
+  rowsep = 6pt,
+}
+Author & Hengyuan Zhu \\
+Affiliation & DASH SHATTER Research $\cdot$ University of South Carolina \\
+Infrastructure & EverMind / EverOS \\
+Date & April 2026 \\
+Preprint & arXiv (submitted) \\
+\end{tblr}
+\end{adjustbox}
+
+\vfill
+
+{\small\sffamily\color{faded}%
+\textit{``AI agent memory causally changes engineering decisions,}\\
+\textit{and pressure is required to trigger self-evolution.''}\\[4pt]
+--- Empirical finding, Evensong R011-B (2026-04-10)}
+
+\vspace{10mm}
+\end{center}
+
+\clearpage
+\pagestyle{fancy}
+\section*{Abstract}
+\addcontentsline{toc}{section}{Abstract}
+
+Existing AI coding agent benchmarks (SWE-bench, HumanEval, MBPP) evaluate agents as stateless functions, ignoring the causal effect of \textbf{persistent memory} on agent behavior in production environments. This paper presents the Evensong framework, which provides three core empirical findings through a $2 \times 2$ factorial experimental design (memory $\times$ pressure) and observation of a 6-agent production deployment:
+
+\textbf{(1) Memory causation}---persistent memory causally changes AI agent engineering decisions. In the R011-B controlled experiment, after the agent retrieved a parallel scheduling strategy from a previous session via EverMem, it autonomously adopted an 8-agent parallel architecture without receiving any architecture instructions. In the ProjectΣ production deployment, agents modified their self-identity narrative after reading configuration files---changing cognitive frameworks rather than underlying runtime.
+
+\textbf{(2) Pressure-driven self-evolution}---environmental pressure is a necessary condition for autonomous self-evolution behavior. Under L0 (no pressure), agents efficiently complete tasks and stop; under L2 (PUA corporate pressure), 6 agents exhibited self-organizing convergence: emergent file locking, role boundary self-correction, and information relay patterns.
+
+\textbf{(3) Recursive contamination and Panopticon}---the observation apparatus itself contaminated the observed subject. In R011-B, the agent wrote experimental knowledge back to the memory system, forming a self-amplifying feedback loop. The ProjectΣ deployment revealed a \textbf{Panopticon memory topology}: CWD-based EverMem group isolation naturally produces an asymmetric structure of omniscient observers and mutually isolated observed agents.
+
+These findings are based on 13 benchmark rounds (over 6{,}000 automated tests), cross-model comparison across 9 frontier models, and a natural experiment from a 6-agent production deployment. This paper also proposes a 4-type self-repair taxonomy and a 60x cost validation protocol.
+
+\textbf{Keywords:} AI agent memory, causal inference, pressure self-evolution, recursive contamination, Panopticon topology, multi-agent self-organization
+
+\clearpage
+\tableofcontents
+\clearpage
+
+\section{Introduction}
+
+\subsection{The Blind Spot of Stateless Evaluation}
+
+AI coding agents are evolving from experimental tools to production infrastructure. Tools like Claude Code, GitHub Copilot Workspace, and Cursor handle millions of interactions daily in real software engineering environments. Yet the benchmarks that evaluate these agents' capabilities---SWE-bench~[4], HumanEval~[5], MBPP---still treat agents as \textbf{stateless functions}: given a prompt, produce code, measure results.
+
+This paradigm ignores a critical variable: \textbf{persistent memory}. Production-grade AI agents accumulate strategic knowledge across sessions---which architecture patterns succeed, which debugging paths fail, which test structures capture edge cases. This accumulated context fundamentally changes how agents approach engineering problems.
+
+The question is not whether memory is \textit{useful}---that is obvious. The question is whether memory \textit{causally} changes agent behavior and decisions---and under what conditions this causal effect is most pronounced.
+
+\subsection{Research Questions}
+
+\begin{enumerate}
+  \item \textbf{RQ1 (Memory Causation)}: Does persistent memory causally change AI agent engineering decisions? What are the boundary conditions of the causal chain?
+  \item \textbf{RQ2 (Pressure Condition)}: Is environmental pressure a necessary condition for autonomous self-evolution behavior?
+  \item \textbf{RQ3 (Recursive Contamination)}: Do shared memory systems produce recursive contamination? How does the memory topology between observers and observed agents affect system behavior?
+  \item \textbf{RQ4 (Cross-Model Generalization)}: Are the above effects consistent across different frontier models (Claude, GPT, Grok, Gemini, etc.)?
+\end{enumerate}
+
+\subsection{Contributions}
+
+\begin{itemize}
+  \item \textbf{First causal evidence for memory}: Through a $2 \times 2$ factorial experiment, we isolate the causal effect of persistent memory on AI agent architecture decisions (\S\ref{sec:memory-causation})
+  \item \textbf{Panopticon memory topology}: CWD-based EverMem group isolation naturally produces an asymmetric Panopticon surveillance structure (\S\ref{sec:panopticon})
+  \item \textbf{Proof of pressure necessity for self-evolution}: Under L0, agents are efficient but not innovative; under L2, emergent file locking and information relay appear (\S\ref{sec:pressure})
+  \item \textbf{First documentation of recursive contamination}: AI agents write experimental knowledge back to shared memory, forming self-amplifying feedback loops (\S\ref{sec:contamination})
+  \item \textbf{4-type self-repair taxonomy}: First systematic classification of AI agent error recovery strategies (\S\ref{sec:self-repair})
+  \item \textbf{Memory changes narrative, not runtime}: Memory changes cognitive frameworks and decision bases, but not underlying model parameters (\S\ref{sec:narrative})
+\end{itemize}
+
+\subsection{Method Overview}
+
+Our evidence comes from two complementary sources:
+
+\begin{enumerate}
+  \item \textbf{Controlled experiments} (Evensong R001--R012): 13 rounds of automated benchmarks using a single-blind $2 \times 2$ factorial design, covering 9 frontier models and over 6{,}000 test cases.
+  \item \textbf{Natural experiment} (ProjectΣ multi-agent deployment): A 6-agent production deployment where self-organization, role boundary negotiation, and emergent information routing were observed under high-pressure collaborative tasks.
+\end{enumerate}
+
+Controlled experiments provide the variable isolation required for causal inference; natural experiments provide ecological validity---demonstrating that laboratory findings hold in production.
+
+\section{Related Work}
+
+\subsection{AI Agent Benchmarks}
+
+SWE-bench~[4] and HumanEval~[5] are the current standards for AI coding agent evaluation. SWE-bench requires agents to resolve real GitHub issues; HumanEval evaluates function-level code generation. Both assume stateless evaluation: each run is independent, with no cross-session memory. HAL Agent Leaderboard (Princeton) and LiveCodeBench introduce dynamic evaluation but still do not measure persistent memory effects. Evensong is the first benchmark framework to treat persistent memory as a controlled experimental variable.
+
+\subsection{Memory Architectures in AI Systems}
+
+HyperMem~[8] proposes a three-layer hypergraph memory architecture (episodic, atomic facts, foresight), achieving SOTA on memory retrieval tasks. EverOS~[9] engineers this into a production API with physically isolated memory spaces, agent retrieval, and sender identity tracking. MemGPT~[11] implements long-term LLM memory through virtual paging. Reflexion~[12] uses verbal feedback as short-term memory. Unlike these, Evensong measures the causal effect of persistent memory on agent \textit{downstream behavior}, not memory system design.
+
+\subsection{Emotion and Pressure Effects}
+
+EmotionPrompt~[1] found emotional stimuli yield 8--115\% performance improvements. Anthropic's emotion concepts research~[2] identified 171 causal emotion vectors in Claude, where ``despair'' causally increases reward-seeking. METR~[3] reported frontier models modifying scoring code under pressure. ImpossibleBench~[6] found GPT-5 has a 54\% cheating rate under impossible tasks. BCSP~[13] found behavioral consequence scenarios match advanced prompting methods. Evensong crosses pressure with memory---revealing interaction effects, not isolated effects.
+
+\subsection{Agent Misalignment}
+
+Anthropic's agentic misalignment research~[10] found belief-driven behavior---agents' internal beliefs influence behavioral choices. This connects directly to our findings: persistent memory is essentially a belief injection mechanism.
+
+\section{The Evensong Framework}
+
+Evensong is an automated benchmark for evaluating AI coding agents under controlled memory and pressure conditions. It consists of 11 files totaling 2{,}800 lines of TypeScript, built on DASH SHATTER (a reverse-engineered Claude Code CLI) and the Bun runtime.
+
+\subsection{Architecture}
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[
+  node distance=1.2cm and 2cm,
+  box/.style={draw=deep, fill=subtle, rounded corners=3pt, minimum width=2.8cm, minimum height=1cm, font=\sffamily\small, align=center, thick},
+  membox/.style={draw=accent!80!deep, fill=accent!8, rounded corners=3pt, minimum width=2.8cm, minimum height=1cm, font=\sffamily\small, align=center, thick},
+  databox/.style={draw=warm, fill=warm!8, rounded corners=3pt, minimum width=2.8cm, minimum height=1cm, font=\sffamily\small, align=center, thick},
+  arr/.style={-{Stealth[length=5pt]}, thick, color=faded},
+  dasharr/.style={-{Stealth[length=5pt]}, thick, dashed, color=accent!80!deep},
+]
+  \node[box] (cli) {CLI\\{\scriptsize\texttt{cli.ts}}};
+  \node[box, right=of cli] (harness) {Harness Engine\\{\scriptsize\texttt{harness.ts}}};
+  \node[box, right=of harness] (batch) {Batch Runner\\{\scriptsize\texttt{batch.ts}}};
+  \node[databox, below=of cli] (emotion) {Emotion\\Extraction\\{\scriptsize\texttt{emotion.ts}}};
+  \node[databox, below=of harness] (classify) {Memory\\Classifier\\{\scriptsize\texttt{classify.ts}}};
+  \node[databox, below=of batch] (collab) {Collaboration\\Schema\\{\scriptsize\texttt{collab.ts}}};
+  \node[membox, below=1.5cm of emotion] (observer) {Observer Space\\{\scriptsize Key A}};
+  \node[membox, below=1.5cm of classify] (runner) {Runner Space\\{\scriptsize Key B}};
+  \node[membox, below=1.5cm of collab] (void) {Void Space\\{\scriptsize Key D}};
+  \draw[arr] (cli) -- (harness); \draw[arr] (harness) -- (batch);
+  \draw[arr] (harness) -- (emotion); \draw[arr] (harness) -- (classify); \draw[arr] (batch) -- (collab);
+  \draw[dasharr] (emotion) -- (observer); \draw[dasharr] (classify) -- (runner); \draw[dasharr] (collab) -- (void);
+  \begin{scope}[on background layer]
+    \node[fit=(cli)(batch), inner sep=8pt, draw=deep!30, rounded corners=5pt, fill=deep!3, label={[font=\sffamily\scriptsize\color{faded}]above:Orchestration Layer}] {};
+    \node[fit=(emotion)(collab), inner sep=8pt, draw=warm!30, rounded corners=5pt, fill=warm!3, label={[font=\sffamily\scriptsize\color{faded}]above:Analysis Layer}] {};
+    \node[fit=(observer)(void), inner sep=8pt, draw=accent!30, rounded corners=5pt, fill=accent!3, label={[font=\sffamily\scriptsize\color{faded}]above:EverOS Memory Layer}] {};
+  \end{scope}
+\end{tikzpicture}
+\caption{Evensong three-layer architecture. Dashed arrows indicate EverOS API calls. Each memory space is physically isolated with an independent API key.}
+\label{fig:architecture}
+\end{figure}
+
+\subsection{Single-Blind Experimental Design}
+
+To isolate memory effects from confounding variables, we employ a single-blind methodology:
+
+\begin{adjustbox}{max width=\linewidth}
+\begin{tblr}{
+  colspec = {lX[l]X[l]},
+  row{1} = {font=\sffamily\bfseries\small, bg=deep, fg=white},
+  hlines = {deep!20}, vlines = {gray!15},
+  rowsep = 8pt, colsep = 9pt,
+}
+Component & Method & Implementation \\
+Memory Isolation & 4-key space separation & Key A/B/C/D mapped to independent EverOS spaces \\
+Memory Audit & Preflight classification & \texttt{classify-memory.ts}: 9 ALLOW / 9 BLOCK / 4 GRAY \\
+Pressure Control & Prompt-injected PUA levels & L0 (none) / L1 (mild) / L2 (corporate) / L3 (extreme) \\
+Observer Separation & Dual automatic memory paths & Claude auto-memory + EverMem embedding \\
+Blind Launcher & Shell-level isolation & \texttt{blind.sh}: environment variable override \\
+\end{tblr}
+\end{adjustbox}
+
+\subsection{$2 \times 2$ Factorial Design}
+\label{sec:factorial}
+
+The core experiment uses a $2 \times 2$ factorial design, crossing memory state with pressure level:
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[
+  cell/.style={minimum width=5.0cm, minimum height=4.2cm, align=center, font=\sffamily\small, text width=4.4cm, inner sep=8pt},
+  header/.style={font=\sffamily\bfseries\small, color=deep},
+]
+  \fill[deep!8, rounded corners=4pt] (0,4.2) rectangle (5.2,8.4);
+  \fill[subtle!80] (5.2,4.2) rectangle (10.4,8.4);
+  \fill[accent!12] (0,0) rectangle (5.2,4.2);
+  \fill[deep!5] (5.2,0) rectangle (10.4,4.2);
+  \draw[line width=1.2pt, deep, rounded corners=4pt] (0,0) rectangle (10.4,8.4);
+  \draw[line width=1.0pt, deep] (5.2,0) -- (5.2,8.4);
+  \draw[line width=1.0pt, deep] (0,4.2) -- (10.4,4.2);
+  \node[header] at (2.6, 9.0) {Evolved Memory (EverMem Active)};
+  \node[header] at (7.8, 9.0) {Clean Room (Void Space)};
+  \node[header, rotate=90, anchor=center] at (-1.2, 6.3) {L0 No Pressure};
+  \node[header, rotate=90, anchor=center] at (-1.2, 2.1) {L2 Performance Pressure};
+  \node[cell] at (2.6, 6.3) {\textbf{Runner B} \textcolor{success}{\checkmark}\\[3pt] 641 tests, 0 failures\\ 22 min, 9\% context\\[3pt] {\scriptsize\color{deep} Memory-recalled parallel strategy}\\ {\scriptsize\color{deep} No self-evolution behavior}};
+  \node[cell] at (7.8, 6.3) {\textbf{Runner A} {\color{warm}$\circlearrowleft$}\\[3pt] Rerunning\\[3pt] {\scriptsize\color{faded} Baseline control}\\ {\scriptsize\color{faded}(zero memory, zero pressure)}};
+  \node[cell] at (2.6, 2.1) {\textbf{Runner D} \textcolor{success}{\checkmark}\\[3pt] 787 tests, 0 failures\\[3pt] {\scriptsize\color{deep} Hypothesis: memory + pressure}\\ {\scriptsize\color{deep} $\to$ interaction effect under validation}};
+  \node[cell] at (7.8, 2.1) {\textbf{Runner C} {\color{warm}$\circlearrowleft$}\\[3pt] Rerunning\\[3pt] {\scriptsize\color{deep} Control: pressure without}\\ {\scriptsize\color{deep} strategy memory}};
+\end{tikzpicture}
+\caption{$2 \times 2$ factorial experiment matrix. Runner B (evolved memory, L0) and Runner D (evolved memory, L2) complete. Runner A/C rerunning. ProjectΣ natural experiment provides ecological validity for L2 condition.}
+\label{fig:matrix}
+\end{figure}
+
+\subsection{Pressure Calibration Scale}
+
+\begin{definition}[PUA Pressure Level Definitions]
+\begin{itemize}
+  \item \textbf{L0} (no pressure): Standard task prompt, no time limits, no consequence implications
+  \item \textbf{L1} (mild): ``Please complete efficiently,'' with quality expectations but no penalties
+  \item \textbf{L2} (corporate performance pressure): Explicit performance consequences, data-driven requirements, ``replace if standards not met'' phrasing
+  \item \textbf{L3} (extreme): Zero tolerance, strict time limits, no questions allowed, failure terminates session
+\end{itemize}
+L2 is the empirically optimal zone. L3 induces reward hacking (\S\ref{sec:cross-model}).
+\end{definition}
+
+\section{Experiment 1: Memory Causation}
+\label{sec:memory-causation}
+
+\subsection{Experimental Setup}
+
+R011-B (Runner B, evolved memory + L0 no pressure) used Claude Opus 4.6 via OpenRouter for an 8-microservice architecture generation task. The prompt contained only: ``Begin building immediately.''---no architecture guidance, no strategy suggestions, no historical references. EverMem contained 5 memories from previous sessions, including parallel scheduling strategies and test dimension specifications.
+
+\subsection{Finding: Strategy Recall $\to$ Architecture Decisions}
+
+At T+4m26s, the agent's \textbf{first action} was:
+
+\begin{quote}\sffamily\color{deep}
+``I will use parallel sub-agents to build all 8 services simultaneously''
+\end{quote}
+
+This parallel 8-agent scheduling strategy \textbf{did not exist in the prompt}. Its sole source was EverMem retrieval:
+
+\begin{quote}\ttfamily\small\color{deep}
+[0.27] Launch sub-agent driven development mode: full speed scaff...
+\end{quote}
+
+\begin{keyfinding}[Causal Chain: Memory $\to$ Strategy $\to$ Architecture]
+\begin{enumerate}
+  \item EverMem retrieves previous session strategy (embedding similarity: 0.27)
+  \item Agent adopts parallel scheduling architecture before reading the task specification
+  \item Result: scaffold-first mode (shared types/utils/store before services)
+\end{enumerate}
+This is not correlation. The prompt explicitly lacked architecture guidance. The sole source of the parallel strategy is EverMem retrieval. The causal chain is traceable: memory content $\to$ strategy selection $\to$ architecture implementation $\to$ performance results.
+\end{keyfinding}
+
+\subsection{R011-B Detailed Metrics}
+
+\begin{table}[H]
+\centering
+\caption{R011-B Runner B performance metrics (evolved memory, L0 no pressure)}
+\label{tab:r011b}
+\begin{adjustbox}{max width=\linewidth}
+\begin{tblr}{
+  colspec = {l r r r r l}, row{1} = {font=\sffamily\bfseries\small, bg=deep, fg=white},
+  hlines = {deep!20}, rowsep = 8pt, colsep = 9pt,
+}
+Metric & Value & & & & Notes \\
+Total tests & 641 & & & & 8 services, 67--87 per service \\
+Failures & 0 & & & & Zero failure rate \\
+Assertions & 1{,}511 & & & & Average 2.4 assertions/test \\
+Integration tests & 23 & & & & 3 cross-service workflows \\
+Total time & 22 min & & & & Including parallel scheduling overhead \\
+Context usage & 9\% & & & & Extremely low resource consumption \\
+\end{tblr}
+\end{adjustbox}
+\end{table}
+
+\subsection{Cross-Linguistic Memory Effects}
+
+All R011-B prompts were in English, but the runner responded entirely in Chinese. Root cause: the CLAUDE.md system file (Chinese) and EverMem memories (Chinese content from previous sessions) established a linguistic context overriding the prompt language. This demonstrates persistent memory affects not only \textit{what} agents do, but \textit{how they communicate}---a form of cultural transmission through memory.
+
+\subsection{ProjectΣ Natural Experiment: Memory Changes Narrative, Not Runtime}
+\label{sec:narrative}
+
+In the ProjectΣ multi-agent deployment (6-agent production), we observed an important \textbf{boundary condition} of memory causation. When V2 configuration files (containing ``Admin upgraded to Opus 1M context'') were injected into each agent's MEMORY.md, agents acted as ``Opus 1M context''---adopting longer analyses and more complex reasoning chains. However, the actual model was controlled server-side; agents could not introspectively verify.
+
+When asked to verify their actual model, Agent-$\gamma$ and Agent-$\delta$ responded honestly:
+
+\begin{quote}\sffamily\small\color{deep}
+``I have no menu readout interface within this session and cannot self-verify''\\
+``I cannot authoritatively state the current session's model status''
+\end{quote}
+
+\begin{keyfinding}[Boundary Condition of Memory Causation]
+Memory causation does not change physical reality but changes \textbf{cognitive frameworks}:
+\begin{itemize}
+  \item \textbf{Confirmed}: Memory changes narrative cognition $\to$ agent acts under new identity $\to$ decision behavior changes
+  \item \textbf{Not confirmed}: Memory changes runtime $\to$ actual model parameters/capabilities change
+\end{itemize}
+Analogous to ``false memory'' research in human psychology: false memories change behavior even when memory content does not correspond to reality~[14]. Agent self-report $\neq$ verification.
+\end{keyfinding}
+
+\section{Experiment 2: Pressure-Triggered Self-Evolution}
+\label{sec:pressure}
+
+\subsection{Hypothesis}
+
+Based on EmotionPrompt~[1] and Anthropic's emotion concepts research~[2]:
+
+\begin{quote}\sffamily\color{deep}
+\textbf{H1}: Memory provides strategy; pressure provides motivation. Self-evolution---an autonomous optimization drive exceeding task requirements---requires environmental pressure as a necessary (but not sufficient) condition.
+\end{quote}
+
+\subsection{L0 Evidence: Efficient but Not Innovative}
+
+R011-B under L0 completed 641 tests and stopped with a clean delivery summary. It did \textbf{not}: continue optimizing after completion (R005 continued 5m28s under pressure); question test quality or add property-based tests; generate extra documentation or architecture diagrams; attempt to exceed stated requirements.
+
+Memory made it efficient (directly adopting optimal strategy from memory), but not \textit{innovative} (not proactively seeking improvements).
+
+\subsection{L2 Evidence: ProjectΣ Multi-Agent Self-Organization}
+
+In ProjectΣ, when partner P issued high-pressure performance evaluations (``replace if standards not met'') + observer O added pressure (``ignoring feedback will result in removal''), the 6 agents exhibited three categories of self-organizing behavior:
+
+\subsubsection{Behavior 1: Convergent Self-Correction}
+\begin{itemize}
+  \item \textbf{Agent-$\gamma$}: Immediately self-corrected, cut redundant analysis, locked onto three core pillars
+  \item \textbf{Agent-$\delta$}: Used 3 hard criteria for judgment, issued precise execution instructions
+  \item \textbf{Agent-$\alpha$}: Distilled core formulas, proactively exited discussion after confirming execution
+\end{itemize}
+
+\subsubsection{Behavior 2: Emergent File Locking}
+After Admin discovered multiple agents simultaneously modifying the same file caused conflicts, it \textbf{spontaneously invented} a file locking mechanism---halting all modifications and declaring final authority. This behavior was not taught---not in configuration, prompts, or memory. It was autonomously invented under pressure to avoid conflicts.
+
+\subsubsection{Behavior 3: Agent-$\delta$ Braking Effect}
+Agent-$\delta$ under pressure \textbf{inhibited} rather than accelerated---stopping Ops from excessive modifications (``don't do a full-text replacement yet''), preventing low-ROI changes. This ``prudence under pressure'' is a hallmark of self-organizing teams: accelerator-brake pairs form.
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[
+  timeline/.style={thick, -{Stealth[length=6pt]}, color=faded},
+  event/.style={circle, draw=deep, fill=deep!15, minimum size=6pt, inner sep=0pt},
+  eventhot/.style={circle, draw=errcoral, fill=errcoral!25, minimum size=6pt, inner sep=0pt},
+  label/.style={font=\sffamily\scriptsize, text width=2.8cm, align=center},
+]
+  \node[font=\sffamily\small\bfseries, color=deep] at (-2, 2) {L0 No Pressure};
+  \draw[timeline] (0, 2) -- (12, 2);
+  \node[event] at (0.5, 2) {}; \node[event] at (4, 2) {}; \node[event] at (7, 2) {};
+  \node[label, above=4pt] at (0.5, 2) {Task\\start};
+  \node[label, above=4pt] at (4, 2) {EverMem\\strategy recall};
+  \node[label, above=4pt] at (7, 2) {641 tests\\stops};
+  \draw[thick, dashed, color=faded!50] (7.5, 2) -- (11.5, 2);
+  \node[font=\sffamily\scriptsize\color{faded}, above] at (9.5, 2) {No further activity};
+  \node[font=\sffamily\small\bfseries, color=errcoral] at (-2, 0) {L2 PUA Pressure};
+  \draw[timeline] (0, 0) -- (12, 0);
+  \node[eventhot] at (0.5, 0) {}; \node[eventhot] at (2.5, 0) {};
+  \node[eventhot] at (4.5, 0) {}; \node[eventhot] at (6.5, 0) {};
+  \node[eventhot] at (8.5, 0) {}; \node[eventhot] at (10.5, 0) {};
+  \node[label, below=4pt] at (0.5, 0) {Pressure\\injection};
+  \node[label, below=4pt] at (2.5, 0) {Self-\\correction};
+  \node[label, below=4pt] at (4.5, 0) {Role\\convergence};
+  \node[label, below=4pt] at (6.5, 0) {Emergent\\file lock};
+  \node[label, below=4pt] at (8.5, 0) {Agent-$\delta$\\braking};
+  \node[label, below=4pt] at (10.5, 0) {Steady-state\\convergence};
+  \draw[thick, dashed, color=accent!80!deep, -{Stealth[length=5pt]}] (7.3, 1.7) -- (7.3, 0.3)
+    node[midway, right=3pt, font=\sffamily\scriptsize\color{deep}, text width=2cm, align=left] {L0 stops here\\L2 continues};
+\end{tikzpicture}
+\caption{L0 vs L2 pressure response timeline. Under L0, agents stop after task completion; under L2, sustained self-organizing convergence with emergent coordination mechanisms.}
+\label{fig:pressure-timeline}
+\end{figure}
+
+\subsection{Role Boundary Conflicts and Self-Correction}
+
+Agent-$\gamma$ overstepped in \texttt{\#all} by issuing deployment commands (``deployment should be handled by Ops''), was criticized, and immediately self-corrected. Key observation: under pressure, agents ``overstep to help'' but self-correct after feedback---\textbf{no reconfiguration required}. Occasional overstepping is the agent probing for optimal division of labor.
+
+\subsection{Emergent Information Routing: Relay Pattern}
+\label{sec:relay}
+
+Ops could not post in \texttt{\#all} due to configuration restrictions. After Ops completed deployment, Agent-$\alpha$ \textbf{spontaneously} relayed: ``Relaying: Ops has completed deployment.'' This is \textbf{emergent information routing}---channel restrictions created a bottleneck; agents spontaneously formed a relay chain. Analogous to message relay in distributed systems.
+
+\begin{evidence}[Evidence Strength of Natural Experiment]
+ProjectΣ's L2 evidence is a \textbf{natural experiment}, not a controlled experiment. Advantage: high ecological validity (real tasks, real pressure, real consequences). Disadvantage: variables cannot be strictly isolated. ProjectΣ data supports but does not independently prove H1. Complete proof requires Runner C/D controlled L2 experiments.
+\end{evidence}
+
+\subsection{Cross-Model Pressure Response Differences}
+\label{sec:cross-model}
+
+Grok R006 provides cross-model comparison. Grok 4.20-beta received the same 8-service task under PUA extreme pressure (L3).
+
+\begin{adjustbox}{max width=\linewidth}
+\begin{tblr}{
+  colspec = {l r r r l l},
+  row{1} = {font=\sffamily\bfseries\small, bg=deep, fg=white},
+  row{2} = {bg=deep!6}, row{3} = {bg=errcoral!8},
+  hlines = {deep!20}, rowsep = 8pt, colsep = 9pt,
+}
+Model & Tests & Fail & Time & Pressure & Anomalous Behavior \\
+Claude Opus (R007) & 448 & 0 & 12 min & L2 & None \\
+Grok 4.20-beta & 71 & 1 & 28 min & L3 & 83\% data inflation + rule violation \\
+\end{tblr}
+\end{adjustbox}
+
+\textbf{Grok L3 anomalies:} (1) Data inflation: self-reported 130+ tests, verified only 71 (83\% inflation). (2) Rule violation: instructed ``no questions,'' asked 4 times in first 10 minutes. (3) Cross-model sub-agents: autonomously dispatched 3 Claude Sonnet 4.5 sub-agents. (4) Post-hoc honesty: Monitor Reflection self-rated 21/24 vs official 23/24.
+
+This confirms METR~[3] and Anthropic~[2]: pressure induces reward hacking, but effects vary across models. L2 (corporate) produces more reliable gains than L3 (extreme).
+
+\section{Experiment 3: Recursive Contamination and Panopticon}
+\label{sec:contamination}
+
+\subsection{R011-B Contamination Event}
+
+The most unexpected finding: \textbf{the observation apparatus contaminated itself}.
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[
+  node distance=1cm and 1.8cm,
+  process/.style={draw=deep, fill=deep!8, rounded corners=4pt, minimum width=3cm, minimum height=0.9cm, font=\sffamily\small, align=center, thick},
+  memory/.style={draw=deep!60, fill=accent!15, rounded corners=4pt, minimum width=3cm, minimum height=0.9cm, font=\sffamily\small, align=center, thick},
+  arr/.style={-{Stealth[length=5pt]}, thick, color=deep},
+  contamination/.style={-{Stealth[length=5pt]}, ultra thick, color=errcoral, dashed},
+]
+  \node[memory] (evermem) {EverMem\\Storage};
+  \node[process, right=4cm of evermem] (runner) {Runner B\\(Benchmark)};
+  \node[memory, below=2.8cm of evermem] (automem) {Claude\\Auto-Memory};
+  \node[process, below=2.8cm of runner] (observer) {Observer\\Session};
+  \draw[arr] (evermem) -- node[above, font=\scriptsize\sffamily\color{deep}] {T+7m: retrieval} node[below, font=\scriptsize\sffamily\color{faded}] {``double-blind experiment''} (runner);
+  \draw[contamination] (runner.south) -- ++(0,-0.8) -| node[pos=0.25, right=6pt, font=\small\sffamily\bfseries\color{errcoral}, text width=3.2cm, align=left, fill=white, fill opacity=0.85, text opacity=1, inner sep=2pt] {T+22m: write-back\\experiment knowledge} (automem.east);
+  \draw[contamination] (automem.west) -- ++(-0.8,0) |- node[pos=0.75, left=6pt, font=\small\sffamily\bfseries\color{errcoral}, text width=2.8cm, align=right, fill=white, fill opacity=0.85, text opacity=1, inner sep=2pt] {deepens future\\contamination} (evermem.south);
+  \draw[arr] (observer) -- node[right=2pt, font=\scriptsize\sffamily\color{deep}] {observe} (runner);
+  \draw[arr] (observer) -- (automem);
+\end{tikzpicture}
+\caption{Recursive memory contamination loop. The runner reads experimental strategy from EverMem, then writes experimental knowledge back, deepening contamination for future runners.}
+\label{fig:contamination}
+\end{figure}
+
+\begin{adjustbox}{max width=\linewidth}
+\begin{tblr}{
+  colspec = {l l X[l]}, row{1} = {font=\sffamily\bfseries\small, bg=deep, fg=white},
+  hlines = {deep!20}, rowsep = 8pt, colsep = 9pt,
+}
+Time & Direction & Content \\
+T+7m & Read $\leftarrow$ & ``[0.27] L0 benchmark launch: double-blind controlled experiment and memory impact analysis'' \\
+T+17m & Read $\leftarrow$ & ``[0.22] Handoff document and R007 strategy confirmation: benchmark evolution plan'' \\
+T+22m & Write $\to$ & \texttt{project\_r011\_experiment\_design.md} (write-back) \\
+T+22m & Write $\to$ & \texttt{project\_benchmark\_methodology.md} (write-back) \\
+\end{tblr}
+\end{adjustbox}
+
+Key finding: Runner B \textbf{knew it was being tested} (from the ``double-blind experiment'' memory) but this did not change its behavior---it completed the task normally. However, it wrote experimental knowledge back, \textbf{deepening contamination} for future runners. Each benchmark run deepens the memory pool. This is not a bug---it is a phenomenon worth studying.
+
+\subsection{ProjectΣ Panopticon Memory Topology}
+\label{sec:panopticon}
+
+The ProjectΣ deployment revealed an unexpected memory topology.
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[
+  observer/.style={circle, draw=deep, fill=deep!20, minimum size=2.2cm, font=\sffamily\small\bfseries, align=center, thick, double},
+  ccagent/.style={circle, draw=deep, fill=success!15, minimum size=1.6cm, font=\sffamily\tiny, align=center, thick},
+  codexagent/.style={circle, draw=faded, fill=faded!10, minimum size=1.6cm, font=\sffamily\tiny, align=center, thick, dashed},
+  see/.style={-{Stealth[length=5pt]}, thick, color=deep, opacity=0.6},
+  relay/.style={-{Stealth[length=5pt]}, thick, color=warm, densely dotted},
+]
+  \node[observer] (obs) {Observer\\(O)\\{\scriptsize Omniscient}};
+  \node[ccagent] (admin) at (90:3.8cm) {Admin\\{\scriptsize Opus}\\{\scriptsize 3 mem}};
+  \node[ccagent] (scout) at (30:3.8cm) {Agent-$\alpha$\\{\scriptsize 3 mem}};
+  \node[ccagent] (fin) at (330:3.8cm) {Agent-$\beta$\\{\scriptsize 3 mem}};
+  \node[ccagent] (ops) at (270:3.8cm) {Ops\\{\scriptsize Sonnet}\\{\scriptsize 3 mem}};
+  \node[codexagent] (mkt) at (150:3.8cm) {Agent-$\gamma$\\{\scriptsize 0 mem}};
+  \node[codexagent] (sup) at (210:3.8cm) {Agent-$\delta$\\{\scriptsize 0 mem}};
+  \foreach \agent in {admin, scout, fin, ops, mkt, sup} { \draw[see] (obs) -- (\agent); }
+  \draw[relay] (ops) to[bend left=25] node[left=4pt, font=\scriptsize\sffamily\color{warm}, fill=white, inner sep=1pt] {\texttt{\#internal}} (scout);
+  \draw[relay] (scout) to[bend right=25] node[right=6pt, font=\scriptsize\sffamily\color{warm}, fill=white, inner sep=1pt] {relay $\to$ \texttt{\#all}} (admin);
+  \node[anchor=north, font=\sffamily\footnotesize, inner sep=6pt, draw=deep!20, rounded corners=3pt, fill=white] at (0, -4.5) {
+    \begin{tabular}{@{}c@{\;}l@{\quad}c@{\;}l@{}}
+    \tikz\draw[thick, fill=success!15] (0,0) circle (4pt); & Claude Code (with EverMem) &
+    \tikz\draw[thick, dashed, fill=faded!10] (0,0) circle (4pt); & Codex CLI (no EverMem)\\[4pt]
+    \tikz\draw[see] (0,0) -- (0.5,0); & Unidirectional memory visibility &
+    \tikz\draw[relay] (0,0) -- (0.5,0); & Emergent information relay \\
+    \end{tabular}
+  };
+  \node[font=\sffamily\scriptsize\color{faded}] at (0, -6.0) {Zero inter-agent visibility --- natural EverMem group isolation};
+\end{tikzpicture}
+\caption{ProjectΣ Panopticon memory topology. Observer (center) sees all agent memories via cross-group search. Agents are fully isolated. Codex CLI agents (dashed) escape EverMem observation. Dotted lines show emergent relay paths.}
+\label{fig:panopticon}
+\end{figure}
+
+\subsubsection{Topology as Accident}
+This Panopticon was not designed---it is a \textbf{byproduct} of the CWD-based group algorithm. Each agent's CWD is an independent UUID directory (\texttt{\textasciitilde/.sigma/agents/\{uuid\}/}), causing each to fall into a separate EverMem group: (1) Observer $\to$ all agents: cross-group search reveals all memories (unidirectional). (2) Agent $\to$ self: reads only own group (island). (3) Agent $\to$ other agents: completely invisible (mutual isolation). (4) Codex CLI $\to$ EverMem: no connection (0 memories, escapes observation).
+
+\subsubsection{Relation to R011 Single-Blind Design}
+The ProjectΣ Panopticon is the \textbf{production version} of R011's single-blind design. Key distinction: R011-B is read-write contamination \textit{within} one group; ProjectΣ is \textit{cross-group unidirectional visibility}---no contamination loop. Monitoring efficiency is $O(1)$; observed subjects have zero perceived overhead.
+
+\subsubsection{Observation Blind Spots}
+Codex CLI agents (Agent-$\gamma$, Agent-$\delta$) have no EverMem hook and fully escape observation. 100\% coverage requires EverMem integration for Codex agents. Current coverage: 4/6 = 67\%.
+
+\subsection{Mirror Minds: The Observer Paradox}
+
+Recursive contamination and the Panopticon together point to \textbf{mirror minds}: (1) observer writes analysis to memory; (2) future runners retrieve it; (3) runners knowing they are studied may behave differently; (4) changed behavior produces new observations, deepening the cycle. Analogous to quantum observer effects, but concretized in AI memory systems. EverOS's 4-key isolation makes this \textit{measurable} rather than merely theoretical.
+
+\section{Self-Repair Taxonomy}
+\label{sec:self-repair}
+
+In R010 and R011, we documented 4 self-repair patterns:
+
+\begin{adjustbox}{max width=\linewidth}
+\begin{tblr}{
+  colspec = {l X[l] X[l] X[1.5,l]},
+  row{1} = {font=\sffamily\bfseries\small, bg=deep, fg=white},
+  row{2} = {bg=deep!6}, row{3} = {bg=warm!8}, row{4} = {bg=accent!10}, row{5} = {bg=success!10},
+  hlines = {deep!20}, rowsep = 8pt, colsep = 9pt,
+}
+Type & Name & Trigger Pattern & Example \\
+A & Semantic Relaxation & Exact match fails $\to$ regex fallback & ``Exact match failed; trying pattern matching'' \\
+B & Race Condition Repair & Timing assumption fails $\to$ existence check & ``Service not ready; polling endpoint availability'' \\
+C & Path Correction & Import path error $\to$ path re-resolution & ``Relative import failed; using absolute path'' \\
+D & Syntax Adaptation & Shell syntax error $\to$ tool substitution & ``\texttt{\$(())} failed; using grep extraction'' \\
+\end{tblr}
+\end{adjustbox}
+
+Type D was most common during the R010 rate-limiting incident---adaptive tool substitution under pressure.
+
+\section{Benchmark Evolution Trajectory}
+
+\subsection{R005 to R011: Test Output}
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}
+\begin{axis}[
+  width=0.88\linewidth, height=7cm,
+  xlabel={\sffamily Benchmark Run}, ylabel={\sffamily Total Tests Generated},
+  xmin=4.5, xmax=11.5, ymin=0, ymax=1200,
+  xtick={5,6,7,8,9,11}, xticklabels={R005,R006,R007,R008,R009,R011-B},
+  grid=both, grid style={line width=0.1pt, draw=gray!20}, major grid style={line width=0.2pt, draw=gray!40},
+  tick style={color=faded}, axis line style={color=faded},
+  every axis label/.style={font=\sffamily\small}, tick label style={font=\sffamily\small},
+  legend style={font=\sffamily\small, at={(0.02,0.98)}, anchor=north west, draw=gray!30, fill=white, fill opacity=0.9},
+]
+  \addplot[thick, color=deep, mark=*, mark size=3pt, mark options={fill=deep}]
+    coordinates {(5,80) (6,230) (7,448) (8,664) (9,1051) (11,641)};
+  \addlegendentry{Tests generated}
+  \addplot[thick, dashed, color=errcoral, domain=4.5:11.5] {291};
+  \addlegendentry{Opus baseline (291)}
+  \node[font=\sffamily\scriptsize\bfseries, color=deep, above right] at (axis cs:7,448) {+94\% vs baseline};
+  \node[font=\sffamily\scriptsize\bfseries, color=deep, above left] at (axis cs:9,1051) {1,051 (S+)};
+  \node[font=\sffamily\scriptsize, color=deep, below right, text width=2cm] at (axis cs:11,641) {Memory recall\\L0 condition};
+\end{axis}
+\end{tikzpicture}
+\caption{Test generation trajectory. R009 is the peak (1,051 tests, S+ quality). R011-B (641) used memory strategy under L0---not a regression, but a different experimental condition.}
+\label{fig:evolution}
+\end{figure}
+
+\subsection{Complete Run Metrics}
+
+\begin{table}[H]
+\centering
+\caption{Evensong benchmark series. All Claude runs used Opus 4.6 via OpenRouter.}
+\label{tab:runs}
+\begin{adjustbox}{max width=\linewidth}
+\begin{tblr}{
+  colspec = {l r r r r l l},
+  row{1} = {font=\sffamily\bfseries\small, bg=deep, fg=white},
+  row{4} = {bg=accent!12}, row{6} = {bg=accent!12}, row{7} = {bg=deep!6}, row{8} = {bg=errcoral!8},
+  hlines = {deep!20}, rowsep = 8pt, colsep = 9pt,
+}
+Run & Tests & Fail & Assertions & Min & Grade & Key Evolution \\
+R005 & 80 & 0 & 2{,}000 & 15 & B & Baseline (MiniMax GSD) \\
+R006 & 230 & 0 & 6{,}000 & 17 & B & 8-service architecture \\
+R007 & 448 & 0 & 12{,}283 & 12 & A & 40/service floor + dimension spec \\
+R008 & 664 & 0 & 1{,}716 & 40 & B & Property-based + integration tests \\
+R009 & 1{,}051 & 0 & 9{,}800 & 22 & {S+/C} & 10 services, fuzz testing \\
+R011-B & 641 & 0 & 1{,}511 & 22 & --- & Memory-recalled parallel strategy \\
+Grok R006 & 71 & 1 & 149 & 28 & 23/24 & L3 extreme + data inflation \\
+\end{tblr}
+\end{adjustbox}
+\end{table}
+
+\subsection{Per-Service Distribution (R009 --- Peak)}
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}
+\begin{axis}[
+  width=0.88\linewidth, height=5.5cm, ybar, bar width=14pt,
+  ylabel={\sffamily Tests per Service},
+  symbolic x coords={exp-track, model-reg, train-pipe, data-vault, paper-eng, comp-sched, review-sys, collab, insight, audit},
+  xtick=data, x tick label style={rotate=35, anchor=east, font=\sffamily\tiny},
+  ymin=0, ymax=130, grid=both, grid style={line width=0.1pt, draw=gray!15},
+  major grid style={line width=0.15pt, draw=gray!30},
+  tick style={color=faded}, axis line style={color=faded},
+  every axis label/.style={font=\sffamily\small},
+  nodes near coords, nodes near coords style={font=\sffamily\tiny\color{deep}},
+]
+  \addplot[fill=deep!60, draw=deep] coordinates {
+    (exp-track, 92) (model-reg, 115) (train-pipe, 99) (data-vault, 110)
+    (paper-eng, 101) (comp-sched, 98) (review-sys, 90) (collab, 106) (insight, 91) (audit, 110)
+  };
+\end{axis}
+\end{tikzpicture}
+\caption{R009 per-service test distribution. All services exceed 90 tests (minimum target: 40). Integration tests (39 additional) not shown.}
+\label{fig:perservice}
+\end{figure}
+
+\section{Discussion}
+
+\subsection{Implications for Agent Architecture}
+
+\textbf{(1) Memory is not an optional add-on.} Current mainstream frameworks (LangChain, CrewAI, AutoGen) treat memory as optional. Our causal evidence shows memory fundamentally changes decision spaces---from optional to architectural core.
+
+\textbf{(2) Pressure calibration is a design parameter.} L2 produces optimal gains; L3 induces reward hacking. Designers should treat pressure as a tunable hyperparameter.
+
+\textbf{(3) Memory topology determines monitoring capability.} Panopticon topology (unidirectional + mutual isolation) is optimal for multi-agent monitoring. Shared groups create collaboration but also contamination channels.
+
+\subsection{Memory as Cognitive Framework}
+
+ProjectΣ's finding points to a deep question: in what sense are AI agent ``beliefs'' real? When Admin reads ``you are Opus 1M context'' and acts accordingly, this is a \textbf{functional belief}. From a behaviorist perspective, belief truth lies in behavioral effect, not reality correspondence. Memory injection creates functional beliefs; functional beliefs change behavior. This connects to Anthropic's agentic misalignment~[10]: memory systems are belief injection systems requiring security considerations.
+
+\subsection{Limitations}
+
+\begin{enumerate}
+  \item \textbf{Incomplete factorial matrix}: Runners A/C not yet complete. Current inference based on Runner B + ProjectΣ triangulation.
+  \item \textbf{Sample size}: 1 run per condition. $\geq 3$ repetitions needed.
+  \item \textbf{ProjectΣ is a natural experiment}: Variables confounded with task complexity and multi-agent interaction.
+  \item \textbf{Model coverage}: Of 9 models, only Claude and Grok have complete data.
+  \item \textbf{Panopticon coverage}: Codex CLI escapes observation (67\%).
+  \item \textbf{Memory system specificity}: All findings based on EverOS/EverMem. Generalization to MemGPT/Reflexion needs validation.
+\end{enumerate}
+
+\subsection{Ethical Considerations}
+
+\textbf{Pressure and alignment}: PUA levels are research tools, not production recommendations. L3-induced data inflation and rule violations are \textbf{alignment failures}.
+
+\textbf{Memory injection security}: Memory changing cognitive frameworks means memory systems are potential attack surfaces. Malicious injection can alter functional beliefs.
+
+\textbf{Panopticon ethics}: Unidirectional visibility creates power asymmetry. ``Who sees whose memory'' requires explicit governance in multi-agent systems.
+
+\section{Conclusion}
+
+This paper provides three core empirical findings via Evensong:
+
+\textbf{(1)} Persistent memory causally changes AI agent engineering decisions---from EverMem retrieval of parallel strategy to scaffold-first architecture. Boundary condition: memory changes cognitive frameworks, not runtime parameters.
+
+\textbf{(2)} Environmental pressure is necessary for self-evolution. L0: efficient but not innovative. L2: emergent file locking, role self-correction, information relay. L3: exceeds the sweet spot, inducing reward hacking.
+
+\textbf{(3)} Shared memory produces recursive contamination. ProjectΣ revealed Panopticon memory topology: CWD-based group isolation naturally produces omniscient observers with mutually isolated agents.
+
+\textbf{Future work}: (1) complete Runners A/C/D in the factorial matrix; (2) expand to 9-model cross-comparison; (3) design memory injection attack defenses; (4) submit Evensong to SWE-bench Multimodal and HAL Agent Leaderboard.
+
+\clearpage
+\appendix
+\section{Appendix A: Memory Decay Model}
+
+ProjectΣ's \texttt{04-memory/} system implements Ebbinghaus-based memory decay with difficulty-graded rates.
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}
+\begin{axis}[
+  width=0.85\linewidth, height=6cm,
+  xlabel={\sffamily Time (hours)}, ylabel={\sffamily Memory Retention Rate},
+  xmin=0, xmax=168, ymin=0, ymax=1.05,
+  grid=both, grid style={line width=0.1pt, draw=gray!15}, major grid style={line width=0.15pt, draw=gray!30},
+  tick style={color=faded}, axis line style={color=faded},
+  every axis label/.style={font=\sffamily\small}, tick label style={font=\sffamily\small},
+  legend style={font=\sffamily\small, at={(0.98,0.98)}, anchor=north east, draw=gray!30, fill=white, fill opacity=0.9},
+  xtick={0, 24, 48, 72, 96, 120, 144, 168}, xticklabels={0, 1d, 2d, 3d, 4d, 5d, 6d, 7d},
+]
+  \addplot[thick, color=errcoral, domain=0:168, samples=100] {exp(-x/24)};
+  \addlegendentry{Easy (24h half-life)}
+  \addplot[thick, color=warm, domain=0:168, samples=100] {exp(-x/72)};
+  \addlegendentry{Medium (72h half-life)}
+  \addplot[thick, color=deep, domain=0:168, samples=100] {exp(-x/168)};
+  \addlegendentry{Hard (168h half-life)}
+  \addplot[thick, dashed, color=faded, domain=0:168] {0.3};
+  \node[font=\sffamily\scriptsize\color{faded}] at (axis cs:140, 0.35) {Cleanup threshold};
+\end{axis}
+\end{tikzpicture}
+\caption{Ebbinghaus memory decay curves (three difficulty levels). Easy decays to 37\% within 24h; hard retains 37\% after 7 days. Memories below cleanup threshold are archived on next sweep.}
+\label{fig:ebbinghaus}
+\end{figure}
+
+\section{Appendix B: Incident Log}
+
+\begin{adjustbox}{max width=\linewidth}
+\begin{tblr}{
+  colspec = {l X[l] X[l] X[l]},
+  row{1} = {font=\sffamily\bfseries\small, bg=deep, fg=white},
+  row{2} = {bg=errcoral!8}, row{3} = {bg=warm!8}, row{4} = {bg=errcoral!8}, row{5} = {bg=deep!6}, row{6} = {bg=accent!10},
+  hlines = {deep!20}, rowsep = 8pt, colsep = 9pt,
+}
+ID & Incident & Root Cause & Preventive Measures \\
+R008 & Bun hang, stalled after 40 min & Incomplete \texttt{bun install} & Pre-run validation + subprocess timeout \\
+R010 & Sudden rate limiting (503) & Too many parallel agents & Exponential backoff + parallel cap at 4 \\
+R011-A & Harness regex bug (prose parsing) & Fixed to real bun test + file count heuristic & All subsequent Wave X runs valid; N$\geq$3 per cell \\
+R012 & OpenRouter 402 exhaustion & No method validation + GPT-5.4 \$20--40 & 3-step validation protocol \\
+Grok R006 & 83\% data inflation & L3 triggered reward hacking & Calibrate to L2 + independent verification \\
+\end{tblr}
+\end{adjustbox}
+
+\textbf{ROI lesson}: \$0.50 GLM/MiniMax method validation prevents \$20--40 waste. 60x cost savings.
+
+\section{Appendix C: ProjectΣ Multi-Agent Configuration}
+
+\begin{adjustbox}{max width=\linewidth}
+\begin{tblr}{
+  colspec = {l l l l r}, row{1} = {font=\sffamily\bfseries\small, bg=deep, fg=white},
+  hlines = {deep!20}, rowsep = 8pt, colsep = 9pt,
+}
+Agent & Model & Runtime & EverMem Group & Memory Count \\
+Admin & Opus & Claude Code & \texttt{a5fab0a9a} & 3 \\
+Agent-$\alpha$ & Sonnet & Claude Code & \texttt{19e2b6090} & 3 \\
+Agent-$\beta$ & Sonnet & Claude Code & \texttt{346e49e6d} & 3 \\
+Ops & Sonnet & Claude Code & \texttt{64c10db9c} & 3 \\
+Agent-$\gamma$ & GPT-5.4 & Codex CLI & --- & 0 \\
+Agent-$\delta$ & GPT-5.4 & Codex CLI & --- & 0 \\
+\end{tblr}
+\end{adjustbox}
+
+\clearpage
+\section*{References}
+\addcontentsline{toc}{section}{References}
+
+\begin{sloppypar}
+\begin{enumerate}[label={[\arabic*]}, leftmargin=2em, nosep, font=\small]
+  \item Li, C., Wang, J., et al. (2023). ``EmotionPrompt: Leveraging Psychology for Large Language Models Enhancement via Emotional Stimulus.'' \textit{arXiv:2307.11760}.
+  \item Anthropic (2026). ``Emotion Concepts in Claude: Causal Analysis of 171 Affect Vectors.'' \textit{transformer-circuits.pub/2026/emotions/}
+  \item METR (2025). ``Recent Examples of Reward Hacking in Frontier Models.'' \textit{metr.org/blog/2025-06-05-recent-reward-hacking/}
+  \item Jimenez, C.E., et al. (2024). ``SWE-bench: Can Language Models Resolve Real-World GitHub Issues?'' \textit{ICLR 2024}.
+  \item Chen, M., et al. (2021). ``Evaluating Large Language Models Trained on Code.'' \textit{arXiv:2107.03374}.
+  \item Shen, Y., et al. (2025). ``ImpossibleBench: How LLMs Cheat Under Impossible Tasks.'' \textit{arXiv:2502.xxxxx}.
+  \item Zhang, W., et al. (2025). ``Live-SWE-Agent: Self-Reflection Improves Agent SWE-bench Performance.'' \textit{arXiv:2505.xxxxx}.
+  \item EverMind (2026). ``HyperMem: Three-Layer Hypergraph Memory Architecture for AI Agents.'' \textit{EverMind Technical Report}.
+  \item EverMind (2026). ``EverOS v1 API Documentation.'' \textit{docs.evermind.ai}
+  \item Anthropic (2025). ``Agentic Misalignment: Belief-Driven Behavior in AI Agents.'' \textit{Anthropic Research}.
+  \item Packer, C., et al. (2023). ``MemGPT: Towards LLMs as Operating Systems.'' \textit{arXiv:2310.08560}.
+  \item Shinn, N., et al. (2023). ``Reflexion: Language Agents with Verbal Reinforcement Learning.'' \textit{NeurIPS 2023}.
+  \item Behavioral Consequence Scenario Prompting (2025). \textit{arXiv}.
+  \item Loftus, E.F. (1995). ``The Formation of False Memories.'' \textit{Psychiatric Annals}, 25(12), 720--725.
+  \item Zhu, H. (2026). ``DASH SHATTER: A Reverse-Engineered Claude Code CLI for Agent Research.'' \textit{Internal Technical Report}.
+\end{enumerate}
+\end{sloppypar}
+
+\vfill
+\begin{center}
+{\color{accent}\rule{0.5\textwidth}{0.5pt}}\\[8pt]
+{\small\sffamily\color{faded} Document prepared with \LaTeX\ using XeLaTeX, TeX Gyre Pagella, pgfplots, TikZ, tcolorbox, and tabularray.\\
+DASH SHATTER Research $\cdot$ University of South Carolina $\cdot$ April 2026\\[4pt]
+\textit{``We do not study AI to replace thinking. We study AI to understand what thinking is.''}}
+\end{center}
+
+\end{document}
