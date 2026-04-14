@@ -1,10 +1,10 @@
 # Fdb version 4
-["xdvipdfmx"] 1775906235.12782 "evensong-paper-en.xdv" "evensong-paper-en.pdf" "evensong-paper-en" 1775906235.44207 0
-  "evensong-paper-en.xdv" 1775906235.05363 658376 d25d74b45c1bd7e434548384ad3e59e0 "xelatex"
+["xdvipdfmx"] 1776083763.83861 "evensong-paper-en.xdv" "evensong-paper-en.pdf" "evensong-paper-en" 1776083764.11439 0
+  "evensong-paper-en.xdv" 1776083763.76576 733680 41f0f10ac7ca290e2bd0de2eada7acb1 "xelatex"
   (generated)
   "evensong-paper-en.pdf"
   (rewritten before read)
-["xelatex"] 1775906231.19606 "evensong-paper-en.tex" "evensong-paper-en.xdv" "evensong-paper-en" 1775906235.44021 0
+["xelatex"] 1776083758.94367 "evensong-paper-en.tex" "evensong-paper-en.xdv" "evensong-paper-en" 1776083764.11252 0
   "/usr/local/texlive/2025/texmf-dist/fonts/map/fontname/texfonts.map" 1577235249 3524 cb3e574dea2d1052e39280babc910dc8 ""
   "/usr/local/texlive/2025/texmf-dist/fonts/tfm/adobe/zapfding/pzdr.tfm" 1136768653 1528 f853c4d1b4e0550255e02831fdc8496f ""
   "/usr/local/texlive/2025/texmf-dist/fonts/tfm/public/amsfonts/cmextra/cmex7.tfm" 1246382020 1004 54797486969f23fa377b128694d548df ""
@@ -226,7 +226,6 @@
   "/usr/local/texlive/2025/texmf-dist/tex/latex/microtype/microtype-xetex.def" 1739394495 28582 05df45896f96323df292cf513c6771dc ""
   "/usr/local/texlive/2025/texmf-dist/tex/latex/microtype/microtype.cfg" 1739394495 27015 bd167d0154f271c424b157d8894ae4a4 ""
   "/usr/local/texlive/2025/texmf-dist/tex/latex/microtype/microtype.sty" 1739394495 102775 6624742dafeb6f262a13657f9f77f048 ""
-  "/usr/local/texlive/2025/texmf-dist/tex/latex/microtype/mt-Palatino.cfg" 1739394495 12003 a1df6adcf87230c4549e705c7870cd62 ""
   "/usr/local/texlive/2025/texmf-dist/tex/latex/microtype/mt-cmr.cfg" 1739394495 22906 b0be544692bb405a84d147a96af5d777 ""
   "/usr/local/texlive/2025/texmf-dist/tex/latex/microtype/mt-msa.cfg" 1739394495 5929 11976688d7d8ed4d0d05efd1b3d5a7e9 ""
   "/usr/local/texlive/2025/texmf-dist/tex/latex/microtype/mt-msb.cfg" 1739394495 5594 d52d5015abe666fae752ed7674c2dd73 ""
@@ -281,9 +280,9 @@
   "/usr/local/texlive/2025/texmf-dist/web2c/texmf.cnf" 1739380943 42148 61becc7c670cd061bb319c643c27fdd4 ""
   "/usr/local/texlive/2025/texmf-var/web2c/xetex/xelatex.fmt" 1741450550 5639796 b6822fbf027c6598cec2e241e0925725 ""
   "/usr/local/texlive/2025/texmf.cnf" 1741450484 577 418a7058ec8e006d8704f60ecd22c938 ""
-  "evensong-paper-en.aux" 1775906235.0509 13530 f6fdca8fa35a452f162b6983eed4c877 "xelatex"
-  "evensong-paper-en.tex" 1775906208.17634 69530 0856a33099ea381fe5a46ed2032ba08b ""
-  "evensong-paper-en.toc" 1775906235.05221 5059 5913bb97719618b8e03e37598edf9adb "xelatex"
+  "evensong-paper-en.aux" 1776083763.76439 14661 49f709388650166439d2b6f4ea34a135 "xelatex"
+  "evensong-paper-en.tex" 1776083621.02334 69883 74ef2df9a89d8c7456da0a7108eb2e3e ""
+  "evensong-paper-en.toc" 1776083763.76562 5530 ed42b9f3b99fd1f18bd59e6f666d8600 "xelatex"
   (generated)
   "evensong-paper-en.aux"
   "evensong-paper-en.log"

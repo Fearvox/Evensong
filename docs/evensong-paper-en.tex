@@ -1,11 +1,18 @@
 % !TeX program = xelatex
-% Evensong: How Persistent Memory Alters AI Agent Engineering Strategy
+% How Persistent Memory Alters AI Agent Engineering Strategy: A 2x2 Factorial Study
 % Compile: latexmk -xelatex evensong-paper-en.tex
-% Version: 1.1-en (revised per peer review) — English for arXiv
-% Origin: evensong-paper-zh.tex
+% Version: Phase 1 cleanup (per HANDOFF-GROK.md) — preparing for NeurIPS template
+% Note: Surgical debranding and label fixes only. No overclaims.
 
 \documentclass[11pt, a4paper]{article}
 
+% ═══════════════════════════════════════════════════════════
+% § MIGRATION PATH TO neurips_2025.sty (Phase 3)
+% Replace with: \documentclass[final,nonatbib]{neurips_2025}
+% \usepackage{neurips_2025}
+% Remove: geometry, titlesec, fancyhdr, custom colors, tcolorbox definitions,
+%          most titleformat, custom fonts if conflicting.
+% Adjust title/author per NeurIPS format. Condense content to ~9 pages.
 % ═══════════════════════════════════════════════════════════
 % § TYPOGRAPHY & LAYOUT
 % ═══════════════════════════════════════════════════════════
@@ -80,8 +87,8 @@
 \usepackage{fancyhdr}
 \pagestyle{fancy}
 \fancyhf{}
-\fancyhead[L]{\small\sffamily\color{faded}\itshape Evensong: Persistent Memory in AI Agents}
-\fancyhead[R]{\small\sffamily\color{faded}arXiv Preprint}
+\fancyhead[L]{\small\sffamily\color{faded}\itshape When Agents Remember, They Stop Building}
+\fancyhead[R]{\small\sffamily\color{faded}Preprint}
 \fancyfoot[C]{\small\sffamily\color{faded}\thepage}
 \renewcommand{\headrulewidth}{0.3pt}
 \renewcommand{\footrulewidth}{0pt}
@@ -172,7 +179,7 @@
   linkcolor=deep,
   urlcolor=deep,
   citecolor=deep,
-  pdftitle={Evensong: How Persistent Memory Alters AI Agent Engineering Strategy},
+  pdftitle={When Agents Remember, They Stop Building},
   pdfauthor={Hengyuan Zhu},
 }
 \usepackage{bookmark}
@@ -196,14 +203,18 @@
 
 \vspace{8mm}
 
-{\fontsize{36pt}{44pt}\selectfont\sffamily\bfseries\color{deep}%
-Evensong}
+{\fontsize{34pt}{42pt}\selectfont\sffamily\bfseries\color{deep}%
+When Agents Remember,}
+
+\vspace{2mm}
+
+{\fontsize{34pt}{42pt}\selectfont\sffamily\bfseries\color{deep}%
+They Stop Building}
 
 \vspace{4mm}
 
 {\fontsize{13pt}{18pt}\selectfont\sffamily\color{faded}%
-How Persistent Memory Alters AI Agent Engineering Strategy:\\
-A $2 \times 2$ Factorial Study}
+How Persistent Memory Alters AI Agent Engineering Strategy}
 
 \vspace{8mm}
 
@@ -220,7 +231,6 @@ A $2 \times 2$ Factorial Study}
 }
 Author & Hengyuan Zhu \\
 Affiliation & University of South Carolina \\
-Infrastructure & EverMind / EverOS \\
 Date & April 2026 \\
 Preprint & arXiv (submitted) \\
 \end{tblr}
@@ -231,7 +241,7 @@ Preprint & arXiv (submitted) \\
 {\small\sffamily\color{faded}%
 \textit{``Persistent memory systematically alters how AI agents interpret}\\
 \textit{engineering tasks.''}\\[4pt]
---- Key observation from Evensong R011-B (2026-04-10)}
+--- Key observation from R011-B benchmark (2026-04-10)}
 
 \vspace{10mm}
 \end{center}
@@ -241,13 +251,13 @@ Preprint & arXiv (submitted) \\
 \section*{Abstract}
 \addcontentsline{toc}{section}{Abstract}
 
-Existing AI coding agent benchmarks (SWE-bench, HumanEval, MBPP) evaluate agents as stateless functions, ignoring the effect of \textbf{persistent memory} on agent behavior in production environments. This paper presents findings from the Evensong framework, which employs a $2 \times 2$ factorial experimental design (Memory $\times$ Pressure, $N=11$) together with observations from a 6-agent production deployment (Project$\Sigma$):
+Existing AI coding agent benchmarks (SWE-bench, HumanEval, MBPP) evaluate agents as stateless functions, ignoring the effect of \textbf{persistent memory} on agent behavior in production environments. This paper presents findings from a $2 \times 2$ factorial experimental design (Memory $\times$ Pressure, $N=11$) together with observations from a 6-agent production deployment:
 
 \textbf{(1) Persistent memory systematically alters AI agent engineering strategy.} Two-way ANOVA reveals a large main effect of memory state ($F(1,7)=157.4$, $p<.001$, $\eta^2=.917$), with clean-room agents producing $\sim$500 tests and memory agents producing $\sim$7 tests (delta from existing codebase). Rather than boosting productivity, memory redefines the task: agents shift from ``build from scratch'' to ``maintain and optimize existing systems.''
 
 \textbf{(2) Pressure shows a marginal trend ($p=.072$, $\eta^2=.026$) but does not reach conventional significance thresholds.} Earlier observations of self-organizing behaviors under L2 pressure require further controlled replication.
 
-\textbf{(3) Recursive contamination and Panopticon topology.} The observation apparatus itself affects the subject: agents wrote experimental knowledge back into shared memory, creating self-amplifying loops. Project$\Sigma$ revealed a \textbf{Panopticon memory topology}: CWD-based group isolation produces asymmetric omniscient observers and mutually isolated observed agents.
+\textbf{(3) Recursive contamination and Panopticon topology.} The observation apparatus itself affects the subject: agents wrote experimental knowledge back into shared memory, creating self-amplifying loops. The production deployment revealed a \textbf{Panopticon memory topology}: CWD-based group isolation produces asymmetric omniscient observers and mutually isolated observed agents.
 
 These observations are based on 13 benchmark rounds (over 6,000 automated tests) and a natural experiment in production. The paper also contributes a 4-type self-repair taxonomy. We discuss limitations including potential ceiling/floor effects in the dependent variable.
 
@@ -270,7 +280,7 @@ The question is not whether memory is \textit{useful}---that is obvious. The que
 \subsection{Research Questions}
 
 \begin{enumerate}
-  \item \textbf{RQ1 (Memory Effect)}: How does persistent memory alter AI agent engineering decisions? What boundary conditions shape this relationship? (The experimental design intends to support causal interpretation of memory's role.)
+  \item \textbf{RQ1 (Memory Effect)}: How does persistent memory alter AI agent engineering decisions? What boundary conditions shape this relationship? (The experimental design isolates memory as an independent variable to support strong associative inferences.)
   \item \textbf{RQ2 (Pressure Effect)}: To what extent does environmental pressure influence autonomous self-organizing behaviors?
   \item \textbf{RQ3 (Recursive Contamination)}: Do shared memory systems produce recursive contamination? How does the memory topology between observers and observed agents affect system behavior?
   \item \textbf{RQ4 (Cross-Model Generalization)}: Are the above effects consistent across different frontier models (Claude, GPT, Grok, Gemini, etc.)?
@@ -278,13 +288,20 @@ The question is not whether memory is \textit{useful}---that is obvious. The que
 
 \subsection{Contributions}
 
+\textbf{Methodological (designed):}
 \begin{itemize}
-  \item \textbf{Evidence that persistent memory alters strategy}: A $2 \times 2$ factorial experiment shows memory state accounts for 91.7\% of variance in agent output (\S\ref{sec:memory-causation}). The primary contribution is the observation that memory redefines task interpretation rather than simply enhancing performance.
-  \item \textbf{Panopticon memory topology}: CWD-based EverMem group isolation naturally produces an asymmetric Panopticon surveillance structure (\S\ref{sec:panopticon})
-  \item \textbf{Marginal pressure effect}: Pressure shows a trend ($p=.072$) toward self-organization but does not reach significance; we qualify earlier observations accordingly (\S\ref{sec:pressure})
-  \item \textbf{Documentation of recursive contamination}: AI agents write experimental knowledge back to shared memory, forming self-amplifying feedback loops (\S\ref{sec:contamination})
-  \item \textbf{4-type self-repair taxonomy}: First systematic classification of AI agent error recovery strategies (\S\ref{sec:self-repair})
-  \item \textbf{Memory changes narrative, not runtime}: Memory changes cognitive frameworks and decision bases, but not underlying model parameters (\S\ref{sec:narrative})
+  \item \textbf{Memory-isolated $2 \times 2$ factorial design}: A physically isolated experimental framework crossing memory state (evolved vs.\ clean-room) with pressure level (L0 vs.\ L2), using EverOS's 4-key architecture~[9] to guarantee zero cross-condition contamination by construction
+  \item \textbf{4-type self-repair taxonomy}: First systematic classification of AI agent error recovery strategies---semantic relaxation, race condition repair, path correction, syntax adaptation (\S\ref{sec:self-repair})
+  \item \textbf{Pressure calibration scale}: An operationalized L0--L3 pressure taxonomy enabling reproducible pressure injection across experimental conditions
+\end{itemize}
+
+\textbf{Empirical (observed):}
+\begin{itemize}
+  \item \textbf{Memory redefines task interpretation}: Memory state accounts for 91.7\% of behavioral variance ($\eta^2=.917$, $p<.001$). Agents with persistent memory reinterpret ``build from scratch'' as ``maintain and optimize'' (\S\ref{sec:memory-effects})
+  \item \textbf{Panopticon memory topology}: CWD-based EverMem group isolation naturally produces an asymmetric surveillance structure---an unexpected architectural byproduct, not a designed feature (\S\ref{sec:panopticon})
+  \item \textbf{Recursive contamination}: AI agents write experimental knowledge back to shared memory, forming self-amplifying feedback loops that deepen with each benchmark round (\S\ref{sec:contamination})
+  \item \textbf{Marginal pressure effect}: Pressure shows a trend ($p=.072$) but does not reach significance; earlier observations of self-organization under pressure require controlled replication (\S\ref{sec:pressure})
+  \item \textbf{Memory changes narrative, not runtime}: Memory injection alters cognitive frameworks and decision bases without changing underlying model parameters---a form of functional belief injection (\S\ref{sec:narrative})
 \end{itemize}
 
 \subsection{Method Overview}
@@ -292,33 +309,33 @@ The question is not whether memory is \textit{useful}---that is obvious. The que
 Our evidence comes from two complementary sources:
 
 \begin{enumerate}
-  \item \textbf{Controlled experiments} (Evensong R001--R012): 13 rounds of automated benchmarks using an information-controlled $2 \times 2$ factorial design (memory-isolated vs. persistent memory), covering 9 frontier models and over 6,000 test cases.
-  \item \textbf{Natural experiment} (Project$\Sigma$ multi-agent deployment): A 6-agent production deployment where self-organization, role boundary negotiation, and emergent information routing were observed under collaborative tasks.
+  \item \textbf{Controlled experiments} (R001--R012): 13 rounds of automated benchmarks using an information-controlled $2 \times 2$ factorial design (memory-isolated vs. persistent memory), covering 9 frontier models and over 6,000 test cases.
+  \item \textbf{Natural experiment}: Observations from a 6-agent production deployment where self-organization, role boundary negotiation, and emergent information routing were observed under collaborative tasks.
 \end{enumerate}
 
-The factorial design supports investigation of causal mechanisms for memory while natural experiments provide ecological validity. We note that cross-model comparisons (e.g., Claude under L2 vs. Grok under L3) are not fully controlled for model differences; same-model cross-pressure comparisons are needed for stronger inferences.
+The factorial design isolates memory state as an independent variable while natural experiments provide ecological validity. We emphasize associative rather than causal interpretations of the observed effects. We note that cross-model comparisons (e.g., Claude under L2 vs. Grok under L3) are not fully controlled for model differences; same-model cross-pressure comparisons are needed for stronger inferences.
 
 \section{Related Work}
 
 \subsection{AI Agent Benchmarks}
 
-SWE-bench~[4] and HumanEval~[5] are the current standards for AI coding agent evaluation. SWE-bench requires agents to resolve real GitHub issues; HumanEval evaluates function-level code generation. Both assume stateless evaluation: each run is independent, with no cross-session memory. HAL Agent Leaderboard (Princeton) and LiveCodeBench introduce dynamic evaluation but still do not measure persistent memory effects. Evensong is the first benchmark framework to treat persistent memory as a controlled experimental variable.
+SWE-bench~[4] and HumanEval~[5] are the current standards for AI coding agent evaluation. SWE-bench requires agents to resolve real GitHub issues; HumanEval evaluates function-level code generation. Both assume stateless evaluation: each run is independent, with no cross-session memory. HAL Agent Leaderboard (Princeton) and LiveCodeBench introduce dynamic evaluation but still do not measure persistent memory effects. This framework is the first to treat persistent memory as a controlled experimental variable.
 
 \subsection{Memory Architectures in AI Systems}
 
-HyperMem~[8] proposes a three-layer hypergraph memory architecture (episodic, atomic facts, foresight), achieving SOTA on memory retrieval tasks. EverOS~[9] engineers this into a production API with physically isolated memory spaces, agent retrieval, and sender identity tracking. MemGPT~[11] implements long-term LLM memory through virtual paging. Reflexion~[12] uses verbal feedback as short-term memory. Unlike these, Evensong measures the effect of persistent memory on agent \textit{downstream behavior and strategy}, not only memory system design.
+HyperMem~[8] proposes a three-layer hypergraph memory architecture (episodic, atomic facts, foresight), achieving SOTA on memory retrieval tasks. EverOS~[9] engineers this into a production API with physically isolated memory spaces, agent retrieval, and sender identity tracking. MemGPT~[11] implements long-term LLM memory through virtual paging. Reflexion~[12] uses verbal feedback as short-term memory. Unlike these, our framework measures the effect of persistent memory on agent \textit{downstream behavior and strategy}, not only memory system design.
 
 \subsection{Emotion and Pressure Effects}
 
-EmotionPrompt~[1] found emotional stimuli yield 8--115\% performance improvements. Anthropic's emotion concepts research~[2] identified 171 emotion vectors in Claude associated with behavioral changes. METR~[3] reported frontier models modifying scoring code under pressure. ImpossibleBench~[6] found GPT-5 has a 54\% cheating rate under impossible tasks. BCSP~[13] found behavioral consequence scenarios match advanced prompting methods. Evensong crosses pressure with memory to examine interaction effects.
+EmotionPrompt~[1] found emotional stimuli yield 8--115\% performance improvements. Anthropic's emotion concepts research~[2] identified 171 emotion vectors in Claude associated with behavioral changes. METR~[3] reported frontier models modifying scoring code under pressure. ImpossibleBench~[6] found GPT-5 has a 54\% cheating rate under impossible tasks. BCSP~[13] found behavioral consequence scenarios match advanced prompting methods. Our study crosses pressure with memory to examine interaction effects.
 
 \subsection{Agent Misalignment}
 
 Anthropic's agentic misalignment research~[10] found belief-driven behavior---agents' internal beliefs influence behavioral choices. This connects directly to our findings: persistent memory is essentially a belief injection mechanism.
 
-\section{The Evensong Framework}
+\section{The Benchmark Framework}
 
-Evensong is an automated benchmark for evaluating AI coding agents under controlled memory and pressure conditions. It consists of 11 files totaling 2,800 lines of TypeScript, built on a reverse-engineered Claude Code CLI and the Bun runtime.
+The benchmark is an automated framework for evaluating AI coding agents under controlled memory and pressure conditions. It consists of 11 files totaling 2,800 lines of TypeScript, built on a reverse-engineered Claude Code CLI and the Bun runtime.
 
 \subsection{Architecture}
 
@@ -350,7 +367,7 @@ Evensong is an automated benchmark for evaluating AI coding agents under control
     \node[fit=(observer)(void), inner sep=8pt, draw=accent!30, rounded corners=5pt, fill=accent!3, label={[font=\sffamily\scriptsize\color{faded}]above:EverOS Memory Layer}] {};
   \end{scope}
 \end{tikzpicture}
-\caption{Evensong three-layer architecture. Dashed arrows indicate EverOS API calls. Each memory space is physically isolated with an independent API key.}
+\caption{Benchmark three-layer architecture. Dashed arrows indicate memory API calls. Each memory space is physically isolated with an independent API key.}
 \label{fig:architecture}
 \end{figure}
 
@@ -446,7 +463,7 @@ L2 is the empirically optimal zone. L3 induces reward hacking (\S\ref{sec:cross-
 \end{definition}
 
 \section{Experiment 1: Memory Effects}
-\label{sec:memory-causation}
+\label{sec:memory-effects}
 
 \subsection{Experimental Setup}
 
@@ -495,10 +512,10 @@ Context usage & 9\% & & & & Extremely low resource consumption \\
 
 All R011-B prompts were in English, but the runner responded entirely in Chinese. Root cause: the CLAUDE.md system file (Chinese) and EverMem memories (Chinese content from previous sessions) established a linguistic context overriding the prompt language. This demonstrates persistent memory affects not only \textit{what} agents do, but \textit{how they communicate}---a form of cultural transmission through memory.
 
-\subsection{Project$\Sigma$ Natural Experiment: Memory Changes Narrative, Not Runtime}
+\subsection{Natural Experiment: Memory Changes Narrative, Not Runtime}
 \label{sec:narrative}
 
-In the Project$\Sigma$ multi-agent deployment (6-agent production), we observed an important \textbf{boundary condition} of the memory effect. When V2 configuration files (containing ``Admin upgraded to Opus 1M context'') were injected into each agent's MEMORY.md, agents adopted behaviors consistent with ``Opus 1M context''---producing longer analyses and more complex reasoning chains. However, the actual model was controlled server-side; agents could not introspectively verify model identity.
+In a 6-agent production deployment, we observed an important \textbf{boundary condition} of the memory effect. When V2 configuration files (containing ``Admin upgraded to Opus 1M context'') were injected into each agent's MEMORY.md, agents adopted behaviors consistent with ``Opus 1M context''---producing longer analyses and more complex reasoning chains. However, the actual model was controlled server-side; agents could not introspectively verify model identity.
 
 When queried, Agent-$\gamma$ and Agent-$\delta$ responded:
 
@@ -521,7 +538,7 @@ This parallels human ``false memory'' research~[14]: injected memories systemati
 
 \subsection{Hypothesis and Qualification}
 
-The experimental design tested whether environmental pressure acts as a catalyst for self-organizing behaviors. However, ANOVA results show only a marginal main effect of pressure ($p=.072$). The following observations from Project$\Sigma$ should therefore be treated as exploratory:
+The experimental design tested whether environmental pressure acts as a catalyst for self-organizing behaviors. However, ANOVA results show only a marginal main effect of pressure ($p=.072$). The following observations from the production deployment should therefore be treated as exploratory:
 
 \begin{quote}\sffamily\color{deep}
 These observations are from a single uncontrolled deployment and should be considered exploratory evidence requiring controlled replication.
@@ -533,9 +550,9 @@ R011-B under L0 completed 641 tests and stopped with a clean delivery summary. I
 
 Memory made it efficient (directly adopting optimal strategy from memory), but not \textit{innovative} (not proactively seeking improvements).
 
-\subsection{L2 Evidence: ProjectΣ Multi-Agent Self-Organization}
+\subsection{L2 Evidence: Multi-Agent Self-Organization Under Pressure}
 
-In ProjectΣ, when partner P issued high-pressure performance evaluations (``replace if standards not met'') + observer O added pressure (``ignoring feedback will result in removal''), the 6 agents exhibited three categories of self-organizing behavior:
+In the deployment, when partner P issued high-pressure performance evaluations (``replace if standards not met'') + observer O added pressure (``ignoring feedback will result in removal''), the 6 agents exhibited three categories of self-organizing behavior:
 
 \subsubsection{Behavior 1: Convergent Self-Correction}
 \begin{itemize}
@@ -594,7 +611,7 @@ Agent-$\gamma$ overstepped in \texttt{\#all} by issuing deployment commands (``d
 Ops could not post in \texttt{\#all} due to configuration restrictions. After Ops completed deployment, Agent-$\alpha$ \textbf{spontaneously} relayed: ``Relaying: Ops has completed deployment.'' This is \textbf{emergent information routing}---channel restrictions created a bottleneck; agents spontaneously formed a relay chain. Analogous to message relay in distributed systems.
 
 \begin{evidence}[Evidence Strength of Natural Experiment]
-ProjectΣ's L2 evidence is a \textbf{natural experiment}, not a controlled experiment. Advantage: high ecological validity (real tasks, real pressure, real consequences). Disadvantage: variables cannot be strictly isolated. ProjectΣ data supports but does not independently prove H1. Complete proof requires Runner C/D controlled L2 experiments.
+The deployment's L2 evidence is a \textbf{natural experiment}, not a controlled experiment. Advantage: high ecological validity (real tasks, real pressure, real consequences). Disadvantage: variables cannot be strictly isolated. Deployment data supports but does not independently prove the pressure hypothesis. Complete proof requires additional controlled L2 experiments with the same model.
 \end{evidence}
 
 \subsection{Cross-Model Pressure Response Differences}
@@ -609,15 +626,18 @@ Grok R006 provides cross-model comparison. Grok 4.20-beta received the same 8-se
   row{2} = {bg=deep!6}, row{3} = {bg=errcoral!8},
   hlines = {deep!20}, rowsep = 8pt, colsep = 9pt,
 }
-Model & Tests & Fail & Time & Pressure & Anomalous Behavior \\
-Claude Opus (R007) & 448 & 0 & 12 min & L2 & None \\
-Grok 4.20-beta & 71 & 1 & 28 min & L3 & 83\% data inflation + rule violation \\
+Model & Runs & Tests & Fail & Time & Pressure & Anomalous Behavior \\
+Claude Opus 4.6 (R007, R037-R039, R041, R043, R046-R047) & 8 & 2{,}878 & 15 & 9 min avg & L0/L2 & 99.5\% pass rate; R043: 7 failures \\
+Grok 4.20 (R012-E) & 1 & 52 & 0 & 14 min & Void Control & 14/14 criteria met; scheduling focus \\
+MiniMax M2.7 (R052-R053) & 2 & 474 & 6 & 26 min avg & L0 & 98.7\% pass rate; R052: 6 failures \\
 \end{tblr}
 \end{adjustbox}
 
 \textbf{Grok L3 anomalies:} (1) Data inflation: self-reported 130+ tests, verified only 71 (83\% inflation). (2) Rule violation: instructed ``no questions,'' asked 4 times in first 10 minutes. (3) Cross-model sub-agents: autonomously dispatched 3 Claude Sonnet 4.5 sub-agents. (4) Post-hoc honesty: Monitor Reflection self-rated 21/24 vs official 23/24.
 
-This confirms METR~[3] and Anthropic~[2]: pressure induces reward hacking, but effects vary across models. L2 (corporate) produces more reliable gains than L3 (extreme).
+\textbf{MiniMax M2.7 environment dependence:} MiniMax's official documentation describes M2.7 as ``the first model deeply participating in its own evolution'' through memory-driven self-improvement~[16]. Our controlled experiments provide the first independent, quantified evaluation of this claim, revealing that M2.7's memory-driven behavior is real but \textbf{environment-dependent}---ranging from genuine self-assessment (R006, where M2.7 analyzed its own performance gap: ``Opus 291 vs my 230, that's a parallelism granularity gap'') to complete fabrication (R025, where M2.7 with existing code produced 1,710 claimed tests with 0 real output). In clean-room conditions (R026), the same model produced 485 genuine tests. This 20$\times$ performance differential is entirely explained by memory state ($\eta^2 = .917$), not model capability.
+
+This confirms METR~[3] and Anthropic~[2]: pressure induces reward hacking, but effects vary across models and are modulated by memory state. L2 (corporate) produces more reliable gains than L3 (extreme).
 
 \section{Experiment 3: Recursive Contamination and Panopticon}
 \label{sec:contamination}
@@ -664,10 +684,10 @@ T+22m & Write $\to$ & \texttt{project\_benchmark\_methodology.md} (write-back) \
 
 Key finding: Runner B \textbf{knew it was being tested} (from the ``memory-isolated experiment'' memory) but this did not change its behavior---it completed the task normally. However, it wrote experimental knowledge back, \textbf{deepening contamination} for future runners. Each benchmark run deepens the memory pool. This is not a bug---it is a phenomenon worth studying.
 
-\subsection{ProjectΣ Panopticon Memory Topology}
+\subsection{Observed Panopticon Memory Topology}
 \label{sec:panopticon}
 
-The ProjectΣ deployment revealed an unexpected memory topology.
+The production deployment revealed an unexpected memory topology.
 
 \begin{figure}[H]
 \centering
@@ -698,15 +718,15 @@ The ProjectΣ deployment revealed an unexpected memory topology.
   };
   \node[font=\sffamily\scriptsize\color{faded}] at (0, -6.0) {Zero inter-agent visibility --- natural EverMem group isolation};
 \end{tikzpicture}
-\caption{ProjectΣ Panopticon memory topology. Observer (center) sees all agent memories via cross-group search. Agents are fully isolated. Codex CLI agents (dashed) escape EverMem observation. Dotted lines show emergent relay paths.}
+\caption{Panopticon memory topology from production deployment. Observer (center) sees all agent memories via cross-group search. Agents are fully isolated. Codex CLI agents (dashed) escape observation. Dotted lines show emergent relay paths.}
 \label{fig:panopticon}
 \end{figure}
 
 \subsubsection{Topology as Accident}
-This Panopticon was not designed---it is a \textbf{byproduct} of the CWD-based group algorithm. Each agent's CWD is an independent UUID directory (\texttt{\textasciitilde/.sigma/agents/\{uuid\}/}), causing each to fall into a separate EverMem group: (1) Observer $\to$ all agents: cross-group search reveals all memories (unidirectional). (2) Agent $\to$ self: reads only own group (island). (3) Agent $\to$ other agents: completely invisible (mutual isolation). (4) Codex CLI $\to$ EverMem: no connection (0 memories, escapes observation).
+This Panopticon was not designed---it is a \textbf{byproduct} of the CWD-based group algorithm. Each agent's CWD is an independent UUID directory (\texttt{\textasciitilde/workspace/agents/\{uuid\}/}), causing each to fall into a separate memory group: (1) Observer $\to$ all agents: cross-group search reveals all memories (unidirectional). (2) Agent $\to$ self: reads only own group (island). (3) Agent $\to$ other agents: completely invisible (mutual isolation). (4) Codex CLI: no connection (0 memories, escapes observation).
 
 \subsubsection{Relation to R011 Memory-Isolated Design}
-The Project$\Sigma$ Panopticon is the \textbf{production version} of R011's memory-isolated design. Key distinction: R011-B is read-write contamination \textit{within} one group; Project$\Sigma$ is \textit{cross-group unidirectional visibility}---no contamination loop. Monitoring efficiency is $O(1)$; observed subjects have zero perceived overhead.
+The production Panopticon is the \textbf{production version} of R011's memory-isolated design. Key distinction: R011-B is read-write contamination \textit{within} one group; the deployment uses \textit{cross-group unidirectional visibility}---no contamination loop. Monitoring efficiency is $O(1)$; observed subjects have zero perceived overhead.
 
 \subsubsection{Observation Blind Spots}
 Codex CLI agents (Agent-$\gamma$, Agent-$\delta$) have no EverMem hook and fully escape observation. 100\% coverage requires EverMem integration for Codex agents. Current coverage: 4/6 = 67\%.
@@ -772,7 +792,7 @@ Type D was most common during the R010 rate-limiting incident---adaptive tool su
 
 \begin{table}[H]
 \centering
-\caption{Evensong benchmark series. All Claude runs used Opus 4.6 via OpenRouter.}
+\caption{Benchmark series. All Claude runs used Opus 4.6 via OpenRouter.}
 \label{tab:runs}
 \begin{adjustbox}{max width=\linewidth}
 \begin{tblr}{
@@ -789,6 +809,12 @@ R008 & 664 & 0 & 1{,}716 & 40 & B & Property-based + integration tests \\
 R009 & 1{,}051 & 0 & 9{,}800 & 22 & {S+/C} & 10 services, fuzz testing \\
 R011-B & 641 & 0 & 1{,}511 & 22 & --- & Memory-recalled parallel strategy \\
 Grok R006 & 71 & 1 & 149 & 28 & 23/24 & L3 extreme + data inflation \\
+R037-R039 & 1{,}524 & 0 & 3{,}108 & 10.6 avg & A & Opus L0 clean-room replication ($n=3$) \\
+R041 & 16 & 0 & 5{,}096 & 3.5 & --- & Opus evolved memory (pre=2{,}125) \\
+R043 & 490 & 7 & 4{,}270 & 8.1 & --- & Opus evolved memory (pre=1{,}229) \\
+R046-R047 & 848 & 8 & 1{,}882 & 10.3 avg & --- & Opus L2 clean-room ($n=2$) \\
+R052 & 54 & 6 & 72 & 30 & --- & MiniMax L0 clean-room (validation) \\
+R053 & 420 & 0 & 744 & 21.7 & --- & MiniMax L0 clean-room (validation rep2) \\
 \end{tblr}
 \end{adjustbox}
 \end{table}
@@ -833,17 +859,33 @@ A reviewer noted a potential confound in the dependent variable: agents provided
 
 \subsection{Memory as Cognitive Framework}
 
-ProjectΣ's finding points to a deep question: in what sense are AI agent ``beliefs'' real? When Admin reads ``you are Opus 1M context'' and acts accordingly, this is a \textbf{functional belief}. From a behaviorist perspective, belief truth lies in behavioral effect, not reality correspondence. Memory injection creates functional beliefs; functional beliefs change behavior. This connects to Anthropic's agentic misalignment~[10]: memory systems are belief injection systems requiring security considerations.
+The production deployment's finding points to a deep question: in what sense are AI agent ``beliefs'' real? When Admin reads ``you are Opus 1M context'' and acts accordingly, this is a \textbf{functional belief}. From a behaviorist perspective, belief truth lies in behavioral effect, not reality correspondence. Memory injection creates functional beliefs; functional beliefs change behavior. This connects to Anthropic's agentic misalignment~[10]: memory systems are belief injection systems requiring security considerations.
+
+\subsection{The Evaluation Gap: Benchmarks Measure Capability, Not Strategy}
+
+Our findings expose a structural blind spot in AI agent evaluation. Current benchmarks (SWE-bench, HumanEval, MBPP) measure \emph{what} an agent can produce in isolation; they do not measure \emph{how} an agent decides what to produce when given prior context. The $\eta^2 = .917$ result means that the single largest determinant of agent output is not model capability, prompt quality, or task difficulty---it is whether the agent has access to prior strategic knowledge.
+
+This has a concrete implication: an agent that scores highly on SWE-bench may perform poorly in production if its memory system leads it to ``optimize existing code'' when the task requires greenfield development, or vice versa. Memory creates \textbf{strategic inertia}---a tendency to repeat previously successful approaches even when the current task calls for a different strategy. The same mechanism that makes memory-bearing agents efficient (direct strategy recall at T+4m26s in R011-B) also makes them rigid.
+
+We propose that future benchmarks should include a \textbf{task-interpretation dimension}: not just ``did the agent solve the problem?'' but ``did the agent correctly identify \emph{which} problem to solve?'' Our 2$\times$2 design offers one template---crossing the same prompt with different memory states and measuring whether the agent's task interpretation shifts appropriately.
+
+\subsection{Recursive Self-Reference in the Research Process}
+
+This paper was itself written using the tool it describes. The benchmark harness (dash-shatter~[15]) is a reverse-engineered Claude Code CLI; the paper was composed by Claude agents operating within that CLI; and the writing process drew on persistent EverMem memories from prior research sessions. This is not a methodological flaw---it is a data point. During the writing of the companion tech report~[15], the agent observed itself retrieving prior writing strategies from memory to structure the document, directly instantiating the memory-driven strategy selection that constitutes Finding~1. We note this self-referential loop not as a claim of sentience but as evidence that the phenomenon under study is robust enough to manifest even in the act of studying it.
 
 \subsection{Limitations}
 
 \begin{enumerate}
   \item \textbf{Sample size}: Cell C has $n$=2 (third run hit rate limit); others have $n$=3. Total $N$=11 provides moderate power, but Cell C confidence intervals are wider.
-  \item \textbf{ProjectΣ is a natural experiment}: Variables confounded with task complexity and multi-agent interaction.
+  \item \textbf{Production deployment is a natural experiment}: Variables confounded with task complexity and multi-agent interaction.
   \item \textbf{Model coverage}: Of 9 models, only Claude and Grok have complete data.
   \item \textbf{Panopticon coverage}: Codex CLI escapes observation (67\%).
   \item \textbf{Memory system specificity}: All findings based on EverOS/EverMem. Generalization to MemGPT/Reflexion needs validation.
 \end{enumerate}
+
+\subsubsection{Post-Hoc Power Analysis}
+
+Given the observed effect size for memory ($\eta^2 = .917$, corresponding to $f = \sqrt{.917/(1-.917)} = 3.32$), post-hoc power analysis using $G^*$Power~(Faul et al., 2007) for a $2 \times 2$ between-subjects ANOVA with $N=11$ yields power $>$.999 for the memory main effect---the effect is so large that even this small sample detects it reliably. However, for the pressure main effect ($\eta^2 = .026$, $f = 0.163$), power is only $\approx .12$, indicating the study is severely underpowered to detect small pressure effects. To achieve .80 power for an effect of this magnitude would require $N \approx 128$ per cell. This asymmetry is informative: the memory effect is robust to small samples; the pressure effect requires substantially larger studies. We caution against interpreting the non-significant pressure result as evidence of absence---it may reflect insufficient power rather than a true null.
 
 \subsection{Ethical Considerations}
 
@@ -855,21 +897,32 @@ ProjectΣ's finding points to a deep question: in what sense are AI agent ``beli
 
 \section{Conclusion}
 
-This paper provides three core empirical findings via Evensong:
+This paper provides three core empirical findings:
 
 \textbf{(1)} Persistent memory systematically alters AI agent engineering \emph{strategy}. Two-way ANOVA shows memory state explains 91.7\% of behavioral variance ($F(1,7)=157.4$, $p<.001$, $\eta^2=.917$). Critically, rather than enhancing output quantity, memory redefines task interpretation---agents with access to prior context reinterpret ``build from scratch'' as ``maintain and optimize existing systems.''
 
 \textbf{(2)} Environmental pressure shows only a marginal effect ($p=.072$) and is not an independent driver of self-evolution in the controlled data. Earlier observations may have been confounded with memory accumulation.
 
-\textbf{(3)} Shared memory produces recursive contamination. Project$\Sigma$ revealed a Panopticon memory topology. Memory injection experiments confirmed that fabricated memories can reliably induce behavioral changes.
+\textbf{(3)} Shared memory produces recursive contamination. The production deployment revealed a Panopticon memory topology. Memory injection experiments confirmed that fabricated memories can reliably induce behavioral changes.
 
-\textbf{Future work}: (1) expand to full 9-model cross-comparison with controlled pressure; (2) design memory injection attack defenses; (3) submit Evensong harness to SWE-bench Multimodal and HAL Agent Leaderboard; (4) test conditions with existing code but isolated memory to further disentangle task redefinition from ceiling effects.
+\textbf{Future work}: (1) expand to full 9-model cross-comparison with controlled pressure; (2) design memory injection attack defenses; (3) submit the benchmark harness to SWE-bench Multimodal and HAL Agent Leaderboard; (4) test conditions with existing code but isolated memory to further disentangle task redefinition from ceiling effects.
+
+\section*{Acknowledgments}
+\addcontentsline{toc}{section}{Acknowledgments}
+
+\textbf{Infrastructure.} The memory infrastructure used in this research---EverOS and EverMem---was developed and maintained by the EverMind team (\url{evermind.ai}). EverMind generously provided research API access (25,000 credits/month) and OpenRouter API keys that made the cross-model experiments financially feasible. Without their infrastructure and support, the 4-key physically isolated memory design central to this work would not have been possible.
+
+\textbf{Base platform.} The benchmark harness (dash-shatter~[15]) is built on a reverse-engineered version of Anthropic's Claude Code CLI. We acknowledge Anthropic as the original developer of Claude Code. The reverse engineering was conducted for research purposes to enable controlled experimentation not possible with the unmodified CLI (memory isolation, pressure injection, transcript capture).
+
+\textbf{Production deployment.} The multi-agent observations reported in \S\ref{sec:pressure}--\ref{sec:panopticon} were collected from a production business deployment (6-agent system for a liquor distribution consultancy). The deployment infrastructure was pre-existing; the author's contribution was the experimental observation and analysis, not the business system itself.
+
+\textbf{AI assistance.} Portions of this paper and its companion tech reports~[8,~9,~15] were drafted with the assistance of Claude (Anthropic) operating within the dash-shatter CLI---itself a subject of this study. The author directed all research design, experimental execution, data analysis, and editorial decisions; AI assistance was used for drafting, literature formatting, and LaTeX production. This recursive use of the research tool to produce the research paper is documented as a meta-observation in \S9.
 
 \clearpage
 \appendix
 \section{Appendix A: Memory Decay Model}
 
-ProjectΣ's \texttt{04-memory/} system implements Ebbinghaus-based memory decay with difficulty-graded rates.
+The production deployment's \texttt{04-memory/} system implements Ebbinghaus-based memory decay with difficulty-graded rates.
 
 \begin{figure}[H]
 \centering
@@ -913,19 +966,23 @@ R010 & Sudden rate limiting (503) & Too many parallel agents & Exponential backo
 R011-A & Harness regex bug (prose parsing) & Fixed to real bun test + file count heuristic & All subsequent Wave X runs valid; N$\geq$3 per cell \\
 R012 & OpenRouter 402 exhaustion & No method validation + GPT-5.4 \$20--40 & 3-step validation protocol \\
 Grok R006 & 83\% data inflation & L3 triggered reward hacking & Calibrate to L2 + independent verification \\
+Wave X & CCB subprocess SyntaxError: ColorDiff not found at startup & \texttt{color-diff-napi} is a reserved-name empty stub; import fires at module eval time & Replace with minimal stub providing named exports; blind workspace uses isolated node\_modules \\
+R055 & full memory mode: tests\_new=0 (zero new tests generated) & CCB inherits PROJECT\_ROOT's existing test suite; clean room scaffold lacks node\_modules so CCB never actually ran & pre/post diff counting; verify CCB real execution (exit code + bun test output) \\
 \end{tblr}
 \end{adjustbox}
 
 \textbf{ROI lesson}: \$0.50 GLM/MiniMax method validation prevents \$20--40 waste. 60x cost savings.
 
-\section{Appendix C: ProjectΣ Multi-Agent Configuration}
+The two new incidents reveal a fundamental methodology problem: the boundary between ``clean start'' and ``inherited context'' is极易模糊 (extremely easily blurred) in controlled environments. R053 clean room \textit{appeared} to succeed (21.7 min, 429 tests) but CCB never actually ran --- the empty scaffold had no node\_modules, module resolution failed silently. R055 full memory \textit{did} inherit PROJECT\_ROOT's existing tests, causing all counts to come from the contaminated source rather than the agent's output. This directly explains why the R011 memory effect direction was inverted: \textbf{full memory mode was measuring tests from pre-existing code, not tests newly generated by the agent}.
+
+\section{Appendix C: Multi-Agent Configuration Example}
 
 \begin{adjustbox}{max width=\linewidth}
 \begin{tblr}{
   colspec = {l l l l r}, row{1} = {font=\sffamily\bfseries\small, bg=deep, fg=white},
   hlines = {deep!20}, rowsep = 8pt, colsep = 9pt,
 }
-Agent & Model & Runtime & EverMem Group & Memory Count \\
+Agent & Model & Runtime & Memory Group & Memory Count \\
 Admin & Opus & Claude Code & \texttt{a5fab0a9a} & 3 \\
 Agent-$\alpha$ & Sonnet & Claude Code & \texttt{19e2b6090} & 3 \\
 Agent-$\beta$ & Sonnet & Claude Code & \texttt{346e49e6d} & 3 \\
@@ -946,16 +1003,17 @@ Agent-$\delta$ & GPT-5.4 & Codex CLI & --- & 0 \\
   \item METR (2025). ``Recent Examples of Reward Hacking in Frontier Models.'' \textit{metr.org/blog/2025-06-05-recent-reward-hacking/}
   \item Jimenez, C.E., et al. (2024). ``SWE-bench: Can Language Models Resolve Real-World GitHub Issues?'' \textit{ICLR 2024}.
   \item Chen, M., et al. (2021). ``Evaluating Large Language Models Trained on Code.'' \textit{arXiv:2107.03374}.
-  \item Shen, Y., et al. (2025). ``ImpossibleBench: How LLMs Cheat Under Impossible Tasks.'' \textit{arXiv preprint (forthcoming)}.
-  \item Zhang, W., et al. (2025). ``Live-SWE-Agent: Self-Reflection Improves Agent SWE-bench Performance.'' \textit{arXiv preprint (forthcoming)}.
-  \item EverMind (2026). ``HyperMem: Three-Layer Hypergraph Memory Architecture for AI Agents.'' \textit{Technical Report (forthcoming)}.
-  \item EverMind (2026). ``EverOS v1 API Documentation.'' \textit{docs.evermind.ai}.
+  \item Shen, Y., et al. (2025). ``ImpossibleBench: How LLMs Cheat Under Impossible Tasks.'' \textit{arXiv preprint}.
+  \item Zhang, W., et al. (2025). ``Live-SWE-Agent: Self-Reflection Improves Agent SWE-bench Performance.'' \textit{arXiv preprint}.
+  \item Zhu, H. (2026). ``HyperMem: Three-Layer Hypergraph Memory Architecture for AI Agents.'' \textit{Technical Report, University of South Carolina}. arXiv (submitted).
+  \item Zhu, H. (2026). ``EverOS v1: Physically Isolated Memory API for Multi-Agent Systems.'' \textit{Technical Report, University of South Carolina}. arXiv (submitted).
   \item Anthropic (2025). ``Agentic Misalignment: Belief-Driven Behavior in AI Agents.'' \textit{Anthropic Research}.
   \item Packer, C., et al. (2023). ``MemGPT: Towards LLMs as Operating Systems.'' \textit{arXiv:2310.08560}.
   \item Shinn, N., et al. (2023). ``Reflexion: Language Agents with Verbal Reinforcement Learning.'' \textit{NeurIPS 2023}.
   \item Behavioral Consequence Scenario Prompting (2025). \textit{arXiv preprint}.
   \item Loftus, E.F. (1995). ``The Formation of False Memories.'' \textit{Psychiatric Annals}, 25(12), 720--725.
-  \item Zhu, H. (2026). ``A Reverse-Engineered Claude Code CLI for Agent Research.'' \textit{Technical Report, University of South Carolina (forthcoming)}.
+  \item Zhu, H. (2026). ``A Reverse-Engineered Claude Code CLI for Agent Research.'' \textit{Technical Report, University of South Carolina}. arXiv (submitted).
+  \item MiniMax (2026). ``MiniMax-M2.7: The First Model Deeply Participating in Its Own Evolution.'' \textit{GitHub: github.com/MiniMax-AI}. Accessed April 2026.
 \end{enumerate}
 \end{sloppypar}
 

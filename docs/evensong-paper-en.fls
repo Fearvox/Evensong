@@ -432,9 +432,6 @@ INPUT ./evensong-paper-en.aux
 INPUT ./evensong-paper-en.aux
 INPUT evensong-paper-en.aux
 OUTPUT evensong-paper-en.aux
-INPUT /usr/local/texlive/2025/texmf-dist/tex/latex/microtype/mt-Palatino.cfg
-INPUT /usr/local/texlive/2025/texmf-dist/tex/latex/microtype/mt-Palatino.cfg
-INPUT /usr/local/texlive/2025/texmf-dist/tex/latex/microtype/mt-Palatino.cfg
 INPUT /usr/local/texlive/2025/texmf-dist/tex/latex/ninecolors/ninecolors.sty
 INPUT /usr/local/texlive/2025/texmf-dist/tex/latex/ninecolors/ninecolors.sty
 INPUT /usr/local/texlive/2025/texmf-dist/tex/latex/translations/translations-basic-dictionary-english.trsl
@@ -498,6 +495,9 @@ INPUT /usr/local/texlive/2025/texmf-dist/fonts/tfm/public/amsfonts/symbols/msam5
 INPUT /usr/local/texlive/2025/texmf-dist/fonts/tfm/public/amsfonts/symbols/msbm10.tfm
 INPUT /usr/local/texlive/2025/texmf-dist/fonts/tfm/public/amsfonts/symbols/msbm7.tfm
 INPUT /usr/local/texlive/2025/texmf-dist/fonts/tfm/public/amsfonts/symbols/msbm5.tfm
+INPUT /usr/local/texlive/2025/texmf-dist/fonts/tfm/public/cm/cmr10.tfm
+INPUT /usr/local/texlive/2025/texmf-dist/fonts/tfm/public/cm/cmr10.tfm
+INPUT /usr/local/texlive/2025/texmf-dist/fonts/tfm/public/cm/cmr10.tfm
 INPUT /usr/local/texlive/2025/texmf-dist/fonts/tfm/public/cm/cmr10.tfm
 INPUT /usr/local/texlive/2025/texmf-dist/fonts/tfm/public/cm/cmr10.tfm
 INPUT /usr/local/texlive/2025/texmf-dist/fonts/tfm/public/cm/cmr10.tfm
