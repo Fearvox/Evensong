@@ -231,6 +231,14 @@ export function createAutoMemCanUseTool(memoryDir: string): CanUseToolFn {
       if (typeof filePath === 'string' && isAutoMemPath(filePath)) {
         // Check content for secrets before allowing write
         const content = getContentFromInput(tool.name, input)
+        // Write without content is suspicious — block as precaution.
+        // Edit without new_string is acceptable (deletion-only edit via old_string).
+        if (tool.name === FILE_WRITE_TOOL_NAME && content === undefined) {
+          return denyAutoMemTool(
+            tool,
+            'Write operation missing content — blocked as precaution',
+          )
+        }
         if (content && containsSecrets(content)) {
           return denyAutoMemTool(
             tool,

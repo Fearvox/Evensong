@@ -111,6 +111,14 @@ describe('secretScanner', () => {
       expect(findings.some(f => f.pattern === 'GitHub OAuth')).toBe(true)
     })
 
+    test('detects Anthropic API key', () => {
+      const content =
+        'api_key: sk-ant-api03-abcdefghijklmnopqrstuvwxyz123456'
+      const findings = scanForSecrets(content)
+      expect(findings.length).toBeGreaterThan(0)
+      expect(findings[0].pattern).toBe('Anthropic API Key')
+    })
+
     test('detects Generic API Key (sk-)', () => {
       const content =
         'OPENAI_API_KEY=sk-abcdefghijklmnopqrstuvwxyz'
@@ -337,6 +345,27 @@ Project notes here.
         file_path: memFile,
         old_string: 'old text',
         new_string: 'Updated learning about Bun workspaces',
+      })
+      expect(result.behavior).toBe('allow')
+    })
+
+    test('denies Write when content is undefined (bypass prevention)', async () => {
+      const tool = makeMockTool('Write')
+      const memFile = `${TEST_MEMORY_DIR}topic.md`
+      const result = await canUseTool(tool, {
+        file_path: memFile,
+        // content intentionally missing — simulates undefined bypass
+      })
+      expect(result.behavior).toBe('deny')
+    })
+
+    test('allows Edit when new_string is undefined (deletion-only edit)', async () => {
+      const tool = makeMockTool('Edit')
+      const memFile = `${TEST_MEMORY_DIR}topic.md`
+      const result = await canUseTool(tool, {
+        file_path: memFile,
+        old_string: 'text to delete',
+        // new_string intentionally missing — deletion-only edit is valid
       })
       expect(result.behavior).toBe('allow')
     })

@@ -535,7 +535,10 @@ describe('extractMemories', () => {
     test('allows Write for paths within memory directory', async () => {
       const tool = makeMockTool('Write')
       const memFile = `${TEST_MEMORY_DIR}new-topic.md`
-      const result = await canUseTool(tool, { file_path: memFile })
+      const result = await canUseTool(tool, {
+        file_path: memFile,
+        content: '## New Memory\n\nSome clean content here.',
+      })
       expect(result.behavior).toBe('allow')
     })
 
@@ -555,6 +558,27 @@ describe('extractMemories', () => {
       const tool = makeMockTool('Edit')
       const result = await canUseTool(tool, { content: 'no path' })
       expect(result.behavior).toBe('deny')
+    })
+
+    test('denies Write when content is undefined (bypass prevention)', async () => {
+      const tool = makeMockTool('Write')
+      const memFile = `${TEST_MEMORY_DIR}new-topic.md`
+      const result = await canUseTool(tool, {
+        file_path: memFile,
+        // content intentionally missing
+      })
+      expect(result.behavior).toBe('deny')
+    })
+
+    test('allows Edit when new_string is undefined (deletion-only edit)', async () => {
+      const tool = makeMockTool('Edit')
+      const memFile = `${TEST_MEMORY_DIR}topic.md`
+      const result = await canUseTool(tool, {
+        file_path: memFile,
+        old_string: 'text to remove',
+        // new_string intentionally missing — deletion-only
+      })
+      expect(result.behavior).toBe('allow')
     })
 
     test('denies unknown tools', async () => {

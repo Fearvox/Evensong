@@ -73,6 +73,10 @@ const SECRET_PATTERNS: SecretPattern[] = [
     regex: /gho_[A-Za-z0-9_]{36,}/g,
   },
   {
+    name: 'Anthropic API Key',
+    regex: /sk-ant-[a-zA-Z0-9]{2,}-[A-Za-z0-9_-]{20,}/g,
+  },
+  {
     name: 'Generic API Key',
     regex:
       /(?:sk-|pk_live_|pk_test_|sk_live_|sk_test_|rk_live_|rk_test_)[A-Za-z0-9]{20,}/g,
