@@ -378,6 +378,31 @@ describe('extractMemories', () => {
       await executeExtractMemories(ctx2)
       expect(mockRunForkedAgent).toHaveBeenCalledTimes(2)
     })
+
+    test('cursor equals last message returns 0 new — throttled second call is skipped', async () => {
+      // Set throttle to every 2 turns so that a call with 0 new messages
+      // (turnsSinceLastExtraction=1 < 2) gets throttled away.
+      mockTenguBrambleLintel = 2
+
+      const msg1 = makeUserMessage()
+      const msg2 = makeAssistantMessage()
+      const ctx = makeContext([msg1, msg2])
+
+      // First call: turnsSinceLastExtraction increments to 1, but 1 < 2 → throttled
+      await executeExtractMemories(ctx)
+      expect(mockRunForkedAgent).toHaveBeenCalledTimes(0)
+
+      // Second call: turnsSinceLastExtraction increments to 2, 2 >= 2 → runs
+      await executeExtractMemories(ctx)
+      expect(mockRunForkedAgent).toHaveBeenCalledTimes(1)
+
+      // Cursor now equals last message UUID. Call again with the SAME messages —
+      // countModelVisibleMessagesSince returns 0 (no messages after cursor).
+      // turnsSinceLastExtraction increments to 1 again, but 1 < 2 → throttled.
+      // runForkedAgent should NOT be called a second time.
+      await executeExtractMemories(ctx)
+      expect(mockRunForkedAgent).toHaveBeenCalledTimes(1)
+    })
   })
 
   // ────────────────────────────────────────────────────────
@@ -800,6 +825,68 @@ describe('extractMemories', () => {
 
       // Clean up
       await extractPromise
+    })
+
+    test('concurrent coalescing: overlapping calls result in 1 immediate + 1 trailing', async () => {
+      // Use a deferred promise so we can control when the first runForkedAgent resolves
+      let resolveFirst!: () => void
+      const firstCallBlocker = new Promise<void>(r => {
+        resolveFirst = r
+      })
+
+      const defaultResult = {
+        messages: [],
+        totalUsage: {
+          input_tokens: 0,
+          output_tokens: 0,
+          cache_read_input_tokens: 0,
+          cache_creation_input_tokens: 0,
+          service_tier: undefined,
+          cache_creation: {
+            ephemeral_1h_input_tokens: 0,
+            ephemeral_5m_input_tokens: 0,
+          },
+        },
+      }
+
+      // First call blocks until we resolve; second call returns immediately
+      mockRunForkedAgent
+        .mockImplementationOnce(async () => {
+          await firstCallBlocker
+          return defaultResult
+        })
+        .mockImplementationOnce(async () => defaultResult)
+
+      const msg1 = makeUserMessage()
+      const msg2 = makeAssistantMessage()
+      const ctx1 = makeContext([msg1, msg2])
+
+      const msg3 = makeUserMessage()
+      const msg4 = makeAssistantMessage()
+      const ctx2 = makeContext([msg1, msg2, msg3, msg4])
+
+      // Fire two calls without awaiting — the second arrives while the first is in-progress
+      const promise1 = executeExtractMemories(ctx1)
+      // Let microtasks run so the first call enters runExtraction and sets inProgress=true
+      await new Promise(r => setTimeout(r, 10))
+      const promise2 = executeExtractMemories(ctx2)
+
+      // At this point: first call is blocked, second call stashed as pendingContext
+      // Only 1 runForkedAgent call should have started
+      expect(mockRunForkedAgent).toHaveBeenCalledTimes(1)
+
+      // Unblock the first call — its finally block will pick up the stashed context
+      // and run a trailing extraction
+      resolveFirst()
+
+      // Wait for both promises to settle
+      await promise1
+      await promise2
+      // Also drain to ensure trailing extraction completes
+      await drainPendingExtraction(5000)
+
+      // Total: 1 immediate + 1 trailing = 2 calls
+      expect(mockRunForkedAgent).toHaveBeenCalledTimes(2)
     })
 
     test('throttle gate respects tengu_bramble_lintel (run every N turns)', async () => {
