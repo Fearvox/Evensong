@@ -304,6 +304,11 @@ describe('extractMemories', () => {
       await executeExtractMemories(ctx)
 
       expect(mockRunForkedAgent).toHaveBeenCalled()
+      expect(runForkedAgentCalls[0]).toMatchObject({
+        querySource: 'extract_memories',
+        maxTurns: 5,
+        skipTranscript: true,
+      })
     })
 
     test('extraction skips when tengu_passport_quail is false', async () => {
@@ -930,12 +935,7 @@ describe('extractMemories', () => {
       expect(mockRunForkedAgent).toHaveBeenCalledTimes(1)
     })
 
-    test('executeExtractMemories is no-op before initExtractMemories', async () => {
-      // Overwrite the extractor by setting module-level to null
-      // We simulate this by calling with a context that would normally
-      // trigger extraction, but after verifying the init path works
-      // The init function is already called in beforeEach, so this
-      // test validates the normal flow
+    test('executeExtractMemories runs normally after initExtractMemories', async () => {
       const messages = [makeUserMessage(), makeAssistantMessage()]
       const ctx = makeContext(messages)
 
