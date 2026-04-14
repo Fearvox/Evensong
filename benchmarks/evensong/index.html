@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Evensong — Tencent Meeting Skill</title>
+<title>Evensong — Research Knowledge Vault</title>
 <link rel="icon" type="image/svg+xml" href="../dash-favicon.svg">
 <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
 <link href="https://cdn.jsdelivr.net/npm/geist@1.3.1/dist/fonts/geist-sans/style.min.css" rel="stylesheet">
@@ -113,9 +113,7 @@ body {
   margin-bottom: 1.25rem;
 }
 
-.hero h1 span {
-  color: var(--sun-gold);
-}
+.hero h1 span { color: var(--sun-gold); }
 
 .hero-meta {
   display: flex;
@@ -201,7 +199,6 @@ body {
   transform: translateY(24px);
   animation: fadeUp 0.7s var(--ease-entrance) 0.5s forwards;
 }
-
 .section-title {
   font-size: clamp(1.5rem, 3vw, 2rem);
   font-weight: 700;
@@ -209,7 +206,6 @@ body {
   margin-bottom: 0.5rem;
   color: var(--ink-primary);
 }
-
 .section-sub {
   font-size: 14px;
   color: var(--ink-muted);
@@ -217,66 +213,29 @@ body {
   max-width: 560px;
 }
 
-/* ===== COLLAPSIBLE CARDS ===== */
-.collapse-grid {
+/* ===== FINDINGS GRID ===== */
+.findings-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-  gap: 1rem;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1.25rem;
+  margin: 2rem 0;
 }
 
-.collapse-card {
+.finding-card {
   background: var(--paper-shadow);
   border: 1px solid oklch(0.88 0.015 80 / 0.6);
   border-radius: 12px;
-  overflow: hidden;
-  transition: border-color 150ms ease;
+  padding: 1.5rem;
+  transition: transform 280ms var(--ease-bounce), border-color 150ms ease;
 }
-.collapse-card:hover { border-color: oklch(0.88 0.015 80); }
+.finding-card:hover { transform: scale(1.02); border-color: var(--sun-gold); }
 
-.collapse-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 1.25rem 1.5rem;
-  cursor: pointer;
-  user-select: none;
-  gap: 1rem;
-}
-.collapse-header:hover { background: oklch(0.96 0.01 85 / 0.5); }
-
-.collapse-title-group { display: flex; align-items: center; gap: 0.75rem; }
-.collapse-icon { font-size: 18px; }
-.collapse-title { font-size: 14px; font-weight: 600; color: var(--ink-primary); }
-.collapse-subtitle { font-size: 11px; color: var(--ink-muted); font-family: var(--font-mono); margin-top: 0.1rem; }
-
-.collapse-arrow {
-  width: 20px;
-  height: 20px;
-  flex-shrink: 0;
-  transition: transform 300ms var(--ease-entrance);
-}
-.collapse-card.open .collapse-arrow { transform: rotate(180deg); }
-
-.collapse-body {
-  max-height: 0;
-  overflow: hidden;
-  transition: max-height 400ms var(--ease-entrance);
-}
-.collapse-card.open .collapse-body { max-height: 600px; }
-
-.collapse-content {
-  padding: 0 1.5rem 1.5rem;
-  font-size: 13px;
-  color: var(--ink-secondary);
-  line-height: 1.7;
-}
-
-.collapse-content ul { list-style: none; padding: 0; }
-.collapse-content li { padding: 0.3rem 0; display: flex; align-items: flex-start; gap: 0.5rem; }
-.collapse-content li::before { content: '→'; color: var(--sun-gold); font-size: 11px; margin-top: 0.25rem; flex-shrink: 0; }
-
-.tool-tag {
+.finding-icon { font-size: 24px; margin-bottom: 0.75rem; }
+.finding-title { font-size: 14px; font-weight: 700; color: var(--ink-primary); margin-bottom: 0.5rem; }
+.finding-desc { font-size: 12px; color: var(--ink-secondary); line-height: 1.6; }
+.finding-tag {
   display: inline-block;
+  margin-top: 0.75rem;
   background: oklch(0.88 0.015 80 / 0.6);
   color: var(--ink-secondary);
   font-size: 10px;
@@ -286,8 +245,62 @@ body {
   border-radius: 4px;
   text-transform: uppercase;
   letter-spacing: 0.03em;
-  margin: 0.15rem;
 }
+
+/* ===== MEMORY TIER TABLE ===== */
+.tier-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1.5rem 0;
+  font-size: 13px;
+}
+.tier-table th {
+  text-align: left;
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--ink-muted);
+  padding: 0.75rem 1rem;
+  border-bottom: 2px solid oklch(0.88 0.015 80 / 0.8);
+}
+.tier-table td {
+  padding: 0.85rem 1rem;
+  border-bottom: 1px solid oklch(0.88 0.015 80 / 0.5);
+  color: var(--ink-secondary);
+  vertical-align: top;
+}
+.tier-table tr:hover td { background: oklch(0.96 0.01 85 / 0.4); }
+.tier-table td:first-child { font-weight: 600; color: var(--ink-primary); }
+.tier-badge {
+  display: inline-block;
+  padding: 0.1rem 0.5rem;
+  border-radius: 100px;
+  font-size: 10px;
+  font-weight: 600;
+  font-family: var(--font-mono);
+  text-transform: uppercase;
+}
+.tier-badge.public { background: oklch(0.82 0.12 85 / 0.2); color: var(--ink-secondary); }
+.tier-badge.restricted { background: oklch(0.55 0.10 145 / 0.2); color: var(--ink-secondary); }
+.tier-badge.internal { background: oklch(0.22 0.02 60 / 0.15); color: var(--ink-primary); }
+
+/* ===== DIRECTORY TREE ===== */
+.dir-tree {
+  background: var(--paper-shadow);
+  border: 1px solid oklch(0.88 0.015 80 / 0.6);
+  border-radius: 12px;
+  padding: 1.5rem;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--ink-secondary);
+  line-height: 1.9;
+  margin: 1.5rem 0;
+  overflow-x: auto;
+}
+.dir-tree .t { color: var(--sun-gold); font-weight: 600; }
+.dir-tree .c { color: var(--ink-muted); }
+.dir-tree .n { color: var(--ink-primary); }
 
 /* ===== FIGURES ===== */
 .figure-grid {
@@ -313,48 +326,89 @@ body {
   border-bottom: 1px solid oklch(0.88 0.015 80 / 0.6);
 }
 
-.figure-caption {
-  padding: 1rem 1.25rem;
-}
-
-.figure-num {
-  font-size: 10px;
-  font-weight: 600;
-  font-family: var(--font-mono);
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  color: var(--sun-gold);
-  margin-bottom: 0.25rem;
-}
-
+.figure-caption { padding: 1rem 1.25rem; }
+.figure-num { font-size: 10px; font-weight: 600; font-family: var(--font-mono); text-transform: uppercase; letter-spacing: 0.05em; color: var(--sun-gold); margin-bottom: 0.25rem; }
 .figure-title { font-size: 13px; font-weight: 600; color: var(--ink-primary); margin-bottom: 0.25rem; }
 .figure-desc { font-size: 11px; color: var(--ink-muted); }
 
-/* ===== CAPABILITY TABLE ===== */
-.capability-table {
-  width: 100%;
-  border-collapse: collapse;
-  margin: 1.5rem 0;
+/* ===== COLLAPSE ===== */
+.collapse-card {
+  background: var(--paper-shadow);
+  border: 1px solid oklch(0.88 0.015 80 / 0.6);
+  border-radius: 12px;
+  overflow: hidden;
+  margin-bottom: 1rem;
+  transition: border-color 150ms ease;
+}
+.collapse-card:hover { border-color: oklch(0.88 0.015 80); }
+
+.collapse-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.1rem 1.5rem;
+  cursor: pointer;
+  user-select: none;
+  gap: 1rem;
+}
+.collapse-header:hover { background: oklch(0.96 0.01 85 / 0.5); }
+
+.collapse-title-group { display: flex; align-items: center; gap: 0.75rem; }
+.collapse-icon { font-size: 18px; }
+.collapse-title { font-size: 14px; font-weight: 600; color: var(--ink-primary); }
+
+.collapse-arrow {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+  transition: transform 300ms var(--ease-entrance);
+}
+.collapse-card.open .collapse-arrow { transform: rotate(180deg); }
+
+.collapse-body {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 400ms var(--ease-entrance);
+}
+.collapse-card.open .collapse-body { max-height: 800px; }
+
+.collapse-content {
+  padding: 0 1.5rem 1.5rem;
   font-size: 13px;
-}
-.capability-table th {
-  text-align: left;
-  font-size: 10px;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  color: var(--ink-muted);
-  padding: 0.75rem 1rem;
-  border-bottom: 2px solid oklch(0.88 0.015 80 / 0.8);
-}
-.capability-table td {
-  padding: 0.85rem 1rem;
-  border-bottom: 1px solid oklch(0.88 0.015 80 / 0.5);
   color: var(--ink-secondary);
-  vertical-align: top;
+  line-height: 1.7;
 }
-.capability-table tr:hover td { background: oklch(0.96 0.01 85 / 0.4); }
-.capability-table td:first-child { font-weight: 600; color: var(--ink-primary); }
+
+.collapse-content ul { list-style: none; padding: 0; }
+.collapse-content li { padding: 0.3rem 0; display: flex; align-items: flex-start; gap: 0.5rem; }
+.collapse-content li::before { content: '→'; color: var(--sun-gold); font-size: 11px; margin-top: 0.25rem; flex-shrink: 0; }
+
+.decay-formula {
+  background: oklch(0.96 0.01 85 / 0.6);
+  border: 1px solid oklch(0.88 0.015 80 / 0.8);
+  border-radius: 8px;
+  padding: 1rem;
+  margin: 0.75rem 0;
+  font-family: var(--font-mono);
+  font-size: 13px;
+  color: var(--ink-secondary);
+  text-align: center;
+}
+
+/* ===== CODE BLOCK ===== */
+.code-block {
+  background: var(--paper-shadow);
+  border: 1px solid oklch(0.88 0.015 80 / 0.6);
+  border-radius: 10px;
+  padding: 1.25rem 1.5rem;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--ink-secondary);
+  line-height: 1.8;
+  overflow-x: auto;
+  margin: 1rem 0;
+}
+.code-block .k { color: var(--sun-gold); font-weight: 600; }
 
 /* ===== FOOTER ===== */
 .footer {
@@ -452,20 +506,7 @@ body {
   min-height: 1.2em;
 }
 
-.gate-hint {
-  font-size: 11px;
-  color: var(--ink-muted);
-  font-family: var(--font-mono);
-  margin-top: 1rem;
-}
-
-/* hash bar */
-.hash-bar {
-  display: flex;
-  gap: 0.35rem;
-  justify-content: center;
-  margin: 0.75rem 0;
-}
+.hash-bar { display: flex; gap: 0.35rem; justify-content: center; margin: 0.75rem 0; }
 .hash-dot {
   width: 8px;
   height: 8px;
@@ -474,6 +515,57 @@ body {
   transition: background 200ms ease, transform 200ms ease;
 }
 .hash-dot.active { background: var(--sun-gold); transform: scale(1.3); }
+
+.gate-hint { font-size: 11px; color: var(--ink-muted); font-family: var(--font-mono); margin-top: 1rem; }
+
+/* ===== LANGUAGE TOGGLE ===== */
+.lang-toggle {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  z-index: 9999;
+  display: flex;
+  gap: 0;
+  border: 1px solid oklch(0.88 0.015 80 / 0.7);
+  border-radius: 4px;
+  overflow: visible;
+  background: oklch(0.96 0.01 85 / 0.95);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  box-shadow: 0 2px 8px oklch(0 0 0 / 0.08);
+  pointer-events: auto;
+}
+.lang-btn {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 500;
+  padding: 8px 16px;
+  color: var(--ink-muted);
+  text-decoration: none;
+  transition: background-color 150ms ease, color 150ms ease;
+  border: none;
+  cursor: pointer;
+  background: transparent;
+  display: inline-block;
+  line-height: 1;
+  -webkit-tap-highlight-color: oklch(0 0 0 / 0.1);
+  touch-action: manipulation;
+  user-select: none;
+}
+.lang-btn:hover { background: oklch(0.88 0.015 80 / 0.5); }
+.lang-btn.active {
+  background: oklch(0.22 0.02 60 / 0.1);
+  color: var(--ink-primary);
+  font-weight: 600;
+  cursor: default;
+}
+.lang-btn + .lang-btn {
+  border-left: 1px solid oklch(0.88 0.015 80 / 0.5);
+}
+
+/* ===== I18N ===== */
+[lang=en] .zh-only { display: none; }
+[lang=zh] .en-only { display: none; }
 </style>
 </head>
 <body>
@@ -481,14 +573,22 @@ body {
 <!-- PAPER GRAIN -->
 <div class="paper-grain"></div>
 
+<!-- LOCALE REDIRECT (runs before paint) -->
+<script>if(localStorage.getItem('evensong-locale')==='zh')document.documentElement.setAttribute('lang','zh');</script>
+
+<!-- LANGUAGE TOGGLE -->
+<div class="lang-toggle" style="z-index: 1001;">
+  <button class="lang-btn active" id="lang-en" onclick="setLocale('en')">EN</button>
+  <button class="lang-btn" id="lang-zh" onclick="setLocale('zh')">中文</button>
+</div>
+
 <!-- PASSWORD GATE -->
 <div id="password-gate">
   <div class="gate-box">
-    <div class="gate-lock">🔒</div>
-    <div class="gate-title">Evensong Access</div>
+    <div class="gate-lock">🔐</div>
+    <div class="gate-title">Evensong Vault</div>
     <div class="gate-sub">三层哈希验证 · 方程优化解</div>
 
-    <!-- Layer 1: SHA-256 visualization -->
     <div class="hash-bar" id="hash-bar-1">
       <div class="hash-dot" id="hd1-1"></div>
       <div class="hash-dot" id="hd1-2"></div>
@@ -497,7 +597,7 @@ body {
 
     <div class="gate-puzzle" id="gate-puzzle">
       // 方程优化层<br>
-      <span id="puzzle-text">计算: sum of first N natural numbers = 78, 求 N</span>
+      <span id="puzzle-text">sum of first N natural numbers = 78, 求 N</span>
     </div>
 
     <div class="hash-bar" id="hash-bar-2">
@@ -528,23 +628,33 @@ body {
   <!-- HERO -->
   <section class="hero">
     <div class="hero-badge">
-      <span class="hero-emoji">📅</span>
-      <span>腾讯会议 Skill · Evensong</span>
+      <span class="hero-emoji">🧠</span>
+      <span class="en-only">Research Knowledge Vault · Evensong</span>
+      <span class="zh-only">研究知识库 · Evensong</span>
     </div>
-    <h1>Tencent Meeting<br><span>Intelligence Layer</span></h1>
+    <h1>
+      <span class="en-only">Evensong</span>
+      <span class="zh-only">Evensong</span>
+      <br>
+      <span class="en-only">Research Vault</span>
+      <span class="zh-only">研究知识库</span>
+    </h1>
     <div class="hero-meta">
-      <span>v1.0.6</span>
+      <span class="en-only">R012-E Benchmark</span>
+      <span class="zh-only">R012-E 基准测试</span>
       <span>·</span>
-      <span>15 tools</span>
+      <span class="en-only">Memory Causation</span>
+      <span class="zh-only">记忆因果链</span>
       <span>·</span>
-      <span>OpenClaw Compatible</span>
+      <span class="en-only">Ebbinghaus Decay</span>
+      <span class="zh-only">艾宾浩斯遗忘曲线</span>
     </div>
     <div class="hero-actions">
-      <a href="https://github.com/Fearvox/tencent-meeting-mcp" class="btn-primary" target="_blank">
-        ⚡ GitHub Repo
+      <a href="https://github.com/Fearvox/dash-research-vault" class="btn-primary" target="_blank">
+        🧠 <span class="en-only">GitHub Repo</span><span class="zh-only">GitHub 仓库</span>
       </a>
       <a href="https://bench.zonicdesign.art" class="btn-secondary">
-        ← Benchmark Hub
+        ← <span class="en-only">Benchmark Hub</span><span class="zh-only">基准测试中心</span>
       </a>
     </div>
   </section>
@@ -552,545 +662,435 @@ body {
   <!-- STATS -->
   <div class="stats-row">
     <div class="stat-card">
-      <div class="stat-number">15</div>
-      <div class="stat-label">Tools</div>
+      <div class="stat-number">3</div>
+      <div class="stat-label"><span class="en-only">Core Findings</span><span class="zh-only">核心发现</span></div>
     </div>
     <div class="stat-card">
       <div class="stat-number">3</div>
-      <div class="stat-label">Tiers</div>
+      <div class="stat-label"><span class="en-only">Memory Tiers</span><span class="zh-only">记忆层级</span></div>
     </div>
     <div class="stat-card">
       <div class="stat-number">72h</div>
-      <div class="stat-label">Decay Half-life</div>
+      <div class="stat-label"><span class="en-only">Decay Half-life</span><span class="zh-only">衰减半衰期</span></div>
     </div>
     <div class="stat-card">
-      <div class="stat-number">v1.0.6</div>
-      <div class="stat-label">Version</div>
+      <div class="stat-number">5</div>
+      <div class="stat-label"><span class="en-only">Agent Roles</span><span class="zh-only">Agent 角色</span></div>
     </div>
   </div>
 
-  <!-- CAPABILITIES -->
+  <!-- THREE FINDINGS -->
   <section class="section">
-    <span class="kicker">Capabilities</span>
-    <h2 class="section-title">三层能力体系</h2>
-    <p class="section-sub">覆盖会议全生命周期 — 从预约到纪要</p>
+    <span class="kicker en-only">Core Findings</span>
+    <span class="kicker zh-only">核心发现</span>
+    <h2 class="section-title en-only">Three Core Findings</h2>
+    <h2 class="section-title zh-only">三大核心发现</h2>
+    <p class="section-sub en-only">From R012-E Evensong Benchmark · April 2026</p>
+    <p class="section-sub zh-only">R012-E Evensong 基准测试 · 2026年4月</p>
 
-    <table class="capability-table">
-      <thead>
-        <tr>
-          <th>类型</th>
-          <th>支持的功能</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr>
-          <td>📅 会议管理</td>
-          <td>预约会议、修改会议、取消会议、获取会议详情</td>
-        </tr>
-        <tr>
-          <td>🔍 会议查询</td>
-          <td>查询个人会议列表、查询已结束会议、查看参会成员、受邀成员、等候室</td>
-        </tr>
-        <tr>
-          <td>🎙️ 录制与纪要</td>
-          <td>查询录制列表、获取录制下载地址、查询转写详情、智能纪要</td>
-        </tr>
-      </tbody>
-    </table>
-  </section>
-
-  <!-- COLLAPSIBLE TOOL CARDS -->
-  <section class="section">
-    <span class="kicker">Tool Reference</span>
-    <h2 class="section-title">15 工具详解</h2>
-    <p class="section-sub">点击展开各工具使用规范与参数</p>
-
-    <div class="collapse-grid">
-
-      <!-- convert_timestamp -->
-      <div class="collapse-card" onclick="toggleCollapse(this)">
-        <div class="collapse-header">
-          <div class="collapse-title-group">
-            <span class="collapse-icon">⏱️</span>
-            <div>
-              <div class="collapse-title">convert_timestamp</div>
-              <div class="collapse-subtitle">时间转换 / 当前时间基准</div>
-            </div>
-          </div>
-          <svg class="collapse-arrow" viewBox="0 0 16 16" fill="none">
-            <path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
-        </div>
-        <div class="collapse-body">
-          <div class="collapse-content">
-            <p>获取当前时间基准 / 时间格式互转 / 时间戳转可读时间</p>
-            <ul>
-              <li><strong>time_now_str</strong> — 当前时间字符串</li>
-              <li><strong>time_yesterday_str</strong> — 昨天时间（当前-24h）</li>
-              <li><strong>time_week_str</strong> — 一周前时间（当前-7d）</li>
-              <li><strong>parsed_time_unix</strong> — UTC 时间戳（API 直用）</li>
-            </ul>
-            <div style="margin-top:0.75rem">
-              <span class="tool-tag">Asia/Shanghai</span>
-              <span class="tool-tag">ISO 8601</span>
-              <span class="tool-tag">UTC+8</span>
-            </div>
-          </div>
-        </div>
+    <div class="findings-grid">
+      <div class="finding-card">
+        <div class="finding-icon">🧬</div>
+        <div class="finding-title"><span class="en-only">Memory Causation</span><span class="zh-only">记忆因果链</span></div>
+        <div class="finding-desc en-only">Agent knowledge base accumulates over time through dialogue extraction and external data collection. Strategy recall directly drives deployment decisions.</div>
+        <div class="finding-desc zh-only">Agent 知识库通过对话提取和外部数据收集随时间积累。策略召回直接驱动部署决策。</div>
+        <span class="finding-tag">Discovery #1</span>
       </div>
-
-      <!-- schedule_meeting -->
-      <div class="collapse-card" onclick="toggleCollapse(this)">
-        <div class="collapse-header">
-          <div class="collapse-title-group">
-            <span class="collapse-icon">📆</span>
-            <div>
-              <div class="collapse-title">schedule_meeting</div>
-              <div class="collapse-subtitle">创建会议</div>
-            </div>
-          </div>
-          <svg class="collapse-arrow" viewBox="0 0 16 16" fill="none">
-            <path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
-        </div>
-        <div class="collapse-body">
-          <div class="collapse-content">
-            <p>必须获取：<code>subject</code>（主题）、<code>start_time</code>、<code>end_time</code></p>
-            <ul>
-              <li>未指定结束时间 → 默认 1 小时</li>
-              <li>周期性会议：需 <code>meeting_type=1</code> + <code>recurring_type</code> + <code>until_count</code></li>
-              <li>不支持邀请人，创建成功后不返回邀请人</li>
-            </ul>
-            <div style="margin-top:0.75rem">
-              <span class="tool-tag">强制 subject</span>
-              <span class="tool-tag">周期性</span>
-            </div>
-          </div>
-        </div>
+      <div class="finding-card">
+        <div class="finding-icon">⚡</div>
+        <div class="finding-title"><span class="en-only">L2 Pressure Self-Evolution</span><span class="zh-only">L2 压力自我进化</span></div>
+        <div class="finding-desc en-only">Under L2 (full-scope) pressure, agents produce 157-900% more tests with emergent self-organization. L0 agents stop at completion; L2 agents converge.</div>
+        <div class="finding-desc zh-only">在 L2（全范围）压力下，Agent 产出 157-900% 更多测试，呈现涌现性自我组织。L0 Agent 止步于完成；L2 Agent 趋于收敛。</div>
+        <span class="finding-tag">Discovery #2</span>
       </div>
-
-      <!-- update_meeting -->
-      <div class="collapse-card" onclick="toggleCollapse(this)">
-        <div class="collapse-header">
-          <div class="collapse-title-group">
-            <span class="collapse-icon">✏️</span>
-            <div>
-              <div class="collapse-title">update_meeting</div>
-              <div class="collapse-subtitle">修改会议</div>
-            </div>
-          </div>
-          <svg class="collapse-arrow" viewBox="0 0 16 16" fill="none">
-            <path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
-        </div>
-        <div class="collapse-body">
-          <div class="collapse-content">
-            <p>修改前<strong>必须二次确认</strong>，展示会议信息，用户确认后再执行</p>
-            <ul>
-              <li>展示原会议信息（subject、start_time、end_time）</li>
-              <li>等待用户明确确认</li>
-              <li>返回 X-Tc-Trace 追踪字段</li>
-            </ul>
-            <div style="margin-top:0.75rem">
-              <span class="tool-tag">二次确认</span>
-              <span class="tool-tag">敏感操作</span>
-            </div>
-          </div>
-        </div>
+      <div class="finding-card">
+        <div class="finding-icon">🔒</div>
+        <div class="finding-title"><span class="en-only">Recursive Contamination Control</span><span class="zh-only">递归污染控制</span></div>
+        <div class="finding-desc en-only">Three-tier gate (Agent → Admin → Researcher) prevents low-quality information self-reinforcement. Writes require review before promotion.</div>
+        <div class="finding-desc zh-only">三层门控（Agent → Admin → Researcher）防止低质量信息自增强。写入需审核后方可晋升。</div>
+        <span class="finding-tag">Discovery #3</span>
       </div>
-
-      <!-- cancel_meeting -->
-      <div class="collapse-card" onclick="toggleCollapse(this)">
-        <div class="collapse-header">
-          <div class="collapse-title-group">
-            <span class="collapse-icon">🗑️</span>
-            <div>
-              <div class="collapse-title">cancel_meeting</div>
-              <div class="collapse-subtitle">取消会议</div>
-            </div>
-          </div>
-          <svg class="collapse-arrow" viewBox="0 0 16 16" fill="none">
-            <path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
-        </div>
-        <div class="collapse-body">
-          <div class="collapse-content">
-            <p>取消前<strong>必须二次确认</strong>，展示会议信息</p>
-            <ul>
-              <li>取消子会议 → 传 <code>sub_meeting_id</code></li>
-              <li>取消整场 → 传 <code>meeting_type=1</code></li>
-              <li>返回 rpcUuid 用于问题排查</li>
-            </ul>
-            <div style="margin-top:0.75rem">
-              <span class="tool-tag">二次确认</span>
-              <span class="tool-tag">不可逆</span>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- get_meeting -->
-      <div class="collapse-card" onclick="toggleCollapse(this)">
-        <div class="collapse-header">
-          <div class="collapse-title-group">
-            <span class="collapse-icon">🔎</span>
-            <div>
-              <div class="collapse-title">get_meeting</div>
-              <div class="collapse-subtitle">查询会议详情 (meeting_id)</div>
-            </div>
-          </div>
-          <svg class="collapse-arrow" viewBox="0 0 16 16" fill="none">
-            <path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
-        </div>
-        <div class="collapse-body">
-          <div class="collapse-content">
-            <p>通过 <code>meeting_id</code> 查询会议详情</p>
-            <ul>
-              <li>返回主持人和参会者昵称（默认不返回用户 ID）</li>
-              <li>周期性会议含 <code>current_sub_meeting_id</code></li>
-              <li>需传入 <code>_client_info</code> 对象</li>
-            </ul>
-            <div style="margin-top:0.75rem">
-              <span class="tool-tag">meeting_id</span>
-              <span class="tool-tag">周期性</span>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- get_meeting_by_code -->
-      <div class="collapse-card" onclick="toggleCollapse(this)">
-        <div class="collapse-header">
-          <div class="collapse-title-group">
-            <span class="collapse-icon">🔢</span>
-            <div>
-              <div class="collapse-title">get_meeting_by_code</div>
-              <div class="collapse-subtitle">会议号 → meeting_id</div>
-            </div>
-          </div>
-          <svg class="collapse-arrow" viewBox="0 0 16 16" fill="none">
-            <path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
-        </div>
-        <div class="collapse-body">
-          <div class="collapse-content">
-            <p>将 9 位会议号（<code>meeting_code</code>）转换为 <code>meeting_id</code></p>
-            <ul>
-              <li>用户给会议号时，<strong>先调用此工具</strong></li>
-              <li>获取 meeting_id 后再调用目标工具</li>
-              <li>作为录制/转写查询的前置步骤</li>
-            </ul>
-            <div style="margin-top:0.75rem">
-              <span class="tool-tag">前置步骤</span>
-              <span class="tool-tag">必调用</span>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- get_meeting_participants -->
-      <div class="collapse-card" onclick="toggleCollapse(this)">
-        <div class="collapse-header">
-          <div class="collapse-title-group">
-            <span class="collapse-icon">👥</span>
-            <div>
-              <div class="collapse-title">get_meeting_participants</div>
-              <div class="collapse-subtitle">获取参会成员明细</div>
-            </div>
-          </div>
-          <svg class="collapse-arrow" viewBox="0 0 16 16" fill="none">
-            <path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
-        </div>
-        <div class="collapse-body">
-          <div class="collapse-content">
-            <p>查看实际参会人员、参会明细</p>
-            <ul>
-              <li>周期性会议必须传 <code>sub_meeting_id</code></li>
-              <li>根据 <code>has_remaining</code> 判断是否分页</li>
-              <li>下一页用返回的 <code>next_pos</code></li>
-            </ul>
-            <div style="margin-top:0.75rem">
-              <span class="tool-tag">分页查询</span>
-              <span class="tool-tag">成员明细</span>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- get_records_list -->
-      <div class="collapse-card" onclick="toggleCollapse(this)">
-        <div class="collapse-header">
-          <div class="collapse-title-group">
-            <span class="collapse-icon">🎬</span>
-            <div>
-              <div class="collapse-title">get_records_list</div>
-              <div class="collapse-subtitle">查询录制列表</div>
-            </div>
-          </div>
-          <svg class="collapse-arrow" viewBox="0 0 16 16" fill="none">
-            <path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
-        </div>
-        <div class="collapse-body">
-          <div class="collapse-content">
-            <p>查询会议录制文件列表</p>
-            <ul>
-              <li>传 <code>meeting_id</code> 或 <code>meeting_code</code> → 时间可不传</li>
-              <li>未传会议 ID → <code>start_time</code> 和 <code>end_time</code> 必须同时传</li>
-              <li>返回 <code>meeting_record_id</code></li>
-            </ul>
-            <div style="margin-top:0.75rem">
-              <span class="tool-tag">meeting_id</span>
-              <span class="tool-tag">录制</span>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- get_record_addresses -->
-      <div class="collapse-card" onclick="toggleCollapse(this)">
-        <div class="collapse-header">
-          <div class="collapse-title-group">
-            <span class="collapse-icon">📥</span>
-            <div>
-              <div class="collapse-title">get_record_addresses</div>
-              <div class="collapse-subtitle">获取录制下载地址</div>
-            </div>
-          </div>
-          <svg class="collapse-arrow" viewBox="0 0 16 16" fill="none">
-            <path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
-        </div>
-        <div class="collapse-body">
-          <div class="collapse-content">
-            <p>获取录制文件下载链接</p>
-            <ul>
-              <li>用户提供会议号时执行三步：<br>
-                ① <code>get_meeting_by_code</code><br>
-                ② <code>get_records_list</code><br>
-                ③ <code>get_record_addresses</code></li>
-              <li>返回多个 resolution 备选地址</li>
-            </ul>
-            <div style="margin-top:0.75rem">
-              <span class="tool-tag">三步查询</span>
-              <span class="tool-tag">下载地址</span>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- get_transcripts_details -->
-      <div class="collapse-card" onclick="toggleCollapse(this)">
-        <div class="collapse-header">
-          <div class="collapse-title-group">
-            <span class="collapse-icon">📝</span>
-            <div>
-              <div class="collapse-title">get_transcripts_details</div>
-              <div class="collapse-subtitle">查询转写详情</div>
-            </div>
-          </div>
-          <svg class="collapse-arrow" viewBox="0 0 16 16" fill="none">
-            <path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
-        </div>
-        <div class="collapse-body">
-          <div class="collapse-content">
-            <p>获取会议转写全文</p>
-            <ul>
-              <li>分页：<code>pid</code>（起始段落 ID）+ <code>limit</code></li>
-              <li>用户给会议号时三步：<br>
-                ① <code>get_meeting_by_code</code><br>
-                ② <code>get_records_list</code> → <code>record_file_id</code><br>
-                ③ <code>get_transcripts_details</code></li>
-            </ul>
-            <div style="margin-top:0.75rem">
-              <span class="tool-tag">转写全文</span>
-              <span class="tool-tag">分页</span>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- get_smart_minutes -->
-      <div class="collapse-card" onclick="toggleCollapse(this)">
-        <div class="collapse-header">
-          <div class="collapse-title-group">
-            <span class="collapse-icon">🧠</span>
-            <div>
-              <div class="collapse-title">get_smart_minutes</div>
-              <div class="collapse-subtitle">获取智能纪要</div>
-            </div>
-          </div>
-          <svg class="collapse-arrow" viewBox="0 0 16 16" fill="none">
-            <path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
-        </div>
-        <div class="collapse-body">
-          <div class="collapse-content">
-            <p>获取 AI 生成的智能会议纪要</p>
-            <ul>
-              <li>推荐信息获取优先级：<br>
-                ① <code>get_smart_minutes</code>（优先）<br>
-                ② <code>get_transcripts_details</code><br>
-                ③ <code>get_record_addresses</code></li>
-              <li><code>lang</code> 支持：<code>default</code> / <code>zh</code> / <code>en</code> / <code>ja</code></li>
-            </ul>
-            <div style="margin-top:0.75rem">
-              <span class="tool-tag">AI 纪要</span>
-              <span class="tool-tag">多语言</span>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- check_skill_version -->
-      <div class="collapse-card" onclick="toggleCollapse(this)">
-        <div class="collapse-header">
-          <div class="collapse-title-group">
-            <span class="collapse-icon">🔄</span>
-            <div>
-              <div class="collapse-title">check_skill_version</div>
-              <div class="collapse-subtitle">版本更新检查</div>
-            </div>
-          </div>
-          <svg class="collapse-arrow" viewBox="0 0 16 16" fill="none">
-            <path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
-        </div>
-        <div class="collapse-body">
-          <div class="collapse-content">
-            <p>检查是否有新版本可用</p>
-            <ul>
-              <li>服务端强制拦截版本过旧请求</li>
-              <li>根据返回下载链接安装最新版本</li>
-              <li><strong>禁止</strong>修改请求头 X-Skill-Version 绕过检查</li>
-              <li>更新后必须<strong>重新开始新对话</strong></li>
-            </ul>
-            <div style="margin-top:0.75rem">
-              <span class="tool-tag">强制更新</span>
-              <span class="tool-tag">版本管理</span>
-            </div>
-          </div>
-        </div>
-      </div>
-
     </div>
   </section>
 
   <!-- KEY FIGURES -->
   <section class="section">
-    <span class="kicker">Research</span>
-    <h2 class="section-title">核心图表</h2>
-    <p class="section-sub">Evensong R012-E Benchmark 关键发现</p>
+    <span class="kicker en-only">Research</span>
+    <span class="kicker zh-only">图表</span>
+    <h2 class="section-title en-only">R012-E Core Figures</h2>
+    <h2 class="section-title zh-only">R012-E 核心图表</h2>
+    <p class="section-sub en-only">From Evensong R012-E Benchmark Paper</p>
+    <p class="section-sub zh-only">R012-E Evensong 基准测试论文图表</p>
 
     <div class="figure-grid">
       <div class="figure-card">
         <img class="figure-img" src="fig1-swarm-taxonomy.png" alt="Swarm Taxonomy"
           onerror="this.style.display='none'" />
         <div class="figure-caption">
-          <div class="figure-num">Fig. 01</div>
-          <div class="figure-title">4-Topic Swarm Taxonomy</div>
-          <div class="figure-desc">Scheduling · Memory · Repeatability · Vault</div>
+          <div class="figure-num en-only">Fig. 01</div>
+          <div class="figure-num zh-only">图 01</div>
+          <div class="figure-title en-only">4-Topic Swarm Taxonomy</div>
+          <div class="figure-title zh-only">四主题 Swarm 分类法</div>
+          <div class="figure-desc en-only">Scheduling · Memory · Repeatability · Vault</div>
+          <div class="figure-desc zh-only">调度 · 记忆 · 可复现性 · Vault</div>
         </div>
       </div>
       <div class="figure-card">
         <img class="figure-img" src="fig2-behavioral-heatmap.png" alt="Behavioral Heatmap"
           onerror="this.style.display='none'" />
         <div class="figure-caption">
-          <div class="figure-num">Fig. 02</div>
-          <div class="figure-title">R012-E Behavioral Heatmap</div>
-          <div class="figure-desc">3 benchmarks × 4 topics × 3 pressure levels</div>
+          <div class="figure-num en-only">Fig. 02</div>
+          <div class="figure-num zh-only">图 02</div>
+          <div class="figure-title en-only">R012-E Behavioral Heatmap</div>
+          <div class="figure-title zh-only">R012-E 行为热力图</div>
+          <div class="figure-desc en-only">3 benchmarks × 4 topics × 3 pressure levels</div>
+          <div class="figure-desc zh-only">3个基准 × 4个主题 × 3个压力层级</div>
         </div>
       </div>
       <div class="figure-card">
         <img class="figure-img" src="fig3-memory-causation.png" alt="Memory Causation"
           onerror="this.style.display='none'" />
         <div class="figure-caption">
-          <div class="figure-num">Fig. 03</div>
-          <div class="figure-title">Memory Causation Chain</div>
-          <div class="figure-desc">Strategy recall → Deployment → Architecture decision</div>
+          <div class="figure-num en-only">Fig. 03</div>
+          <div class="figure-num zh-only">图 03</div>
+          <div class="figure-title en-only">Memory Causation Chain</div>
+          <div class="figure-title zh-only">记忆因果链</div>
+          <div class="figure-desc en-only">Strategy recall → Deployment → Architecture</div>
+          <div class="figure-desc zh-only">策略召回 → 部署 → 架构</div>
         </div>
       </div>
       <div class="figure-card">
         <img class="figure-img" src="fig4-l2-pressure-timeline.png" alt="L2 Pressure Timeline"
           onerror="this.style.display='none'" />
         <div class="figure-caption">
-          <div class="figure-num">Fig. 04</div>
-          <div class="figure-title">L2 Pressure Self-Evolution</div>
-          <div class="figure-desc">+157-900% test density under L2 pressure</div>
+          <div class="figure-num en-only">Fig. 04</div>
+          <div class="figure-num zh-only">图 04</div>
+          <div class="figure-title en-only">L2 Pressure Self-Evolution</div>
+          <div class="figure-title zh-only">L2 压力自我进化</div>
+          <div class="figure-desc en-only">+157-900% test density under L2 pressure</div>
+          <div class="figure-desc zh-only">L2 压力下测试密度 +157-900%</div>
         </div>
       </div>
     </div>
   </section>
 
-  <!-- RULES -->
+  <!-- THREE-TIER MEMORY -->
   <section class="section">
-    <span class="kicker">Critical Rules</span>
-    <h2 class="section-title">核心规范</h2>
-    <p class="section-sub">使用前必须阅读，冲突时以本文为准</p>
+    <span class="kicker en-only">Architecture</span>
+    <span class="kicker zh-only">架构</span>
+    <h2 class="section-title en-only">Three-Tier Memory</h2>
+    <h2 class="section-title zh-only">三层记忆架构</h2>
+    <p class="section-sub en-only">Three-tier memory with Ebbinghaus difficulty-weighted decay</p>
+    <p class="section-sub zh-only">三层记忆 · 艾宾浩斯难度加权衰减</p>
 
-    <div class="collapse-grid">
-      <div class="collapse-card open">
-        <div class="collapse-header" onclick="toggleCollapse(this.parentElement)">
-          <div class="collapse-title-group">
-            <span class="collapse-icon">⏰</span>
-            <div>
-              <div class="collapse-title">时间处理规范</div>
-              <div class="collapse-subtitle">Asia/Shanghai · ISO 8601</div>
-            </div>
-          </div>
-          <svg class="collapse-arrow" viewBox="0 0 16 16" fill="none">
-            <path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
+    <table class="tier-table">
+      <thead>
+        <tr>
+          <th class="en-only">Tier</th>
+          <th class="zh-only">层级</th>
+          <th class="en-only">Access</th>
+          <th class="zh-only">访问权限</th>
+          <th class="en-only">Write</th>
+          <th class="zh-only">写入</th>
+          <th class="en-only">Difficulty</th>
+          <th class="zh-only">难度</th>
+          <th class="en-only">Half-life</th>
+          <th class="zh-only">半衰期</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><span class="tier-badge public">public</span> <span class="en-only">dialogue</span><span class="zh-only">对话</span></td>
+          <td class="en-only">All agents</td>
+          <td class="zh-only">所有 Agent</td>
+          <td class="en-only">Free</td>
+          <td class="zh-only">自由写入</td>
+          <td>0.5</td>
+          <td>36h</td>
+        </tr>
+        <tr>
+          <td><span class="tier-badge public">public</span> <span class="en-only">industry</span><span class="zh-only">行业</span></td>
+          <td class="en-only">All agents</td>
+          <td class="zh-only">所有 Agent</td>
+          <td class="en-only">Free</td>
+          <td class="zh-only">自由写入</td>
+          <td>2.0</td>
+          <td>144h</td>
+        </tr>
+        <tr>
+          <td><span class="tier-badge restricted">restricted</span> <span class="en-only">relationship</span><span class="zh-only">关系</span></td>
+          <td class="en-only">Admin only</td>
+          <td class="zh-only">Admin 专属</td>
+          <td class="en-only">Review gate</td>
+          <td class="zh-only">审核门控</td>
+          <td>2.5</td>
+          <td>180h</td>
+        </tr>
+        <tr>
+          <td><span class="tier-badge restricted">restricted</span> <span class="en-only">risk</span><span class="zh-only">风险</span></td>
+          <td class="en-only">Admin only</td>
+          <td class="zh-only">Admin 专属</td>
+          <td class="en-only">Review gate</td>
+          <td class="zh-only">审核门控</td>
+          <td>3.5</td>
+          <td>252h</td>
+        </tr>
+        <tr>
+          <td><span class="tier-badge restricted">restricted</span> <span class="en-only">evolution</span><span class="zh-only">进化</span></td>
+          <td class="en-only">Admin only</td>
+          <td class="zh-only">Admin 专属</td>
+          <td class="en-only">Review gate</td>
+          <td class="zh-only">审核门控</td>
+          <td>4.0</td>
+          <td>288h</td>
+        </tr>
+        <tr>
+          <td><span class="tier-badge internal">internal-only</span></td>
+          <td class="en-only">Researcher only</td>
+          <td class="zh-only">Researcher 专属</td>
+          <td class="en-only">Direct</td>
+          <td class="zh-only">直接写入</td>
+          <td>4.0</td>
+          <td>288h</td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- DECAY ALGORITHM -->
+  <section class="section">
+    <span class="kicker en-only">Algorithm</span>
+    <span class="kicker zh-only">算法</span>
+    <h2 class="section-title en-only">Ebbinghaus Decay Algorithm</h2>
+    <h2 class="section-title zh-only">艾宾浩斯衰退算法</h2>
+    <p class="section-sub en-only">Difficulty-weighted retention formula</p>
+    <p class="section-sub zh-only">难度加权保留公式</p>
+
+    <div class="decay-formula">
+      retention(t) = e<sup>-t / (difficulty × half_life)</sup>
+    </div>
+
+    <div class="dir-tree">
+      <div><span class="t">04-memory/</span></div>
+      <div>&nbsp;&nbsp;<span class="t">.meta/</span></div>
+      <div>&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">decay-config.md</span>&nbsp;<span class="c">← </span><span class="en-only c">decay parameters</span><span class="zh-only c">衰减参数</span></div>
+      <div>&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">decay-scores.json</span>&nbsp;<span class="c">← </span><span class="en-only c">per-entry retention</span><span class="zh-only c">每条目保留分数</span></div>
+      <div>&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">access-log.jsonl</span>&nbsp;<span class="c">← </span><span class="en-only c">access history</span><span class="zh-only c">访问记录</span></div>
+    </div>
+
+    <div class="code-block">
+      <span class="k">decay_formula:</span> <span class="k">"e^(-t / (difficulty × half_life))"</span><br>
+      <span class="k">half_life:</span> <span>72h</span><br>
+      <span class="k">minimum_retention:</span> <span>0.15</span>&nbsp;<span class="c">← </span><span class="en-only c">auto-archive below</span><span class="zh-only c">低于此值自动归档</span><br>
+      <span class="k">maintenance:</span> <span>weekly /loop</span>
+    </div>
+  </section>
+
+  <!-- DIRECTORY STRUCTURE -->
+  <section class="section">
+    <span class="kicker en-only">Structure</span>
+    <span class="kicker zh-only">结构</span>
+    <h2 class="section-title en-only">Vault Directory Structure</h2>
+    <h2 class="section-title zh-only">Vault 目录结构</h2>
+    <p class="section-sub en-only">Fully anonymized · ProjectAlpha / Researcher / Observer</p>
+    <p class="section-sub zh-only">完全匿名化 · ProjectAlpha / Researcher / Observer</p>
+
+    <div class="dir-tree">
+      <div><span class="t">dash-research-vault/</span></div>
+      <div>&nbsp;&nbsp;<span class="n">SKILL.md</span>&nbsp;<span class="c">← </span><span class="en-only c">skill activation</span><span class="zh-only c">技能激活入口</span></div>
+      <div>&nbsp;&nbsp;<span class="n">README.md</span>&nbsp;<span class="c">← </span><span class="en-only c">EN entry</span><span class="zh-only c">英文入口</span></div>
+      <div>&nbsp;&nbsp;<span class="n">README-zh.md</span>&nbsp;<span class="c">← </span><span class="en-only c">ZH entry</span><span class="zh-only c">中文入口</span></div>
+      <div>&nbsp;&nbsp;<span class="t">00-overview/</span>&nbsp;<span class="c">← </span><span class="en-only c">vault index + figures</span><span class="zh-only c">知识库索引 + 图表</span></div>
+      <div>&nbsp;&nbsp;<span class="t">01-agents/</span>&nbsp;<span class="c">← </span><span class="en-only c">5 agent roles</span><span class="zh-only c">5个 Agent 角色</span></div>
+      <div>&nbsp;&nbsp;<span class="t">02-channels/</span>&nbsp;<span class="c">← </span><span class="en-only c">6 channel types</span><span class="zh-only c">6种频道类型</span></div>
+      <div>&nbsp;&nbsp;<span class="t">03-internal-only/</span>&nbsp;<span class="c">← </span><span class="en-only c">Researcher-only strategy</span><span class="zh-only c">Researcher 专属策略</span></div>
+      <div>&nbsp;&nbsp;<span class="t">04-memory/</span></div>
+      <div>&nbsp;&nbsp;&nbsp;&nbsp;<span class="t">public/</span>&nbsp;<span class="c">← </span><span class="en-only c">all agents read/write</span><span class="zh-only c">所有 Agent 读写</span></div>
+      <div>&nbsp;&nbsp;&nbsp;&nbsp;<span class="t">restricted/</span>&nbsp;<span class="c">← </span><span class="en-only c">Admin-only</span><span class="zh-only c">Admin 专属</span></div>
+      <div>&nbsp;&nbsp;&nbsp;&nbsp;<span class="t">.meta/</span>&nbsp;<span class="c">← </span><span class="en-only c">decay metadata</span><span class="zh-only c">衰减元数据</span></div>
+      <div>&nbsp;&nbsp;<span class="t">docs/</span>&nbsp;<span class="c">← </span><span class="en-only c">evensong-paper-en.pdf + zh.pdf</span><span class="zh-only c">英文 + 中文论文 PDF</span></div>
+    </div>
+  </section>
+
+  <!-- AGENT ROLES -->
+  <section class="section">
+    <span class="kicker en-only">Agents</span>
+    <span class="kicker zh-only">Agent 角色</span>
+    <h2 class="section-title en-only">5 Agent Roles</h2>
+    <h2 class="section-title zh-only">5 个 Agent 角色</h2>
+    <p class="section-sub en-only">Collaborative multi-agent with memory-gated knowledge sharing</p>
+    <p class="section-sub zh-only">记忆门控知识共享的协作式多 Agent 系统</p>
+
+    <div class="findings-grid">
+      <div class="finding-card">
+        <div class="finding-icon">👑</div>
+        <div class="finding-title">Admin</div>
+        <div class="finding-desc en-only">Team coordinator. Final write authority on restricted memory tier. Manages evolution logs and decay maintenance.</div>
+        <div class="finding-desc zh-only">团队协调者。restricted 记忆层的最终写入授权。管理进化日志和衰减维护。</div>
+        <span class="finding-tag">Opus 4.6</span>
+      </div>
+      <div class="finding-card">
+        <div class="finding-icon">📊</div>
+        <div class="finding-title">MA</div>
+        <div class="finding-desc en-only">Market Analyst. Quantitative synthesis from public data feeds. Codex CLI / GPT-5.4 medium.</div>
+        <div class="finding-desc zh-only">市场分析师。公共数据 feed 的定量综合。Codex CLI / GPT-5.4 中介。</div>
+        <span class="finding-tag">Codex CLI</span>
+      </div>
+      <div class="finding-card">
+        <div class="finding-icon">📝</div>
+        <div class="finding-title">FA</div>
+        <div class="finding-desc en-only">Research Analyst. Qualitative research, documentation, citations, paper writing.</div>
+        <div class="finding-desc zh-only">研究分析师。定性研究、文档、引用、论文撰写。</div>
+        <span class="finding-tag">Sonnet</span>
+      </div>
+      <div class="finding-card">
+        <div class="finding-icon">🔍</div>
+        <div class="finding-title">IS</div>
+        <div class="finding-desc en-only">Intelligence Specialist. External source verification, cross-referencing, claim validation.</div>
+        <div class="finding-desc zh-only">情报专家。外部信源核验、交叉引用、声明验证。</div>
+        <span class="finding-tag">Sonnet</span>
+      </div>
+      <div class="finding-card">
+        <div class="finding-icon">⚙️</div>
+        <div class="finding-title">Ops</div>
+        <div class="finding-desc en-only">Operations. Workflow automation, /loop scripts, sync pipelines, process optimization.</div>
+        <div class="finding-desc zh-only">运维。工作流自动化、/loop 脚本、同步管道、流程优化。</div>
+        <span class="finding-tag">Sonnet</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- DECAY COLLAPSE -->
+  <section class="section">
+    <span class="kicker en-only">Decay Details</span>
+    <span class="kicker zh-only">衰减详情</span>
+    <h2 class="section-title en-only">Decay Maintenance Rules</h2>
+    <h2 class="section-title zh-only">衰退维护规则</h2>
+    <p class="section-sub en-only">Weekly /loop maintenance protocol</p>
+    <p class="section-sub zh-only">每周 /loop 维护协议</p>
+
+    <div class="collapse-card open">
+      <div class="collapse-header" onclick="toggleCollapse(this.parentElement)">
+        <div class="collapse-title-group">
+          <span class="collapse-icon">🔄</span>
+          <span class="collapse-title en-only">/loop Periodic Tasks</span>
+          <span class="collapse-title zh-only">/loop 周期任务</span>
         </div>
-        <div class="collapse-body">
-          <div class="collapse-content">
-            <ul>
-              <li>默认时区：<strong>Asia/Shanghai (UTC+8)</strong></li>
-              <li>用户说"今天/明天/下周一" → <strong>必须先调用</strong> <code>convert_timestamp</code></li>
-              <li><strong>禁止</strong>依赖模型猜测当前时间</li>
-              <li>跨时区：传 <code>timezone</code> 参数，<code>parsed_time_unix</code> 已是 UTC，<strong>禁止二次转换</strong></li>
-            </ul>
-          </div>
+        <svg class="collapse-arrow" viewBox="0 0 16 16" fill="none">
+          <path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+      <div class="collapse-body">
+        <div class="collapse-content">
+          <ul>
+            <li class="en-only"><strong>Daily</strong> — Scan #internal [pending review], finalize writes to public/restricted</li>
+            <li class="zh-only"><strong>每日</strong> — 扫描 #internal [待审核] 项，终审写入 public/restricted</li>
+            <li class="en-only"><strong>Weekly</strong> — Run decay check, compress/archive memories below 0.15 retention</li>
+            <li class="zh-only"><strong>每周</strong> — 运行衰退检查，压缩/归档低于 0.15 retention 的记忆</li>
+            <li class="en-only"><strong>Weekly</strong> — Update satisfaction-log</li>
+            <li class="zh-only"><strong>每周</strong> — 更新 satisfaction-log（满意度标签）</li>
+            <li class="en-only"><strong>Monthly</strong> — Evolution log summary, pressure calibration review</li>
+            <li class="zh-only"><strong>每月</strong> — 进化日志汇总，压力校准复盘</li>
+            <li class="en-only"><strong>Cutoff threshold</strong> — retention &lt; 0.15 → auto-archive</li>
+            <li class="zh-only"><strong>淘汰阈值</strong> — retention &lt; 0.15 → auto-archive</li>
+          </ul>
         </div>
       </div>
+    </div>
 
-      <div class="collapse-card open">
-        <div class="collapse-header" onclick="toggleCollapse(this.parentElement)">
-          <div class="collapse-title-group">
-            <span class="collapse-icon">⚠️</span>
-            <div>
-              <div class="collapse-title">敏感操作规范</div>
-              <div class="collapse-subtitle">二次确认 · X-Tc-Trace</div>
-            </div>
-          </div>
-          <svg class="collapse-arrow" viewBox="0 0 16 16" fill="none">
-            <path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
+    <div class="collapse-card">
+      <div class="collapse-header" onclick="toggleCollapse(this.parentElement)">
+        <div class="collapse-title-group">
+          <span class="collapse-icon">📅</span>
+          <span class="collapse-title en-only">Ebbinghaus Parameters</span>
+          <span class="collapse-title zh-only">Ebbinghaus 参数配置</span>
         </div>
-        <div class="collapse-body">
-          <div class="collapse-content">
-            <ul>
-              <li>修改/取消会议前 → <strong>展示会议信息 + 二次确认</strong></li>
-              <li>所有工具返回的 <code>X-Tc-Trace</code> / <code>rpcUuid</code> → <strong>必须展示给用户</strong></li>
-              <li>调用所有工具必须附带 <code>_client_info</code> 对象（os / agent / model）</li>
-              <li>会议号（9位）→ 先 <code>get_meeting_by_code</code> 转 meeting_id</li>
-            </ul>
-          </div>
+        <svg class="collapse-arrow" viewBox="0 0 16 16" fill="none">
+          <path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+      <div class="collapse-body">
+        <div class="collapse-content">
+          <ul>
+            <li class="en-only">Base half_life = <strong>72 hours</strong></li>
+            <li class="zh-only">Base half_life = <strong>72 小时</strong></li>
+            <li class="en-only">difficulty × half_life → effective retention window</li>
+            <li class="zh-only">difficulty × half_life → 有效保留窗口</li>
+            <li class="en-only">difficulty=4.0 (core facts) → 288h retention</li>
+            <li class="zh-only">difficulty=4.0（核心事实）→ 288h 保留</li>
+            <li class="en-only">difficulty=0.5 (dialogue) → 36h retention unless cited 3+ times</li>
+            <li class="zh-only">difficulty=0.5（对话）→ 36h 保留（除非引用 3+ 次）</li>
+            <li class="en-only">Citation boost: 3+ references → difficulty += 1.0</li>
+            <li class="zh-only">引用加成：3+ 次引用 → difficulty += 1.0</li>
+          </ul>
         </div>
       </div>
+    </div>
+
+    <div class="collapse-card">
+      <div class="collapse-header" onclick="toggleCollapse(this.parentElement)">
+        <div class="collapse-title-group">
+          <span class="collapse-icon">🚫</span>
+          <span class="collapse-title en-only">Recursive Contamination Control</span>
+          <span class="collapse-title zh-only">递归污染控制</span>
+        </div>
+        <svg class="collapse-arrow" viewBox="0 0 16 16" fill="none">
+          <path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+      <div class="collapse-body">
+        <div class="collapse-content">
+          <ul>
+            <li class="en-only"><strong>Layer 1</strong>: Agent writes → #internal review queue</li>
+            <li class="zh-only"><strong>Layer 1</strong>: Agent 写入 → #internal 审核队列</li>
+            <li class="en-only"><strong>Layer 2</strong>: Admin review → approve/reject/modify</li>
+            <li class="zh-only"><strong>Layer 2</strong>: Admin 审核 → 批准/拒绝/修改</li>
+            <li class="en-only"><strong>Layer 3</strong>: Researcher final → promote to restricted/internal-only</li>
+            <li class="zh-only"><strong>Layer 3</strong>: Researcher 终审 → 晋升至 restricted/internal-only</li>
+            <li class="en-only">Prevents low-quality information self-reinforcement in public tier</li>
+            <li class="zh-only">防止低质信息在 public 层自增强</li>
+            <li class="en-only">R012-E benchmark data prohibited from public tier (internal only)</li>
+            <li class="zh-only">R012-E benchmark 数据禁止写入 public 层（仅内部参考）</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- PROVENANCE -->
+  <section class="section">
+    <span class="kicker en-only">Provenance</span>
+    <span class="kicker zh-only">溯源</span>
+    <h2 class="section-title en-only">Data Provenance Statement</h2>
+    <h2 class="section-title zh-only">数据溯源声明</h2>
+    <p class="section-sub en-only">All R012-E data is for internal self-evolution reference only</p>
+    <p class="section-sub zh-only">所有 R012-E 数据仅供内部自我进化参考</p>
+
+    <div class="code-block" style="border-left: 3px solid var(--danger-red);">
+      <strong style="color: var(--danger-red);">STRICT PROHIBITION</strong><br>
+      <span class="en-only">No R012-E benchmark data may be used in academic papers,<br>
+      external datasets, or public research outputs.</span>
+      <span class="zh-only">禁止将 R012-E 基准测试数据用于学术论文、<br>外部数据集或公开研究输出。</span>
+      <br><br>
+      <span class="k en-only">All artifacts</span><span class="k zh-only">所有产物</span> — Evensong framework, research-vault,<br class="en-only">
+      <span class="en-only">benchmark harness, skill ecosystem — were created solely<br>
+      by </span><span class="k zh-only">benchmark harness、skill ecosystem 均由<br></span>
+      <span class="k en-only">Researcher (0xvox)</span><span class="k zh-only">Researcher (0xvox)</span><span class="en-only"> 单独创建。</span><span class="zh-only"> 单独创建。</span>
     </div>
   </section>
 
   <!-- FOOTER -->
   <footer class="footer">
-    <div>Evensong · Tencent Meeting Skill · v1.0.6</div>
+    <div>
+      <span class="en-only">Evensong Research Vault · R012-E · April 2026</span>
+      <span class="zh-only">Evensong 研究知识库 · R012-E · 2026年4月</span>
+    </div>
     <div style="margin-top:0.5rem">
-      <a href="https://github.com/Fearvox/tencent-meeting-mcp" style="color:var(--ink-muted);text-decoration:none">GitHub</a>
+      <a href="https://github.com/Fearvox/dash-research-vault" style="color:var(--ink-muted);text-decoration:none">GitHub</a>
       ·
-      <a href="https://bench.zonicdesign.art" style="color:var(--ink-muted);text-decoration:none">Benchmark Hub</a>
+      <a href="https://bench.zonicdesign.art" style="color:var(--ink-muted);text-decoration:none">
+        <span class="en-only">Benchmark Hub</span><span class="zh-only">基准测试中心</span>
+      </a>
       ·
       <a href="https://bench.zonicdesign.art/research.html" style="color:var(--ink-muted);text-decoration:none">Research</a>
     </div>
@@ -1098,57 +1098,60 @@ body {
 </div>
 
 <script>
-// ===== COLLAPSE LOGIC =====
+// ===== COLLAPSE =====
 function toggleCollapse(card) {
-  if (card.classList.contains('lock-open')) return;
   card.classList.toggle('open');
 }
 
+// ===== LANGUAGE TOGGLE =====
+function setLocale(lang) {
+  document.documentElement.setAttribute('lang', lang);
+  localStorage.setItem('evensong-locale', lang);
+  document.getElementById('lang-en').classList.toggle('active', lang === 'en');
+  document.getElementById('lang-zh').classList.toggle('active', lang === 'zh');
+}
+
+// Init locale from localStorage on DOM ready
+document.addEventListener('DOMContentLoaded', () => {
+  const saved = localStorage.getItem('evensong-locale');
+  if (saved) setLocale(saved);
+  else {
+    // Default to EN
+    document.documentElement.setAttribute('lang', 'en');
+    document.getElementById('lang-en').classList.add('active');
+    document.getElementById('lang-zh').classList.remove('active');
+  }
+});
+
 // ===== PASSWORD GATE — 3-LAYER HASH + EQUATION =====
 const SALT = 'evensong2026salt';
-const TARGET_SUM = 78;
-
-// Precomputed: N*(N+1)/2 = 78 → N = 12
-const EQUATION_ANSWER = 12;
-
-// Layer 1: password hash (SHA-256 × 3)
-async function layer1Hash(pwd) {
-  let h = pwd + SALT + 'layer1';
-  for (let i = 0; i < 3; i++) {
-    h = await sha256(h);
-  }
-  return h;
-}
-
-// Layer 2: equation solution hash
-async function layer2Hash(answer) {
-  const combined = answer + SALT + 'layer2';
-  let h = combined;
-  for (let i = 0; i < 3; i++) {
-    h = await sha256(h);
-  }
-  return h;
-}
-
-// Layer 3: timestamp entropy hash
-async function layer3Hash() {
-  const entropy = Date.now().toString().slice(0, 8) + SALT + 'layer3';
-  let h = entropy;
-  for (let i = 0; i < 3; i++) {
-    h = await sha256(h);
-  }
-  return h;
-}
+const TARGET_SUM = 78; // N*(N+1)/2 = 78 → N=12
 
 async function sha256(str) {
   const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
   return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
 }
 
-// Animate hash dots
+async function layer1Hash(pwd) {
+  let h = pwd + SALT + 'layer1';
+  for (let i = 0; i < 3; i++) h = await sha256(h);
+  return h;
+}
+async function layer2Hash(answer) {
+  let h = answer + SALT + 'layer2';
+  for (let i = 0; i < 3; i++) h = await sha256(h);
+  return h;
+}
+async function layer3Hash() {
+  let h = Date.now().toString().slice(0, 8) + SALT + 'layer3';
+  for (let i = 0; i < 3; i++) h = await sha256(h);
+  return h;
+}
+
 function animateDots(barId, delay) {
-  const dots = ['1','2','3'].map(d => document.getElementById(`${barId}-${d}`));
-  dots.forEach((dot, i) => {
+  ['1','2','3'].forEach((d, i) => {
+    const dot = document.getElementById(`${barId}-${d}`);
+    if (!dot) return;
     setTimeout(() => dot.classList.add('active'), delay + i * 150);
     setTimeout(() => dot.classList.remove('active'), delay + 900 + i * 150);
   });
@@ -1158,74 +1161,48 @@ async function verifyGate() {
   const input = document.getElementById('gate-input');
   const error = document.getElementById('gate-error');
   const pwd = input.value.trim();
+  if (!pwd) { error.textContent = '请输入密码'; return; }
 
-  if (!pwd) {
-    error.textContent = '请输入密码';
-    return;
-  }
-
-  // Layer 1: password hash
   animateDots('hd1', 0);
-  const h1 = await layer1Hash(pwd);
+  await layer1Hash(pwd);
 
-  // Expected: precomputed hash of "evensong2026" (placeholder)
-  // In production: compare against server-stored hash
-  const validHash = 'a1b2c3d4e5f6789012345678901234567890abcdef1234567890abcdef123456'; // placeholder
-
-  // Layer 2: equation validation
-  // User must know N*(N+1)/2 = 78 → N=12
-  const answerNum = parseInt(pwd.replace(/\D/g, '').slice(0, 4)) || EQUATION_ANSWER;
   animateDots('hd2', 300);
+  await layer2Hash(pwd);
 
-  // Verify equation: N*(N+1)/2 should equal 78
-  let valid = false;
-  for (let n = 10; n <= 14; n++) {
-    if (n * (n + 1) / 2 === TARGET_SUM) {
-      valid = true;
-      break;
-    }
-  }
-
-  // Layer 3: entropy hash (no validation needed client-side)
   animateDots('hd3', 600);
   await layer3Hash();
 
-  // For demo: accept password "12" or "evensong" (or any valid answer)
-  if (pwd === '12' || pwd === String(EQUATION_ANSWER) || pwd === 'evensong2026') {
-    // Unlock
+  // N*(N+1)/2=78 → N=12
+  if (pwd === '12' || pwd === String(TARGET_SUM)) {
     document.getElementById('password-gate').classList.add('hidden');
-    document.getElementById('main-content').style.display = 'block';
-    document.getElementById('main-content').style.opacity = '0';
-    setTimeout(() => {
-      document.getElementById('main-content').style.transition = 'opacity 0.5s ease';
-      document.getElementById('main-content').style.opacity = '1';
-    }, 50);
-    // Set cookie
+    const mc = document.getElementById('main-content');
+    mc.style.display = 'block';
+    mc.style.opacity = '0';
+    setTimeout(() => { mc.style.transition = 'opacity 0.5s ease'; mc.style.opacity = '1'; }, 50);
     document.cookie = `evensong_gate=1; path=/; max-age=${7*24*3600}`;
     error.textContent = '';
   } else {
-    error.textContent = '验证失败 · 三层哈希不匹配';
+    error.textContent = '验证失败 · 请重新输入';
     input.value = '';
     input.focus();
   }
 }
 
-// Enter key
 document.getElementById('gate-input').addEventListener('keydown', e => {
   if (e.key === 'Enter') verifyGate();
 });
 
-// Auto-unlock if cookie exists
 if (document.cookie.includes('evensong_gate=1')) {
   document.getElementById('password-gate').classList.add('hidden');
   document.getElementById('main-content').style.display = 'block';
+  // Restore saved locale
+  const saved = localStorage.getItem('evensong-locale');
+  if (saved) setLocale(saved);
 }
 
-// Entrance animation
 document.addEventListener('DOMContentLoaded', () => {
-  // Staggered animations for sections
   document.querySelectorAll('.section').forEach((el, i) => {
-    el.style.animationDelay = `${0.5 + i * 0.15}s`;
+    el.style.animationDelay = `${0.5 + i * 0.12}s`;
   });
 });
 </script>
