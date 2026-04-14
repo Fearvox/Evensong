@@ -60,6 +60,7 @@ import {
   buildExtractAutoOnlyPrompt,
   buildExtractCombinedPrompt,
 } from './prompts.js'
+import { containsSecrets } from './secretScanner.js'
 
 /* eslint-disable @typescript-eslint/no-require-imports */
 const teamMemPaths = feature('TEAMMEM')
@@ -164,6 +165,24 @@ function denyAutoMemTool(tool: Tool, reason: string) {
 }
 
 /**
+ * Extracts the content string from a tool input object.
+ * - Write tool: input.content
+ * - Edit tool: input.new_string (the replacement text being written)
+ */
+function getContentFromInput(
+  toolName: string,
+  input: Record<string, unknown>,
+): string | undefined {
+  if (toolName === FILE_WRITE_TOOL_NAME) {
+    return typeof input.content === 'string' ? input.content : undefined
+  }
+  if (toolName === FILE_EDIT_TOOL_NAME) {
+    return typeof input.new_string === 'string' ? input.new_string : undefined
+  }
+  return undefined
+}
+
+/**
  * Creates a canUseTool function that allows Read/Grep/Glob (unrestricted),
  * read-only Bash commands, and Edit/Write only for paths within the
  * auto-memory directory. Shared by extractMemories and autoDream.
@@ -210,6 +229,14 @@ export function createAutoMemCanUseTool(memoryDir: string): CanUseToolFn {
     ) {
       const filePath = input.file_path
       if (typeof filePath === 'string' && isAutoMemPath(filePath)) {
+        // Check content for secrets before allowing write
+        const content = getContentFromInput(tool.name, input)
+        if (content && containsSecrets(content)) {
+          return denyAutoMemTool(
+            tool,
+            'Memory content contains potential secrets — write blocked',
+          )
+        }
         return { behavior: 'allow' as const, updatedInput: input }
       }
     }
