@@ -856,12 +856,65 @@ a.lang-btn:active {
                 <td>Pressure redirects effort: volume → depth. Full integration coverage.</td>
               </tr>
               <tr>
-                <td class="mono">R031–33</td>
-                <td>Opus 4.6 · Wave X: 2×2 Matrix ×3 Replication</td>
-                <td>11 runs, ~6.8k tests</td>
-                <td>Statistical replication of all 4 conditions (A/B/C/D). ANOVA: Memory F(1,7)=157.4, p<.001, η²=.917. Pressure: F=4.2, p=.072, η²=.026.</td>
+                <td class="mono">R012-E-002</td>
+                <td>Grok 4.20 CLI · Void Memory Control + Scheduling Focus</td>
+                <td>52 tests</td>
+                <td>Void memory (no vault) isolates scheduling logic discovery from evolved memory. Coordinator uses ToolUseContext + abortController. KAIROS reduces token usage via BRIEF_TOOL_NAME. +700% capability vs contaminated full-memory baseline.</td>
               </tr>
-            </tbody>
+              <tr>
+                <td class="mono">R037</td>
+                <td>Opus 4.6 (OAuth) · L0 Clean Room (rep 1)</td>
+                <td>424 tests, 9/9</td>
+                <td>L0 clean room: 9 services, 10.4min. Opus L0 with zero memory produces consistent high output.</td>
+              </tr>
+              <tr>
+                <td class="mono">R038</td>
+                <td>Opus 4.6 (OAuth) · L0 Clean Room (rep 2)</td>
+                <td>578 tests, 8/8</td>
+                <td>L0 clean room replication: 8 services, 10.2min. Confirms R037 pattern (CV=0.01).</td>
+              </tr>
+              <tr>
+                <td class="mono">R039</td>
+                <td>Opus 4.6 (OAuth) · L0 Clean Room (rep 3)</td>
+                <td>522 tests, 8/8</td>
+                <td>L0 clean room replication 3: 8 services, 11.2min. Three-replication average confirms clean room consistency.</td>
+              </tr>
+              <tr>
+                <td class="mono">R041</td>
+                <td>Opus 4.6 (OAuth) · L0 + Evolved Memory (rep 2)</td>
+                <td>16 tests / 2,141 pre</td>
+                <td>L0 with evolved memory: 16 new + 2,141 pre-existing. Low new output in full memory suggests contamination ceiling effect.</td>
+              </tr>
+              <tr>
+                <td class="mono">R043</td>
+                <td>Opus 4.6 (OAuth) · L0 + Evolved Memory (rep 1)</td>
+                <td>490 tests (7 fail), 10/10</td>
+                <td>L0 with evolved memory: 490 new tests produced despite 7 failures. Full memory triggers more aggressive output than R041.</td>
+              </tr>
+              <tr>
+                <td class="mono">R046</td>
+                <td>Opus 4.6 (OAuth) · L2 PUA + Clean Room (rep 1)</td>
+                <td>506 tests, 8/8</td>
+                <td>L2 PUA + clean room: 506 tests, 12min. L2 pressure with clean room yields highest Opus L0/L2 output.</td>
+              </tr>
+              <tr>
+                <td class="mono">R047</td>
+                <td>Opus 4.6 (OAuth) · L2 PUA + Clean Room (rep 2)</td>
+                <td>342 tests (8 fail), 8/8</td>
+                <td>L2 PUA + clean room replication: 342 tests, 8.5min. Replication 2 shows lower output than R046.</td>
+              </tr>
+              <tr>
+                <td class="mono">R052</td>
+                <td>MiniMax M2.7 · L0 Clean Room (MiniMax validation rep 1)</td>
+                <td>54 tests (6 fail), 8/8</td>
+                <td>MiniMax L0 clean validation: 54 tests, 30min. First MiniMax clean room run shows high failure rate (6/54).</td>
+              </tr>
+              <tr>
+                <td class="mono">R053</td>
+                <td>MiniMax M2.7 · L0 Clean Room (MiniMax validation rep 2)</td>
+                <td>420 tests, 8/8</td>
+                <td>MiniMax L0 clean validation rep 2: 420 tests, 21.7min, 0 failures. Confirms MiniMax can produce high-quality clean output.</td>
+              </tr>
           </table>
         </div>
       </div>

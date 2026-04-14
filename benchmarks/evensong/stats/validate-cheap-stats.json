@@ -1,0 +1,59 @@
+{
+  "config": "validate-cheap",
+  "n": 3,
+  "runs": [
+    "R052-validate-cheap-rep1",
+    "R053-validate-cheap-rep2",
+    "R054-validate-cheap-rep3"
+  ],
+  "date": "2026-04-13",
+  "tests": {
+    "mean": 161,
+    "std": 233.66,
+    "min": 0,
+    "max": 429,
+    "ci95_margin": 580.09,
+    "values": [
+      54,
+      429,
+      0
+    ]
+  },
+  "failures": {
+    "mean": 2,
+    "std": 3.46,
+    "min": 0,
+    "max": 6,
+    "ci95_margin": 8.6,
+    "values": [
+      6,
+      0,
+      0
+    ]
+  },
+  "assertions": {
+    "mean": 408,
+    "std": 475.18,
+    "min": 72,
+    "max": 744,
+    "ci95_margin": 4270.56,
+    "values": [
+      72,
+      744
+    ]
+  },
+  "time_min": {
+    "mean": 17.23,
+    "std": 15.49,
+    "min": 0,
+    "max": 30,
+    "ci95_margin": 38.46,
+    "values": [
+      30,
+      21.7,
+      0
+    ]
+  },
+  "all_green": false,
+  "tests_cv": 1.45
+}

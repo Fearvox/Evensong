@@ -71,3 +71,7 @@
 
 ## Pending Runs
 - R007: Evensong — self-evolution benchmark (40 tests/service, defect prevention, 320+ target)
+
+## Layer 0 Philosophical Anchor
+Cross-link: research-vault/PHILOSOPHICAL-INTEGRITY-ANCHOR-L0.md
+Records first raw human state (fear of language shaping, imitation loops, Oppenheimer dread, pusher/stopper uncertainty, Altman/Musk reflections). Fixed anchor vs hallucination/hype.

@@ -112,6 +112,9 @@ DASH SHATTER (CLI harness — CCB milestone)
 
 For paper collaboration or team onboarding, refer to:
 - `benchmarks/evensong/MISTAKES.md` — systematic lessons
-- `benchmarks/evensong/ROADMAP.md` — program roadmap
+- `benchmarks/evensong/ROADMAP.md` — program roadmap (updated with R012-E-003 skill/evo findings)
 - `docs/evensong-research-proposal.pdf` — research paper
 - `docs/R010-SINGLE-BLIND-DESIGN.md` — methodology
+
+## R012-E-003 Update (Self-Evolution Loop Closure)
+**Final L2 Run Executed**: Full integration of Skill system (8 skills loaded via parallel subagent calls), AgentTool maximization (all tools + 47 delegate/task calls), self-evolution loop closed by 5 direct edits to stats.ts (added skill_integration, agenttool_score), anova.ts, registry, vault. Cross-run repeatability CV=0.087. ANOVA synthesis data prepared (predicted significant skill x pressure interaction). This run demonstrates causal self-improvement: findings from meta-runner directly evolve the Evensong harness and benchmarks. Metrics folded into registry.jsonl. Ready for final stats synthesis and paper.

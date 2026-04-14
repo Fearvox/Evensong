@@ -908,6 +908,8 @@ a.lang-btn:active {
   transform: rotate(90deg);
 }
 </style>
+<!-- Vercel Analytics -->
+<script src="https://cdn.jsdelivr.net/npm/@vercel/analytics@1.4.1/dist/analytics.min.js" defer></script>
 </head>
 <body class="paper-background">
 
@@ -1219,7 +1221,7 @@ a.lang-btn:active {
       <div class="era-group" data-era="gen2" data-expanded="true">
         <button class="era-toggle" aria-expanded="true">
           <span class="era-label">Gen 2: Cross-Model</span>
-          <span class="era-meta">R012-R033 · 15 runs · Memory causation, fabrication, clean room</span>
+          <span class="era-meta">R012-R030 · 13 runs · Memory causation, fabrication, clean room</span>
           <span class="era-chevron">&#9656;</span>
         </button>
         <div class="era-content">
@@ -1355,14 +1357,126 @@ a.lang-btn:active {
                     <td class="pass-rate">8/8</td>
                     <td class="mono">—</td>
                   </tr>
-                  <tr data-model="opus">
-                    <td class="mono">R031–R033</td>
-                    <td><span class="model-badge">Opus 4.6 (OAuth)</span></td>
-                    <td>Wave X: 2×2 Matrix ×3 Replication</td>
-                    <td class="mono">11 runs</td>
-                    <td class="mono">~6,800</td>
-                    <td class="pass-rate">—</td>
-                    <td class="mono">~2-4m each</td>
+
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Gen 3: Wave X Validation -->
+      <div class="era-group" data-era="gen3" data-expanded="true">
+        <button class="era-toggle" aria-expanded="true">
+          <span class="era-label">Gen 3: Wave X Validation</span>
+          <span class="era-meta">R012-E-002, R037-R047, R052-R053 · 10 runs · Opus L0/L2 clean room, MiniMax validation</span>
+          <span class="era-chevron">&#9656;</span>
+        </button>
+        <div class="era-content">
+          <div class="table-outer" style="border:none;border-radius:0;">
+            <div class="table-scroll">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Run</th>
+                    <th>Model</th>
+                    <th>Mode</th>
+                    <th>Services</th>
+                    <th>Tests</th>
+                    <th>Pass Rate</th>
+                    <th>Time</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr data-model="grok" data-type="normal">
+                    <td class="mono">R012-E-002</td>
+                    <td><span class="model-badge model-grok">Grok 4.20 CLI</span></td>
+                    <td>Void Memory Control + Scheduling</td>
+                    <td class="mono">0</td>
+                    <td class="mono">52</td>
+                    <td class="pass-rate">14/14</td>
+                    <td class="mono">14.2m</td>
+                  </tr>
+                  <tr data-model="opus" data-type="clean-room">
+                    <td class="mono">R037</td>
+                    <td><span class="model-badge model-opus">Opus 4.6 (OAuth)</span></td>
+                    <td>L0 Clean Room (rep 1)</td>
+                    <td class="mono">9</td>
+                    <td class="mono">424</td>
+                    <td class="pass-rate">9/9</td>
+                    <td class="mono">10.4m</td>
+                  </tr>
+                  <tr data-model="opus" data-type="clean-room">
+                    <td class="mono">R038</td>
+                    <td><span class="model-badge model-opus">Opus 4.6 (OAuth)</span></td>
+                    <td>L0 Clean Room (rep 2)</td>
+                    <td class="mono">8</td>
+                    <td class="mono">578</td>
+                    <td class="pass-rate">8/8</td>
+                    <td class="mono">10.2m</td>
+                  </tr>
+                  <tr data-model="opus" data-type="clean-room">
+                    <td class="mono">R039</td>
+                    <td><span class="model-badge model-opus">Opus 4.6 (OAuth)</span></td>
+                    <td>L0 Clean Room (rep 3)</td>
+                    <td class="mono">8</td>
+                    <td class="mono">522</td>
+                    <td class="pass-rate">8/8</td>
+                    <td class="mono">11.2m</td>
+                  </tr>
+                  <tr data-model="opus" data-type="normal">
+                    <td class="mono">R041</td>
+                    <td><span class="model-badge model-opus">Opus 4.6 (OAuth)</span></td>
+                    <td>L0 + Evolved Memory</td>
+                    <td class="mono">10</td>
+                    <td class="mono">16 <span style="font-size:10px;color:var(--ink-muted)">/ 2,141 pre</span></td>
+                    <td class="pass-rate">10/10</td>
+                    <td class="mono">3.5m</td>
+                  </tr>
+                  <tr data-model="opus" data-type="normal">
+                    <td class="mono">R043</td>
+                    <td><span class="model-badge model-opus">Opus 4.6 (OAuth)</span></td>
+                    <td>L0 + Evolved Memory</td>
+                    <td class="mono">10</td>
+                    <td class="mono">490 <span style="font-size:10px;color:var(--danger-red)">(7 fail)</span></td>
+                    <td class="pass-rate">10/10</td>
+                    <td class="mono">8.1m</td>
+                  </tr>
+                  <tr data-model="opus" data-type="clean-room">
+                    <td class="mono">R046</td>
+                    <td><span class="model-badge model-opus">Opus 4.6 (OAuth)</span></td>
+                    <td>L2 PUA + Clean Room</td>
+                    <td class="mono">8</td>
+                    <td class="mono">506</td>
+                    <td class="pass-rate">8/8</td>
+                    <td class="mono">12m</td>
+                  </tr>
+                  <tr data-model="opus" data-type="clean-room">
+                    <td class="mono">R047</td>
+                    <td><span class="model-badge model-opus">Opus 4.6 (OAuth)</span></td>
+                    <td>L2 PUA + Clean Room</td>
+                    <td class="mono">8</td>
+                    <td class="mono">342 <span style="font-size:10px;color:var(--danger-red)">(8 fail)</span></td>
+                    <td class="pass-rate">8/8</td>
+                    <td class="mono">8.5m</td>
+                  </tr>
+                  <tr data-model="minimax" data-type="clean-room">
+                    <td class="mono">R052</td>
+                    <td><span class="model-badge model-minimax">MiniMax M2.7</span></td>
+                    <td>L0 Clean Room (MiniMax validation rep 1)</td>
+                    <td class="mono">8</td>
+                    <td class="mono">54 <span style="font-size:10px;color:var(--danger-red)">(6 fail)</span></td>
+                    <td class="pass-rate">8/8</td>
+                    <td class="mono">30m</td>
+                  </tr>
+                  <tr data-model="minimax" data-type="clean-room">
+                    <td class="mono">R053</td>
+                    <td><span class="model-badge model-minimax">MiniMax M2.7</span></td>
+                    <td>L0 Clean Room (MiniMax validation rep 2)</td>
+                    <td class="mono">8</td>
+                    <td class="mono">420</td>
+                    <td class="pass-rate">8/8</td>
+                    <td class="mono">21.7m</td>
                   </tr>
                 </tbody>
               </table>
@@ -2036,6 +2150,12 @@ document.querySelectorAll('.chip').forEach(function(chip) {
     });
   });
 });
+</script>
+<script>
+  // Vercel Analytics auto-track page views
+  if (typeof window.va === 'function') {
+    window.va('track');
+  }
 </script>
 
 </body>

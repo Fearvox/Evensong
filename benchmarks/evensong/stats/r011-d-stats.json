@@ -1,60 +1,70 @@
 {
   "config": "r011-d",
-  "n": 3,
+  "n": 5,
   "runs": [
-    "R049-r011-d-rep1",
-    "R050-r011-d-rep2",
-    "R051-r011-d-rep3"
+    "R060-r011-d-rep1",
+    "R061-r011-d-rep2",
+    "R062-r011-d-rep3",
+    "R063-r011-d-rep4",
+    "R064-r011-d-rep5"
   ],
-  "date": "2026-04-12",
+  "date": "2026-04-13",
   "tests": {
-    "mean": 7,
-    "std": 0,
-    "min": 7,
-    "max": 7,
-    "ci95_margin": 0,
+    "mean": 43.2,
+    "std": 2.68,
+    "min": 42,
+    "max": 48,
+    "ci95_margin": 3.34,
     "values": [
-      7,
-      7,
-      7
+      42,
+      42,
+      48,
+      42,
+      42
     ]
   },
   "failures": {
-    "mean": 7,
-    "std": 0,
-    "min": 7,
-    "max": 7,
-    "ci95_margin": 0,
+    "mean": 42.2,
+    "std": 0.45,
+    "min": 42,
+    "max": 43,
+    "ci95_margin": 0.56,
     "values": [
-      7,
-      7,
-      7
+      42,
+      42,
+      43,
+      42,
+      42
     ]
   },
   "assertions": {
-    "mean": 4283,
-    "std": 17.35,
-    "min": 4264,
-    "max": 4298,
-    "ci95_margin": 43.07,
+    "mean": 3964.2,
+    "std": 29.18,
+    "min": 3935,
+    "max": 3996,
+    "ci95_margin": 36.28,
     "values": [
-      4264,
-      4287,
-      4298
+      3938,
+      3935,
+      3959,
+      3993,
+      3996
     ]
   },
   "time_min": {
-    "mean": 1.43,
-    "std": 0.38,
-    "min": 1,
-    "max": 1.7,
-    "ci95_margin": 0.94,
+    "mean": 0.1,
+    "std": 0,
+    "min": 0.1,
+    "max": 0.1,
+    "ci95_margin": 0,
     "values": [
-      1.6,
-      1.7,
-      1
+      0.1,
+      0.1,
+      0.1,
+      0.1,
+      0.1
     ]
   },
   "all_green": false,
-  "tests_cv": 0
+  "tests_cv": 0.06
 }
