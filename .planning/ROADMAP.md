@@ -97,7 +97,7 @@ Plans:
 **Milestone Goal:** Evolve CCB from a working CLI into an intelligent agent platform by unlocking 6 major capabilities hidden behind feature flags, adding safety infrastructure, and polishing the UI.
 
 - [ ] **Phase 5: Infrastructure & Gate Override** - GrowthBook gate bypass, feature flag dependency graph, and MCP transport connectivity
-- [ ] **Phase 6: Memory Extraction** - Cross-session memories extracted automatically, loaded in future sessions, with secret scanning
+- [x] **Phase 6: Memory Extraction** - Cross-session memories extracted automatically, loaded in future sessions, with secret scanning
 - [ ] **Phase 7: Deliberation Checkpoint** - High-risk tool calls trigger visible reasoning; risk scoring classifies actions into safety tiers
 - [ ] **Phase 8: Dynamic Permission Escalation** - Session-scoped temporary permission grants with isolation from forked agents
 - [ ] **Phase 9: Context Collapse** - Intelligent context folding replaces stale message spans with summaries while preserving recent fidelity
@@ -135,7 +135,9 @@ Plans:
 **Plans**: TBD
 
 Plans:
-- (plans TBD -- not yet planned)
+- [x] 06-01-PLAN.md -- Extraction pipeline activation + unit tests (MEM-01): 36 tests for feature flag gating, createAutoMemCanUseTool permissions, cursor advancement, coalescing
+- [x] 06-02-PLAN.md -- Memory loading + path resolution tests (MEM-02): 41 tests for scanMemoryFiles, formatMemoryManifest, isAutoMemoryEnabled, getAutoMemPath, isAutoMemPath, isExtractModeActive
+- [x] 06-03-PLAN.md -- Secret scanner + integration (MEM-03): secretScanner.ts with 11 pattern categories (incl. Anthropic keys), integrated into createAutoMemCanUseTool, undefined-content bypass fix, 31 tests
 
 ### Phase 7: Deliberation Checkpoint
 **Goal**: High-risk tool calls are intercepted for visible reasoning before execution; risk scoring prevents both unchecked destructive actions and over-refusal paralysis
@@ -260,8 +262,8 @@ Phases execute in numeric order: 5 -> 6 -> 7 -> 8 -> 9 -> 10 -> 11 -> 12 -> 13 -
 | 2. Core Tool Reliability | v1.0 | 3/3 | Complete | 2026-04-07 |
 | 3. API & Streaming Resilience | v1.0 | 3/3 | Complete | 2026-04-07 |
 | 4. Query Loop & Permission System | v1.0 | 4/4 | Complete | 2026-04-08 |
-| 5. Infrastructure & Gate Override | v2.0 | 0/3 | In progress | - |
-| 6. Memory Extraction | v2.0 | 0/TBD | Not started | - |
+| 5. Infrastructure & Gate Override | v2.0 | 3/3 | Complete | 2026-04-13 |
+| 6. Memory Extraction | v2.0 | 3/3 | Complete | 2026-04-14 |
 | 7. Deliberation Checkpoint | v2.0 | 0/TBD | Not started | - |
 | 8. Dynamic Permission Escalation | v2.0 | 0/TBD | Not started | - |
 | 9. Context Collapse | v2.0 | 0/TBD | Not started | - |
