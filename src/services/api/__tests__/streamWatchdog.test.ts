@@ -15,7 +15,18 @@ import { safeParseStreamEvent } from '../streamEventSchema.js'
 describe('stream watchdog env var', () => {
   const savedEnv = { ...process.env }
   afterEach(() => {
-    process.env = { ...savedEnv }
+    for (const key of Object.keys(process.env)) {
+      if (!(key in savedEnv)) {
+        delete process.env[key]
+      }
+    }
+    for (const [key, value] of Object.entries(savedEnv)) {
+      if (value === undefined) {
+        delete process.env[key]
+      } else {
+        process.env[key] = value
+      }
+    }
   })
 
   test('watchdog enabled by default (CLAUDE_DISABLE_STREAM_WATCHDOG not set)', () => {

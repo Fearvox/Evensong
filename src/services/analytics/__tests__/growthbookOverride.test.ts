@@ -1,7 +1,14 @@
-import { describe, test, expect, beforeEach, afterEach } from 'bun:test'
+import { describe, test, expect, beforeEach, afterEach, mock } from 'bun:test'
 import { mkdtempSync, writeFileSync, mkdirSync, rmSync } from 'fs'
 import { join } from 'path'
 import { tmpdir } from 'os'
+
+type GrowthbookModule = typeof import('../growthbook.js')
+
+async function loadGrowthbookModule(): Promise<GrowthbookModule> {
+  mock.restore()
+  return import(`../growthbook.js?isolation=${Date.now()}-${Math.random()}`)
+}
 
 /**
  * Tests for GrowthBook tengu_* local override system.
@@ -31,6 +38,7 @@ describe('GrowthBook local override (getLocalFlagOverrides)', () => {
   let tempDir: string | null = null
 
   beforeEach(() => {
+    mock.restore()
     // Save env state
     savedEnv = {
       HOME: process.env.HOME,
@@ -40,7 +48,11 @@ describe('GrowthBook local override (getLocalFlagOverrides)', () => {
   })
 
   afterEach(() => {
-    // Restore env state
+    for (const key of Object.keys(process.env)) {
+      if (!(key in savedEnv)) {
+        delete process.env[key]
+      }
+    }
     for (const [key, val] of Object.entries(savedEnv)) {
       if (val === undefined) {
         delete process.env[key]
@@ -48,7 +60,6 @@ describe('GrowthBook local override (getLocalFlagOverrides)', () => {
         process.env[key] = val
       }
     }
-    // Cleanup temp dir
     if (tempDir) {
       try {
         rmSync(tempDir, { recursive: true, force: true })
@@ -65,7 +76,7 @@ describe('GrowthBook local override (getLocalFlagOverrides)', () => {
     delete process.env.USER_TYPE
 
     // Dynamic import to get fresh module state
-    const mod = await import('../growthbook.js')
+    const mod = await loadGrowthbookModule()
     // Reset module state so it re-reads overrides
     mod.resetGrowthBook()
 
@@ -79,7 +90,7 @@ describe('GrowthBook local override (getLocalFlagOverrides)', () => {
     process.env.HOME = tempDir
     delete process.env.USER_TYPE
 
-    const mod = await import('../growthbook.js')
+    const mod = await loadGrowthbookModule()
     mod.resetGrowthBook()
     // Reset local flag overrides cache
     mod._resetLocalFlagOverridesForTesting()
@@ -94,7 +105,7 @@ describe('GrowthBook local override (getLocalFlagOverrides)', () => {
     process.env.HOME = tempDir
     delete process.env.USER_TYPE
 
-    const mod = await import('../growthbook.js')
+    const mod = await loadGrowthbookModule()
     mod.resetGrowthBook()
     mod._resetLocalFlagOverridesForTesting()
 
@@ -114,7 +125,7 @@ describe('GrowthBook local override (getLocalFlagOverrides)', () => {
     process.env.HOME = tempDir
     delete process.env.USER_TYPE
 
-    const mod = await import('../growthbook.js')
+    const mod = await loadGrowthbookModule()
     mod.resetGrowthBook()
     mod._resetLocalFlagOverridesForTesting()
 
@@ -135,7 +146,7 @@ describe('GrowthBook local override (getLocalFlagOverrides)', () => {
     process.env.HOME = tempDir
     delete process.env.USER_TYPE
 
-    const mod = await import('../growthbook.js')
+    const mod = await loadGrowthbookModule()
     mod.resetGrowthBook()
     mod._resetLocalFlagOverridesForTesting()
 
@@ -155,7 +166,7 @@ describe('GrowthBook local override (getLocalFlagOverrides)', () => {
       tengu_test_gate: false,
     })
 
-    const mod = await import('../growthbook.js')
+    const mod = await loadGrowthbookModule()
     mod.resetGrowthBook()
     mod._resetLocalFlagOverridesForTesting()
 

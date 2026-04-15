@@ -9,7 +9,7 @@
  * - Integration with createAutoMemCanUseTool (Write/Edit blocking)
  */
 
-import { describe, test, expect, beforeEach } from 'bun:test'
+import { describe, test, expect, beforeEach, afterAll } from 'bun:test'
 import { mock } from 'bun:test'
 import { randomUUID } from 'crypto'
 
@@ -79,6 +79,10 @@ function makeMockTool(
 // ============================================================================
 // 1. Pattern Detection — one test per category
 // ============================================================================
+
+afterAll(() => {
+  mock.restore()
+})
 
 describe('secretScanner', () => {
   describe('pattern detection', () => {

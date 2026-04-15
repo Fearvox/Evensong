@@ -6,7 +6,7 @@
  * growthbook, git). Env vars are saved/restored per test.
  */
 
-import { describe, test, expect, beforeEach, afterEach, mock } from 'bun:test'
+import { describe, test, expect, beforeEach, afterEach, afterAll, mock } from 'bun:test'
 import { sep, join } from 'path'
 
 // ============================================================================
@@ -58,6 +58,10 @@ mock.module('src/utils/debug.js', () => ({
   logForDebugging: () => {},
 }))
 
+afterAll(() => {
+  mock.restore()
+})
+
 // ============================================================================
 // Import module under test AFTER all mocks
 // ============================================================================
@@ -94,7 +98,18 @@ beforeEach(() => {
 })
 
 afterEach(() => {
-  process.env = savedEnv
+  for (const key of Object.keys(process.env)) {
+    if (!(key in savedEnv)) {
+      delete process.env[key]
+    }
+  }
+  for (const [key, value] of Object.entries(savedEnv)) {
+    if (value === undefined) {
+      delete process.env[key]
+    } else {
+      process.env[key] = value
+    }
+  }
 })
 
 // ---------------------------------------------------------------------------

@@ -12,7 +12,7 @@
  * All tests mock the forked agent (no real API calls).
  */
 
-import { describe, test, expect, beforeEach, afterEach, mock } from 'bun:test'
+import { describe, test, expect, beforeEach, afterEach, afterAll, mock } from 'bun:test'
 import { randomUUID, type UUID } from 'crypto'
 
 // ============================================================================
@@ -274,6 +274,10 @@ function makeMockTool(
 // ============================================================================
 // Tests
 // ============================================================================
+
+afterAll(() => {
+  mock.restore()
+})
 
 describe('extractMemories', () => {
   beforeEach(() => {

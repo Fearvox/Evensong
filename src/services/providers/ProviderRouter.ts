@@ -279,8 +279,8 @@ export class ProviderRouter {
 
     return new ProviderRouter({
       providers,
-      defaultProvider: 'anthropic',
-      fallbackChain: ['anthropic'],
+      defaultProvider: 'xai-fast',  // Set to fastest generation model per user request
+      fallbackChain: ['xai-fast', 'anthropic'],
     });
   }
 }

@@ -9,7 +9,7 @@
  * - createSubagentContext applies stripping inside getAppState wrapper
  * - Feature flag gates all behavior
  */
-import { describe, it, expect, beforeEach, mock } from 'bun:test'
+import { describe, it, expect, beforeEach, afterAll, mock } from 'bun:test'
 import type { ToolPermissionContext } from 'src/types/permissions.js'
 
 // Mock feature flag BEFORE importing the module under test
@@ -28,6 +28,10 @@ import type { ToolUseContext } from 'src/Tool.js'
 import { getEmptyToolPermissionContext } from 'src/Tool.js'
 import type { AppState } from 'src/state/AppState.js'
 import { createFileStateCacheWithSizeLimit } from 'src/utils/fileStateCache.js'
+
+afterAll(() => {
+  mock.restore()
+})
 
 // ============================================================================
 // Test Data

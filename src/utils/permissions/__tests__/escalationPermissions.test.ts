@@ -13,7 +13,7 @@
  * ALL callers (toolExecution.ts, interactiveHandler.recheckPermission, headless)
  * see it consistently.
  */
-import { describe, it, expect, beforeEach, mock } from 'bun:test'
+import { describe, it, expect, beforeEach, afterAll, mock } from 'bun:test'
 import type { PermissionResult } from 'src/types/permissions.js'
 import type { Tool } from 'src/Tool.js'
 import { getEmptyToolPermissionContext } from 'src/Tool.js'
@@ -37,6 +37,10 @@ import {
   grantEscalation,
   revokeAllEscalations,
 } from '../escalation/EscalationStore.js'
+
+afterAll(() => {
+  mock.restore()
+})
 
 // ============================================================================
 // Constants
