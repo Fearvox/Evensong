@@ -1,54 +1,159 @@
-# Microservice Suite
+# DASH SHATTER
 
-Production-ready 8-service microservices built with TypeScript, Bun runtime, and in-memory stores. Full CRUD + business logic per service, comprehensive testing (516 tests total across unit, business, and integration), input validation, proper error handling (400/401/404/409/500), and cross-service integration tests.
+> Reverse-engineered Claude Code CLI — hackable, studyable, extendable.
 
-## Architecture
+This is a decompiled and reconstructed version of Anthropic's [Claude Code](https://claude.ai/code) CLI tool. The goal is to provide a working, modifiable codebase that developers can study, extend, and customize.
 
-See `services/README.md` for full details and per-service endpoint lists.
+## What is this?
 
-- **Ports**: auth=3001, users=3002, products=3003, orders=3004, payments=3005, notifications=3006, analytics=3007, search=3008
-- **Shared**: types, HTTP utilities, in-memory `MemoryStore<T>` base, validation, error handling, response builders
-- **Per service**: `index.ts` (Bun.serve entry), `handlers.ts` (pure `handleRequest(req: Request)` with validation/routing), `store.ts` (business logic + CRUD)
-- **No external deps** for storage — pure in-memory Maps with deterministic behaviors (e.g. payments >$10k fail, strict order status machine)
+Claude Code is Anthropic's official CLI for interacting with Claude. This project reverse-engineers the CLI to understand its architecture and make it hackable for learning and experimentation.
+
+**Status**: Core functionality works. Many secondary features are stubbed or disabled. ~1341 TypeScript errors from decompilation (mostly type issues) — these don't affect runtime.
 
 ## Quick Start
 
+### Prerequisites
+
+- [Bun](https://bun.sh) >= 1.3.0
+- Anthropic API key
+
+### Installation
+
 ```bash
-# Install
+# Clone the repo
+git clone https://github.com/Fearvox/ds-internal-beta-run.git
+cd ds-internal-beta-run
+
+# Install dependencies
 bun install
 
-# Run test suite (summary + all services)
-bun services/run-tests.ts
+# Set your API key
+export ANTHROPIC_API_KEY="sk-ant-your-key-here"
 
-# Run all tests directly
-bun test services/
-
-# Run a service
-bun run services/auth/index.ts
-# or with hot reload
-bun --watch services/auth/index.ts
-
-# Test single service
-bun test services/auth/
+# Run the CLI
+bun run dev
 ```
 
-## Test Coverage
+### Usage
 
-- ~55-66 tests per service (CRUD, business rules, validation edges, error paths, status machines)
-- Integration tests: full E2E user journey (register → order → payment → notification → analytics)
-- 516 total passing tests (0 failures)
-- All assertions validate real HTTP responses, state mutations, and business invariants
+```bash
+# Interactive REPL mode (default)
+bun run dev
 
-## Key Features
+# Pipe mode — single prompt, get response
+echo "explain what this repo does" | bun run dev -p
 
-- JWT auth with blacklist/refresh tokens
-- Strict order status finite state machine
-- TF-IDF-inspired search with relevance scoring
-- Template-based notifications with delivery tracking
-- Analytics with funnels, cohorts, retention metrics
-- Deterministic payment gateway simulation
-- Soft deletes, bulk operations, role-based access, inventory management
+# Build a standalone bundle (~25MB)
+bun run build
+# Then run: bun dist/cli.js
+```
 
-All services follow production patterns (pure handlers for testability, shared infrastructure for consistency). The suite serves as both a learning reference for microservice design and a testbed for the surrounding agent evolution frameworks.
+## Architecture Overview
 
-Run `bun services/run-tests.ts` to verify everything passes.
+```
+src/
+├── entrypoints/
+│   └── cli.tsx          # Main entrypoint with runtime polyfills
+├── main.tsx             # Commander.js CLI definition
+├── query.ts             # Core API query function
+├── QueryEngine.ts       # Conversation orchestrator
+├── screens/
+│   └── REPL.tsx         # Interactive terminal UI (React/Ink)
+├── services/
+│   └── api/
+│       └── claude.ts    # Anthropic API client
+├── tools/               # Built-in tools (Bash, Edit, Grep, etc.)
+│   ├── BashTool/
+│   ├── FileEditTool/
+│   ├── GrepTool/
+│   └── AgentTool/
+├── components/          # Terminal UI components
+└── state/               # App state management
+```
+
+### Key Components
+
+| Component | Purpose |
+|-----------|---------|
+| `cli.tsx` | Entrypoint with feature flag polyfills |
+| `query.ts` | Sends messages to Claude API, handles streaming |
+| `QueryEngine.ts` | Manages conversation state, compaction, tool calls |
+| `REPL.tsx` | Interactive terminal UI built with Ink |
+| `tools/` | Each tool (Bash, Edit, etc.) in its own directory |
+
+### Technology Stack
+
+- **Runtime**: Bun (not Node.js)
+- **UI**: React + [Ink](https://github.com/vadimdemedes/ink) (terminal rendering)
+- **API**: `@anthropic-ai/sdk`
+- **Build**: Single-file bundle via `bun build`
+
+## Working with the Codebase
+
+### Don't panic about TypeScript errors
+
+The ~1341 tsc errors are from decompilation artifacts (mostly `unknown`/`never`/`{}` types). They don't affect runtime — the code runs fine with Bun.
+
+### Feature flags are disabled
+
+All `feature('FLAG_NAME')` calls return `false`. Code behind feature flags is effectively dead code in this build. This disables Anthropic-internal features.
+
+### React Compiler artifacts
+
+You'll see patterns like `const $ = _c(N)` throughout components. This is decompiled React Compiler output — it's normal memoization boilerplate.
+
+## Supported Providers
+
+The CLI can work with different API providers:
+
+- Anthropic (direct) — default
+- AWS Bedrock
+- Google Vertex AI
+- Azure OpenAI
+
+Configure via environment variables. See `src/utils/model/providers.ts`.
+
+## What's Stubbed/Removed
+
+| Feature | Status |
+|---------|--------|
+| Computer Use (`@ant/*`) | Stubbed |
+| Native packages (audio, image) | Stubbed |
+| Analytics / Sentry | Empty implementations |
+| Voice Mode / LSP Server | Removed |
+| Plugins / Marketplace | Removed |
+| MCP OAuth | Simplified |
+
+## Project Structure
+
+```
+.
+├── src/                 # Main source code
+├── packages/            # Internal packages (mostly stubs)
+├── services/            # Microservices test suite (516 tests)
+├── benchmarks/          # Evensong benchmark framework
+├── skills/              # Claude Code skills
+└── docs/                # Documentation
+```
+
+## Running Tests
+
+```bash
+# Run the microservices test suite
+bun services/run-tests.ts
+
+# Run all tests
+bun test
+```
+
+## Contributing
+
+This is an internal beta. Feel free to explore, experiment, and learn!
+
+## License
+
+See [LICENSE](LICENSE) file.
+
+---
+
+Built with reverse-engineering wizardry. For educational purposes.
