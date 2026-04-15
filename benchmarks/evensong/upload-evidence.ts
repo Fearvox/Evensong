@@ -16,7 +16,8 @@
  */
 
 const EVEROS_STORAGE_ENDPOINT = 'https://api.evermind.ai/api/v1/storage/upload'
-const OBSERVER_KEY = '9db9eb89-aeea-4fa2-9da8-f70590394614'
+const OBSERVER_KEY = process.env.EVERMEM_API_KEY
+if (!OBSERVER_KEY) throw new Error('EVERMEM_API_KEY env var required')
 
 const CONTENT_TYPE_MAP: Record<string, string> = {
   '.png':  'image/png',

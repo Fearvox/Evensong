@@ -11,7 +11,8 @@
  *   bun benchmarks/evensong/inject-memory.ts list # show recent memories
  */
 
-const KEY_A = '9db9eb89-aeea-4fa2-9da8-f70590394614'
+const KEY_A = process.env.EVERMEM_API_KEY
+if (!KEY_A) throw new Error('EVERMEM_API_KEY env var required')
 const GROUP_ID = 'clauf6029'  // CWD hash: /Users/0xvox/claude-code-reimagine-for-learning
 const USER_ID = 'nolan'
 

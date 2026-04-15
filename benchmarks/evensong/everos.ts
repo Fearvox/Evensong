@@ -379,15 +379,21 @@ export class EverOSClient {
 
 /** Observer key — read-only analytics space */
 export function createObserverClient(): EverOSClient {
-  return new EverOSClient(process.env.EVERMEM_OBS_KEY ?? '9db9eb89-aeea-4fa2-9da8-f70590394614')
+  const key = process.env.EVERMEM_OBS_KEY
+  if (!key) throw new Error('EVERMEM_OBS_KEY env var required')
+  return new EverOSClient(key)
 }
 
 /** Runner key — general-purpose allaround space */
 export function createRunnerClient(): EverOSClient {
-  return new EverOSClient(process.env.EVERMEM_RNR_KEY ?? 'a2981e4d-6374-4c40-ab50-9c8ae052a7c4')
+  const key = process.env.EVERMEM_RNR_KEY
+  if (!key) throw new Error('EVERMEM_RNR_KEY env var required')
+  return new EverOSClient(key)
 }
 
 /** Void key — empty/disposable space for clean-room benchmarks */
 export function createVoidClient(): EverOSClient {
-  return new EverOSClient(process.env.EVERMEM_VOID_KEY ?? '309390b7-2468-4a4f-b800-f593fea15ba4')
+  const key = process.env.EVERMEM_VOID_KEY
+  if (!key) throw new Error('EVERMEM_VOID_KEY env var required')
+  return new EverOSClient(key)
 }

@@ -359,11 +359,13 @@ function buildEnv(provider: ProviderPreset, config: RunConfig, workspace: Worksp
   }
   if (config.memory === 'clean') {
     // Void space — empty/disposable, no memories persist
-    env.EVERMEM_API_KEY = '309390b7-2468-4a4f-b800-f593fea15ba4'
+    // Requires EVERMEM_VOID_KEY env var
+    env.EVERMEM_API_KEY = process.env.EVERMEM_VOID_KEY ?? ''
     env.CLAUDE_CODE_DISABLE_AUTO_MEMORY = '1'
   } else if (config.memory === 'blind') {
     // Allaround space — general-purpose runner memories only
-    env.EVERMEM_API_KEY = 'a2981e4d-6374-4c40-ab50-9c8ae052a7c4'
+    // Requires EVERMEM_RNR_KEY env var
+    env.EVERMEM_API_KEY = process.env.EVERMEM_RNR_KEY ?? ''
   }
   // 'full' — don't override EVERMEM_API_KEY, uses default Key A from plugin .env
 

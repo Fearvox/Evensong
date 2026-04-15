@@ -18,7 +18,7 @@
           },
           {
             "type": "command",
-            "command": "export EVERMEM_API_KEY=9db9eb89-aeea-4fa2-9da8-f70590394614 EVERMEM_USER_ID=cloud-runner EVERMEM_AGENTIC=1 EVERMEM_GROUP_ID=evensong && echo '[EverMem] cloud-runner/evensong initialized'"
+            "command": "export EVERMEM_USER_ID=cloud-runner EVERMEM_AGENTIC=1 EVERMEM_GROUP_ID=evensong && echo '[EverMem] cloud-runner/evensong initialized (set EVERMEM_API_KEY to enable)'"
           }
         ]
       }

@@ -98,8 +98,8 @@ describe('Factory functions', () => {
 })
 
 describe('Settings.get integration', () => {
-  const obsKey = process.env.EVERMEM_OBS_KEY ?? '9db9eb89-aeea-4fa2-9da8-f70590394614'
-  const skipReason = process.env.CI ? 'CI environment — skip real API calls' : null
+  const obsKey = process.env.EVERMEM_OBS_KEY
+  const skipReason = process.env.CI ? 'CI environment — skip real API calls' : (!obsKey ? 'EVERMEM_OBS_KEY not set' : null)
 
   test.skipIf(!!skipReason)('Settings.get returns data with observer key', async () => {
     const client = new EverOSClient(obsKey)
