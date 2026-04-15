@@ -151,6 +151,7 @@ import chrome from './commands/chrome/index.js'
 import stickers from './commands/stickers/index.js'
 import advisor from './commands/advisor.js'
 import ultraThink from './commands/ultra-think/index.js'
+import ultEvoReport from './commands/ult-evo-report/index.js'
 import { logError } from './utils/log.js'
 import { toError } from './utils/errors.js'
 import { logForDebugging } from './utils/debug.js'
@@ -332,6 +333,7 @@ const COMMANDS = memoize((): Command[] => [
   thinkback,
   thinkbackPlay,
   ultraThink,
+  ultEvoReport,
   permissions,
   plan,
   privacySettings,
