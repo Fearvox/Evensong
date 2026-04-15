@@ -95,8 +95,8 @@ export function Settings(t0) {
   }
   let t7;
   if ($[13] !== contentHeight) {
-    const GatesComponent = Gates as any;
-    t7 = false ? [<Tab key="gates" title="Gates"><GatesComponent onOwnsEscChange={setGatesOwnsEsc} contentHeight={contentHeight} /></Tab>] : [];
+    // Gates component removed in CCR build — dead code path (condition is always false)
+    t7 = [];
     $[13] = contentHeight;
     $[14] = t7;
   } else {

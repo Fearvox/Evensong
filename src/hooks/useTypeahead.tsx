@@ -378,7 +378,7 @@ export function useTypeahead({
   // Compute max column width from ALL commands once (not filtered results)
   // This prevents layout shift when filtering
   const allCommandsMaxWidth = useMemo(() => {
-    const visibleCommands = commands.filter(cmd => !cmd.isHidden);
+    const visibleCommands = commands.filter(cmd => !cmd.isHidden && getCommandName(cmd));
     if (visibleCommands.length === 0) return undefined;
     const maxLen = Math.max(...visibleCommands.map(cmd => getCommandName(cmd).length));
     return maxLen + 6; // +1 for "/" prefix, +5 for padding

@@ -626,7 +626,13 @@ export function transitionPermissionMode(
 
     if (toUsesClassifier && !fromUsesClassifier) {
       if (!isAutoModeGateEnabled()) {
-        throw new Error('Cannot transition to auto mode: gate is not enabled')
+        // CCR: graceful fallback instead of crash — auto mode requires the
+        // transcript classifier which is not available in this build.
+        logForDebugging(
+          'Cannot transition to auto mode: gate is not enabled — falling back to current mode',
+          { level: 'warn' },
+        )
+        return context
       }
       autoModeStateModule?.setAutoModeActive(true)
       context = stripDangerousPermissionsForAutoMode(context)
@@ -1281,6 +1287,9 @@ function isAutoModeDisabledBySettings(): boolean {
  * have not disabled it. Synchronous.
  */
 export function isAutoModeGateEnabled(): boolean {
+  // CCR: auto mode requires TRANSCRIPT_CLASSIFIER (Anthropic's internal
+  // classifier). Without it, auto mode is structurally unavailable.
+  if (!feature('TRANSCRIPT_CLASSIFIER')) return false
   if (autoModeStateModule?.isAutoModeCircuitBroken() ?? false) return false
   if (isAutoModeDisabledBySettings()) return false
   if (!modelSupportsAutoMode(getMainLoopModel())) return false
