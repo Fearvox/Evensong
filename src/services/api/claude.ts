@@ -2458,7 +2458,7 @@ async function* queryModel(
             if (stopReason === 'model_context_window_exceeded') {
               logEvent('tengu_context_window_exceeded', {
                 max_tokens: maxOutputTokens,
-                output_tokens: usage.output_tokens,
+                output_tokens: usage?.output_tokens ?? 0,
               })
               // Reuse the max_output_tokens recovery path — from the model's
               // perspective, both mean "response was cut off, continue from
@@ -3117,18 +3117,18 @@ export function updateUsage(
     input_tokens:
       partUsage.input_tokens !== null && partUsage.input_tokens > 0
         ? partUsage.input_tokens
-        : usage.input_tokens,
+        : (usage?.input_tokens ?? 0),
     cache_creation_input_tokens:
       partUsage.cache_creation_input_tokens !== null &&
       partUsage.cache_creation_input_tokens > 0
         ? partUsage.cache_creation_input_tokens
-        : usage.cache_creation_input_tokens,
+        : (usage?.cache_creation_input_tokens ?? 0),
     cache_read_input_tokens:
       partUsage.cache_read_input_tokens !== null &&
       partUsage.cache_read_input_tokens > 0
         ? partUsage.cache_read_input_tokens
-        : usage.cache_read_input_tokens,
-    output_tokens: partUsage.output_tokens ?? usage.output_tokens,
+        : (usage?.cache_read_input_tokens ?? 0),
+    output_tokens: partUsage.output_tokens ?? usage?.output_tokens ?? 0,
     server_tool_use: {
       web_search_requests:
         partUsage.server_tool_use?.web_search_requests ??
