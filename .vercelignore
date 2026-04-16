@@ -1,0 +1,10 @@
+node_modules
+.git
+.worktrees
+.planning
+benchmarks
+docs
+skills
+ultra-evo
+research-vault
+scripts
