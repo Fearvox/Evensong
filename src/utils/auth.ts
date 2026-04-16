@@ -117,6 +117,13 @@ export function isAnthropicAuthEnabled(): boolean {
     isEnvTruthy(process.env.CLAUDE_CODE_USE_VERTEX) ||
     isEnvTruthy(process.env.CLAUDE_CODE_USE_FOUNDRY)
 
+  // CCR: When ANTHROPIC_BASE_URL points to a non-Anthropic domain, OAuth
+  // tokens are invalid — disable auth so ANTHROPIC_API_KEY is used directly.
+  const baseUrl = process.env.ANTHROPIC_BASE_URL
+  const isNonAnthropicProxy = baseUrl
+    ? !new URL(baseUrl).hostname.endsWith('.anthropic.com')
+    : false
+
   // Check if user has configured an external API key source
   // This allows externally-provided API keys to work (without requiring proxy configuration)
   const settings = getSettings_DEPRECATED() || {}
@@ -142,6 +149,7 @@ export function isAnthropicAuthEnabled(): boolean {
   // if we get reports of that, we should probably add an env var to force OAuth enablement
   const shouldDisableAuth =
     is3P ||
+    isNonAnthropicProxy ||
     (hasExternalAuthToken && !isManagedOAuthContext()) ||
     (hasExternalApiKey && !isManagedOAuthContext())
 

@@ -24,6 +24,9 @@ if (typeof globalThis.MACRO === "undefined") {
 // eslint-disable-next-line custom-rules/no-top-level-side-effects, custom-rules/no-process-env-top-level
 process.env.USER_TYPE = 'external'
 
+// OAuth disabled for non-Anthropic providers via isNonAnthropicProxy check
+// in auth.ts — no extra env var needed here.
+
 // Bugfix for corepack auto-pinning, which adds yarnpkg to peoples' package.jsons
 // eslint-disable-next-line custom-rules/no-top-level-side-effects
 process.env.COREPACK_ENABLE_AUTO_PIN = "0";
