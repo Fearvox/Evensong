@@ -24,6 +24,10 @@ if (typeof globalThis.MACRO === "undefined") {
 // eslint-disable-next-line custom-rules/no-top-level-side-effects, custom-rules/no-process-env-top-level
 process.env.USER_TYPE = 'external'
 
+// CCR: disable GrowthBook/Statsig telemetry to prevent 30s blocking on first query
+// eslint-disable-next-line custom-rules/no-top-level-side-effects, custom-rules/no-process-env-top-level
+process.env.DISABLE_TELEMETRY = '1'
+
 // OAuth disabled for non-Anthropic providers via isNonAnthropicProxy check
 // in auth.ts — no extra env var needed here.
 

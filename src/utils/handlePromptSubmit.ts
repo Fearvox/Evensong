@@ -310,6 +310,7 @@ export async function handlePromptSubmit(
     }
   }
 
+  logForDebugging(`[handlePromptSubmit] queryGuard.isActive=${queryGuard.isActive} isExternalLoading=${isExternalLoading} input="${input?.slice(0, 20)}"`)
   if (queryGuard.isActive || isExternalLoading) {
     // Only allow prompt and bash mode commands to be queued
     if (mode !== 'prompt' && mode !== 'bash') {
