@@ -1,69 +1,28 @@
 import { describe, test, expect, beforeEach, afterEach, mock } from 'bun:test'
-import { mkdtempSync, writeFileSync, mkdirSync, rmSync } from 'fs'
-import { join } from 'path'
-import { tmpdir } from 'os'
+
+// Mock getLocalFlagOverrides at module level — avoids process.env.HOME
+// mutation which leaks across parallel test files in Bun.
+let mockOverrides: Record<string, unknown> | null = null
+
+mock.module('../../analytics/growthbook.js', () => ({
+  getLocalFlagOverrides: () => mockOverrides,
+  resetGrowthBook: () => {},
+  _resetLocalFlagOverridesForTesting: () => { mockOverrides = null },
+}))
 
 type LocalGateModule = typeof import('../localGateProvider.js')
-type GrowthBookModule = typeof import('../../analytics/growthbook.js')
 
 async function loadLocalGateModule(): Promise<LocalGateModule> {
-  mock.restore()
-  return import(`../localGateProvider.js?isolation=${Date.now()}-${Math.random()}`)
-}
-
-// Helper: create a temp HOME with .claude/feature-flags.json
-function setupTempHome(flags: Record<string, unknown>): string {
-  const tempDir = mkdtempSync(join(tmpdir(), 'lgp-test-'))
-  const claudeDir = join(tempDir, '.claude')
-  mkdirSync(claudeDir, { recursive: true })
-  writeFileSync(join(claudeDir, 'feature-flags.json'), JSON.stringify(flags))
-  return tempDir
+  return import(`../localGateProvider.js?v=${Date.now()}-${Math.random()}`)
 }
 
 describe('localGateProvider', () => {
-  let savedEnv: Record<string, string | undefined>
-  let tempDir: string | null = null
-
-  beforeEach(async () => {
-    mock.restore()
-    // Save env state
-    savedEnv = {
-      HOME: process.env.HOME,
-      USER_TYPE: process.env.USER_TYPE,
-      CLAUDE_INTERNAL_FC_OVERRIDES: process.env.CLAUDE_INTERNAL_FC_OVERRIDES,
-    }
-
-    // Reset growthbook module cache so getLocalFlagOverrides re-reads from new HOME
-    const gbMod = await import('../../analytics/growthbook.js')
-    gbMod.resetGrowthBook()
-    gbMod._resetLocalFlagOverridesForTesting()
+  beforeEach(() => {
+    mockOverrides = null
   })
 
-  afterEach(async () => {
-    for (const key of Object.keys(process.env)) {
-      if (!(key in savedEnv)) {
-        delete process.env[key]
-      }
-    }
-    for (const [key, val] of Object.entries(savedEnv)) {
-      if (val === undefined) {
-        delete process.env[key]
-      } else {
-        process.env[key] = val
-      }
-    }
-    if (tempDir) {
-      try {
-        rmSync(tempDir, { recursive: true, force: true })
-      } catch {
-        // ignore
-      }
-      tempDir = null
-    }
-    // Reset growthbook cache after test
-    const gbMod = await import('../../analytics/growthbook.js')
-    gbMod.resetGrowthBook()
-    gbMod._resetLocalFlagOverridesForTesting()
+  afterEach(() => {
+    mockOverrides = null
   })
 
   describe('isLocalGate', () => {
@@ -85,54 +44,39 @@ describe('localGateProvider', () => {
 
   describe('getLocalGateValue', () => {
     test('returns value for tengu_key present in feature-flags.json', async () => {
-      tempDir = setupTempHome({ tengu_test_gate: true })
-      process.env.HOME = tempDir
-      delete process.env.USER_TYPE
-
+      mockOverrides = { tengu_test_gate: true }
       const mod = await loadLocalGateModule()
       const result = mod.getLocalGateValue('tengu_test_gate')
       expect(result).toBe(true)
     })
 
     test('returns null for non-tengu_key (not a local gate)', async () => {
-      tempDir = setupTempHome({ tengu_test_gate: true })
-      process.env.HOME = tempDir
-      delete process.env.USER_TYPE
-
+      mockOverrides = { tengu_test_gate: true }
       const mod = await loadLocalGateModule()
       const result = mod.getLocalGateValue('KAIROS')
       expect(result).toBeNull()
     })
 
     test('returns null when feature-flags.json does not exist', async () => {
-      tempDir = mkdtempSync(join(tmpdir(), 'lgp-empty-test-'))
-      process.env.HOME = tempDir
-      delete process.env.USER_TYPE
-
+      mockOverrides = null
       const mod = await loadLocalGateModule()
       const result = mod.getLocalGateValue('tengu_test_gate')
       expect(result).toBeNull()
     })
 
     test('returns null when feature-flags.json has no tengu_* keys', async () => {
-      tempDir = setupTempHome({ KAIROS: true, PROACTIVE: false })
-      process.env.HOME = tempDir
-      delete process.env.USER_TYPE
-
+      mockOverrides = {}
       const mod = await loadLocalGateModule()
       const result = mod.getLocalGateValue('tengu_test_gate')
       expect(result).toBeNull()
     })
 
     test('returns non-boolean values as-is (objects, numbers, strings)', async () => {
-      tempDir = setupTempHome({
+      mockOverrides = {
         tengu_config: { key: 'val', nested: true },
         tengu_number: 42,
         tengu_string: 'hello',
-      })
-      process.env.HOME = tempDir
-      delete process.env.USER_TYPE
-
+      }
       const mod = await loadLocalGateModule()
       expect(mod.getLocalGateValue('tengu_config')).toEqual({ key: 'val', nested: true })
       expect(mod.getLocalGateValue('tengu_number')).toBe(42)
@@ -142,30 +86,21 @@ describe('localGateProvider', () => {
 
   describe('resolveGate (local-first priority)', () => {
     test('tengu_* gates resolve from local flags, not remote cache', async () => {
-      tempDir = setupTempHome({ tengu_local_gate: true })
-      process.env.HOME = tempDir
-      delete process.env.USER_TYPE
-
+      mockOverrides = { tengu_local_gate: true }
       const mod = await loadLocalGateModule()
       const result = mod.resolveGate('tengu_local_gate')
       expect(result).toEqual({ source: 'local', value: true })
     })
 
     test('non-tengu_* gates return null (not a local gate)', async () => {
-      tempDir = setupTempHome({ tengu_test: true })
-      process.env.HOME = tempDir
-      delete process.env.USER_TYPE
-
+      mockOverrides = { tengu_test: true }
       const mod = await loadLocalGateModule()
       const result = mod.resolveGate('KAIROS')
       expect(result).toBeNull()
     })
 
     test('resolveGate logs gate resolution with source', async () => {
-      tempDir = setupTempHome({ tengu_logged_gate: true })
-      process.env.HOME = tempDir
-      delete process.env.USER_TYPE
-
+      mockOverrides = { tengu_logged_gate: true }
       const mod = await loadLocalGateModule()
       const result = mod.resolveGate('tengu_logged_gate')
       expect(result).not.toBeNull()
