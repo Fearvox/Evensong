@@ -1091,46 +1091,116 @@ async function* queryModel(
         apiMessages.push({ role, content })
       }
 
-      const result = await provider.createMessage({
-        systemPrompt: systemParts.join('\n\n'),
-        messages: apiMessages,
-      })
+      // ─── Confidential Relay: route through encrypted relay if RELAY_URL is set ───
+      const relayUrl = process.env.RELAY_URL
+      const relayKey = process.env.RELAY_RELAY_KEY
 
-      // Wrap response as AssistantMessage
-      const { randomUUID } = await import('crypto')
-      const assistantMsg: AssistantMessage = {
-        type: 'assistant',
-        uuid: randomUUID(),
-        message: {
-          role: 'assistant',
-          id: `msg_${activeProvider}_${Date.now()}`,
-          content: [{ type: 'text', text: result.text }],
-          usage: {
-            input_tokens: result.usage.inputTokens,
-            output_tokens: result.usage.outputTokens,
-            cache_creation_input_tokens: 0,
-            cache_read_input_tokens: 0,
-          },
+      if (relayUrl && relayKey) {
+        // Build provider-agnostic payload
+        const providerPayload = {
           model: provider.modelName,
-          stop_reason: result.finishReason === 'stop' ? 'end_turn' : result.finishReason,
-        },
-        costUSD: 0, // Third-party cost tracking TBD
-      }
-
-      // Handle tool calls from OpenAI-compatible providers
-      if (result.toolCalls.length > 0) {
-        const content = assistantMsg.message!.content as any[]
-        for (const tc of result.toolCalls) {
-          content.push({
-            type: 'tool_use',
-            id: tc.id,
-            name: tc.name,
-            input: tc.arguments,
-          })
+          systemPrompt: systemParts.join('\n\n'),
+          messages: apiMessages,
         }
-      }
 
-      yield assistantMsg
+        const { encryptRelayPayload, decryptRelayPayload } = await import('src/utils/crypto.js')
+        const encryptedPayload = encryptRelayPayload(providerPayload, relayKey)
+
+        const relayResponse = await fetch(relayUrl, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ encrypted: encryptedPayload, provider: activeProvider }),
+        })
+
+        if (!relayResponse.ok) {
+          const errorText = await relayResponse.text()
+          throw new Error(`Relay returned ${relayResponse.status}: ${errorText}`)
+        }
+
+        const { encrypted: encryptedResponse } = await relayResponse.json() as { encrypted: string }
+        const responseData = decryptRelayPayload(encryptedResponse, relayKey) as {
+          text?: string
+          choices?: Array<{ message?: { content?: string }; finish_reason?: string }>
+          usage?: { prompt_tokens?: number; completion_tokens?: number }
+          error?: { message?: string }
+        }
+
+        // Handle error responses
+        if (responseData.error) {
+          throw new Error(`Relay provider error: ${responseData.error.message}`)
+        }
+
+        // Parse OpenAI-compatible response format
+        const replyText = responseData.text
+          ?? responseData.choices?.[0]?.message?.content
+          ?? ''
+        const finishReason = responseData.choices?.[0]?.finish_reason
+          ?? 'stop'
+        const inputTokens = responseData.usage?.prompt_tokens ?? 0
+        const outputTokens = responseData.usage?.completion_tokens ?? 0
+
+        const { randomUUID } = await import('crypto')
+        const assistantMsg: AssistantMessage = {
+          type: 'assistant',
+          uuid: randomUUID(),
+          message: {
+            role: 'assistant',
+            id: `msg_relay_${activeProvider}_${Date.now()}`,
+            content: [{ type: 'text', text: replyText }],
+            usage: {
+              input_tokens: inputTokens,
+              output_tokens: outputTokens,
+              cache_creation_input_tokens: 0,
+              cache_read_input_tokens: 0,
+            },
+            model: provider.modelName,
+            stop_reason: finishReason === 'stop' ? 'end_turn' : finishReason,
+          },
+          costUSD: 0,
+        }
+
+        yield assistantMsg
+      } else {
+        // ─── Default: direct provider call (RELAY_URL not set) ───
+        const result = await provider.createMessage({
+          systemPrompt: systemParts.join('\n\n'),
+          messages: apiMessages,
+        })
+
+        const { randomUUID } = await import('crypto')
+        const assistantMsg: AssistantMessage = {
+          type: 'assistant',
+          uuid: randomUUID(),
+          message: {
+            role: 'assistant',
+            id: `msg_${activeProvider}_${Date.now()}`,
+            content: [{ type: 'text', text: result.text }],
+            usage: {
+              input_tokens: result.usage.inputTokens,
+              output_tokens: result.usage.outputTokens,
+              cache_creation_input_tokens: 0,
+              cache_read_input_tokens: 0,
+            },
+            model: provider.modelName,
+            stop_reason: result.finishReason === 'stop' ? 'end_turn' : result.finishReason,
+          },
+          costUSD: 0,
+        }
+
+        if (result.toolCalls.length > 0) {
+          const content = assistantMsg.message!.content as any[]
+          for (const tc of result.toolCalls) {
+            content.push({
+              type: 'tool_use',
+              id: tc.id,
+              name: tc.name,
+              input: tc.arguments,
+            })
+          }
+        }
+
+        yield assistantMsg
+      }
     } catch (err) {
       yield getAssistantMessageFromError(
         err instanceof Error ? err : new Error(String(err)),
