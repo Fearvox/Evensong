@@ -137,7 +137,25 @@ Trigger phrases: "evensong benchmark", "co-evolution loop", "dash-shatter handof
 
 Reverse-engineered/decompiled Anthropic Claude Code CLI. Goal: restore core into hackable, understandable codebase, trim secondary capabilities. Built on Bun runtime w/ ESM, TSX, Ink for terminal UI.
 
-> **CCR vs CCB**: This repo = **CCR** (`claude-code-reimagine-for-learning`). Milestone/brand repo at `~/dash-shatter/` = **CCB** (DASH SHATTER product).
+> **CCR (this repo, active DS main line)** — Local: `~/claude-code-reimagine-for-learning/`. GitHub: `Fearvox/Evensong.git` (pre-rename artifact — local dir name unchanged). Goal: ultimate productive CLI with all hidden features (GREEN + YELLOW flags) enabled.
+>
+> **CCB (frozen paper-benchmark snapshot)** — Local: `~/dash-shatter/` / GitHub: `Fearvox/dash-shatter.git`. HEAD frozen 2026-04-13 at paper-benchmark cut. **Not active, not a fork** — separate git history. Preserved only for paper reproducibility.
+>
+> **Naming note**: Brand = "Dash Shatter / DS". GitHub repo = "Evensong". Local dir = "claude-code-reimagine-for-learning". All three refer to the same active product.
+
+### Integrated Assets (Phase 07 output, 2026-04-16)
+
+- `packages/research-vault-mcp/` — MCP server for research vault memory (Bun workspace package; HTTP SSE transport on port 8765)
+- `research-vault/` — **Submodule** → `Fearvox/ds-research-vault` (private). 82 MB vault: docs, knowledge, raw papers, summaries, ultraplan, scripts. Sensitive files (`api key.md`, `飙马野人/`, `*.docx`) `.gitignore`d inside the submodule.
+- `benchmarks/data/` — **Optional submodule** → `Fearvox/ds-benchmark-data` (private). 73 MB of R006/R008/R012 + EverMind-Handoff + stress-tests. Default `git submodule update` SKIPS this. Opt in via `git submodule update --init benchmarks/data`.
+
+Sibling projects — **do NOT modify from CCR sessions**:
+- `~/dash-verse/` (separate project)
+- `~/.dashpersona/` (separate project)
+- `~/workspace/dash-shatter-vault/` (separate vault instance)
+
+Archive-only reference (read-only):
+- `~/Documents/Evensong/` — remaining assets not yet migrated (LaTeX paper source, evensong-neurips, EverOS Collab Log). Local-only, not in any repo.
 
 **Core Value:** Working, modifiable Claude Code CLI devs can study, extend, customize — bridging "decompiled and runs" to "engineered and maintainable."
 
