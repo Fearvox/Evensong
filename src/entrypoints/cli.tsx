@@ -18,6 +18,12 @@ if (typeof globalThis.MACRO === "undefined") {
 (globalThis as any).BUILD_ENV = "production";
 (globalThis as any).INTERFACE_TYPE = "stdio";
 
+// CCR is never an Anthropic-internal build. Force USER_TYPE to 'external' to
+// prevent ant-only code paths (resolveAntModel, REPLTool, ConfigTool, TungstenTool)
+// from activating — those modules are stubs in this codebase.
+// eslint-disable-next-line custom-rules/no-top-level-side-effects, custom-rules/no-process-env-top-level
+process.env.USER_TYPE = 'external'
+
 // Bugfix for corepack auto-pinning, which adds yarnpkg to peoples' package.jsons
 // eslint-disable-next-line custom-rules/no-top-level-side-effects
 process.env.COREPACK_ENABLE_AUTO_PIN = "0";
