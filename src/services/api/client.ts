@@ -297,17 +297,23 @@ export async function getAnthropicClient({
     return new AnthropicVertex(vertexArgs) as unknown as Anthropic
   }
 
-  // Determine authentication method based on available tokens
+  // CCR: non-Anthropic base URL → skip OAuth, use API key directly
+  const envBaseUrl = process.env.ANTHROPIC_BASE_URL
+  const isThirdParty = envBaseUrl
+    ? (() => { try { return !new URL(envBaseUrl).hostname.endsWith('.anthropic.com') } catch { return false } })()
+    : false
+  const useOAuth = !isThirdParty && isClaudeAISubscriber()
+
   const clientConfig: ConstructorParameters<typeof Anthropic>[0] = {
-    apiKey: isClaudeAISubscriber() ? null : apiKey || getAnthropicApiKey(),
-    authToken: isClaudeAISubscriber()
-      ? getClaudeAIOAuthTokens()?.accessToken
-      : undefined,
-    // Set baseURL from OAuth config when using staging OAuth
-    ...(process.env.USER_TYPE === 'ant' &&
-    isEnvTruthy(process.env.USE_STAGING_OAUTH)
-      ? { baseURL: getOauthConfig().BASE_API_URL }
-      : {}),
+    apiKey: useOAuth ? null : apiKey || getAnthropicApiKey(),
+    authToken: useOAuth ? getClaudeAIOAuthTokens()?.accessToken : undefined,
+    // Explicit baseURL: ANTHROPIC_BASE_URL for third-party providers,
+    // staging OAuth URL for ant users, or omit for SDK default.
+    ...(envBaseUrl
+      ? { baseURL: envBaseUrl }
+      : process.env.USER_TYPE === 'ant' && isEnvTruthy(process.env.USE_STAGING_OAUTH)
+        ? { baseURL: getOauthConfig().BASE_API_URL }
+        : {}),
     ...ARGS,
     ...(isDebugToStdErr() && { logger: createStderrLogger() }),
   }
