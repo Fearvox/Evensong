@@ -28,6 +28,7 @@ import {
   getVertexRegionForModel,
   isEnvTruthy,
 } from '../../utils/envUtils.js'
+import { getSecureStorage } from '../../utils/secureStorage/index.js'
 
 /**
  * Environment variables for different client types:
@@ -85,6 +86,8 @@ function createStderrLogger(): ClientOptions['logger'] {
   }
 }
 
+const OAUTH_EXPIRING_SOON_MS = 5 * 60 * 1000
+
 export async function getAnthropicClient({
   apiKey,
   maxRetries,
@@ -138,6 +141,10 @@ export async function getAnthropicClient({
   // implementing a working refresh mechanism.
   // await checkAndRefreshOAuthTokenIfNeeded()
   logForDebugging('[API:auth] OAuth refresh skipped (CCR)')
+
+  if (!isThirdParty) {
+    await warnIfOAuthTokenExpiringSoon()
+  }
 
   if (!isThirdParty && !isClaudeAISubscriber()) {
     await configureApiKeyHeaders(defaultHeaders, getIsNonInteractiveSession())
@@ -328,6 +335,28 @@ function isNonAnthropicBaseUrl(baseUrl: string): boolean {
     return !new URL(baseUrl).hostname.endsWith('.anthropic.com')
   } catch {
     return false
+  }
+}
+
+async function warnIfOAuthTokenExpiringSoon(): Promise<void> {
+  if (process.platform !== 'darwin') {
+    return
+  }
+
+  try {
+    const expiresAt = (await getSecureStorage().readAsync())?.claudeAiOauth
+      ?.expiresAt
+    if (typeof expiresAt !== 'number') {
+      return
+    }
+
+    if (expiresAt - Date.now() < OAUTH_EXPIRING_SOON_MS) {
+      logForDebugging('OAuth token expiring soon, run /login to refresh', {
+        level: 'warn',
+      })
+    }
+  } catch {
+    // Never let keychain warnings block client creation.
   }
 }
 
