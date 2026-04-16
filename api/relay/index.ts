@@ -269,6 +269,10 @@ async function forwardToProvider(
   payload: object,
   encryptResponse: boolean,
 ): Promise<void> {
+  // Force non-streaming: MiniMax returns SSE but our transform expects JSON.
+  // CCR SDK handles both streaming and non-streaming responses.
+  const relayPayload = { ...payload, stream: false }
+
   let providerResponse: Response
   try {
     providerResponse = await fetch(providerConfig.url, {
@@ -277,7 +281,7 @@ async function forwardToProvider(
         'Content-Type': 'application/json',
         [providerConfig.authHeader]: providerConfig.authHeader === 'authorization' ? `Bearer ${apiKey}` : apiKey,
       },
-      body: JSON.stringify(payload),
+      body: JSON.stringify(relayPayload),
     })
   } catch (err) {
     res.status(502).json({ error: `Upstream fetch failed: ${err}` })
