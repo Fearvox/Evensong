@@ -88,6 +88,31 @@ function createStderrLogger(): ClientOptions['logger'] {
 
 const OAUTH_EXPIRING_SOON_MS = 5 * 60 * 1000
 
+export type TemporaryThirdPartyClientOverride = {
+  apiKey: string
+  baseURL: string
+  label?: string
+}
+
+let temporaryThirdPartyClientOverride: TemporaryThirdPartyClientOverride | null =
+  null
+
+export function setTemporaryThirdPartyClientOverride(
+  override: TemporaryThirdPartyClientOverride | null,
+): void {
+  temporaryThirdPartyClientOverride = override
+}
+
+export function getTemporaryThirdPartyClientOverride():
+  | TemporaryThirdPartyClientOverride
+  | null {
+  return temporaryThirdPartyClientOverride
+}
+
+export function clearTemporaryThirdPartyClientOverride(): void {
+  temporaryThirdPartyClientOverride = null
+}
+
 export async function getAnthropicClient({
   apiKey,
   maxRetries,
@@ -101,9 +126,14 @@ export async function getAnthropicClient({
   fetchOverride?: ClientOptions['fetch']
   source?: string
 }): Promise<Anthropic> {
-  const envBaseUrl = process.env.ANTHROPIC_BASE_URL
-  const isThirdParty = envBaseUrl
-    ? isNonAnthropicBaseUrl(envBaseUrl)
+  const thirdPartyOverride = getTemporaryThirdPartyClientOverride()
+  const relayUrl = process.env.RELAY_URL
+  const effectiveBaseUrl = thirdPartyOverride?.baseURL
+    ?? relayUrl
+    ?? process.env.ANTHROPIC_BASE_URL
+  const effectiveApiKey = thirdPartyOverride?.apiKey ?? apiKey
+  const isThirdParty = effectiveBaseUrl
+    ? isNonAnthropicBaseUrl(effectiveBaseUrl)
     : false
   const containerId = process.env.CLAUDE_CODE_CONTAINER_ID
   const remoteSessionId = process.env.CLAUDE_CODE_REMOTE_SESSION_ID
@@ -126,6 +156,12 @@ export async function getAnthropicClient({
   logForDebugging(
     `[API:request] Creating client, ANTHROPIC_CUSTOM_HEADERS present: ${!!process.env.ANTHROPIC_CUSTOM_HEADERS}, has Authorization header: ${!!customHeaders['Authorization']}`,
   )
+  if (thirdPartyOverride) {
+    logForDebugging(
+      `[API:auth] Using temporary third-party override${thirdPartyOverride.label ? ` (${thirdPartyOverride.label})` : ''}`,
+      { level: 'warn' },
+    )
+  }
 
   // Add additional protection header if enabled via env var
   const additionalProtectionEnabled = isEnvTruthy(
@@ -314,12 +350,16 @@ export async function getAnthropicClient({
   const useOAuth = isThirdParty ? false : isClaudeAISubscriber()
 
   const clientConfig: ConstructorParameters<typeof Anthropic>[0] = {
-    apiKey: isThirdParty ? apiKey : useOAuth ? null : apiKey || getAnthropicApiKey(),
+    apiKey: isThirdParty
+      ? effectiveApiKey
+      : useOAuth
+        ? null
+        : effectiveApiKey || getAnthropicApiKey(),
     authToken: useOAuth ? getClaudeAIOAuthTokens()?.accessToken : undefined,
     // Explicit baseURL: ANTHROPIC_BASE_URL for third-party providers,
     // staging OAuth URL for ant users, or omit for SDK default.
-    ...(envBaseUrl
-      ? { baseURL: envBaseUrl }
+    ...(effectiveBaseUrl
+      ? { baseURL: effectiveBaseUrl }
       : process.env.USER_TYPE === 'ant' && isEnvTruthy(process.env.USE_STAGING_OAUTH)
         ? { baseURL: getOauthConfig().BASE_API_URL }
         : {}),
