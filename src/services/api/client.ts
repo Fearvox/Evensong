@@ -297,10 +297,18 @@ export async function getAnthropicClient({
     return new AnthropicVertex(vertexArgs) as unknown as Anthropic
   }
 
+  // CCR: When ANTHROPIC_BASE_URL points to a non-Anthropic domain, OAuth
+  // tokens are meaningless — always use the API key directly.
+  const baseUrl = process.env.ANTHROPIC_BASE_URL
+  const isNonAnthropicProvider = baseUrl
+    ? (() => { try { return !new URL(baseUrl).hostname.endsWith('.anthropic.com') } catch { return false } })()
+    : false
+  const useOAuth = !isNonAnthropicProvider && isClaudeAISubscriber()
+
   // Determine authentication method based on available tokens
   const clientConfig: ConstructorParameters<typeof Anthropic>[0] = {
-    apiKey: isClaudeAISubscriber() ? null : apiKey || getAnthropicApiKey(),
-    authToken: isClaudeAISubscriber()
+    apiKey: useOAuth ? null : apiKey || getAnthropicApiKey(),
+    authToken: useOAuth
       ? getClaudeAIOAuthTokens()?.accessToken
       : undefined,
     // Set baseURL from OAuth config when using staging OAuth
@@ -312,6 +320,9 @@ export async function getAnthropicClient({
     ...(isDebugToStdErr() && { logger: createStderrLogger() }),
   }
 
+  // CCR diagnostic: log client config for debugging auth issues
+  const { logForDebugging: _dbg } = await import('../../utils/debug.js')
+  _dbg(`[API:client] apiKey=${clientConfig.apiKey ? 'SET' : 'null'}, authToken=${clientConfig.authToken ? 'SET' : 'null'}, baseURL=${clientConfig.baseURL || 'default'}`)
   return new Anthropic(clientConfig)
 }
 
