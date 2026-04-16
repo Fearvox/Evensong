@@ -26,7 +26,9 @@ type InputSchema = z.infer<ReturnType<typeof inputSchema>>
 export const MonitorTool = buildTool({
   name: 'Monitor',
   aliases: ['monitor', 'Monitor'],
-  inputSchema,
+  get inputSchema() {
+    return inputSchema()
+  },
   maxResultSizeChars: Infinity,
 
   isEnabled() {
@@ -93,7 +95,11 @@ export const MonitorTool = buildTool({
     }
   },
 
-  description() {
+  async prompt() {
+    return 'Run a shell script with real-time streaming output. The script runs in a subprocess and progress is reported as it executes.'
+  },
+
+  async description() {
     return 'Run a shell script and stream its real-time output as progress events'
   },
 

@@ -34,3 +34,30 @@ export function resumeProactive(): void {
 export function getProactiveSource(): string | undefined {
   return _source
 }
+
+// --- useSyncExternalStore compatibility ---
+// REPL.tsx and PromptInputFooterLeftSide.tsx call these via optional chaining
+// with fallback, but export them for completeness.
+type Listener = () => void
+const _listeners = new Set<Listener>()
+
+function _notify(): void {
+  for (const fn of _listeners) fn()
+}
+
+export function subscribeToProactiveChanges(listener: Listener): () => void {
+  _listeners.add(listener)
+  return () => _listeners.delete(listener)
+}
+
+// Next scheduled tick timestamp (null = no scheduled tick)
+let _nextTickAt: number | null = null
+
+export function getNextTickAt(): number | null {
+  return _nextTickAt
+}
+
+export function setNextTickAt(ts: number | null): void {
+  _nextTickAt = ts
+  _notify()
+}

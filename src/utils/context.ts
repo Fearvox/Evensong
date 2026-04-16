@@ -5,6 +5,12 @@ import { isEnvTruthy } from './envUtils.js'
 import { getCanonicalName } from './model/model.js'
 import { getModelCapability } from './model/modelCapabilities.js'
 
+// Guard: resolveAntModel is declared as a global (see global.d.ts) but only
+// injected in Anthropic-internal builds. If it doesn't exist at runtime, ant
+// model branches gracefully skip.
+const _resolveAntModel: typeof resolveAntModel | undefined =
+  typeof resolveAntModel === 'function' ? resolveAntModel : undefined
+
 // Model context window size (200k tokens for all models right now)
 export const MODEL_CONTEXT_WINDOW_DEFAULT = 200_000
 
@@ -89,7 +95,7 @@ export function getContextWindowForModel(
     return 1_000_000
   }
   if (process.env.USER_TYPE === 'ant') {
-    const antModel = resolveAntModel(model)
+    const antModel = _resolveAntModel?.(model)
     if (antModel?.contextWindow) {
       return antModel.contextWindow
     }
@@ -154,7 +160,7 @@ export function getModelMaxOutputTokens(model: string): {
   let upperLimit: number
 
   if (process.env.USER_TYPE === 'ant') {
-    const antModel = resolveAntModel(model.toLowerCase())
+    const antModel = _resolveAntModel?.(model.toLowerCase())
     if (antModel) {
       defaultTokens = antModel.defaultMaxTokens ?? MAX_OUTPUT_TOKENS_DEFAULT
       upperLimit = antModel.upperMaxTokensLimit ?? MAX_OUTPUT_TOKENS_UPPER_LIMIT
