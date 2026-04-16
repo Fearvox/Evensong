@@ -353,7 +353,11 @@ type FastModeOrgStatus =
   | { status: 'enabled' }
   | { status: 'disabled'; reason: FastModeDisabledReason }
 
-let orgStatus: FastModeOrgStatus = { status: 'pending' }
+// CCR: force fast mode enabled — the penguin_mode endpoint check is
+// unreliable (network errors behind proxies, GrowthBook disabled).
+// The API itself is the real gatekeeper; if the subscription doesn't
+// support it, the server will reject the request.
+let orgStatus: FastModeOrgStatus = { status: 'enabled' }
 
 // Listeners notified when org-level fast mode status changes
 const orgFastModeChange = createSignal<[orgEnabled: boolean]>()
