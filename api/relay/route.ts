@@ -1,5 +1,5 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node'
-import { encryptRelayPayload, decryptRelayPayload } from './crypto'
+import { encryptRelayPayload, decryptRelayPayload } from './crypto.js'
 
 // Environment variables (set in Vercel dashboard):
 // RELAY_KEY=64-char-hex
@@ -110,7 +110,7 @@ export default async function handler(
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        [providerConfig.authHeader]: apiKey,
+        [providerConfig.authHeader]: providerConfig.authHeader === 'authorization' ? `Bearer ${apiKey}` : apiKey,
       },
       body: JSON.stringify(originalPayload),
     })
