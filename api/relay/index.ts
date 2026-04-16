@@ -189,6 +189,64 @@ export default async function handler(
   res.status(400).json({ error: 'Missing encrypted/provider or model field' })
 }
 
+/**
+ * Transform OpenAI/MiniMax response format to Anthropic format.
+ * MiniMax returns OpenAI chat completions format, but the SDK expects Anthropic message format.
+ */
+function transformToAnthropicFormat(responseData: any): object {
+  // If already in Anthropic format (has type: 'message'), return as-is
+  if (responseData?.type === 'message') {
+    return responseData
+  }
+
+  // OpenAI/MiniMax format: { id, object, model, choices: [{ message: { role, content }, finish_reason }], usage }
+  if (responseData?.choices && Array.isArray(responseData.choices)) {
+    const choice = responseData.choices[0]
+    const message = choice?.message
+    const finishReason = choice?.finish_reason
+
+    // Map finish_reason: 'stop' -> 'end_turn', 'length' -> 'max_tokens'
+    let stopReason: 'end_turn' | 'max_tokens' | 'stop_sequence' | null = null
+    if (finishReason === 'stop') {
+      stopReason = 'end_turn'
+    } else if (finishReason === 'length') {
+      stopReason = 'max_tokens'
+    } else if (finishReason === 'tool_calls') {
+      stopReason = 'end_turn'
+    }
+
+    // Transform content to Anthropic format (array of text blocks)
+    let content: Array<{ type: 'text'; text: string }> = []
+    if (message?.content) {
+      if (typeof message.content === 'string') {
+        content = [{ type: 'text', text: message.content }]
+      } else if (Array.isArray(message.content)) {
+        // Already array format - pass through
+        content = message.content
+      }
+    }
+
+    return {
+      id: responseData.id || `msg_${Date.now()}`,
+      type: 'message',
+      role: message?.role || 'assistant',
+      content,
+      model: responseData.model || 'unknown',
+      stop_reason: stopReason,
+      stop_sequence: null,
+      usage: {
+        input_tokens: responseData.usage?.prompt_tokens || 0,
+        output_tokens: responseData.usage?.completion_tokens || 0,
+        cache_creation_input_tokens: responseData.usage?.cache_creation_input_tokens || 0,
+        cache_read_input_tokens: responseData.usage?.cache_read_input_tokens || 0,
+      },
+    }
+  }
+
+  // Fallback: return as-is (some error responses)
+  return responseData
+}
+
 /** Infer provider from model name */
 function inferProviderFromModel(model: string): string | null {
   const m = model.toLowerCase()
@@ -239,7 +297,9 @@ async function forwardToProvider(
       res.status(500).json({ error: 'Response encryption failed' })
     }
   } else {
-    // Plain JSON mode: return response directly (CCR SDK expects direct JSON)
-    res.status(200).json(responseData)
+    // Plain JSON mode: transform OpenAI/MiniMax response to Anthropic format
+    // The SDK expects Anthropic format but MiniMax returns OpenAI format
+    const anthropicResponse = transformToAnthropicFormat(responseData)
+    res.status(200).json(anthropicResponse)
   }
 }
