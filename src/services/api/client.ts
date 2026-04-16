@@ -98,6 +98,10 @@ export async function getAnthropicClient({
   fetchOverride?: ClientOptions['fetch']
   source?: string
 }): Promise<Anthropic> {
+  const envBaseUrl = process.env.ANTHROPIC_BASE_URL
+  const isThirdParty = envBaseUrl
+    ? isNonAnthropicBaseUrl(envBaseUrl)
+    : false
   const containerId = process.env.CLAUDE_CODE_CONTAINER_ID
   const remoteSessionId = process.env.CLAUDE_CODE_REMOTE_SESSION_ID
   const clientApp = process.env.CLAUDE_AGENT_SDK_CLIENT_APP
@@ -135,7 +139,7 @@ export async function getAnthropicClient({
   // await checkAndRefreshOAuthTokenIfNeeded()
   logForDebugging('[API:auth] OAuth refresh skipped (CCR)')
 
-  if (!isClaudeAISubscriber()) {
+  if (!isThirdParty && !isClaudeAISubscriber()) {
     await configureApiKeyHeaders(defaultHeaders, getIsNonInteractiveSession())
   }
 
@@ -300,15 +304,10 @@ export async function getAnthropicClient({
     return new AnthropicVertex(vertexArgs) as unknown as Anthropic
   }
 
-  // CCR: non-Anthropic base URL → skip OAuth, use API key directly
-  const envBaseUrl = process.env.ANTHROPIC_BASE_URL
-  const isThirdParty = envBaseUrl
-    ? (() => { try { return !new URL(envBaseUrl).hostname.endsWith('.anthropic.com') } catch { return false } })()
-    : false
-  const useOAuth = !isThirdParty && isClaudeAISubscriber()
+  const useOAuth = isThirdParty ? false : isClaudeAISubscriber()
 
   const clientConfig: ConstructorParameters<typeof Anthropic>[0] = {
-    apiKey: useOAuth ? null : apiKey || getAnthropicApiKey(),
+    apiKey: isThirdParty ? apiKey : useOAuth ? null : apiKey || getAnthropicApiKey(),
     authToken: useOAuth ? getClaudeAIOAuthTokens()?.accessToken : undefined,
     // Explicit baseURL: ANTHROPIC_BASE_URL for third-party providers,
     // staging OAuth URL for ant users, or omit for SDK default.
@@ -322,6 +321,14 @@ export async function getAnthropicClient({
   }
 
   return new Anthropic(clientConfig)
+}
+
+function isNonAnthropicBaseUrl(baseUrl: string): boolean {
+  try {
+    return !new URL(baseUrl).hostname.endsWith('.anthropic.com')
+  } catch {
+    return false
+  }
 }
 
 async function configureApiKeyHeaders(
