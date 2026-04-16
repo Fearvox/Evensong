@@ -176,15 +176,44 @@ export async function processUserInput({
   }
 
   // Execute UserPromptSubmit hooks and handle blocking
+  // P0 fix: 5-second timeout prevents any single hook from blocking the REPL
   queryCheckpoint('query_hooks_start')
   const inputMessage = getContentText(input) || ''
+  const HOOK_TIMEOUT_MS = 5000
+  const hookStartTime = Date.now()
 
-  for await (const hookResult of executeUserPromptSubmitHooks(
+  const hookIterator = executeUserPromptSubmitHooks(
     inputMessage,
     appState.toolPermissionContext.mode,
     context,
     context.requestPrompt,
-  )) {
+  )
+
+  let hookTimedOut = false
+  for await (const hookResult of {
+    [Symbol.asyncIterator]() {
+      return {
+        async next() {
+          const elapsed = Date.now() - hookStartTime
+          if (elapsed > HOOK_TIMEOUT_MS) {
+            logForDebugging(`[hooks] UserPromptSubmit timed out after ${elapsed}ms — skipping remaining hooks`)
+            return { done: true, value: undefined }
+          }
+          const result = await Promise.race([
+            hookIterator.next(),
+            new Promise<{ done: true; value: undefined }>(resolve =>
+              setTimeout(() => {
+                hookTimedOut = true
+                logForDebugging(`[hooks] UserPromptSubmit hook timed out after ${HOOK_TIMEOUT_MS}ms — skipping`)
+                resolve({ done: true, value: undefined })
+              }, HOOK_TIMEOUT_MS - elapsed)
+            ),
+          ])
+          return result as IteratorResult<typeof hookResult>
+        },
+      }
+    },
+  }) {
     // We only care about the result
     if (hookResult.message?.type === 'progress') {
       continue
