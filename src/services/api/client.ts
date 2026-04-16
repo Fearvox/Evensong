@@ -128,9 +128,17 @@ export async function getAnthropicClient({
     defaultHeaders['x-anthropic-additional-protection'] = 'true'
   }
 
-  logForDebugging('[API:auth] OAuth token check starting')
-  await checkAndRefreshOAuthTokenIfNeeded()
-  logForDebugging('[API:auth] OAuth token check complete')
+  // CCR: skip OAuth refresh for non-Anthropic providers — it hangs waiting
+  // for Anthropic's token endpoint when the request is meant for MiniMax/xAI.
+  const _envBase = process.env.ANTHROPIC_BASE_URL
+  const _skipOAuthRefresh = _envBase
+    ? (() => { try { return !new URL(_envBase).hostname.endsWith('.anthropic.com') } catch { return false } })()
+    : false
+  if (!_skipOAuthRefresh) {
+    logForDebugging('[API:auth] OAuth token check starting')
+    await checkAndRefreshOAuthTokenIfNeeded()
+    logForDebugging('[API:auth] OAuth token check complete')
+  }
 
   if (!isClaudeAISubscriber()) {
     await configureApiKeyHeaders(defaultHeaders, getIsNonInteractiveSession())
