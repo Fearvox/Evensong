@@ -128,17 +128,12 @@ export async function getAnthropicClient({
     defaultHeaders['x-anthropic-additional-protection'] = 'true'
   }
 
-  // CCR: skip OAuth refresh for non-Anthropic providers — it hangs waiting
-  // for Anthropic's token endpoint when the request is meant for MiniMax/xAI.
-  const _envBase = process.env.ANTHROPIC_BASE_URL
-  const _skipOAuthRefresh = _envBase
-    ? (() => { try { return !new URL(_envBase).hostname.endsWith('.anthropic.com') } catch { return false } })()
-    : false
-  if (!_skipOAuthRefresh) {
-    logForDebugging('[API:auth] OAuth token check starting')
-    await checkAndRefreshOAuthTokenIfNeeded()
-    logForDebugging('[API:auth] OAuth token check complete')
-  }
+  // CCR: OAuth token refresh disabled — CCR reads tokens from keychain
+  // (written by official CC's /login). The refresh endpoint hangs in CCR
+  // because the decompiled OAuth flow is incomplete. Re-enable after
+  // implementing a working refresh mechanism.
+  // await checkAndRefreshOAuthTokenIfNeeded()
+  logForDebugging('[API:auth] OAuth refresh skipped (CCR)')
 
   if (!isClaudeAISubscriber()) {
     await configureApiKeyHeaders(defaultHeaders, getIsNonInteractiveSession())

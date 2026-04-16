@@ -2776,6 +2776,7 @@ export function REPL({
         effortValue: effort
       });
     }
+    logForDebugging(`[onQuery] context loading start (Promise.all)`)
     queryCheckpoint('query_context_loading_start');
     const [,, defaultSystemPrompt, baseUserContext, systemContext] = await Promise.all([
     // IMPORTANT: do this after setMessages() above, to avoid UI jank
@@ -2789,6 +2790,7 @@ export function REPL({
         terminalFocus: 'The terminal is unfocused \u2014 the user is not actively watching.'
       } : {})
     };
+    logForDebugging(`[onQuery] context loading end (Promise.all done)`)
     queryCheckpoint('query_context_loading_end');
     const systemPrompt = buildEffectiveSystemPrompt({
       mainThreadAgentDefinition,
@@ -2878,6 +2880,7 @@ export function REPL({
     // Concurrent guard via state machine. tryStart() atomically checks
     // and transitions idle→running, returning the generation number.
     // Returns null if already running — no separate check-then-set.
+    logForDebugging(`[onQuery] ENTERED shouldQuery=${shouldQuery} model=${mainLoopModelParam}`)
     const thisGeneration = queryGuard.tryStart();
     if (thisGeneration === null) {
       logEvent('tengu_concurrent_onquery_detected', {});

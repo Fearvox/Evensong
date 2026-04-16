@@ -226,6 +226,7 @@ export async function* query(
   | ToolUseSummaryMessage,
   Terminal
 > {
+  logForDebugging('[query] ENTERED')
   const consumedCommandUuids: string[] = []
   const terminal = yield* queryLoop(params, consumedCommandUuids)
   // Only reached if queryLoop returned normally. Skipped on throw (error
