@@ -52,6 +52,7 @@ import {
   createSystemMessage,
   createUserMessage,
 } from '../messages.js'
+import { logForDebugging } from '../debug.js'
 import { queryCheckpoint } from '../queryProfiler.js'
 import { parseSlashCommand } from '../slashCommandParsing.js'
 import {
