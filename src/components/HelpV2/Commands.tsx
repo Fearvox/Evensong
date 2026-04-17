@@ -46,6 +46,7 @@ export function Commands(t0) {
       t2 = $[4];
     }
     t1 = commands.filter(cmd => {
+      if (!cmd?.name) return false;
       if (seen.has(cmd.name)) {
         return false;
       }
@@ -77,5 +78,5 @@ export function Commands(t0) {
   return t2;
 }
 function _temp(a, b) {
-  return a.name.localeCompare(b.name);
+  return (a?.name ?? '').localeCompare(b?.name ?? '');
 }

@@ -474,27 +474,39 @@ async function executeUserInput(params: ExecuteUserInputParams): Promise<void> {
       for (let i = 0; i < commands.length; i++) {
         const cmd = commands[i]!
         const isFirst = i === 0
-        const result = await processUserInput({
-          input: cmd.value,
-          preExpansionInput: cmd.preExpansionValue,
-          mode: cmd.mode,
-          setToolJSX,
-          context: makeContext(),
-          pastedContents: isFirst ? cmd.pastedContents : undefined,
-          messages,
-          setUserInputOnProcessing: isFirst
-            ? setUserInputOnProcessing
-            : undefined,
-          isAlreadyProcessing: !isFirst,
-          querySource,
-          canUseTool,
-          uuid: cmd.uuid,
-          ideSelection: isFirst ? ideSelection : undefined,
-          skipSlashCommands: cmd.skipSlashCommands,
-          bridgeOrigin: cmd.bridgeOrigin,
-          isMeta: cmd.isMeta,
-          skipAttachments: !isFirst,
-        })
+        // Defensive: log + rethrow any sync/async error from processUserInput.
+        // Phase-10 silent-swallow class of bug — when processUserInput throws
+        // (e.g. ReferenceError from a decompile-stripped import), the rejection
+        // would otherwise vanish through the await chain into REPL UI without
+        // surfacing the cause. This try block makes the underlying error
+        // visible in debug.log before re-propagating.
+        let result: Awaited<ReturnType<typeof processUserInput>>
+        try {
+          result = await processUserInput({
+            input: cmd.value,
+            preExpansionInput: cmd.preExpansionValue,
+            mode: cmd.mode,
+            setToolJSX,
+            context: makeContext(),
+            pastedContents: isFirst ? cmd.pastedContents : undefined,
+            messages,
+            setUserInputOnProcessing: isFirst
+              ? setUserInputOnProcessing
+              : undefined,
+            isAlreadyProcessing: !isFirst,
+            querySource,
+            canUseTool,
+            uuid: cmd.uuid,
+            ideSelection: isFirst ? ideSelection : undefined,
+            skipSlashCommands: cmd.skipSlashCommands,
+            bridgeOrigin: cmd.bridgeOrigin,
+            isMeta: cmd.isMeta,
+            skipAttachments: !isFirst,
+          })
+        } catch (err) {
+          logForDebugging(`[handlePromptSubmit] processUserInput threw: ${String((err as Error)?.message ?? err).slice(0, 300)}`)
+          throw err
+        }
         // Stamp origin here rather than threading another arg through
         // processUserInput → processUserInputBase → processTextPrompt → createUserMessage.
         // Derive origin from mode for task-notifications — mirrors the origin
