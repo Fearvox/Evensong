@@ -2686,15 +2686,29 @@ function runHeadlessStreaming(
 
   // Set up UDS inbox callback so the query loop is kicked off
   // when a message arrives via the UDS socket in headless mode.
+  //
+  // Wrapped in try/catch because the require target is a decompilation stub
+  // (src/utils/udsMessaging.ts). If a future build strips setOnEnqueue, the
+  // TypeError would throw synchronously out of runHeadlessStreaming and the
+  // `void runHeadless(...)` dispatch in main.tsx would swallow it as an
+  // unhandled rejection — reproducing the Phase 10 silent-swallow hang.
   if (feature('UDS_INBOX')) {
-    /* eslint-disable @typescript-eslint/no-require-imports */
-    const { setOnEnqueue } = require('../utils/udsMessaging.js')
-    /* eslint-enable @typescript-eslint/no-require-imports */
-    setOnEnqueue(() => {
-      if (!inputClosed) {
-        void run()
+    try {
+      /* eslint-disable @typescript-eslint/no-require-imports */
+      const { setOnEnqueue } = require('../utils/udsMessaging.js')
+      /* eslint-enable @typescript-eslint/no-require-imports */
+      if (typeof setOnEnqueue === 'function') {
+        setOnEnqueue(() => {
+          if (!inputClosed) {
+            void run()
+          }
+        })
+      } else {
+        logForDebugging('[UDS_INBOX] udsMessaging.setOnEnqueue missing — noop')
       }
-    })
+    } catch (err) {
+      logForDebugging(`[UDS_INBOX] setOnEnqueue wiring failed: ${errorMessage(err)}`)
+    }
   }
 
   // Cron scheduler: runs scheduled_tasks.json tasks in SDK/-p mode.
