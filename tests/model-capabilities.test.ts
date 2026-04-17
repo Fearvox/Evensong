@@ -69,6 +69,78 @@ describe('effort.ts registry migration parity — Task 2', () => {
   }
 })
 
+describe('registry invariants — Task 6', () => {
+  it('exactly one entry has frontier=true', () => {
+    const frontiers = Object.entries(CAPABILITY_REGISTRY)
+      .filter(([, caps]) => caps.frontier)
+      .map(([id]) => id)
+    expect(frontiers).toHaveLength(1)
+    expect(frontiers[0]).toBe('claude-opus-4-7')
+  })
+
+  it('xhighEffort implies maxEffort', () => {
+    for (const [id, caps] of Object.entries(CAPABILITY_REGISTRY)) {
+      if (caps.xhighEffort) {
+        expect(caps.maxEffort).toBe(true)
+      }
+    }
+  })
+
+  it('adaptiveThinking implies effort', () => {
+    for (const [id, caps] of Object.entries(CAPABILITY_REGISTRY)) {
+      if (caps.adaptiveThinking) {
+        expect(caps.effort).toBe(true)
+      }
+    }
+  })
+})
+
+describe('defineModel DSL — Task 7', () => {
+  const { defineModel } = require('../src/utils/model/defineModel')
+
+  it('builds config + capabilities with defaults filled in', () => {
+    const m = defineModel({
+      id: 'claude-test-0',
+      bedrock: 'us.anthropic.claude-test-0-v1',
+      vertex: 'claude-test-0',
+      foundry: 'claude-test-0',
+      marketingName: 'Test 0',
+      capabilities: { effort: true, supports1m: false },
+    })
+    expect(m.config.firstParty).toBe('claude-test-0')
+    expect(m.config.bedrock).toBe('us.anthropic.claude-test-0-v1')
+    expect(m.capabilities.effort).toBe(true)
+    expect(m.capabilities.maxEffort).toBe(false)
+    expect(m.capabilities.marketingName).toBe('Test 0')
+    expect(m.capabilities.frontier).toBe(false)
+    expect(m.capabilities.knowledgeCutoff).toBe(null)
+  })
+
+  it('accepts knowledgeCutoff and frontier overrides', () => {
+    const m = defineModel({
+      id: 'claude-future-0',
+      bedrock: 'us.anthropic.claude-future-0-v1',
+      vertex: 'claude-future-0',
+      foundry: 'claude-future-0',
+      marketingName: 'Future 0',
+      knowledgeCutoff: 'March 2027',
+      frontier: true,
+      capabilities: {
+        effort: true,
+        maxEffort: true,
+        xhighEffort: true,
+        adaptiveThinking: true,
+        structuredOutputs: true,
+        autoMode: true,
+        supports1m: true,
+      },
+    })
+    expect(m.capabilities.frontier).toBe(true)
+    expect(m.capabilities.knowledgeCutoff).toBe('March 2027')
+    expect(m.capabilities.xhighEffort).toBe(true)
+  })
+})
+
 describe('modelCost rename — Task 5', () => {
   const {
     COST_OPUS_FRONTIER,

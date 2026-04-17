@@ -124,3 +124,7 @@ export const CANONICAL_ID_TO_KEY: Record<CanonicalModelId, ModelKey> =
       ([key, cfg]) => [cfg.firstParty, key],
     ),
   ) as Record<CanonicalModelId, ModelKey>
+
+/** Re-export the defineModel DSL so new-model authors need one import site. */
+export { defineModel } from './defineModel.js'
+export type { DefineModelInput, DefinedModel } from './defineModel.js'
