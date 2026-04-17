@@ -523,6 +523,17 @@ async function executeUserInput(params: ExecuteUserInputParams): Promise<void> {
       }
 
       queryCheckpoint('query_process_user_input_end')
+      // @debug Phase-09 silent-swallow hunt: show what processUserInput yielded
+      logForDebugging(
+        `[executeUserInput] processUserInput done: ` +
+        `commands=${commands.length} newMessages.length=${newMessages.length} ` +
+        `shouldQuery=${shouldQuery} firstCmdInput="${String(commands[0]?.value ?? '').slice(0, 40)}"`,
+      )
+      if (newMessages.length > 0) {
+        logForDebugging(
+          `[executeUserInput] newMessages types: ${newMessages.map(m => (m as { type?: string }).type ?? 'unknown').join(',')}`,
+        )
+      }
       if (fileHistoryEnabled()) {
         queryCheckpoint('query_file_history_snapshot_start')
         newMessages.filter(selectableUserMessagesFilter).forEach(message => {

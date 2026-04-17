@@ -4,6 +4,7 @@ import { feature } from 'src/utils/featureFlag.js'
 import { getFeatureValue_CACHED_MAY_BE_STALE } from '../services/analytics/growthbook.js'
 import { getCanonicalName } from './model/model.js'
 import { get3PModelCapabilityOverride } from './model/modelSupportOverrides.js'
+import { getCapability } from './model/capabilities.js'
 import { getAPIProvider } from './model/providers.js'
 import { getSettingsWithErrors } from './settings/settings.js'
 
@@ -109,17 +110,16 @@ export function modelSupportsThinking(model: string): boolean {
   return canonical.includes('sonnet-4') || canonical.includes('opus-4')
 }
 
-// @[MODEL LAUNCH]: Add the new model to the allowlist if it supports adaptive thinking.
+// @[MODEL LAUNCH]: Update CAPABILITY_REGISTRY in src/utils/model/capabilities.ts.
 export function modelSupportsAdaptiveThinking(model: string): boolean {
   const supported3P = get3PModelCapabilityOverride(model, 'adaptive_thinking')
   if (supported3P !== undefined) {
     return supported3P
   }
-  const canonical = getCanonicalName(model)
-  // Supported by a subset of Claude 4 models
-  if (canonical.includes('opus-4-6') || canonical.includes('sonnet-4-6')) {
+  if (getCapability(model, 'adaptiveThinking')) {
     return true
   }
+  const canonical = getCanonicalName(model)
   // Exclude any other known legacy models (allowlist above catches 4-6 variants first)
   if (
     canonical.includes('opus') ||

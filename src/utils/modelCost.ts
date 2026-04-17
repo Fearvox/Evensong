@@ -11,6 +11,7 @@ import {
   CLAUDE_OPUS_4_1_CONFIG,
   CLAUDE_OPUS_4_5_CONFIG,
   CLAUDE_OPUS_4_6_CONFIG,
+  CLAUDE_OPUS_4_7_CONFIG,
   CLAUDE_OPUS_4_CONFIG,
   CLAUDE_SONNET_4_5_CONFIG,
   CLAUDE_SONNET_4_6_CONFIG,
@@ -50,14 +51,19 @@ export const COST_TIER_15_75 = {
   webSearchRequests: 0.01,
 } as const satisfies ModelCosts
 
-// Pricing tier for Opus 4.5: $5 input / $25 output per Mtok
-export const COST_TIER_5_25 = {
+// Pricing tier for frontier Opus models (4.5 / 4.6 / 4.7): $5 in / $25 out per MTok.
+// Named after the capability tier, not the price, so a future $/MTok change
+// doesn't require a grep-replace across the codebase.
+export const COST_OPUS_FRONTIER = {
   inputTokens: 5,
   outputTokens: 25,
   promptCacheWriteTokens: 6.25,
   promptCacheReadTokens: 0.5,
   webSearchRequests: 0.01,
 } as const satisfies ModelCosts
+
+/** @deprecated use COST_OPUS_FRONTIER. Alias kept one release for in-flight call sites. */
+export const COST_TIER_5_25 = COST_OPUS_FRONTIER
 
 // Fast mode pricing for Opus 4.6: $30 input / $150 output per Mtok
 export const COST_TIER_30_150 = {
@@ -86,7 +92,7 @@ export const COST_HAIKU_45 = {
   webSearchRequests: 0.01,
 } as const satisfies ModelCosts
 
-const DEFAULT_UNKNOWN_MODEL_COST = COST_TIER_5_25
+const DEFAULT_UNKNOWN_MODEL_COST = COST_OPUS_FRONTIER
 
 /**
  * Get the cost tier for Opus 4.6 based on fast mode.
@@ -95,7 +101,7 @@ export function getOpus46CostTier(fastMode: boolean): ModelCosts {
   if (isFastModeEnabled() && fastMode) {
     return COST_TIER_30_150
   }
-  return COST_TIER_5_25
+  return COST_OPUS_FRONTIER
 }
 
 // @[MODEL LAUNCH]: Add a pricing entry for the new model below.
@@ -120,9 +126,11 @@ export const MODEL_COSTS: Record<ModelShortName, ModelCosts> = {
   [firstPartyNameToCanonical(CLAUDE_OPUS_4_1_CONFIG.firstParty)]:
     COST_TIER_15_75,
   [firstPartyNameToCanonical(CLAUDE_OPUS_4_5_CONFIG.firstParty)]:
-    COST_TIER_5_25,
+    COST_OPUS_FRONTIER,
   [firstPartyNameToCanonical(CLAUDE_OPUS_4_6_CONFIG.firstParty)]:
-    COST_TIER_5_25,
+    COST_OPUS_FRONTIER,
+  [firstPartyNameToCanonical(CLAUDE_OPUS_4_7_CONFIG.firstParty)]:
+    COST_OPUS_FRONTIER,
 }
 
 /**

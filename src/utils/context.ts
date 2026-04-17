@@ -4,6 +4,7 @@ import { getGlobalConfig } from './config.js'
 import { isEnvTruthy } from './envUtils.js'
 import { getCanonicalName } from './model/model.js'
 import { getModelCapability } from './model/modelCapabilities.js'
+import { getCapability } from './model/capabilities.js'
 
 // Guard: resolveAntModel is declared as a global (see global.d.ts) but only
 // injected in Anthropic-internal builds. If it doesn't exist at runtime, ant
@@ -45,13 +46,12 @@ export function has1mContext(model: string): boolean {
   return /\[1m\]/i.test(model)
 }
 
-// @[MODEL LAUNCH]: Update this pattern if the new model supports 1M context
+// @[MODEL LAUNCH]: Update CAPABILITY_REGISTRY in src/utils/model/capabilities.ts.
 export function modelSupports1M(model: string): boolean {
   if (is1mContextDisabled()) {
     return false
   }
-  const canonical = getCanonicalName(model)
-  return canonical.includes('claude-sonnet-4') || canonical.includes('opus-4-6')
+  return getCapability(model, 'supports1m')
 }
 
 export function getContextWindowForModel(
