@@ -26,6 +26,7 @@ import { isClaudeAISubscriber } from './auth.js'
 import { has1mContext } from './context.js'
 import { isEnvDefinedFalsy, isEnvTruthy } from './envUtils.js'
 import { getCanonicalName } from './model/model.js'
+import { getCapability } from './model/capabilities.js'
 import { get3PModelCapabilityOverride } from './model/modelSupportOverrides.js'
 import { getAPIProvider } from './model/providers.js'
 import { getInitialSettings } from './settings/settings.js'
@@ -138,23 +139,14 @@ export function modelSupportsContextManagement(model: string): boolean {
   )
 }
 
-// @[MODEL LAUNCH]: Add the new model ID to this list if it supports structured outputs.
+// @[MODEL LAUNCH]: Update CAPABILITY_REGISTRY in src/utils/model/capabilities.ts.
 export function modelSupportsStructuredOutputs(model: string): boolean {
-  const canonical = getCanonicalName(model)
   const provider = getAPIProvider()
   // Structured outputs only supported on firstParty and Foundry (not Bedrock/Vertex yet)
   if (provider !== 'firstParty' && provider !== 'foundry') {
     return false
   }
-  return (
-    canonical.includes('claude-sonnet-4-6') ||
-    canonical.includes('claude-sonnet-4-5') ||
-    canonical.includes('claude-opus-4-1') ||
-    canonical.includes('claude-opus-4-5') ||
-    canonical.includes('claude-opus-4-6') ||
-    canonical.includes('claude-opus-4-7') ||
-    canonical.includes('claude-haiku-4-5')
-  )
+  return getCapability(model, 'structuredOutputs')
 }
 
 // @[MODEL LAUNCH]: Add the new model if it supports auto mode (specifically PI probes) — ask in #proj-claude-code-safety-research.
@@ -189,8 +181,8 @@ export function modelSupportsAutoMode(model: string): boolean {
       if (/claude-(opus|sonnet|haiku)-4(?!-[6-9])/.test(m)) return false
       return true
     }
-    // External allowlist (firstParty already checked above).
-    return /^claude-(opus|sonnet)-4-[67]/.test(m)
+    // External allowlist sourced from CAPABILITY_REGISTRY (firstParty checked above).
+    return getCapability(model, 'autoMode')
   }
   return false
 }

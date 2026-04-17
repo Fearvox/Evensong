@@ -68,3 +68,32 @@ describe('effort.ts registry migration parity — Task 2', () => {
     })
   }
 })
+
+describe('thinking/betas/context registry parity — Task 3', () => {
+  const { modelSupportsAdaptiveThinking } = require('../src/utils/thinking')
+  const {
+    modelSupportsStructuredOutputs,
+  } = require('../src/utils/betas')
+  const { modelSupports1M } = require('../src/utils/context')
+
+  it('adaptive thinking: Opus 4.6/4.7 and Sonnet 4.6 only', () => {
+    expect(modelSupportsAdaptiveThinking('claude-opus-4-7')).toBe(true)
+    expect(modelSupportsAdaptiveThinking('claude-opus-4-6')).toBe(true)
+    expect(modelSupportsAdaptiveThinking('claude-sonnet-4-6')).toBe(true)
+    expect(modelSupportsAdaptiveThinking('claude-opus-4-5-20251101')).toBe(false)
+  })
+
+  it('structured outputs: 4.1+ and Haiku 4.5 (1P-only)', () => {
+    expect(modelSupportsStructuredOutputs('claude-opus-4-7')).toBe(true)
+    expect(modelSupportsStructuredOutputs('claude-opus-4-1-20250805')).toBe(true)
+    expect(modelSupportsStructuredOutputs('claude-haiku-4-5-20251001')).toBe(true)
+    expect(modelSupportsStructuredOutputs('claude-3-5-sonnet-20241022')).toBe(false)
+  })
+
+  it('1M context: Sonnet 4+ and Opus 4-6/4-7 only', () => {
+    expect(modelSupports1M('claude-opus-4-7')).toBe(true)
+    expect(modelSupports1M('claude-opus-4-6')).toBe(true)
+    expect(modelSupports1M('claude-sonnet-4-5-20250929')).toBe(true)
+    expect(modelSupports1M('claude-opus-4-5-20251101')).toBe(false)
+  })
+})
