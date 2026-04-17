@@ -181,8 +181,13 @@ export default async function handler(
       res.status(500).json({ error: `API key for ${inferredProvider} not configured` })
       return
     }
-    // Forward the full body as payload
-    await forwardToProvider(res, providerConfig, apiKey, req.body, false)
+    // Route: stream=true + openai-format provider → SSE translation; else non-streaming + transform
+    const wantsStream = (req.body as { stream?: unknown })?.stream === true
+    if (wantsStream && providerConfig.bodyFormat === 'openai') {
+      await forwardToProviderStream(res, providerConfig, apiKey, req.body, model)
+    } else {
+      await forwardToProvider(res, providerConfig, apiKey, req.body, false)
+    }
     return
   }
 
@@ -306,4 +311,202 @@ async function forwardToProvider(
     const anthropicResponse = transformToAnthropicFormat(responseData)
     res.status(200).json(anthropicResponse)
   }
+}
+
+/**
+ * Stream-mode: forward request with stream=true, translate OpenAI SSE chunks
+ * to Anthropic SSE events on the fly. Used for MiniMax/Codex/Gemini/OpenRouter
+ * when the caller opts into streaming (req.body.stream === true).
+ *
+ * Anthropic SSE event sequence:
+ *   message_start → content_block_start → content_block_delta* → content_block_stop
+ *   → message_delta → message_stop
+ *
+ * OpenAI SSE chunk shape:
+ *   data: { choices: [{ delta: { content }, finish_reason }], usage? }
+ *   data: [DONE]
+ */
+async function forwardToProviderStream(
+  res: VercelResponse,
+  providerConfig: (typeof PROVIDER_ENDPOINTS)['minimax'],
+  apiKey: string,
+  payload: object,
+  model: string,
+): Promise<void> {
+  const relayPayload = { ...payload, stream: true }
+
+  let upstream: Response
+  try {
+    upstream = await fetch(providerConfig.url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Accept: 'text/event-stream',
+        [providerConfig.authHeader]:
+          providerConfig.authHeader === 'authorization' ? `Bearer ${apiKey}` : apiKey,
+      },
+      body: JSON.stringify(relayPayload),
+    })
+  } catch (err) {
+    res.status(502).json({ error: `Upstream fetch failed: ${err}` })
+    return
+  }
+
+  if (!upstream.ok || !upstream.body) {
+    const errText = await upstream.text().catch(() => '')
+    res.status(upstream.status || 502).json({
+      error: `Upstream ${upstream.status}: ${errText.slice(0, 500)}`,
+    })
+    return
+  }
+
+  // Set SSE headers on response BEFORE any write (cannot be changed after flushHeaders)
+  res.setHeader('Content-Type', 'text/event-stream')
+  res.setHeader('Cache-Control', 'no-cache, no-transform')
+  res.setHeader('Connection', 'keep-alive')
+  res.setHeader('X-Accel-Buffering', 'no') // disable proxy buffering
+  res.status(200)
+
+  const writeEvent = (event: string, data: object): void => {
+    res.write(`event: ${event}\ndata: ${JSON.stringify(data)}\n\n`)
+  }
+
+  const msgId = `msg_${Date.now()}_${Math.random().toString(36).slice(2, 10)}`
+  let started = false
+  let stopReason: 'end_turn' | 'max_tokens' | 'stop_sequence' = 'end_turn'
+  let outputTokens = 0
+  let inputTokens = 0
+  let cacheCreationTokens = 0
+  let cacheReadTokens = 0
+
+  const startMessage = (): void => {
+    if (started) return
+    started = true
+    writeEvent('message_start', {
+      type: 'message_start',
+      message: {
+        id: msgId,
+        type: 'message',
+        role: 'assistant',
+        content: [],
+        model,
+        stop_reason: null,
+        stop_sequence: null,
+        usage: {
+          input_tokens: 0,
+          output_tokens: 0,
+          cache_creation_input_tokens: 0,
+          cache_read_input_tokens: 0,
+        },
+      },
+    })
+    writeEvent('content_block_start', {
+      type: 'content_block_start',
+      index: 0,
+      content_block: { type: 'text', text: '' },
+    })
+  }
+
+  const reader = upstream.body.getReader()
+  const decoder = new TextDecoder()
+  let buffer = ''
+
+  try {
+    while (true) {
+      const { value, done } = await reader.read()
+      if (done) break
+      buffer += decoder.decode(value, { stream: true })
+
+      let idx: number
+      while ((idx = buffer.indexOf('\n')) !== -1) {
+        const rawLine = buffer.slice(0, idx).trim()
+        buffer = buffer.slice(idx + 1)
+        if (!rawLine || !rawLine.startsWith('data:')) continue
+
+        const dataStr = rawLine.slice(5).trim()
+        if (dataStr === '[DONE]') continue
+
+        let chunk: any
+        try {
+          chunk = JSON.parse(dataStr)
+        } catch {
+          continue // skip malformed line
+        }
+
+        const choice = chunk?.choices?.[0]
+        const deltaContent: string | undefined = choice?.delta?.content
+        const finishReason: string | undefined = choice?.finish_reason
+
+        if (chunk?.usage) {
+          inputTokens = chunk.usage.prompt_tokens ?? inputTokens
+          outputTokens = chunk.usage.completion_tokens ?? outputTokens
+          cacheCreationTokens = chunk.usage.cache_creation_input_tokens ?? cacheCreationTokens
+          cacheReadTokens = chunk.usage.cache_read_input_tokens ?? cacheReadTokens
+        }
+
+        if (deltaContent) {
+          startMessage()
+          writeEvent('content_block_delta', {
+            type: 'content_block_delta',
+            index: 0,
+            delta: { type: 'text_delta', text: deltaContent },
+          })
+        }
+
+        if (finishReason) {
+          if (finishReason === 'length') stopReason = 'max_tokens'
+          else if (finishReason === 'stop' || finishReason === 'tool_calls') stopReason = 'end_turn'
+        }
+      }
+    }
+  } catch (err) {
+    // Best-effort: emit error as message_delta + message_stop so client can finalize
+    startMessage()
+    writeEvent('content_block_stop', { type: 'content_block_stop', index: 0 })
+    writeEvent('message_delta', {
+      type: 'message_delta',
+      delta: { stop_reason: 'end_turn', stop_sequence: null },
+      usage: { output_tokens: outputTokens },
+    })
+    writeEvent('message_stop', { type: 'message_stop' })
+    res.end()
+    console.error('[relay stream] reader error:', err)
+    return
+  }
+
+  // Flush any trailing buffered line (some providers omit final newline)
+  if (buffer.trim().startsWith('data:')) {
+    const tail = buffer.trim().slice(5).trim()
+    if (tail && tail !== '[DONE]') {
+      try {
+        const chunk = JSON.parse(tail)
+        const deltaContent = chunk?.choices?.[0]?.delta?.content
+        if (deltaContent) {
+          startMessage()
+          writeEvent('content_block_delta', {
+            type: 'content_block_delta',
+            index: 0,
+            delta: { type: 'text_delta', text: deltaContent },
+          })
+        }
+      } catch { /* ignore */ }
+    }
+  }
+
+  // Ensure we emit at least the skeleton even if provider returned no deltas
+  startMessage()
+
+  writeEvent('content_block_stop', { type: 'content_block_stop', index: 0 })
+  writeEvent('message_delta', {
+    type: 'message_delta',
+    delta: { stop_reason: stopReason, stop_sequence: null },
+    usage: {
+      input_tokens: inputTokens,
+      output_tokens: outputTokens,
+      cache_creation_input_tokens: cacheCreationTokens,
+      cache_read_input_tokens: cacheReadTokens,
+    },
+  })
+  writeEvent('message_stop', { type: 'message_stop' })
+  res.end()
 }
