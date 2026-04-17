@@ -69,6 +69,23 @@ describe('effort.ts registry migration parity — Task 2', () => {
   }
 })
 
+describe('modelCost rename — Task 5', () => {
+  const {
+    COST_OPUS_FRONTIER,
+    COST_TIER_5_25,
+  } = require('../src/utils/modelCost')
+
+  it('exports COST_OPUS_FRONTIER with 5/25 per-MTok pricing', () => {
+    expect(COST_OPUS_FRONTIER).toBeDefined()
+    expect(COST_OPUS_FRONTIER.inputTokens).toBe(5)
+    expect(COST_OPUS_FRONTIER.outputTokens).toBe(25)
+  })
+
+  it('keeps COST_TIER_5_25 as deprecated alias pointing to same object', () => {
+    expect(COST_TIER_5_25).toBe(COST_OPUS_FRONTIER)
+  })
+})
+
 describe('prompts.ts getKnowledgeCutoff parity — Task 4', () => {
   const { _getKnowledgeCutoffForTest: cutoff } = require('../src/constants/prompts')
 
