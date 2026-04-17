@@ -1,5 +1,4 @@
 import { feature } from 'src/utils/featureFlag.js'
-import { logForDebugging } from 'src/utils/debug.js'
 import type { ContentBlockParam } from '@anthropic-ai/sdk/resources/messages.mjs'
 import { randomUUID } from 'crypto'
 import last from 'lodash-es/last.js'
@@ -799,11 +798,6 @@ export class QueryEngine {
           break
         }
         case 'stream_event': {
-          try {
-            logForDebugging(
-              `[engine] stream_event inner=${(message as { event?: { type?: string } })?.event?.type ?? '?'}`,
-            )
-          } catch {}
           const event = (message as unknown as { event: Record<string, unknown> }).event
           if (event.type === 'message_start') {
             // Reset current message usage for new message

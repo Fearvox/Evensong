@@ -2136,13 +2136,6 @@ async function* queryModel(
           } catch {}
         }
 
-        // @instrument stream-parser hunt: log every raw SDK chunk type
-        try {
-          logForDebugging(
-            `[api] chunk type=${(part as { type?: string })?.type ?? '?'}`,
-          )
-        } catch {}
-
         // Validate stream event at API boundary (Phase 3 Zod schema)
         const validated = safeParseStreamEvent(part)
         if (!validated) {

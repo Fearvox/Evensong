@@ -2599,11 +2599,6 @@ export function REPL({
     onBackgroundQuery: handleBackgroundQuery
   });
   const onQueryEvent = useCallback((event: Parameters<typeof handleMessageFromStream>[0]) => {
-    try {
-      logForDebugging(
-        `[repl] onQueryEvent type=${(event as { type?: string })?.type ?? '?'} inner=${(event as { event?: { type?: string } })?.event?.type ?? '?'}`,
-      )
-    } catch {}
     handleMessageFromStream(event, newMessage => {
       if (isCompactBoundaryMessage(newMessage)) {
         // Fullscreen: keep pre-compact messages for scrollback. query.ts
