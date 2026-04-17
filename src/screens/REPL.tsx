@@ -1479,7 +1479,12 @@ export function REPL({
   // char-by-char. lastIndexOf returns -1 when no newline, giving '' → null.
   // Guard on showStreamingText so toggling reducedMotion mid-stream
   // immediately hides the streaming preview.
-  const visibleStreamingText = streamingText && showStreamingText ? streamingText.substring(0, streamingText.lastIndexOf('\n') + 1) || null : null;
+  // Slice to the last newline so we don't flicker a partial line mid-token,
+  // but fall back to the full buffer when the response is single-line — the
+  // old `|| null` branch hid the entire reply until a newline arrived, which
+  // for short replies ("Hi!" / "嗨！…") never happened and looked like the
+  // stream was broken.
+  const visibleStreamingText = streamingText && showStreamingText ? (streamingText.substring(0, streamingText.lastIndexOf('\n') + 1) || streamingText) : null;
   const [lastQueryCompletionTime, setLastQueryCompletionTime] = useState(0);
   const [spinnerMessage, setSpinnerMessage] = useState<string | null>(null);
   const [spinnerColor, setSpinnerColor] = useState<keyof Theme | null>(null);

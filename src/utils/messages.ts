@@ -2993,6 +2993,49 @@ export function handleMessageFromStream(
     if (message.type === 'assistant') {
       const assistMsg = message as Message
       const contentArr = Array.isArray(assistMsg.message?.content) ? assistMsg.message.content : []
+      try {
+        const shape = contentArr.map(b => {
+          if (typeof b === 'string') return { kind: 'string', len: b.length }
+          const bb = b as { type?: string; text?: string; thinking?: string }
+          return {
+            kind: bb.type ?? '?',
+            textLen: bb.text?.length ?? 0,
+            textPreview: bb.text?.slice(0, 80) ?? null,
+            thinkingLen: bb.thinking?.length ?? 0,
+          }
+        })
+        logForDebugging(
+          `[reducer] assistant content blocks=${contentArr.length} shape=${JSON.stringify(shape)}`,
+        )
+      } catch {}
+      // Detect upstream-emitted empty responses — observed with Anthropic-
+      // compatible proxies (e.g. MiniMax) routing short prompts through
+      // thinking mode and emitting only a signature_delta, leaving a
+      // thinking block with zero content and no text block. Technically
+      // valid SSE, but renders as blank in Messages.tsx. Inject a visible
+      // retry hint so the user sees *something* and knows to press ↑ Enter.
+      const hasUsefulContent = contentArr.some(block => {
+        if (typeof block === 'string') return block.length > 0
+        const b = block as { type?: string; text?: string; thinking?: string; name?: string; id?: string }
+        if (b.type === 'text') return (b.text?.length ?? 0) > 0
+        if (b.type === 'thinking' || b.type === 'redacted_thinking') return (b.thinking?.length ?? 0) > 0
+        if (b.type === 'tool_use') return !!b.name || !!b.id
+        return true
+      })
+      if (!hasUsefulContent && contentArr.length > 0) {
+        try {
+          logForDebugging(
+            '[reducer] empty assistant content detected — injecting retry placeholder',
+          )
+        } catch {}
+        assistMsg.message = {
+          ...assistMsg.message,
+          content: [
+            ...contentArr,
+            { type: 'text', text: '_(模型返回空响应 — 按 ↑ + Enter 重试)_' },
+          ],
+        } as typeof assistMsg.message
+      }
       const thinkingBlock = contentArr.find(
         block => typeof block !== 'string' && block.type === 'thinking',
       )
