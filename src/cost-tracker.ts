@@ -263,12 +263,12 @@ function addToTotalModelUsage(
     maxOutputTokens: 0,
   }
 
-  modelUsage.inputTokens += usage.input_tokens
-  modelUsage.outputTokens += usage.output_tokens
-  modelUsage.cacheReadInputTokens += usage.cache_read_input_tokens ?? 0
-  modelUsage.cacheCreationInputTokens += usage.cache_creation_input_tokens ?? 0
+  modelUsage.inputTokens += usage?.input_tokens ?? 0
+  modelUsage.outputTokens += usage?.output_tokens ?? 0
+  modelUsage.cacheReadInputTokens += usage?.cache_read_input_tokens ?? 0
+  modelUsage.cacheCreationInputTokens += usage?.cache_creation_input_tokens ?? 0
   modelUsage.webSearchRequests +=
-    usage.server_tool_use?.web_search_requests ?? 0
+    usage?.server_tool_use?.web_search_requests ?? 0
   modelUsage.costUSD += cost
   modelUsage.contextWindow = getContextWindowForModel(model, getSdkBetas())
   modelUsage.maxOutputTokens = getModelMaxOutputTokens(model).default
@@ -280,6 +280,10 @@ export function addToTotalSessionCost(
   usage: Usage,
   model: string,
 ): number {
+  // Third-party providers (e.g. MiniMax via relay) may omit or mis-name the
+  // usage object. Tolerate it rather than crashing the CLI.
+  if (!usage) return cost
+
   const modelUsage = addToTotalModelUsage(cost, usage, model)
   addToTotalCostState(cost, modelUsage, model)
 
@@ -289,8 +293,8 @@ export function addToTotalSessionCost(
       : { model }
 
   getCostCounter()?.add(cost, attrs)
-  getTokenCounter()?.add(usage.input_tokens, { ...attrs, type: 'input' })
-  getTokenCounter()?.add(usage.output_tokens, { ...attrs, type: 'output' })
+  getTokenCounter()?.add(usage.input_tokens ?? 0, { ...attrs, type: 'input' })
+  getTokenCounter()?.add(usage.output_tokens ?? 0, { ...attrs, type: 'output' })
   getTokenCounter()?.add(usage.cache_read_input_tokens ?? 0, {
     ...attrs,
     type: 'cacheRead',
