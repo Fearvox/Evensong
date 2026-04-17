@@ -44,3 +44,27 @@ describe('CAPABILITY_REGISTRY — Task 1 skeleton', () => {
     expect(getCapability('gpt-5-turbo', 'knowledgeCutoff')).toBe(null)
   })
 })
+
+describe('effort.ts registry migration parity — Task 2', () => {
+  const {
+    modelSupportsEffort,
+    modelSupportsMaxEffort,
+    modelSupportsXHighEffort,
+  } = require('../src/utils/effort')
+
+  const cases: Array<[string, boolean, boolean, boolean]> = [
+    ['claude-opus-4-7', true, true, true],
+    ['claude-opus-4-6', true, true, false],
+    ['claude-sonnet-4-6', true, false, false],
+    ['claude-haiku-4-5-20251001', false, false, false],
+    ['claude-3-7-sonnet-20250219', false, false, false],
+  ]
+
+  for (const [model, eff, max, xh] of cases) {
+    it(`${model} → effort=${eff}, max=${max}, xh=${xh}`, () => {
+      expect(modelSupportsEffort(model)).toBe(eff)
+      expect(modelSupportsMaxEffort(model)).toBe(max)
+      expect(modelSupportsXHighEffort(model)).toBe(xh)
+    })
+  }
+})

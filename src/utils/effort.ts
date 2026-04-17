@@ -5,6 +5,11 @@ import { isProSubscriber, isMaxSubscriber, isTeamSubscriber } from './auth.js'
 import { getFeatureValue_CACHED_MAY_BE_STALE } from 'src/services/analytics/growthbook.js'
 import { getAPIProvider } from './model/providers.js'
 import { get3PModelCapabilityOverride } from './model/modelSupportOverrides.js'
+import { getCapability } from './model/capabilities.js'
+import {
+  getAntModelOverrideConfig,
+  resolveAntModel,
+} from './model/antModels.js'
 import { isEnvTruthy } from './envUtils.js'
 import type { EffortLevel } from 'src/entrypoints/sdk/runtimeTypes.js'
 
@@ -20,9 +25,8 @@ export const EFFORT_LEVELS = [
 
 export type EffortValue = EffortLevel | number
 
-// @[MODEL LAUNCH]: Add the new model to the allowlist if it supports the effort parameter.
+// @[MODEL LAUNCH]: Update CAPABILITY_REGISTRY in src/utils/model/capabilities.ts.
 export function modelSupportsEffort(model: string): boolean {
-  const m = model.toLowerCase()
   if (isEnvTruthy(process.env.CLAUDE_CODE_ALWAYS_ENABLE_EFFORT)) {
     return true
   }
@@ -30,15 +34,11 @@ export function modelSupportsEffort(model: string): boolean {
   if (supported3P !== undefined) {
     return supported3P
   }
-  // Supported by a subset of Claude 4 models
-  if (
-    m.includes('opus-4-6') ||
-    m.includes('opus-4-7') ||
-    m.includes('sonnet-4-6')
-  ) {
+  if (getCapability(model, 'effort')) {
     return true
   }
   // Exclude any other known legacy models (haiku, older opus/sonnet variants)
+  const m = model.toLowerCase()
   if (m.includes('haiku') || m.includes('sonnet') || m.includes('opus')) {
     return false
   }
@@ -53,15 +53,14 @@ export function modelSupportsEffort(model: string): boolean {
   return getAPIProvider() === 'firstParty'
 }
 
-// @[MODEL LAUNCH]: Add the new model to the allowlist if it supports 'max' effort.
+// @[MODEL LAUNCH]: Update CAPABILITY_REGISTRY in src/utils/model/capabilities.ts.
 // Per API docs, 'max' is Opus 4.6/4.7 only for public models — other models return an error.
 export function modelSupportsMaxEffort(model: string): boolean {
   const supported3P = get3PModelCapabilityOverride(model, 'max_effort')
   if (supported3P !== undefined) {
     return supported3P
   }
-  const lower = model.toLowerCase()
-  if (lower.includes('opus-4-6') || lower.includes('opus-4-7')) {
+  if (getCapability(model, 'maxEffort')) {
     return true
   }
   if (process.env.USER_TYPE === 'ant' && resolveAntModel(model)) {
@@ -79,7 +78,7 @@ export function modelSupportsXHighEffort(model: string): boolean {
   if (supported3P !== undefined) {
     return supported3P
   }
-  if (model.toLowerCase().includes('opus-4-7')) {
+  if (getCapability(model, 'xhighEffort')) {
     return true
   }
   if (process.env.USER_TYPE === 'ant' && resolveAntModel(model)) {
