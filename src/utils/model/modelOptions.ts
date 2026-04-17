@@ -140,6 +140,27 @@ function getOpus46Option(fastMode = false): ModelOption {
   }
 }
 
+function getOpus47Option(fastMode = false): ModelOption {
+  const is3P = getAPIProvider() !== 'firstParty'
+  return {
+    value: is3P ? getModelStrings().opus47 : 'opus',
+    label: 'Opus',
+    description: `Opus 4.7 · Frontier · Most capable for complex work${getOpus46PricingSuffix(fastMode)}`,
+    descriptionForModel: 'Opus 4.7 - frontier model, most capable for complex work',
+  }
+}
+
+export function getOpus47_1MOption(fastMode = false): ModelOption {
+  const is3P = getAPIProvider() !== 'firstParty'
+  return {
+    value: is3P ? getModelStrings().opus47 + '[1m]' : 'opus[1m]',
+    label: 'Opus (1M context)',
+    description: `Opus 4.7 with 1M context · Frontier for long sessions${getOpus46PricingSuffix(fastMode)}`,
+    descriptionForModel:
+      'Opus 4.7 with 1M context window - frontier model for long sessions with large codebases',
+  }
+}
+
 export function getSonnet46_1MOption(): ModelOption {
   const is3P = getAPIProvider() !== 'firstParty'
   return {
@@ -402,7 +423,10 @@ function getModelFamilyInfo(
   }
 
   // Opus family
-  if (canonical.includes('claude-opus-4')) {
+  if (
+    canonical.includes('claude-opus-4-7') ||
+    canonical.includes('claude-opus-4')
+  ) {
     const currentName = getMarketingNameForModel(getDefaultOpusModel())
     if (currentName) {
       return { alias: 'Opus', currentVersionName: currentName }

@@ -14,6 +14,7 @@ export const EFFORT_LEVELS = [
   'low',
   'medium',
   'high',
+  'xhigh',
   'max',
 ] as const satisfies readonly EffortLevel[]
 
@@ -30,7 +31,11 @@ export function modelSupportsEffort(model: string): boolean {
     return supported3P
   }
   // Supported by a subset of Claude 4 models
-  if (m.includes('opus-4-6') || m.includes('sonnet-4-6')) {
+  if (
+    m.includes('opus-4-6') ||
+    m.includes('opus-4-7') ||
+    m.includes('sonnet-4-6')
+  ) {
     return true
   }
   // Exclude any other known legacy models (haiku, older opus/sonnet variants)
@@ -49,13 +54,32 @@ export function modelSupportsEffort(model: string): boolean {
 }
 
 // @[MODEL LAUNCH]: Add the new model to the allowlist if it supports 'max' effort.
-// Per API docs, 'max' is Opus 4.6 only for public models — other models return an error.
+// Per API docs, 'max' is Opus 4.6/4.7 only for public models — other models return an error.
 export function modelSupportsMaxEffort(model: string): boolean {
   const supported3P = get3PModelCapabilityOverride(model, 'max_effort')
   if (supported3P !== undefined) {
     return supported3P
   }
-  if (model.toLowerCase().includes('opus-4-6')) {
+  const lower = model.toLowerCase()
+  if (lower.includes('opus-4-6') || lower.includes('opus-4-7')) {
+    return true
+  }
+  if (process.env.USER_TYPE === 'ant' && resolveAntModel(model)) {
+    return true
+  }
+  return false
+}
+
+/**
+ * 'xhigh' (Extra high) is an Opus 4.7 exclusive tier between 'high' and 'max'.
+ * Finer reasoning/latency control than max for cases where max is too slow.
+ */
+export function modelSupportsXHighEffort(model: string): boolean {
+  const supported3P = get3PModelCapabilityOverride(model, 'xhigh_effort')
+  if (supported3P !== undefined) {
+    return supported3P
+  }
+  if (model.toLowerCase().includes('opus-4-7')) {
     return true
   }
   if (process.env.USER_TYPE === 'ant' && resolveAntModel(model)) {
@@ -98,7 +122,11 @@ export function toPersistableEffort(
   if (value === 'low' || value === 'medium' || value === 'high') {
     return value
   }
-  if (value === 'max' && process.env.USER_TYPE === 'ant') {
+  // 'xhigh' and 'max' are session-scoped for external users (ants can persist them).
+  if (
+    (value === 'xhigh' || value === 'max') &&
+    process.env.USER_TYPE === 'ant'
+  ) {
     return value
   }
   return undefined
@@ -159,8 +187,12 @@ export function resolveAppliedEffort(
   }
   const resolved =
     envOverride ?? appStateEffortValue ?? getDefaultEffortForModel(model)
-  // API rejects 'max' on non-Opus-4.6 models — downgrade to 'high'.
+  // API rejects 'max' on non-Opus-4.6/4.7 models — downgrade to 'high'.
   if (resolved === 'max' && !modelSupportsMaxEffort(model)) {
+    return 'high'
+  }
+  // 'xhigh' is Opus 4.7 only — downgrade to 'high' on other models.
+  if (resolved === 'xhigh' && !modelSupportsXHighEffort(model)) {
     return 'high'
   }
   return resolved
@@ -209,7 +241,8 @@ export function convertEffortValueToLevel(value: EffortValue): EffortLevel {
   if (process.env.USER_TYPE === 'ant' && typeof value === 'number') {
     if (value <= 50) return 'low'
     if (value <= 85) return 'medium'
-    if (value <= 100) return 'high'
+    if (value <= 95) return 'high'
+    if (value <= 100) return 'xhigh'
     return 'max'
   }
   return 'high'
@@ -229,8 +262,10 @@ export function getEffortLevelDescription(level: EffortLevel): string {
       return 'Balanced approach with standard implementation and testing'
     case 'high':
       return 'Comprehensive implementation with extensive testing and documentation'
+    case 'xhigh':
+      return 'Extra high — deeper reasoning with longer latency (Opus 4.7)'
     case 'max':
-      return 'Maximum capability with deepest reasoning (Opus 4.6 only)'
+      return 'Maximum capability with deepest reasoning (Opus 4.6/4.7)'
   }
 }
 
@@ -304,9 +339,13 @@ export function getDefaultEffortForModel(
   // the model launch DRI and research. Default effort is a sensitive setting
   // that can greatly affect model quality and bashing.
 
-  // Default effort on Opus 4.6 to medium for Pro.
+  // Default effort on Opus 4.6/4.7 to medium for Pro.
   // Max/Team also get medium when the tengu_grey_step2 config is enabled.
-  if (model.toLowerCase().includes('opus-4-6')) {
+  const lowerModel = model.toLowerCase()
+  if (
+    lowerModel.includes('opus-4-6') ||
+    lowerModel.includes('opus-4-7')
+  ) {
     if (isProSubscriber()) {
       return 'medium'
     }
