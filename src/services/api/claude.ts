@@ -1970,6 +1970,20 @@ async function* queryModel(
           headlessProfilerCheckpoint('api_request_sent')
         }
 
+        // @instrument silent-swallow hunt: log exactly at API request boundary
+        try {
+          const msgCount = Array.isArray(params.messages) ? params.messages.length : 0
+          const sysSize = Array.isArray((params as { system?: unknown }).system)
+            ? JSON.stringify((params as { system: unknown }).system).length
+            : typeof (params as { system?: unknown }).system === 'string'
+              ? ((params as { system: string }).system).length
+              : 0
+          const msgSize = JSON.stringify(params.messages).length
+          logForDebugging(
+            `[api] request SENT model=${params.model} msgs=${msgCount} msgSize=${msgSize}B sysSize=${sysSize}B max_tokens=${params.max_tokens} attempt=${attempt}`,
+          )
+        } catch {}
+
         // Generate and track client request ID so timeouts (which return no
         // server request ID) can still be correlated with server logs.
         // First-party only — 3P providers don't log it (inc-4029 class).
@@ -1994,6 +2008,14 @@ async function* queryModel(
           )
           .withResponse()
         queryCheckpoint('query_response_headers_received')
+        // @instrument silent-swallow hunt: log when headers arrive
+        try {
+          const headers = result.response?.headers
+          const ct = headers?.get?.('content-type') ?? '?'
+          logForDebugging(
+            `[api] response HEADERS status=${result.response?.status} request_id=${result.request_id} content-type=${ct} ttfb_headers=${Date.now() - start}ms`,
+          )
+        } catch {}
         streamRequestId = result.request_id
         streamResponse = result.response
         return result.data
@@ -2104,6 +2126,15 @@ async function* queryModel(
       for await (const part of stream) {
         resetStreamIdleTimer()
         const now = Date.now()
+
+        // @instrument silent-swallow hunt: log first chunk received
+        if (isFirstChunk) {
+          try {
+            logForDebugging(
+              `[api] FIRST CHUNK type=${(part as { type?: string })?.type ?? '?'} ttft=${now - start}ms`,
+            )
+          } catch {}
+        }
 
         // Validate stream event at API boundary (Phase 3 Zod schema)
         const validated = safeParseStreamEvent(part)
