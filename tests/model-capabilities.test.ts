@@ -69,6 +69,26 @@ describe('effort.ts registry migration parity — Task 2', () => {
   }
 })
 
+describe('prompts.ts getKnowledgeCutoff parity — Task 4', () => {
+  const { _getKnowledgeCutoffForTest: cutoff } = require('../src/constants/prompts')
+
+  it('returns registry value for known canonicals', () => {
+    expect(cutoff('claude-opus-4-7')).toBe('January 2026')
+    expect(cutoff('claude-opus-4-6')).toBe('May 2025')
+    expect(cutoff('claude-sonnet-4-6')).toBe('August 2025')
+    expect(cutoff('claude-haiku-4-5-20251001')).toBe('February 2025')
+  })
+
+  it('preserves legacy "January 2025" for claude-opus-4 / sonnet-4 family', () => {
+    expect(cutoff('claude-opus-4-20250514')).toBe('January 2025')
+    expect(cutoff('claude-sonnet-4-20250514')).toBe('January 2025')
+  })
+
+  it('returns null for unknown model (legacy behavior)', () => {
+    expect(cutoff('gpt-5-turbo')).toBe(null)
+  })
+})
+
 describe('thinking/betas/context registry parity — Task 3', () => {
   const { modelSupportsAdaptiveThinking } = require('../src/utils/thinking')
   const {

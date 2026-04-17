@@ -79,7 +79,9 @@ export const CAPABILITY_REGISTRY: Record<string, ModelCapabilities> = {
   'claude-sonnet-4': {
     ...DEFAULT_CAPS,
     supports1m: true,
-    knowledgeCutoff: 'March 2025',
+    // Legacy prompts.ts returned 'January 2025' for claude-sonnet-4 — preserved
+    // for parity; a follow-up should verify against Anthropic model card.
+    knowledgeCutoff: 'January 2025',
     marketingName: 'Sonnet 4',
     frontier: false,
   },
@@ -104,14 +106,17 @@ export const CAPABILITY_REGISTRY: Record<string, ModelCapabilities> = {
   },
   'claude-opus-4': {
     ...DEFAULT_CAPS,
-    knowledgeCutoff: 'March 2025',
+    // Legacy prompts.ts returned 'January 2025' for claude-opus-4 — preserved.
+    knowledgeCutoff: 'January 2025',
     marketingName: 'Opus 4',
     frontier: false,
   },
   'claude-opus-4-1': {
     ...DEFAULT_CAPS,
     structuredOutputs: true,
-    knowledgeCutoff: 'March 2025',
+    // Legacy had no explicit 4-1 branch; fell through to 'January 2025' for
+    // 'claude-opus-4' substring. Preserved for parity.
+    knowledgeCutoff: 'January 2025',
     marketingName: 'Opus 4.1',
     frontier: false,
   },
