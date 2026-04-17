@@ -1,0 +1,23 @@
+{
+  "servers": {
+    "github": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-github"],
+      "env": {
+        "GITHUB_PERSONAL_ACCESS_TOKEN": "${env:GITHUB_TOKEN}"
+      }
+    },
+    "evermem": {
+      "type": "stdio",
+      "command": "node",
+      "args": ["${workspaceFolder}/.claude/plugins/evermem/dist/index.js"],
+      "env": {
+        "EVERMEM_API_KEY": "${env:EVERMEM_API_KEY}",
+        "EVERMEM_USER_ID": "cloud-runner",
+        "EVERMEM_GROUP_ID": "evensong",
+        "EVERMEM_AGENTIC": "1"
+      }
+    }
+  }
+}
