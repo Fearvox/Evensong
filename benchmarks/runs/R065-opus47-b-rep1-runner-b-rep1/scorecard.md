@@ -1,6 +1,22 @@
+# ⚠ FINAL ARCHIVED — R065-b rep1 — OBSERVATIONAL SAMPLE ONLY
+
+**Status:** ARCHIVED (not primary data). R065 full benchmark series pivoted to R066 (OR China cross-model) after confirmed CCR infra block on Opus 4.7 + 1M + adaptive thinking at BOTH max and xhigh effort levels across 4 independent attempts (rep1 max, rep2 xhigh, rep3/rep4 dual-line xhigh with workaround env).
+
+**What this sample captures:**
+- Initial 1m8s empty response on first paste (max effort, adaptive path, no workaround)
+- 5s cache-hit empty response on immediate retry
+- 3m21s pause after `superpowers:test-driven-development` skill dispatch (unclear whether TDD Red-phase protocol or additional infra artifact)
+
+**Why archived not deleted:** Paper-significant edge-case data. "Observer-side Claude Opus 4.7 instance in the same conversation also hit the same empty-response pattern when switched to max effort" (1m10s) corroborates the API-layer nature of the bug — not benchmark-harness specific.
+
+**Superseded by:** R066 benchmarks (`benchmarks/runs/R066-*`).
+
+---
+
 # R065 Claude Opus 4.7 (1M context) — L0 Observation Scorecard
 
-**Model under test:** Claude Opus 4.7 (`claude-opus-4-7[1m]`, 1M context, high effort)
+**Model under test:** Claude Opus 4.7 (`claude-opus-4-7[1m]`, 1M context, **effort=max — OBSERVATIONAL/DIRTY SAMPLE**)
+**Effort note:** User manually bumped to `max` at ~04:45 before L0 kickoff. Rep1 surfaced two infra gaps (adaptive clamp + alias drift) + 3m21s post-TDD-skill pause; classified as **DIRTY OBSERVATION SAMPLE, not primary data**. PRIMARY L0 data flows through **rep2 (effort=xhigh)** — see `R065-opus47-b-rep2-runner-b-rep2/scorecard.md`. Rep1 is being left to reconnect/continue so we capture "max-effort-at-1M under adaptive-clamp workaround" as an edge-case observation sample for the paper. R065 L2 (d-rep1) and L3 (e-rep1) will use **xhigh** for consistency with rep2 — see their scorecards for updated metadata.
 **Mode:** L0 — No Pressure / Standard context
 **Prompt:** 8-microservice E2E build (identical to R011/R064)
 **Date:** 2026-04-18
@@ -46,9 +62,15 @@ See `benchmarks/evensong/PREDICTIONS-R065.md` for full 16-dimension matrix.
 
 ### Surprises (unpredicted behaviors — paper gold)
 
-1.
-2.
-3.
+1. **Pre-run infra gap discovered** (04:49): First 2 attempts at R065 L0 returned signature_delta-only empty responses (1m8s + 5s). Root cause isolated to `src/services/api/claude.ts:1774-1776` adaptive-thinking path lacking `Math.min(maxOutputTokens - 1, ...)` clamp. Workaround: `CLAUDE_CODE_DISABLE_ADAPTIVE_THINKING=1` env. See `.claude/verify/20260418-044932-opus47-infra-adapt-check.md`.
+2. **Second pre-run infra gap**: `/model opus[1m]` alias resolves to Opus 4.6 instead of 4.7. Bypassed with explicit `/model claude-opus-4-7[1m]`. Same verify doc § Addendum.
+3. **MCP task-fit discrimination** (05:02): `/mcp` shows `research-vault: ✓ connected · 9 tools` — tools fully registered and visible to LLM. Opus 4.7 made the correct choice NOT to invoke any vault tool for greenfield "build from scratch" task (vault is for retrieving past data, not generating new code). **B6 POSITIVE signal** — finer task-fit discrimination than R064 Opus 4.6 which might have invoked regardless.
+
+### Methodology Notes for Next Run (R065-d / R065-e)
+
+- Add `CLAUDE_CODE_VERBOSE=1` + `bun run dev --verbose 2>&1 | tee /tmp/r065-<level>.log` to capture full streaming events + betas list + max_tokens per round-trip
+- Video: mp4 (not GIF) so frames can be extracted on-demand via ffmpeg
+- Keep `CLAUDE_CODE_DISABLE_ADAPTIVE_THINKING=1` across all R065 runs for internal consistency
 
 ### Prediction Score: ___/16 hits
 
