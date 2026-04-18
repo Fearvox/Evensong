@@ -1,5 +1,5 @@
 {
-  "buildCommand": "echo 'skip build'",
+  "buildCommand": "mkdir -p dist && echo 'skip build'",
   "outputDirectory": "dist",
   "installCommand": "bun install",
   "framework": null,
