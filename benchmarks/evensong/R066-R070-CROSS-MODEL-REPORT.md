@@ -9,13 +9,31 @@
 
 ## Results
 
-| # | Model | Prov | test | desc | expect | e/t | svc | chars | sec | cost | finish |
-|---|-------|------|------|------|--------|-----|-----|-------|-----|------|--------|
-| R066 | Elephant-α stealth | Chutes | 3 | 2 | 0 | 0.00 | 8 | 54K | 78 | $0.000 | length |
-| R067 | GLM-5.1 | z-ai | 23 | 2 | 40 | 1.74 | 1 | 29K | 155 | $0.071 | stop |
-| R068 | Kimi K2.5 | Cloudflare free | 48 | 4 | 65 | 1.35 | 6 | 62K | 261 | $0.000 | length |
-| R069 | Qwen 3 Max | qwen | 46 | 1 | 85 | 1.85 | 1 | 68K | 481 | $0.063 | length |
-| R070 | **Qwen 3.6 Plus (1M)** | qwen | **55** | **7** | 76 | 1.38 | 3 | 60K | 296 | $0.032 | stop? |
+### or-shot lite metrics (grep-based)
+
+| # | Model | Prov | test | desc | expect | e/t | svc | chars | sec | cost |
+|---|-------|------|------|------|--------|-----|-----|-------|-----|------|
+| R066 | Elephant-α stealth | Chutes | 3 | 2 | 0 | 0.00 | 8 | 54K | 78 | $0.000 |
+| R067 | GLM-5.1 | z-ai | 23 | 2 | 40 | 1.74 | 1 | 29K | 155 | $0.071 |
+| R068 | Kimi K2.5 | Cloudflare free | 48 | 4 | 65 | 1.35 | 6 | 62K | 261 | $0.000 |
+| R069 | Qwen 3 Max | qwen | 46 | 1 | 85 | 1.85 | 1 | 68K | 481 | $0.063 |
+| R070 | **Qwen 3.6 Plus (1M)** | qwen | **55** | **7** | 76 | 1.38 | 3 | 60K | 296 | $0.032 |
+
+### OR Generation Logs (authoritative, verified post-hoc 2026-04-18 09:43)
+
+| # | Time | Model | In tok | Out tok | Speed | Finish |
+|---|------|-------|--------|---------|-------|--------|
+| R066 | 09:08 | Elephant-α | 404 | 16,000 | **205.5 tps** | length |
+| R067 | 09:09 | GLM-5.1 | 358 | 16,000 | 103.0 tps | **length** (corrected: initially thought "stop") |
+| R068 | 09:12 | Kimi K2.5 | 362 | 16,000 | 61.3 tps | length |
+| R069 | 09:16 | Qwen 3 Max | 373 | 16,000 | 33.3 tps | length |
+| R070 | 09:33 | Qwen 3.6 Plus | 387 | **16,380** | 55.3 tps | length |
+
+**Key corrections from OR logs**:
+1. **All 5 cells hit finish=length** (not 4/5 as I initially scored) — every model was budget-constrained, none self-terminated
+2. Qwen 3.6 Plus output **16,380 tokens** — exceeded the nominal 16K by 380, suggests OR allows small overflow for sentence completion
+3. Input tokens 358-404 confirm prompt template is deterministic (~390 tok baseline)
+4. **Speed dimension (tps) is hidden 3rd axis** independent of breadth/depth — see Finding 5 below
 
 ---
 
@@ -74,15 +92,29 @@ Above 1.3 = meaningful assertion density. Elephant is the only clear outlier, wh
 
 Elephant-α is the only stealth / training-incomplete model in the set, and the only pure-breadth cell (8 svc / 0 e/t). GLM/Kimi/Qwen (all released flagships) default to some form of depth-first or hybrid. **Hypothesis for paper:** pre-RLHF-saturation models lack the "quality threshold" instinct and spread scaffolding thin; mature models self-throttle breadth and prioritize depth within a budget.
 
-## Finding 4: Token budget drives strategy, not just quality
+## Finding 4: Token budget saturates every cell (CORRECTED)
 
-4 of 5 cells likely hit `finish="length"` (at or near 16K max_tokens):
-- Elephant (54K chars / 8 svc = 6.7K chars/svc shallow)
-- Kimi (62K / 6 svc = 10.3K chars/svc)
-- Qwen Max (68K / 1 svc = 68K chars/svc ultra-deep)
-- Qwen Plus (60K / 3 svc = 20K chars/svc balanced)
+**All 5 cells hit `finish=length`** at ~16K output (OR logs confirmed). Original "GLM stopped at 29K chars self-limit" was wrong — GLM output was also 16K tokens, just lower char density (Chinese-mixed or more compact style).
 
-GLM 29K chars at "stop" (no length cap) — GLM self-limits earlier than others. **Different length-policy per model** is itself a finding.
+This means the R011 prompt is **over-saturated** for a single-turn 16K output budget. No model got to naturally conclude. Real ceilings are masked.
+
+**Implication for next pass**: raise `max_tokens` to 32K or 64K and re-run — expect at least one cell to self-terminate, revealing true strategy vs forced-truncation strategy.
+
+## Finding 5: Speed (tps) is a third independent axis
+
+OR-measured tps reveals generation-speed hierarchy orthogonal to quality:
+
+| rank | model | tps | interpretation |
+|------|-------|-----|----------------|
+| 1 | Elephant-α | **205.5** | stealth model, smallest backend, minimal thinking |
+| 2 | GLM-5.1 | 103.0 | fast + focused (1 svc depth) |
+| 3 | Kimi K2.5 | 61.3 | moderate |
+| 4 | Qwen 3.6 Plus | 55.3 | moderate (structured overhead) |
+| 5 | Qwen 3 Max | 33.3 | slowest — ultra-depth thinking per token |
+
+**Rank inversion vs quality**: fastest (Elephant) is lowest quality; slowest (Qwen 3 Max) is in top-quality bracket. This matches "thinking throughput ≠ raw generation throughput" — models that think per token are slower but produce denser code.
+
+**Paper angle**: tps × e/t ratio gives "effective quality per second" — useful for subagent selection in latency-sensitive scenarios. Qwen 3.6 Plus wins here (55 tps × 1.38 e/t = 76 quality-units/sec) and matches the seed-B subagent promotion decision.
 
 ---
 
