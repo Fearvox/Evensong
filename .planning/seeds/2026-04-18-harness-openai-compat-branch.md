@@ -33,7 +33,11 @@ Any of these, in priority order:
 3. **Anthropic upstream ships adaptive-thinking clamp fix** — natural batching point to also tackle harness.ts refactor (both require touching `claude.ts` surrounding code)
 4. **Paper review cycle starts** — reviewers will likely ask "why only single-turn for OR family?"
 5. **OR BYOK or Anthropic-compat pricing changes** — if OR removes the Anthropic-compat subscription gate, this seed is no longer load-bearing
-6. **"Opus 4.7 + Kimi-K2.5 + MiniMax-M2.7 三星架构" 落地** (Nolan 2026-04-18 构想) — 主 Opus 4.7 + Kimi 作为 262K-ctx 免费读库 subagent + MiniMax 作为 thinking-heavy 独立探索 subagent。MiniMax 路径已通 (`minimax-direct` provider Anthropic-compat `api.minimax.io/anthropic`),**Kimi 部分正是此 seed 要解锁** — AgentTool spawn 对 Kimi 目前走 CCR 的 Anthropic SDK path,会撞和 R066 batch.ts 同样的 OR Anthropic-compat 403。B1 实施后,`or-kimi` 可作为 teammate 模型通过 ProviderRouter OpenAICompatibleClient 路由,AgentTool prompt 里加 "use Kimi subagent to read large file and summarize" 之类的 task routing,成本 $0/M。这是本 seed 最具体的 near-term driver。
+6. **"Opus 4.7 + Qwen3.6-Plus(1M) + MiniMax-M2.7 三星架构" 落地** (Nolan 2026-04-18 post-R070 确认,原 Kimi 方案被 Qwen 替代)  — 主 Opus 4.7 + **Qwen 3.6 Plus (1M ctx, $0.325/$1.95, Arena Code Top 9%) 作为主 subagent** + MiniMax 作为 thinking-heavy 独立探索 subagent。R070 benchmark 证据:55 test + 7 describe + 76 expect + 3 svc hybrid + 5min + $0.032/run,全维度碾压 R069 qwen3-max,且结构化比 Kimi 更贴 Opus R011 风格(每 describe 含 ~8 tests,分层清晰)。MiniMax 路径已通 (`minimax-direct` Anthropic-compat `api.minimax.io/anthropic`);**Qwen3.6-plus 部分正是此 seed 要解锁** — AgentTool spawn 对 `or-qwen-plus` 目前走 CCR 的 Anthropic SDK path,会撞和 R066 batch.ts 同样的 OR Anthropic-compat 403。B1 实施后,`or-qwen-plus` 作为 teammate 模型通过 ProviderRouter OpenAICompatibleClient 路由,AgentTool prompt 可按任务类型分派:
+  - "读整个代码库 + 总结" → Qwen 3.6 Plus 1M ctx (主力)
+  - "深度思考单一问题" → MiniMax-M2.7
+  - Kimi K2.5 降为 "免费 long-context 备胎"(低优先,Cloudflare cache 11% 差)
+  成本估:单 session 主 Opus + 10 次 Qwen subagent 调用 ≈ $0.50,比纯 Opus 4.7 multi-turn 成本低 70%+。**这是本 seed 最高 ROI near-term driver。**
 
 ---
 
