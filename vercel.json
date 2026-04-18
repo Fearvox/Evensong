@@ -3,8 +3,11 @@
   "outputDirectory": "dist",
   "installCommand": "bun install",
   "framework": null,
+  "rewrites": [
+    { "source": "/api/relay/v1/messages", "destination": "/api/relay" }
+  ],
   "functions": {
-    "api/relay/route.ts": {
+    "api/relay/index.ts": {
       "regions": ["iad1"]
     }
   }
