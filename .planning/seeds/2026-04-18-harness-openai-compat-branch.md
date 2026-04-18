@@ -22,11 +22,23 @@ During R066 benchmark kickoff on 2026-04-18, `batch.ts` / `runBenchmark` / `spaw
 
 **What this seed proposes (B):** Make `harness.ts:spawnCLI` provider-aware — route non-Anthropic OR models through CCR's `ProviderRouter` / `OpenAICompatibleClient` so they get the full agent loop (multi-turn tool calling, AgentTool spawn, self-repair iterations). Restores R011 benchmark semantics for cross-family models.
 
-**SCOPE UPDATE (2026-04-18 09:58):** REPL interactive path **已通过验证** — `bun run dev` → `/provider or-qwen-plus` → "hello say pong only" → `pong` round-trip successful. `OpenAICompatibleClient` + `setActiveProvider` chain works end-to-end for OR non-Anthropic-brand models in single-user interactive mode. B seed scope now narrows to:
-  - ❌ **OUT OF SCOPE**: REPL main-loop (already works via `/provider X` command)
-  - ✅ **IN SCOPE #1**: `AgentTool` subagent spawn — when main agent calls a sub-agent with model=`or-qwen-plus`, the spawn path currently goes through Anthropic SDK (Task 4 tool etc.) and will hit the same 403 the benchmark harness did
-  - ✅ **IN SCOPE #2**: `benchmarks/evensong/harness.ts` spawnCLI — batch.ts non-interactive runs still route via ANTHROPIC_BASE_URL env
-  - Impact: "Opus 4.7 main + Qwen 3.6 Plus subagent" architecture needs this; "Qwen 3.6 Plus as lone main agent" already works today.
+**SCOPE UPDATE (2026-04-18 09:58):** REPL chat round-trip **已通过验证** — `bun run dev` → `/provider or-qwen-plus` → "hello say pong only" → `pong`. Pure chat works.
+
+**SCOPE UPDATE v2 (2026-04-18 10:08):** REPL **tool-calling** test revealed next gap — user: "read file and tell me X" → Qwen emitted prose "let me read a file" without actual Read tool invocation. Root cause: `OpenAICompatibleClient.createMessage` accepted `tools?: unknown[]` but dropped it entirely. Partial fix shipped in commit `1919cef` (send-path only: Anthropic tool schema → OpenAI function schema + tool_choice=auto). **Reverse direction still broken**: conversation history containing Anthropic `tool_use` + `tool_result` blocks vs OpenAI `tool_calls` + `role:'tool'` format. First tool call should work; multi-turn tool flow may error.
+
+Narrowed B seed scope (3 sub-items remaining):
+  - ❌ **OUT**: REPL single-turn chat (already works)
+  - ❌ **OUT (partial)**: REPL first-turn tool dispatch (send done in `1919cef`)
+  - ✅ **IN #1 (tool-calling adapter, high-pri)**: message-format converter for multi-turn tool history — `tool_use`↔`tool_calls`, `tool_result`↔`role:'tool'`. Without this, Qwen can fire one tool then blow up on the response round.
+  - ✅ **IN #2**: `AgentTool` subagent spawn path — main agent dispatching sub-agent with `or-qwen-plus` or similar still routes through Anthropic SDK for the spawn call itself
+  - ✅ **IN #3**: `benchmarks/evensong/harness.ts` spawnCLI — batch.ts non-interactive still uses ANTHROPIC_BASE_URL env override
+
+Architecture readiness:
+  - Qwen 3.6 Plus as chat-only main agent: **ready today** ✓
+  - Qwen 3.6 Plus as first-turn tool-agent: **ready after user tests `1919cef`** ✓/❓
+  - Multi-turn tool loop: needs IN #1 (hours)
+  - Full agent + subagent composition: needs IN #1 + #2 (days)
+  - Full benchmark harness: needs IN #1 + #3 (days)
 
 ---
 
