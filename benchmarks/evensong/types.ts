@@ -64,6 +64,7 @@ export const BENCHMARK_MODELS: ProviderPreset[] = [
   { name: 'or-qwen-coder', modelId: 'qwen/qwen3-coder-plus',        displayName: 'Qwen3 Coder+',         provider: 'openrouter' },
   { name: 'or-deepseek',    modelId: 'deepseek/deepseek-r1-0528',    displayName: 'DeepSeek R1',           provider: 'openrouter' },
   { name: 'or-kimi',       modelId: 'moonshotai/kimi-k2.5',          displayName: 'Kimi K2.5',            provider: 'openrouter' },
+  { name: 'or-elephant-alpha', modelId: 'openrouter/elephant-alpha', displayName: 'Elephant-α (stealth)', provider: 'openrouter' },
   // MiniMax direct — via api.minimax.io/anthropic (Anthropic-compatible)
   {
     name: 'minimax-m27',
