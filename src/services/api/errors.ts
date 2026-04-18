@@ -468,7 +468,7 @@ export function getAssistantMessageFromError(
   ) {
     return createAssistantAPIErrorMessage({
       content:
-        'API Error: Third-party provider is overloaded after repeated retries. Retry shortly, or switch to a different provider/model.',
+        'API Error: Service is overloaded after repeated retries. Retry shortly, or switch to a different model/provider.',
       error: 'rate_limit',
     })
   }

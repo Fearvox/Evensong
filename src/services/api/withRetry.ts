@@ -23,7 +23,7 @@ import {
   isClaudeAISubscriber,
   isEnterpriseSubscriber,
 } from '../../utils/auth.js'
-import { getClaudeConfigHomeDir, isEnvTruthy } from '../../utils/envUtils.js'
+import { getClaudeConfigHomeDir, isBareMode, isEnvTruthy } from '../../utils/envUtils.js'
 import { errorMessage } from '../../utils/errors.js'
 import {
   type CooldownReason,
@@ -112,6 +112,8 @@ function getCurrentThirdPartyBaseUrl(): string | undefined {
 function readThirdPartyApiKeyFromClaudeKeys(
   providerName: string,
 ): string | undefined {
+  // --bare skips all disk credential reads — env vars only.
+  if (isBareMode()) return undefined
   try {
     const keyPath = join(getClaudeConfigHomeDir(), 'keys', providerName)
     const key = readFileSync(keyPath, 'utf8').trim()

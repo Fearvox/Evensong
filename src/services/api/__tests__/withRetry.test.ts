@@ -258,6 +258,65 @@ describe('third-party 529 fallback', () => {
     )
   })
 
+  test('bare mode skips ~/.claude/keys disk reads for third-party fallback', async () => {
+    // Write a keys file that WOULD be read outside bare mode.
+    tempClaudeConfigDir = mkdtempSync(join(tmpdir(), 'ccr-third-party-bare-'))
+    mkdirSync(join(tempClaudeConfigDir, 'keys'), { recursive: true })
+    writeFileSync(
+      join(tempClaudeConfigDir, 'keys', 'xai'),
+      'xai-file-test-key\n',
+    )
+
+    process.env.CLAUDE_CONFIG_DIR = tempClaudeConfigDir
+    process.env.CLAUDE_CODE_SIMPLE = '1' // enables bare mode
+    process.env.ANTHROPIC_BASE_URL = 'https://api.minimax.io/anthropic'
+    process.env.USER_TYPE = 'external'
+    delete process.env.OPENROUTER_API_KEY
+    delete process.env.XAI_API_KEY
+    delete process.env.CLAUDE_CODE_THIRD_PARTY_FALLBACK_BASE_URL
+    delete process.env.CLAUDE_CODE_THIRD_PARTY_FALLBACK_API_KEY
+    delete process.env.CLAUDE_CODE_THIRD_PARTY_FALLBACK_MODEL
+
+    const zeroRetryAfterHeaders = new Headers([['retry-after', '0']])
+
+    const run = async () => {
+      const generator = withRetry(
+        async () => ({} as never),
+        async () => {
+          throw new APIError(
+            529,
+            undefined,
+            '529 {"type":"overloaded_error","message":"busy"}',
+            zeroRetryAfterHeaders,
+          )
+        },
+        {
+          maxRetries: 10,
+          model: 'MiniMax-M2.7',
+          thinkingConfig: { type: 'disabled' },
+        },
+      )
+
+      for await (const _message of generator) {
+        // exhaust
+      }
+    }
+
+    // With bare mode on, the disk key should be ignored — no fallback target
+    // exists, so FallbackTriggeredError must NOT be thrown, and the override
+    // must stay unset. External user_type will throw CannotRetryError
+    // carrying REPEATED_529_ERROR_MESSAGE instead.
+    let caught: unknown
+    try {
+      await run()
+    } catch (error) {
+      caught = error
+    }
+    expect(caught).toBeDefined()
+    expect(caught).not.toBeInstanceOf(FallbackTriggeredError)
+    expect(getTemporaryThirdPartyClientOverride()).toBeNull()
+  })
+
   test('uses env-configured third-party fallback target when fully set', async () => {
     process.env.ANTHROPIC_BASE_URL = 'https://api.minimax.io/anthropic'
     process.env.CLAUDE_CODE_THIRD_PARTY_FALLBACK_BASE_URL =

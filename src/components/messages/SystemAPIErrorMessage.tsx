@@ -24,7 +24,7 @@ export function SystemAPIErrorMessage(t0) {
     retryInMs,
     maxRetries
   } = t1;
-  const isOverloadedRetry = error?.status === 529 || error?.message?.includes?.('"type":"overloaded_error"');
+  const isOverloadedRetry = error?.status === 529 || error?.message?.includes?.('overloaded_error');
   const hidden = !isOverloadedRetry && retryAttempt < 4;
   const [countdownMs, setCountdownMs] = useState(0);
   const done = countdownMs >= retryInMs;
