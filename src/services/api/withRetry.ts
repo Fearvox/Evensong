@@ -1,10 +1,12 @@
 import { feature } from 'src/utils/featureFlag.js'
 import type Anthropic from '@anthropic-ai/sdk'
+import { readFileSync } from 'fs'
 import {
   APIConnectionError,
   APIError,
   APIUserAbortError,
 } from '@anthropic-ai/sdk'
+import { join } from 'path'
 import type { QuerySource } from 'src/constants/querySource.js'
 import type { SystemAPIErrorMessage } from 'src/types/message.js'
 import { isAwsCredentialsProviderError } from 'src/utils/aws.js'
@@ -21,7 +23,7 @@ import {
   isClaudeAISubscriber,
   isEnterpriseSubscriber,
 } from '../../utils/auth.js'
-import { isEnvTruthy } from '../../utils/envUtils.js'
+import { getClaudeConfigHomeDir, isBareMode, isEnvTruthy } from '../../utils/envUtils.js'
 import { errorMessage } from '../../utils/errors.js'
 import {
   type CooldownReason,
@@ -44,6 +46,10 @@ import {
   checkMockRateLimitError,
   isMockRateLimitError,
 } from '../rateLimitMocking.js'
+import {
+  getTemporaryThirdPartyClientOverride,
+  setTemporaryThirdPartyClientOverride,
+} from './client.js'
 import { REPEATED_529_ERROR_MESSAGE } from './errors.js'
 import { extractConnectionErrorDetails } from './errorUtils.js'
 
@@ -88,6 +94,107 @@ function shouldRetry529(querySource: QuerySource | undefined): boolean {
   )
 }
 
+function isNonAnthropicBaseUrl(baseUrl: string): boolean {
+  try {
+    return !new URL(baseUrl).hostname.endsWith('.anthropic.com')
+  } catch {
+    return false
+  }
+}
+
+function getCurrentThirdPartyBaseUrl(): string | undefined {
+  return (
+    getTemporaryThirdPartyClientOverride()?.baseURL ??
+    process.env.ANTHROPIC_BASE_URL
+  )
+}
+
+function readThirdPartyApiKeyFromClaudeKeys(
+  providerName: string,
+): string | undefined {
+  // --bare skips all disk credential reads — env vars only.
+  if (isBareMode()) return undefined
+  try {
+    const keyPath = join(getClaudeConfigHomeDir(), 'keys', providerName)
+    const key = readFileSync(keyPath, 'utf8').trim()
+    return key || undefined
+  } catch {
+    return undefined
+  }
+}
+
+function getThirdPartyFallbackApiKey(
+  envVarName: 'OPENROUTER_API_KEY' | 'XAI_API_KEY',
+  providerName: 'openrouter' | 'xai',
+): string | undefined {
+  return process.env[envVarName] || readThirdPartyApiKeyFromClaudeKeys(providerName)
+}
+
+function isThirdPartyAnthropicCompatibleRequest(): boolean {
+  const baseUrl = getCurrentThirdPartyBaseUrl()
+  return !!baseUrl && isNonAnthropicBaseUrl(baseUrl)
+}
+
+function getThirdPartyFallbackTarget(): ThirdPartyFallbackTarget | null {
+  const currentBaseUrl = getCurrentThirdPartyBaseUrl()
+  if (!currentBaseUrl || !isNonAnthropicBaseUrl(currentBaseUrl)) {
+    return null
+  }
+
+  const envFallbackBaseUrl =
+    process.env.CLAUDE_CODE_THIRD_PARTY_FALLBACK_BASE_URL
+  const envFallbackModel = process.env.CLAUDE_CODE_THIRD_PARTY_FALLBACK_MODEL
+  const envFallbackApiKey =
+    process.env.CLAUDE_CODE_THIRD_PARTY_FALLBACK_API_KEY
+
+  if (
+    envFallbackBaseUrl &&
+    envFallbackModel &&
+    envFallbackApiKey &&
+    envFallbackBaseUrl !== currentBaseUrl
+  ) {
+    return {
+      apiKey: envFallbackApiKey,
+      baseURL: envFallbackBaseUrl,
+      label: 'env-configured-third-party-fallback',
+      model: envFallbackModel,
+    }
+  }
+
+  const currentHost = (() => {
+    try {
+      return new URL(currentBaseUrl).hostname
+    } catch {
+      return ''
+    }
+  })()
+
+  const openRouterApiKey = getThirdPartyFallbackApiKey(
+    'OPENROUTER_API_KEY',
+    'openrouter',
+  )
+  if (openRouterApiKey && currentHost !== 'openrouter.ai') {
+    return {
+      apiKey: openRouterApiKey,
+      baseURL: 'https://openrouter.ai/api/v1',
+      label: 'openrouter-sonnet-fallback',
+      model: 'anthropic/claude-sonnet-4.6',
+    }
+  }
+
+  const xaiApiKey = getThirdPartyFallbackApiKey('XAI_API_KEY', 'xai')
+  if (xaiApiKey && currentHost !== 'api.x.ai') {
+    return {
+      apiKey: xaiApiKey,
+      baseURL: 'https://api.x.ai',
+      label: 'xai-fallback',
+      model: 'grok-4.20-0309-reasoning',
+    }
+  }
+
+  return null
+}
+
 // CLAUDE_CODE_UNATTENDED_RETRY: for unattended sessions (ant-only). Retries 429/529
 // indefinitely with higher backoff and periodic keep-alive yields so the host
 // environment does not mark the session idle mid-wait.
@@ -96,6 +203,13 @@ function shouldRetry529(querySource: QuerySource | undefined): boolean {
 const PERSISTENT_MAX_BACKOFF_MS = 5 * 60 * 1000
 const PERSISTENT_RESET_CAP_MS = 6 * 60 * 60 * 1000
 const HEARTBEAT_INTERVAL_MS = 30_000
+
+type ThirdPartyFallbackTarget = {
+  apiKey: string
+  baseURL: string
+  label: string
+  model: string
+}
 
 function isPersistentRetryEnabled(): boolean {
   return feature('UNATTENDED_RETRY')
@@ -329,10 +443,37 @@ export async function* withRetry<T>(
         // If FALLBACK_FOR_ALL_PRIMARY_MODELS is not set, fall through only if the primary model is a non-custom Opus model.
         // TODO: Revisit if the isNonCustomOpusModel check should still exist, or if isNonCustomOpusModel is a stale artifact of when Claude Code was hardcoded on Opus.
         (process.env.FALLBACK_FOR_ALL_PRIMARY_MODELS ||
+          isThirdPartyAnthropicCompatibleRequest() ||
           (!isClaudeAISubscriber() && isNonCustomOpusModel(options.model)))
       ) {
         consecutive529Errors++
         if (consecutive529Errors >= MAX_529_RETRIES) {
+          const thirdPartyFallbackTarget =
+            !options.fallbackModel && isThirdPartyAnthropicCompatibleRequest()
+              ? getThirdPartyFallbackTarget()
+              : null
+
+          if (thirdPartyFallbackTarget) {
+            logEvent('tengu_api_third_party_fallback_triggered', {
+              original_model:
+                options.model as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
+              fallback_model:
+                thirdPartyFallbackTarget.model as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
+              provider: getAPIProviderForStatsig(),
+              fallback_provider:
+                thirdPartyFallbackTarget.label as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
+            })
+            setTemporaryThirdPartyClientOverride({
+              apiKey: thirdPartyFallbackTarget.apiKey,
+              baseURL: thirdPartyFallbackTarget.baseURL,
+              label: thirdPartyFallbackTarget.label,
+            })
+            throw new FallbackTriggeredError(
+              options.model,
+              thirdPartyFallbackTarget.model,
+            )
+          }
+
           // Check if fallback model is specified
           if (options.fallbackModel) {
             logEvent('tengu_api_opus_fallback_triggered', {

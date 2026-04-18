@@ -463,6 +463,17 @@ export function getAssistantMessageFromError(
   }
 
   if (
+    error instanceof Error &&
+    error.message.includes(REPEATED_529_ERROR_MESSAGE)
+  ) {
+    return createAssistantAPIErrorMessage({
+      content:
+        'API Error: Service is overloaded after repeated retries. Retry shortly, or switch to a different model/provider.',
+      error: 'rate_limit',
+    })
+  }
+
+  if (
     error instanceof APIError &&
     error.status === 429 &&
     shouldProcessRateLimits(isClaudeAISubscriber())

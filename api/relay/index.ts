@@ -65,6 +65,22 @@ export default async function handler(
   req: VercelRequest,
   res: VercelResponse,
 ): Promise<void> {
+  // Gate all debug routes behind RELAY_DEBUG_TOKEN env var. Mismatch returns
+  // 404 (not 403) so the endpoints don't leak existence to unauthenticated
+  // callers. Without RELAY_DEBUG_TOKEN set, debug routes are disabled.
+  if (req.query['debug']) {
+    const expected = process.env['RELAY_DEBUG_TOKEN']
+    const provided = req.query['token']
+    if (
+      !expected ||
+      typeof provided !== 'string' ||
+      provided !== expected
+    ) {
+      res.status(404).json({ error: 'Not Found' })
+      return
+    }
+  }
+
   // DEBUG: check env state
   if (req.query['debug'] === 'env') {
     const k = process.env['RELAY_KEY'] ?? ''

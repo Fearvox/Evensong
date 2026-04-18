@@ -1,10 +1,13 @@
 {
-  "buildCommand": "echo 'skip build'",
+  "buildCommand": "mkdir -p dist && printf '<!doctype html><title>Relay</title>API functions only. See /api/relay.\\n' > dist/index.html && echo 'skip build'",
   "outputDirectory": "dist",
   "installCommand": "bun install",
   "framework": null,
+  "rewrites": [
+    { "source": "/api/relay/v1/messages", "destination": "/api/relay" }
+  ],
   "functions": {
-    "api/relay/route.ts": {
+    "api/relay/index.ts": {
       "regions": ["iad1"]
     }
   }

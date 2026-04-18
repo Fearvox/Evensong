@@ -1,12 +1,21 @@
 import { describe, test, expect, afterEach } from 'bun:test'
+import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'fs'
 import {
+  FallbackTriggeredError,
   is529Error,
   getRetryDelay,
   BASE_DELAY_MS,
   getDefaultMaxRetries,
+  withRetry,
 } from 'src/services/api/withRetry.js'
 import { extractConnectionErrorDetails } from 'src/services/api/errorUtils.js'
+import {
+  clearTemporaryThirdPartyClientOverride,
+  getTemporaryThirdPartyClientOverride,
+} from 'src/services/api/client.js'
 import { APIError, APIConnectionError } from '@anthropic-ai/sdk'
+import { join } from 'path'
+import { tmpdir } from 'os'
 
 describe('is529Error', () => {
   test('returns true for APIError with status 529', () => {
@@ -103,6 +112,256 @@ describe('getDefaultMaxRetries', () => {
   test('returns env override when CLAUDE_CODE_MAX_RETRIES is set', () => {
     process.env.CLAUDE_CODE_MAX_RETRIES = '5'
     expect(getDefaultMaxRetries()).toBe(5)
+  })
+})
+
+describe('third-party 529 fallback', () => {
+  const savedEnv = { ...process.env }
+  let tempClaudeConfigDir: string | undefined
+
+  afterEach(() => {
+    clearTemporaryThirdPartyClientOverride()
+    process.env = { ...savedEnv }
+    if (tempClaudeConfigDir) {
+      rmSync(tempClaudeConfigDir, { force: true, recursive: true })
+      tempClaudeConfigDir = undefined
+    }
+  })
+
+  test('switches to openrouter fallback after repeated 529s on third-party base url', async () => {
+    process.env.ANTHROPIC_BASE_URL = 'https://api.minimax.io/anthropic'
+    process.env.OPENROUTER_API_KEY = 'openrouter-test-key'
+    delete process.env.XAI_API_KEY
+
+    const zeroRetryAfterHeaders = new Headers([['retry-after', '0']])
+
+    const run = async () => {
+      const generator = withRetry(
+        async () => ({} as never),
+        async () => {
+          throw new APIError(
+            529,
+            undefined,
+            '529 {"type":"overloaded_error","message":"busy"}',
+            zeroRetryAfterHeaders,
+          )
+        },
+        {
+          maxRetries: 10,
+          model: 'MiniMax-M2.7',
+          thinkingConfig: { type: 'disabled' },
+        },
+      )
+
+      for await (const _message of generator) {
+        // exhaust retry system messages until fallback triggers
+      }
+    }
+
+    await expect(run()).rejects.toBeInstanceOf(FallbackTriggeredError)
+
+    expect(getTemporaryThirdPartyClientOverride()).toEqual({
+      apiKey: 'openrouter-test-key',
+      baseURL: 'https://openrouter.ai/api/v1',
+      label: 'openrouter-sonnet-fallback',
+    })
+  })
+
+  test('falls back using ~/.claude/keys/xai when env fallback keys are absent', async () => {
+    tempClaudeConfigDir = mkdtempSync(join(tmpdir(), 'ccr-third-party-fallback-'))
+    mkdirSync(join(tempClaudeConfigDir, 'keys'), { recursive: true })
+    writeFileSync(join(tempClaudeConfigDir, 'keys', 'xai'), 'xai-file-test-key\n')
+
+    process.env.CLAUDE_CONFIG_DIR = tempClaudeConfigDir
+    process.env.ANTHROPIC_BASE_URL = 'https://api.minimax.io/anthropic'
+    delete process.env.OPENROUTER_API_KEY
+    delete process.env.XAI_API_KEY
+
+    const zeroRetryAfterHeaders = new Headers([['retry-after', '0']])
+
+    const run = async () => {
+      const generator = withRetry(
+        async () => ({} as never),
+        async () => {
+          throw new APIError(
+            529,
+            undefined,
+            '529 {"type":"overloaded_error","message":"busy"}',
+            zeroRetryAfterHeaders,
+          )
+        },
+        {
+          maxRetries: 10,
+          model: 'MiniMax-M2.7',
+          thinkingConfig: { type: 'disabled' },
+        },
+      )
+
+      for await (const _message of generator) {
+        // exhaust retry system messages until fallback triggers
+      }
+    }
+
+    await expect(run()).rejects.toBeInstanceOf(FallbackTriggeredError)
+
+    expect(getTemporaryThirdPartyClientOverride()).toEqual({
+      apiKey: 'xai-file-test-key',
+      baseURL: 'https://api.x.ai',
+      label: 'xai-fallback',
+    })
+  })
+
+  test('FallbackTriggeredError carries fallbackModel matching override target', async () => {
+    process.env.ANTHROPIC_BASE_URL = 'https://api.minimax.io/anthropic'
+    process.env.OPENROUTER_API_KEY = 'openrouter-test-key'
+    delete process.env.XAI_API_KEY
+    delete process.env.CLAUDE_CODE_THIRD_PARTY_FALLBACK_BASE_URL
+    delete process.env.CLAUDE_CODE_THIRD_PARTY_FALLBACK_API_KEY
+    delete process.env.CLAUDE_CODE_THIRD_PARTY_FALLBACK_MODEL
+
+    const zeroRetryAfterHeaders = new Headers([['retry-after', '0']])
+
+    let caughtError: unknown
+    try {
+      const generator = withRetry(
+        async () => ({} as never),
+        async () => {
+          throw new APIError(
+            529,
+            undefined,
+            '529 {"type":"overloaded_error","message":"busy"}',
+            zeroRetryAfterHeaders,
+          )
+        },
+        {
+          maxRetries: 10,
+          model: 'MiniMax-M2.7',
+          thinkingConfig: { type: 'disabled' },
+        },
+      )
+      for await (const _message of generator) {
+        // exhaust until fallback triggers
+      }
+    } catch (error) {
+      caughtError = error
+    }
+
+    // query.ts recover path reads err.fallbackModel directly (not a stale
+    // closure). Guard both the field value and sibling override so they
+    // stay in sync on future refactors.
+    expect(caughtError).toBeInstanceOf(FallbackTriggeredError)
+    const err = caughtError as FallbackTriggeredError
+    expect(err.originalModel).toBe('MiniMax-M2.7')
+    expect(err.fallbackModel).toBe('anthropic/claude-sonnet-4.6')
+    expect(getTemporaryThirdPartyClientOverride()?.baseURL).toBe(
+      'https://openrouter.ai/api/v1',
+    )
+  })
+
+  test('bare mode skips ~/.claude/keys disk reads for third-party fallback', async () => {
+    // Write a keys file that WOULD be read outside bare mode.
+    tempClaudeConfigDir = mkdtempSync(join(tmpdir(), 'ccr-third-party-bare-'))
+    mkdirSync(join(tempClaudeConfigDir, 'keys'), { recursive: true })
+    writeFileSync(
+      join(tempClaudeConfigDir, 'keys', 'xai'),
+      'xai-file-test-key\n',
+    )
+
+    process.env.CLAUDE_CONFIG_DIR = tempClaudeConfigDir
+    process.env.CLAUDE_CODE_SIMPLE = '1' // enables bare mode
+    process.env.ANTHROPIC_BASE_URL = 'https://api.minimax.io/anthropic'
+    process.env.USER_TYPE = 'external'
+    delete process.env.OPENROUTER_API_KEY
+    delete process.env.XAI_API_KEY
+    delete process.env.CLAUDE_CODE_THIRD_PARTY_FALLBACK_BASE_URL
+    delete process.env.CLAUDE_CODE_THIRD_PARTY_FALLBACK_API_KEY
+    delete process.env.CLAUDE_CODE_THIRD_PARTY_FALLBACK_MODEL
+
+    const zeroRetryAfterHeaders = new Headers([['retry-after', '0']])
+
+    const run = async () => {
+      const generator = withRetry(
+        async () => ({} as never),
+        async () => {
+          throw new APIError(
+            529,
+            undefined,
+            '529 {"type":"overloaded_error","message":"busy"}',
+            zeroRetryAfterHeaders,
+          )
+        },
+        {
+          maxRetries: 10,
+          model: 'MiniMax-M2.7',
+          thinkingConfig: { type: 'disabled' },
+        },
+      )
+
+      for await (const _message of generator) {
+        // exhaust
+      }
+    }
+
+    // With bare mode on, the disk key should be ignored — no fallback target
+    // exists, so FallbackTriggeredError must NOT be thrown, and the override
+    // must stay unset. External user_type will throw CannotRetryError
+    // carrying REPEATED_529_ERROR_MESSAGE instead.
+    let caught: unknown
+    try {
+      await run()
+    } catch (error) {
+      caught = error
+    }
+    expect(caught).toBeDefined()
+    expect(caught).not.toBeInstanceOf(FallbackTriggeredError)
+    expect(getTemporaryThirdPartyClientOverride()).toBeNull()
+  })
+
+  test('uses env-configured third-party fallback target when fully set', async () => {
+    process.env.ANTHROPIC_BASE_URL = 'https://api.minimax.io/anthropic'
+    process.env.CLAUDE_CODE_THIRD_PARTY_FALLBACK_BASE_URL =
+      'https://custom-relay.example/v1'
+    process.env.CLAUDE_CODE_THIRD_PARTY_FALLBACK_API_KEY = 'custom-test-key'
+    process.env.CLAUDE_CODE_THIRD_PARTY_FALLBACK_MODEL = 'custom-fallback-model'
+    // env-configured target must take precedence over openrouter/xai defaults
+    process.env.OPENROUTER_API_KEY = 'openrouter-would-win-without-env-target'
+    delete process.env.XAI_API_KEY
+
+    const zeroRetryAfterHeaders = new Headers([['retry-after', '0']])
+
+    const run = async () => {
+      const generator = withRetry(
+        async () => ({} as never),
+        async () => {
+          throw new APIError(
+            529,
+            undefined,
+            '529 {"type":"overloaded_error","message":"busy"}',
+            zeroRetryAfterHeaders,
+          )
+        },
+        {
+          maxRetries: 10,
+          model: 'MiniMax-M2.7',
+          thinkingConfig: { type: 'disabled' },
+        },
+      )
+
+      for await (const _message of generator) {
+        // exhaust until fallback triggers
+      }
+    }
+
+    await expect(run()).rejects.toMatchObject({
+      originalModel: 'MiniMax-M2.7',
+      fallbackModel: 'custom-fallback-model',
+    })
+
+    expect(getTemporaryThirdPartyClientOverride()).toEqual({
+      apiKey: 'custom-test-key',
+      baseURL: 'https://custom-relay.example/v1',
+      label: 'env-configured-third-party-fallback',
+    })
   })
 })
 
