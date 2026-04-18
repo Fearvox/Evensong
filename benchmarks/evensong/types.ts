@@ -63,6 +63,7 @@ export const BENCHMARK_MODELS: ProviderPreset[] = [
   { name: 'or-glm',        modelId: 'z-ai/glm-5.1',                 displayName: 'GLM-5.1',               provider: 'openrouter' },
   { name: 'or-qwen-coder', modelId: 'qwen/qwen3-coder-plus',        displayName: 'Qwen3 Coder+',         provider: 'openrouter' },
   { name: 'or-qwen',       modelId: 'qwen/qwen3-max',                displayName: 'Qwen 3 Max',           provider: 'openrouter' },
+  { name: 'or-qwen-plus',  modelId: 'qwen/qwen3.6-plus',             displayName: 'Qwen 3.6 Plus (1M)',   provider: 'openrouter' },
   { name: 'or-deepseek',    modelId: 'deepseek/deepseek-r1-0528',    displayName: 'DeepSeek R1',           provider: 'openrouter' },
   { name: 'or-kimi',       modelId: 'moonshotai/kimi-k2.5',          displayName: 'Kimi K2.5',            provider: 'openrouter' },
   { name: 'or-elephant-alpha', modelId: 'openrouter/elephant-alpha', displayName: 'Elephant-α (stealth)', provider: 'openrouter' },

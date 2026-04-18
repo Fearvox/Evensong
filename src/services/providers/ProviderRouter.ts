@@ -144,6 +144,12 @@ export const PROVIDER_PRESETS: Record<string, Omit<ProviderConfig, 'apiKey'>> = 
     modelName: 'qwen/qwen3-max',
     baseUrl: 'https://openrouter.ai/api/v1',
   },
+  'or-qwen-plus': {
+    name: 'or-qwen-plus',
+    providerClass: 'openai-compatible',
+    modelName: 'qwen/qwen3.6-plus',
+    baseUrl: 'https://openrouter.ai/api/v1',
+  },
   // or-kimi-k25 merged into or-kimi (both now kimi-k2.5)
   'or-minimax': {
     name: 'or-minimax',
@@ -249,6 +255,7 @@ export class ProviderRouter {
       'or-kimi': process.env.OPENROUTER_API_KEY,
       'or-deepseek': process.env.OPENROUTER_API_KEY,
       'or-qwen': process.env.OPENROUTER_API_KEY,
+      'or-qwen-plus': process.env.OPENROUTER_API_KEY,
       // or-kimi-k25 merged into or-kimi
       'or-minimax': process.env.OPENROUTER_API_KEY,
       'or-elephant-alpha': process.env.OPENROUTER_API_KEY,
