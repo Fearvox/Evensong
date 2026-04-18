@@ -22,6 +22,12 @@ During R066 benchmark kickoff on 2026-04-18, `batch.ts` / `runBenchmark` / `spaw
 
 **What this seed proposes (B):** Make `harness.ts:spawnCLI` provider-aware — route non-Anthropic OR models through CCR's `ProviderRouter` / `OpenAICompatibleClient` so they get the full agent loop (multi-turn tool calling, AgentTool spawn, self-repair iterations). Restores R011 benchmark semantics for cross-family models.
 
+**SCOPE UPDATE (2026-04-18 09:58):** REPL interactive path **已通过验证** — `bun run dev` → `/provider or-qwen-plus` → "hello say pong only" → `pong` round-trip successful. `OpenAICompatibleClient` + `setActiveProvider` chain works end-to-end for OR non-Anthropic-brand models in single-user interactive mode. B seed scope now narrows to:
+  - ❌ **OUT OF SCOPE**: REPL main-loop (already works via `/provider X` command)
+  - ✅ **IN SCOPE #1**: `AgentTool` subagent spawn — when main agent calls a sub-agent with model=`or-qwen-plus`, the spawn path currently goes through Anthropic SDK (Task 4 tool etc.) and will hit the same 403 the benchmark harness did
+  - ✅ **IN SCOPE #2**: `benchmarks/evensong/harness.ts` spawnCLI — batch.ts non-interactive runs still route via ANTHROPIC_BASE_URL env
+  - Impact: "Opus 4.7 main + Qwen 3.6 Plus subagent" architecture needs this; "Qwen 3.6 Plus as lone main agent" already works today.
+
 ---
 
 ## Trigger conditions (surface this seed when)
