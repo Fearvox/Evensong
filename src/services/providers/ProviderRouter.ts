@@ -141,7 +141,7 @@ export const PROVIDER_PRESETS: Record<string, Omit<ProviderConfig, 'apiKey'>> = 
   'or-qwen': {
     name: 'or-qwen',
     providerClass: 'openai-compatible',
-    modelName: 'qwen/qwen3.6-plus',
+    modelName: 'qwen/qwen3-max',
     baseUrl: 'https://openrouter.ai/api/v1',
   },
   // or-kimi-k25 merged into or-kimi (both now kimi-k2.5)
