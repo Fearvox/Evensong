@@ -48,7 +48,8 @@ bun benchmarks/evensong/batch.ts \
   --dry-run \
   --models or-elephant-alpha,or-glm,or-kimi,or-qwen \
   --pressure L0 \
-  --memory clean
+  --memory clean \
+  --start-id R066
 
 echo ""
 read -p "Proceed with live 4-cell batch? [y/N] " confirm
@@ -64,7 +65,8 @@ echo "════════════════════════�
 bun benchmarks/evensong/batch.ts \
   --models or-elephant-alpha,or-glm,or-kimi,or-qwen \
   --pressure L0 \
-  --memory clean
+  --memory clean \
+  --start-id R066
 
 echo ""
 echo "════════════════════════════════════════════════════════════════"
