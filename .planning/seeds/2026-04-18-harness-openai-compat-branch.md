@@ -33,6 +33,7 @@ Any of these, in priority order:
 3. **Anthropic upstream ships adaptive-thinking clamp fix** — natural batching point to also tackle harness.ts refactor (both require touching `claude.ts` surrounding code)
 4. **Paper review cycle starts** — reviewers will likely ask "why only single-turn for OR family?"
 5. **OR BYOK or Anthropic-compat pricing changes** — if OR removes the Anthropic-compat subscription gate, this seed is no longer load-bearing
+6. **"Opus 4.7 + Kimi-K2.5 + MiniMax-M2.7 三星架构" 落地** (Nolan 2026-04-18 构想) — 主 Opus 4.7 + Kimi 作为 262K-ctx 免费读库 subagent + MiniMax 作为 thinking-heavy 独立探索 subagent。MiniMax 路径已通 (`minimax-direct` provider Anthropic-compat `api.minimax.io/anthropic`),**Kimi 部分正是此 seed 要解锁** — AgentTool spawn 对 Kimi 目前走 CCR 的 Anthropic SDK path,会撞和 R066 batch.ts 同样的 OR Anthropic-compat 403。B1 实施后,`or-kimi` 可作为 teammate 模型通过 ProviderRouter OpenAICompatibleClient 路由,AgentTool prompt 里加 "use Kimi subagent to read large file and summarize" 之类的 task routing,成本 $0/M。这是本 seed 最具体的 near-term driver。
 
 ---
 
