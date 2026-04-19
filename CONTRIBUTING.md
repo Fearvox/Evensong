@@ -149,13 +149,16 @@ compatibility matrix.
 
 If you find a security issue (leaked secret in the repo, auth bypass,
 remote code execution path, data-exfil vector in a dependency), **please do
-not open a public issue**. Email `fearvox1015 at gmail dot com` with:
+not open a public issue**. Email `admin at zonicdesign dot art` with:
 
 - A brief description
 - Reproduction steps if applicable
 - A GPG public key if you want an encrypted reply
 
 We aim to respond within 72 hours.
+
+For commercial / partnership / licensing inquiries unrelated to security,
+use `business at zonicdesign dot art`.
 
 ---
 

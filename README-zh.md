@@ -285,9 +285,11 @@ const result = await vaultRetrieve(
 
 ## 🙏 致谢
 
-作者：**[Fearvox / 0xVox](https://github.com/Fearvox)**（朱珩源 / Hengyuan Zhu）。
+作者：**[Fearvox / 0xVox](https://github.com/Fearvox)**（朱恒源 / Hengyuan Zhu）。
 
 CCR 运行时是对 Anthropic Claude Code CLI 的 clean-room 逆向工程研究。所有识别性字符串、遥测端点和内部 API 已 stub 或移除。本仓库不主张任何 Anthropic 商标或原始二进制设计的所有权。
+
+上游沿袭：源自社区逆向工程基线 [github.com/claude-code-best/claude-code](https://github.com/claude-code-best/claude-code) (CCB)。CCR 在该基线上继续推进——新增基础设施、检索流水线、基准 harness 与打包工作。
 
 混合检索架构、基准 harness、以及 `src/services/retrieval/`、`scripts/benchmark-*.ts`、`benchmarks/wave3*` 中的所有原创代码均为原创工作，独立受 EverMemOS 公开设计启发。
 

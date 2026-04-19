@@ -5,7 +5,7 @@ authors:
   - family-names: "Zhu"
     given-names: "Hengyuan"
     alias: "Fearvox"
-    orcid: "https://orcid.org/0000-0000-0000-0000"
+    email: "admin@zonicdesign.art"
 type: software
 repository-code: "https://github.com/Fearvox/Evensong"
 url: "https://github.com/Fearvox/Evensong"
@@ -39,6 +39,7 @@ preferred-citation:
     - family-names: "Zhu"
       given-names: "Hengyuan"
       alias: "Fearvox"
+      email: "admin@zonicdesign.art"
   year: 2026
   url: "https://github.com/Fearvox/Evensong"
   version: "0.1.0"

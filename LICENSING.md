@@ -85,7 +85,8 @@ Benchmark harnesses and hybrid retrieval architecture (`src/services/retrieval/`
 
 ## Questions?
 
-Open a GitHub issue on this repo, or contact `fearvox1015 at gmail dot com`.
+Open a GitHub issue on this repo, or contact `admin at zonicdesign dot art`
+(commercial/licensing inquiries: `business at zonicdesign dot art`).
 
 ---
 
