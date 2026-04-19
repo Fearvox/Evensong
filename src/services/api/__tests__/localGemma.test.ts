@@ -1,0 +1,25 @@
+import { describe, test, expect } from 'bun:test'
+import { createLocalGemmaClient, LOCAL_GEMMA_DEFAULT_BASE_URL, LOCAL_GEMMA_DEFAULT_MODEL } from '../localGemma.js'
+
+describe('createLocalGemmaClient', () => {
+  test('returns client with default baseURL http://127.0.0.1:1337/v1', () => {
+    const client = createLocalGemmaClient()
+    expect(client.baseURL).toBe(LOCAL_GEMMA_DEFAULT_BASE_URL)
+    expect(LOCAL_GEMMA_DEFAULT_BASE_URL).toBe('http://127.0.0.1:1337/v1')
+  })
+
+  test('returns client with default model Gemma-4-E4B-Uncensored-Q4_K_M', () => {
+    const client = createLocalGemmaClient()
+    expect(client.model).toBe(LOCAL_GEMMA_DEFAULT_MODEL)
+  })
+
+  test('accepts baseURL override via options', () => {
+    const client = createLocalGemmaClient({ baseURL: 'http://192.168.1.50:1337/v1' })
+    expect(client.baseURL).toBe('http://192.168.1.50:1337/v1')
+  })
+
+  test('accepts model override via options', () => {
+    const client = createLocalGemmaClient({ model: 'other-model.gguf' })
+    expect(client.model).toBe('other-model.gguf')
+  })
+})
