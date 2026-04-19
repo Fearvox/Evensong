@@ -87,6 +87,23 @@ bun run scripts/benchmark-hybrid-scale.ts \
 
 原始 JSONL + Markdown 摘要存于 [`benchmarks/runs/`](./benchmarks/runs)。生成器 prompt 也 committed——审阅者可直接 audit 查询是怎么出的。
 
+### 自适应层（Wave 3+G，2026-04-19 ship）
+
+always-rerank 的 Hybrid 每 query 付 1 次 LLM 调用。但对相当大比例的 query，BM25 自身就已经置信给出 top-1——继续付 LLM 只加延迟不换准确度。新的 **`createAdaptiveHybridProvider`** 引入 gap-ratio 门禁：若 `BM25 scores[0] / scores[1] >= 1.5`，信任 stage 1 并 **完全跳过 LLM**；否则走 stage 2。
+
+| 流水线 | Top-1 | p50 | p90 | Avg | LLM 调用 |
+|--------|-------|-----|-----|-----|---------|
+| Hybrid（始终 rerank） | 77.8% (84/108) | 3447 ms | 12759 ms | 6365 ms | 100% |
+| **Adaptive Hybrid（Wave 3+G）** | **73.1% (79/108)** | **1896 ms** | **4479 ms** | **2130 ms** | **73%**（27% 跳过） |
+
+> 🟡 **初测数据** —— 2026-04-19 内部 dogfood 单次 108q × 1 run 实测。正式 `wave3g-adaptive-*.md` artifact 重跑已排期；数字可能在 ±3pp 内漂移。
+
+**代价**：top-1 -4.7pp 换 **avg 延迟 -67% + p90 -65%**。门禁同时消除了 Hybrid 偶发的 12 秒尾延迟——BM25 自信时直接跳过延迟方差大的 LLM。阈值是可调旋钮：`gapRatioThreshold: 1.3` 提升跳过率但准确度下降；`2.0` 则回到接近 Hybrid 的状态。
+
+**对 EverOS 的定位**：填充 EverOS 已公开的 Fast 层（0 LLM 调用，200-600 ms）与 Agentic 层（1-3 LLM 调用，2-5 s）之间的空白——**Adaptive Hybrid 是 0 _或_ 1 次条件性 LLM 调用，且带用户可调门禁旋钮**。不在任何已公开的 EverOS / EverMemOS / HyperMem 设计覆盖范围内。
+
+见 [`src/services/retrieval/providers/adaptiveHybridProvider.ts`](./src/services/retrieval/providers/adaptiveHybridProvider.ts) 以及 `adaptiveHybridProvider.test.ts` 中的 7 个单元测试。Shipped at [`86bb4ee`](https://github.com/Fearvox/Evensong/commit/86bb4ee)。**66/66 retrieval domain 测试通过。**
+
 <p align="right"><a href="#目录">↑ 回目录</a></p>
 
 ---
@@ -111,6 +128,9 @@ bun run scripts/benchmark-hybrid-scale.ts \
 │                                 ▼                               │
 │                         hybridProvider                          │
 │                  (stage1 → 收窄 → stage2)                       │
+│                                 │                               │
+│                     adaptiveHybridProvider                      │
+│              (BM25 gap ≥ 1.5× → 跳过 stage 2 LLM)               │
 │                                 ▼                               │
 │                         vaultRetrieve                           │
 │                       (回退链编排)                              │
@@ -200,11 +220,13 @@ import { createLocalGemmaClient, ATOMIC_MODELS } from 'src/services/api/localGem
 import { createAtomicProvider } from 'src/services/retrieval/providers/atomicProvider'
 import { createBM25Provider } from 'src/services/retrieval/providers/bm25Provider'
 import { createHybridProvider } from 'src/services/retrieval/providers/hybridProvider'
+import { createAdaptiveHybridProvider } from 'src/services/retrieval/providers/adaptiveHybridProvider'
 import { buildVaultManifest } from 'src/services/retrieval/manifestBuilder'
 import { vaultRetrieve } from 'src/services/retrieval/vaultRetrieve'
 
 const manifest = await buildVaultManifest({ vaultRoot: '_vault', withBody: true })
 
+// Always-rerank Hybrid —— 每 query 付 1 次 LLM 调用换最高准确度。
 const hybrid = createHybridProvider({
   stage1: createBM25Provider(),
   stage2: createAtomicProvider(
@@ -213,13 +235,22 @@ const hybrid = createHybridProvider({
   stage1TopK: 50,
 })
 
+// 自适应变体 —— BM25 自信 top-1 时跳过 LLM。
+// 代价：top-1 -4.7pp 换 avg 延迟 -67%。见上方自适应层表格。
+const adaptive = createAdaptiveHybridProvider({
+  stage2: createAtomicProvider(
+    createLocalGemmaClient({ model: ATOMIC_MODELS.DEEPSEEK_V32 })
+  ),
+  gapRatioThreshold: 1.5,  // scores[0] / scores[1] >= 1.5 时跳过 stage 2
+})
+
 const result = await vaultRetrieve(
   { query: '超图记忆用于长期对话', manifest, topK: 5 },
-  { providers: [hybrid] },
+  { providers: [hybrid] },  // 或 [adaptive] 启用门禁变体
 )
 ```
 
-**可用 provider**：`createAtomicProvider`、`createBM25Provider`、`createHybridProvider`。全部实现 `VaultRetrievalProvider` 契约——组合或互换皆自由。
+**可用 provider**：`createAtomicProvider`、`createBM25Provider`、`createHybridProvider`、`createAdaptiveHybridProvider`。全部实现 `VaultRetrievalProvider` 契约——组合或互换皆自由。
 
 <p align="right"><a href="#目录">↑ 回目录</a></p>
 
@@ -248,8 +279,8 @@ const result = await vaultRetrieve(
 
 欢迎 PR——尤其在：
 
-- **稠密向量 stage 1** provider（BGE-M3 集成、与 BM25 的 RRF 融合）
-- **自适应门控**（BM25 置信度高时跳过 stage 2——calibration 数据已 committed 在 `benchmarks/runs/`）
+- **稠密向量 stage 1** provider（BGE-M3 集成、与 BM25 的 RRF 融合）🔴
+- **自适应门控阈值自校准** —— 当前 1.5× gap-ratio 默认值是手选保守值；欢迎 PR 基于真实 query 分布 sweep 阈值（门禁本身已 ship 于 [`86bb4ee`](https://github.com/Fearvox/Evensong/commit/86bb4ee) ✅）
 - **更多模型连接器**，走 `atomicProvider` 工厂
 - **新基准类别**（对抗式查询、多意图、否定陷阱）
 - **Vault 规模扩展**实验（100 / 500 / 1000+ entries）

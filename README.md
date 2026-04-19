@@ -87,6 +87,23 @@ bun run scripts/benchmark-hybrid-scale.ts \
 
 Raw JSONL + Markdown summaries live in [`benchmarks/runs/`](./benchmarks/runs). Generator prompt is committed too — reviewers can audit exactly how queries were produced.
 
+### Adaptive tier (Wave 3+G, shipped 2026-04-19)
+
+The always-rerank Hybrid pays 1 LLM call per query. For a large fraction of queries, BM25 alone is already confidently correct — paying for the LLM adds latency without changing the top-1. The new **`createAdaptiveHybridProvider`** adds a gap-ratio gate: if `BM25 scores[0] / scores[1] >= 1.5`, trust stage 1 and **skip the LLM entirely**. Else fall through to stage 2.
+
+| Pipeline | Top-1 | p50 | p90 | Avg | LLM calls |
+|----------|-------|-----|-----|-----|-----------|
+| Hybrid (always-rerank) | 77.8% (84/108) | 3447 ms | 12759 ms | 6365 ms | 100% |
+| **Adaptive Hybrid (Wave 3+G)** | **73.1% (79/108)** | **1896 ms** | **4479 ms** | **2130 ms** | **73%** (27% skip) |
+
+> 🟡 **Preliminary** — measured in a single 108q × 1-run internal dogfood on 2026-04-19. Formal `wave3g-adaptive-*.md` artifact re-run is scheduled; numbers may shift within ~±3pp.
+
+**Trade-off**: −4.7pp top-1 accuracy buys **−67% avg latency + −65% p90**. The gate also eliminates Hybrid's worst-case 12-second tail — when BM25 is confident, you skip the variable-latency LLM entirely. Threshold is a tuning knob: `gapRatioThreshold: 1.3` raises skip rate and drops accuracy; `2.0` reverts toward Hybrid parity.
+
+**Positioning vs EverOS**: this fills the gap between EverOS's published Fast tier (0 LLM calls, 200-600 ms) and Agentic tier (1-3 LLM calls, 2-5 s) — **Adaptive Hybrid is 0 _or_ 1 conditional LLM call, with a user-tunable gating knob**. Not covered by any published EverOS / EverMemOS / HyperMem design.
+
+See [`src/services/retrieval/providers/adaptiveHybridProvider.ts`](./src/services/retrieval/providers/adaptiveHybridProvider.ts) and the 7 unit tests in `adaptiveHybridProvider.test.ts`. Shipped at [`86bb4ee`](https://github.com/Fearvox/Evensong/commit/86bb4ee). **66/66 retrieval-domain tests pass.**
+
 <p align="right"><a href="#目录">↑ back to top</a></p>
 
 ---
@@ -111,6 +128,9 @@ Raw JSONL + Markdown summaries live in [`benchmarks/runs/`](./benchmarks/runs). 
 │                                 ▼                               │
 │                         hybridProvider                          │
 │                    (stage1 → narrow → stage2)                   │
+│                                 │                               │
+│                     adaptiveHybridProvider                      │
+│              (BM25 gap ≥ 1.5× → skip stage 2 LLM)               │
 │                                 ▼                               │
 │                         vaultRetrieve                           │
 │                    (fallback chain orchestrator)                │
@@ -200,11 +220,13 @@ import { createLocalGemmaClient, ATOMIC_MODELS } from 'src/services/api/localGem
 import { createAtomicProvider } from 'src/services/retrieval/providers/atomicProvider'
 import { createBM25Provider } from 'src/services/retrieval/providers/bm25Provider'
 import { createHybridProvider } from 'src/services/retrieval/providers/hybridProvider'
+import { createAdaptiveHybridProvider } from 'src/services/retrieval/providers/adaptiveHybridProvider'
 import { buildVaultManifest } from 'src/services/retrieval/manifestBuilder'
 import { vaultRetrieve } from 'src/services/retrieval/vaultRetrieve'
 
 const manifest = await buildVaultManifest({ vaultRoot: '_vault', withBody: true })
 
+// Always-rerank Hybrid — pays 1 LLM call per query for max accuracy.
 const hybrid = createHybridProvider({
   stage1: createBM25Provider(),
   stage2: createAtomicProvider(
@@ -213,13 +235,22 @@ const hybrid = createHybridProvider({
   stage1TopK: 50,
 })
 
+// Adaptive variant — skips the LLM when BM25 is confidently top-1.
+// Trade-off: −4.7pp top-1 for −67% avg latency. See Adaptive tier above.
+const adaptive = createAdaptiveHybridProvider({
+  stage2: createAtomicProvider(
+    createLocalGemmaClient({ model: ATOMIC_MODELS.DEEPSEEK_V32 })
+  ),
+  gapRatioThreshold: 1.5,  // skip stage 2 when scores[0] / scores[1] >= 1.5
+})
+
 const result = await vaultRetrieve(
   { query: 'hypergraph memory for long-term conversations', manifest, topK: 5 },
-  { providers: [hybrid] },
+  { providers: [hybrid] },  // or [adaptive] for the gated variant
 )
 ```
 
-**Available providers**: `createAtomicProvider`, `createBM25Provider`, `createHybridProvider`. All implement the `VaultRetrievalProvider` contract — compose or swap freely.
+**Available providers**: `createAtomicProvider`, `createBM25Provider`, `createHybridProvider`, `createAdaptiveHybridProvider`. All implement the `VaultRetrievalProvider` contract — compose or swap freely.
 
 <p align="right"><a href="#目录">↑ back to top</a></p>
 
@@ -248,8 +279,8 @@ The full 108-query test corpus with provenance is at [`benchmarks/wave3f-generat
 
 We welcome PRs — especially around:
 
-- **Dense-vector stage 1** providers (BGE-M3 integration, RRF fusion with BM25)
-- **Adaptive gating** (skip stage 2 when BM25 confidence is high — calibration data committed at `benchmarks/runs/`)
+- **Dense-vector stage 1** providers (BGE-M3 integration, RRF fusion with BM25) 🔴
+- **Adaptive gating threshold auto-calibration** — the 1.5× gap-ratio default is a conservative hand-pick; PRs welcome to sweep thresholds against live query distributions (gate itself already shipped at [`86bb4ee`](https://github.com/Fearvox/Evensong/commit/86bb4ee) ✅)
 - **Additional model connectors** via the `atomicProvider` factory
 - **New benchmark categories** (adversarial queries, multi-intent, negation traps)
 - **Vault-size scaling** experiments (100 / 500 / 1000+ entries)
