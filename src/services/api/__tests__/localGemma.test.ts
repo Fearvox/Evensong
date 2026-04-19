@@ -8,9 +8,10 @@ describe('createLocalGemmaClient', () => {
     expect(LOCAL_GEMMA_DEFAULT_BASE_URL).toBe('http://127.0.0.1:1337/v1')
   })
 
-  test('returns client with default model Gemma-4-E4B-Uncensored-Q4_K_M', () => {
+  test('returns client with actual Atomic model name (HauhauCS-Aggressive-Q4_K_M)', () => {
     const client = createLocalGemmaClient()
     expect(client.model).toBe(LOCAL_GEMMA_DEFAULT_MODEL)
+    expect(LOCAL_GEMMA_DEFAULT_MODEL).toBe('Gemma-4-E4B-Uncensored-HauhauCS-Aggressive-Q4_K_M')
   })
 
   test('accepts baseURL override via options', () => {
