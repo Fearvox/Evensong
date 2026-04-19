@@ -289,6 +289,8 @@ Created by **[Fearvox / 0xVox](https://github.com/Fearvox)** (Hengyuan Zhu).
 
 The CCR runtime is a clean-room reverse-engineered study of Anthropic's Claude Code CLI. All identifying strings, telemetry endpoints, and internal APIs have been stubbed or removed. This repository makes no claims over Anthropic's trademarks or original binary design.
 
+Upstream lineage: derived from the community reverse-engineered baseline at [github.com/claude-code-best/claude-code](https://github.com/claude-code-best/claude-code) (CCB). CCR continues from that foundation with additional infrastructure, retrieval pipeline, benchmark harness, and packaging work.
+
 The hybrid retrieval architecture, benchmark harness, and all original code in `src/services/retrieval/`, `scripts/benchmark-*.ts`, and `benchmarks/wave3*` are original work, independently inspired by the EverMemOS published design.
 
 <p align="right"><a href="#目录">↑ back to top</a></p>
