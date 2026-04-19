@@ -141,6 +141,12 @@ export const PROVIDER_PRESETS: Record<string, Omit<ProviderConfig, 'apiKey'>> = 
   'or-qwen': {
     name: 'or-qwen',
     providerClass: 'openai-compatible',
+    modelName: 'qwen/qwen3-max',
+    baseUrl: 'https://openrouter.ai/api/v1',
+  },
+  'or-qwen-plus': {
+    name: 'or-qwen-plus',
+    providerClass: 'openai-compatible',
     modelName: 'qwen/qwen3.6-plus',
     baseUrl: 'https://openrouter.ai/api/v1',
   },
@@ -149,6 +155,14 @@ export const PROVIDER_PRESETS: Record<string, Omit<ProviderConfig, 'apiKey'>> = 
     name: 'or-minimax',
     providerClass: 'openai-compatible',
     modelName: 'minimax/minimax-m1',
+    baseUrl: 'https://openrouter.ai/api/v1',
+  },
+  // OpenRouter stealth / blind-test 模型 (盲测期免费,256K ctx)
+  // 用途: 单步推理 + 轻量代理,不适合重 reasoning 任务
+  'or-elephant-alpha': {
+    name: 'or-elephant-alpha',
+    providerClass: 'openai-compatible',
+    modelName: 'openrouter/elephant-alpha',
     baseUrl: 'https://openrouter.ai/api/v1',
   },
 };
@@ -241,8 +255,10 @@ export class ProviderRouter {
       'or-kimi': process.env.OPENROUTER_API_KEY,
       'or-deepseek': process.env.OPENROUTER_API_KEY,
       'or-qwen': process.env.OPENROUTER_API_KEY,
+      'or-qwen-plus': process.env.OPENROUTER_API_KEY,
       // or-kimi-k25 merged into or-kimi
       'or-minimax': process.env.OPENROUTER_API_KEY,
+      'or-elephant-alpha': process.env.OPENROUTER_API_KEY,
       mimo: process.env.MIMO_API_KEY,
       'mimo-flash': process.env.MIMO_API_KEY,
       xai: process.env.XAI_API_KEY,

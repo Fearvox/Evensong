@@ -28,12 +28,27 @@ export class OpenAICompatibleClient implements LLMProvider {
       ...(params.messages as OpenAI.ChatCompletionMessageParam[]),
     ];
 
+    // Convert Anthropic tool schema → OpenAI tools parameter.
+    // Anthropic: { name, description, input_schema }
+    // OpenAI:    { type: 'function', function: { name, description, parameters } }
+    const openaiTools: OpenAI.ChatCompletionTool[] | undefined = params.tools
+      ? (params.tools as Array<{ name: string; description?: string; input_schema?: unknown }>).map((t) => ({
+          type: "function" as const,
+          function: {
+            name: t.name,
+            description: t.description ?? "",
+            parameters: (t.input_schema ?? { type: "object", properties: {} }) as Record<string, unknown>,
+          },
+        }))
+      : undefined;
+
     const response = await this.client.chat.completions.create({
       model: this.modelName,
       messages,
       temperature: this.config.temperature ?? 1.0,
       max_completion_tokens: this.config.maxTokens ?? 32000,
       stream: false,
+      ...(openaiTools && openaiTools.length > 0 ? { tools: openaiTools, tool_choice: "auto" as const } : {}),
     });
 
     const choice = response.choices[0];
