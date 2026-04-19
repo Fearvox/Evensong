@@ -76,3 +76,43 @@ _vault
 .metadata/
 *.swp
 *.swo
+
+# ─────────────────────────────────────────────────────────────
+# Privacy cleanup 2026-04-19 — untrack business + internal docs
+# These dirs / files are kept locally but not published to public repo.
+# ─────────────────────────────────────────────────────────────
+
+# Entire dirs — internal dev sessions, planning, session transcripts
+.claude/
+.planning/
+.grok/
+.learnings/
+doc-dept/
+evolution-layer/
+repo-bootstrap/
+
+# docs/ — remove internal work products, keep only paper assets
+docs/superpowers/
+docs/doc-dept/
+docs/DASH-SHATTER-*.html
+docs/business-model-*.md
+docs/investor-brief-*.html
+docs/HANDOFF-*.md
+docs/SESSION-HANDOFF-*.md
+docs/RESEARCH-DIRECTIONS.md
+docs/research-vault-map.md
+docs/R010-*.md
+docs/STRESS-TEST-*.md
+docs/*-contributions*.md
+docs/*-contributions*.pdf
+docs/*-techreport.tex
+docs/evensong-paper-zh.tex
+docs/evensong-paper-v3-zh.tex
+
+# LaTeX build artifacts (belt-and-braces; already covered by *.aux etc. above)
+docs/**/*.aux
+docs/**/*.fdb_latexmk
+docs/**/*.fls
+docs/**/*.toc
+docs/**/*.xdv
+docs/**/*.bbl
