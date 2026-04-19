@@ -1,5 +1,5 @@
 import { describe, test, expect } from 'bun:test'
-import { createLocalGemmaClient, LOCAL_GEMMA_DEFAULT_BASE_URL, LOCAL_GEMMA_DEFAULT_MODEL, isLocalGemmaAvailable } from '../localGemma.js'
+import { createLocalGemmaClient, LOCAL_GEMMA_DEFAULT_BASE_URL, LOCAL_GEMMA_DEFAULT_MODEL, isLocalGemmaAvailable, chatCompletionLocalGemma, LocalGemmaConnectionError } from '../localGemma.js'
 
 describe('createLocalGemmaClient', () => {
   test('returns client with default baseURL http://127.0.0.1:1337/v1', () => {
@@ -54,6 +54,39 @@ describe('isLocalGemmaAvailable', () => {
     }) as typeof fetch
     try {
       expect(await isLocalGemmaAvailable(createLocalGemmaClient(), 100)).toBe(false)
+    } finally { globalThis.fetch = saved }
+  })
+})
+
+describe('chatCompletionLocalGemma', () => {
+  test('returns content on 200', async () => {
+    const saved = globalThis.fetch
+    globalThis.fetch = (async () => new Response(JSON.stringify({
+      choices: [{ message: { content: 'hello back' } }]
+    }), { status: 200 })) as typeof fetch
+    try {
+      const r = await chatCompletionLocalGemma(createLocalGemmaClient(), {
+        messages: [{ role: 'user', content: 'hi' }],
+      })
+      expect(r.content).toBe('hello back')
+    } finally { globalThis.fetch = saved }
+  })
+  test('throws LocalGemmaConnectionError on fetch throw', async () => {
+    const saved = globalThis.fetch
+    globalThis.fetch = (async () => { throw new Error('fail') }) as typeof fetch
+    try {
+      await expect(
+        chatCompletionLocalGemma(createLocalGemmaClient(), { messages: [{ role: 'user', content: 'hi' }] })
+      ).rejects.toBeInstanceOf(LocalGemmaConnectionError)
+    } finally { globalThis.fetch = saved }
+  })
+  test('throws LocalGemmaConnectionError on non-200', async () => {
+    const saved = globalThis.fetch
+    globalThis.fetch = (async () => new Response('err', { status: 503 })) as typeof fetch
+    try {
+      await expect(
+        chatCompletionLocalGemma(createLocalGemmaClient(), { messages: [{ role: 'user', content: 'hi' }] })
+      ).rejects.toBeInstanceOf(LocalGemmaConnectionError)
     } finally { globalThis.fetch = saved }
   })
 })

@@ -21,6 +21,66 @@ export function createLocalGemmaClient(options: LocalGemmaClientOptions = {}): L
   }
 }
 
+export class LocalGemmaConnectionError extends Error {
+  readonly cause?: unknown
+  constructor(message: string, cause?: unknown) {
+    super(message)
+    this.name = 'LocalGemmaConnectionError'
+    this.cause = cause
+  }
+}
+
+export interface LocalGemmaChatRequest {
+  messages: Array<{ role: 'system' | 'user' | 'assistant'; content: string }>
+  temperature?: number
+  maxTokens?: number
+}
+
+export interface LocalGemmaChatResponse {
+  content: string
+  raw: unknown
+}
+
+export async function chatCompletionLocalGemma(
+  client: LocalGemmaClient,
+  request: LocalGemmaChatRequest,
+): Promise<LocalGemmaChatResponse> {
+  const controller = new AbortController()
+  const timer = setTimeout(() => controller.abort(), client.timeoutMs)
+  let response: Response
+  try {
+    response = await fetch(`${client.baseURL}/chat/completions`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: client.model,
+        messages: request.messages,
+        temperature: request.temperature ?? 0.2,
+        max_tokens: request.maxTokens ?? 1024,
+      }),
+      signal: controller.signal,
+    })
+  } catch (err) {
+    throw new LocalGemmaConnectionError(
+      `Local Gemma connection failed: ${err instanceof Error ? err.message : String(err)}`,
+      err,
+    )
+  } finally {
+    clearTimeout(timer)
+  }
+
+  if (response.status !== 200) {
+    const body = await response.text().catch(() => '')
+    throw new LocalGemmaConnectionError(
+      `Local Gemma returned HTTP ${response.status}: ${body.slice(0, 200)}`,
+    )
+  }
+
+  const data = await response.json() as { choices?: Array<{ message?: { content?: string } }> }
+  const content = data.choices?.[0]?.message?.content ?? ''
+  return { content, raw: data }
+}
+
 export async function isLocalGemmaAvailable(
   client: LocalGemmaClient,
   probeTimeoutMs = 2000,
