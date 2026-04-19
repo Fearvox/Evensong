@@ -24,14 +24,20 @@ export function buildJudgePrompt(req: VaultRetrievalRequest): string {
 }
 
 export function parseJudgeOutput(content: string, manifest: VaultRetrievalRequest['manifest']): string[] {
+  const knownPaths = new Set(manifest.map((m) => m.path))
   const trimmed = content.trim()
   try {
     const parsed = JSON.parse(trimmed)
-    if (Array.isArray(parsed) && parsed.every((x) => typeof x === 'string')) return parsed
+    if (Array.isArray(parsed) && parsed.every((x) => typeof x === 'string')) {
+      // Hallucination guard: even for well-formed JSON, drop any path the LLM
+      // invented that isn't in the manifest. Observed 2026-04-19 E2E with
+      // deepseek-v3.2 which occasionally returned a plausible-sounding path
+      // that didn't exist.
+      return (parsed as string[]).filter((p) => knownPaths.has(p))
+    }
   } catch {
     // fall through to heuristic parse
   }
-  const knownPaths = new Set(manifest.map((m) => m.path))
   const mdPathPattern = /[a-zA-Z0-9/_\-.]+\.md/g
   const matches = content.match(mdPathPattern) ?? []
   const found: string[] = []

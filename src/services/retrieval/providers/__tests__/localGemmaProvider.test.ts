@@ -19,7 +19,10 @@ describe('createLocalGemmaProvider', () => {
       const p = createLocalGemmaProvider(createLocalGemmaClient())
       const r = await p.retrieve({
         query: 'q',
-        manifest: [{ path: 'a.md', title: 'A', retentionScore: 0.9, accessCount: 1, lastAccess: '2026-01-01', summaryLevel: 'deep' }],
+        manifest: [
+          { path: 'a.md', title: 'A', retentionScore: 0.9, accessCount: 1, lastAccess: '2026-01-01', summaryLevel: 'deep' },
+          { path: 'b.md', title: 'B', retentionScore: 0.8, accessCount: 1, lastAccess: '2026-01-01', summaryLevel: 'deep' },
+        ],
       })
       expect(r.rankedPaths).toEqual(['a.md', 'b.md'])
     } finally { globalThis.fetch = saved }

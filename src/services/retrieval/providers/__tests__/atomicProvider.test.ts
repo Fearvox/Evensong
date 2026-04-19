@@ -48,4 +48,37 @@ describe('createAtomicProvider', () => {
     const p = createAtomicProvider(createLocalGemmaClient({ model: ATOMIC_MODELS.MINIMAX_M27 }))
     expect(p.name).toBe(`atomic:${ATOMIC_MODELS.MINIMAX_M27}`)
   })
+
+  test('drops hallucinated paths from JSON-array output (not in manifest)', async () => {
+    const saved = globalThis.fetch
+    globalThis.fetch = (async (url: Parameters<typeof fetch>[0]) => {
+      if (url.toString().endsWith('/models')) return new Response('{"data":[]}', { status: 200 })
+      // LLM returns 3 paths but only "real.md" is in the manifest
+      return new Response(
+        JSON.stringify({
+          choices: [{ message: { content: '["real.md","hallucinated.md","also-fake.md"]' } }],
+        }),
+        { status: 200 },
+      )
+    }) as typeof fetch
+    try {
+      const p = createAtomicProvider(createLocalGemmaClient({ model: ATOMIC_MODELS.GROK_3 }))
+      const r = await p.retrieve({
+        query: 'q',
+        manifest: [
+          {
+            path: 'real.md',
+            title: 'R',
+            retentionScore: 0.9,
+            accessCount: 1,
+            lastAccess: '2026-01-01',
+            summaryLevel: 'deep',
+          },
+        ],
+      })
+      expect(r.rankedPaths).toEqual(['real.md'])
+    } finally {
+      globalThis.fetch = saved
+    }
+  })
 })
