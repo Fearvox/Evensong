@@ -1,5 +1,5 @@
 import { describe, test, expect } from 'bun:test'
-import { createLocalGemmaClient, LOCAL_GEMMA_DEFAULT_BASE_URL, LOCAL_GEMMA_DEFAULT_MODEL, isLocalGemmaAvailable, chatCompletionLocalGemma, LocalGemmaConnectionError } from '../localGemma.js'
+import { createLocalGemmaClient, LOCAL_GEMMA_DEFAULT_BASE_URL, LOCAL_GEMMA_DEFAULT_MODEL, isLocalGemmaAvailable, chatCompletionLocalGemma, LocalGemmaConnectionError, ATOMIC_MODELS } from '../localGemma.js'
 
 describe('createLocalGemmaClient', () => {
   test('returns client with default baseURL http://127.0.0.1:1337/v1', () => {
@@ -22,6 +22,30 @@ describe('createLocalGemmaClient', () => {
   test('accepts model override via options', () => {
     const client = createLocalGemmaClient({ model: 'other-model.gguf' })
     expect(client.model).toBe('other-model.gguf')
+  })
+
+  test('accepts ATOMIC_MODELS.FAST as model override (grok-4-fast-reasoning)', () => {
+    const client = createLocalGemmaClient({ model: ATOMIC_MODELS.FAST })
+    expect(client.model).toBe('grok-4-fast-reasoning')
+  })
+})
+
+describe('ATOMIC_MODELS registry', () => {
+  test('exposes 6 verified-reachable model IDs', () => {
+    expect(ATOMIC_MODELS.FAST).toBe('grok-4-fast-reasoning')
+    expect(ATOMIC_MODELS.FAST_REASONING).toBe('grok-4-1-fast-reasoning')
+    expect(ATOMIC_MODELS.MINIMAX_M27).toBe('MiniMax-M2.7')
+    expect(ATOMIC_MODELS.MINIMAX_M25).toBe('MiniMax-M2.5')
+    expect(ATOMIC_MODELS.GROK_3).toBe('grok-3')
+    expect(ATOMIC_MODELS.LOCAL_GEMMA).toBe(LOCAL_GEMMA_DEFAULT_MODEL)
+  })
+
+  test('does not expose plan-locked or 404-routed IDs', () => {
+    const values = Object.values(ATOMIC_MODELS) as string[]
+    expect(values).not.toContain('MiniMax-M2.7-highspeed')
+    expect(values).not.toContain('MiniMax-M2.5-highspeed')
+    expect(values).not.toContain('deepseek/deepseek-r1:free')
+    expect(values).not.toContain('qwen/qwen3-30b-a3b:free')
   })
 })
 

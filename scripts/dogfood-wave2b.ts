@@ -1,21 +1,21 @@
 #!/usr/bin/env bun
 /**
- * Wave 2B dogfood — real Atomic Chat + real _vault manifest.
- * One-shot script: not a test, not shipped. Run once, discard.
+ * Wave 2B dogfood — compares retrieval judges on real Atomic + real _vault md.
  *
- * Tests the hypothesis that localGemmaProvider with MOCK tests alone misses:
- *   1. Model name mismatch (plan wrote short name; Atomic serves long name)
- *   2. Real LLM output format (does it actually return JSON array as prompted?)
- *   3. Real latency
- *   4. Hallucination guard (LLM returning paths not in manifest)
+ * Default: runs each MODELS entry below against 3 reference queries, prints
+ * a comparison table with latency + rank quality + hallucination flags.
+ *
+ * Override single model:  bun run scripts/dogfood-wave2b.ts grok-4-fast-reasoning
+ *
+ * This is a reproducible smoke test for provider/model swap decisions, not a
+ * unit test. Run when adding new models to ATOMIC_MODELS or when Atomic
+ * backend mapping changes.
  */
 
-import { createLocalGemmaClient } from '../src/services/api/localGemma.js'
+import { createLocalGemmaClient, ATOMIC_MODELS } from '../src/services/api/localGemma.js'
 import { createLocalGemmaProvider } from '../src/services/retrieval/providers/localGemmaProvider.js'
 import { vaultRetrieve } from '../src/services/retrieval/vaultRetrieve.js'
 import type { VaultManifestEntry } from '../src/services/retrieval/types.js'
-
-const ACTUAL_ATOMIC_MODEL = 'Gemma-4-E4B-Uncensored-HauhauCS-Aggressive-Q4_K_M'
 
 const manifest: VaultManifestEntry[] = [
   {
@@ -56,55 +56,113 @@ const manifest: VaultManifestEntry[] = [
   },
 ]
 
-async function run() {
-  console.log('=== Wave 2B Dogfood ===')
-  console.log(`Atomic endpoint: http://127.0.0.1:1337/v1`)
-  console.log(`Using ACTUAL model name: ${ACTUAL_ATOMIC_MODEL}`)
-  console.log(`Manifest size: ${manifest.length} entries\n`)
+// Reference queries with expected ideal top-1 for ranking-quality scoring.
+const queries: Array<{ q: string; ideal: string }> = [
+  {
+    q: 'memory sparse attention',
+    ideal: '_vault/knowledge/ai-agents/memory-systems/20260411-msa-memory-sparse-attention.md',
+  },
+  {
+    q: 'three layer hypergraph',
+    ideal: '_vault/knowledge/ai-agents/memory-systems/20260411-2604-08256-hypermem.md',
+  },
+  {
+    q: 'paging memory between RAM and disk',
+    ideal: '_vault/knowledge/ai-agents/memory-systems/20260411-2310-08560-memgpt.md',
+  },
+]
 
-  const client = createLocalGemmaClient({ model: ACTUAL_ATOMIC_MODEL })
+const argModel = process.argv[2]
+const MODELS = argModel
+  ? [argModel]
+  : [
+      ATOMIC_MODELS.FAST,
+      ATOMIC_MODELS.FAST_REASONING,
+      ATOMIC_MODELS.MINIMAX_M27,
+      ATOMIC_MODELS.GROK_3,
+      ATOMIC_MODELS.LOCAL_GEMMA,
+    ]
+
+interface RunResult {
+  model: string
+  query: string
+  latencyMs: number
+  rankedTop: string
+  idealMatch: boolean
+  hallucinated: number
+  emptyResult: boolean
+  error?: string
+}
+
+async function runOne(model: string, q: string, ideal: string): Promise<RunResult> {
+  const client = createLocalGemmaClient({ model })
   const provider = createLocalGemmaProvider(client)
-
-  // Probe 1: health
-  const alive = await provider.available()
-  console.log(`[1] available(): ${alive}`)
-  if (!alive) {
-    console.error('Atomic not reachable. Aborting.')
-    process.exit(1)
+  const manifestPaths = new Set(manifest.map((m) => m.path))
+  try {
+    const result = await vaultRetrieve({ query: q, manifest, topK: 2 }, { providers: [provider] })
+    const top = result.rankedPaths[0] ?? '(empty)'
+    return {
+      model,
+      query: q,
+      latencyMs: result.latencyMs,
+      rankedTop: top,
+      idealMatch: top === ideal,
+      hallucinated: result.rankedPaths.filter((p) => !manifestPaths.has(p)).length,
+      emptyResult: result.rankedPaths.length === 0,
+    }
+  } catch (err) {
+    return {
+      model,
+      query: q,
+      latencyMs: 0,
+      rankedTop: '(error)',
+      idealMatch: false,
+      hallucinated: 0,
+      emptyResult: true,
+      error: err instanceof Error ? err.message : String(err),
+    }
   }
+}
 
-  // Probe 2: single retrieval via provider
-  const queries = [
-    'memory sparse attention',
-    'three layer hypergraph',
-    'what is the best memory system for long conversations',
-  ]
-
-  for (const query of queries) {
-    console.log(`\n[2] Query: "${query}"`)
-    const start = Date.now()
-    try {
-      const result = await vaultRetrieve(
-        { query, manifest, topK: 2 },
-        { providers: [provider] },
-      )
-      console.log(`    Provider: ${result.provider}`)
-      console.log(`    Latency: ${result.latencyMs}ms (wall: ${Date.now() - start}ms)`)
-      console.log(`    Ranked: ${JSON.stringify(result.rankedPaths)}`)
-      // Hallucination guard check: every returned path must be in manifest
-      const manifestPaths = new Set(manifest.map((m) => m.path))
-      const hallucinated = result.rankedPaths.filter((p) => !manifestPaths.has(p))
-      if (hallucinated.length > 0) {
-        console.log(`    ⚠️  HALLUCINATED (not in manifest): ${JSON.stringify(hallucinated)}`)
-      } else {
-        console.log(`    ✅ All paths grounded in manifest.`)
-      }
-    } catch (err) {
-      console.log(`    ❌ ERROR: ${err instanceof Error ? err.message : String(err)}`)
+async function run() {
+  console.log('=== Wave 2B Dogfood: judge comparison ===\n')
+  const allResults: RunResult[] = []
+  for (const model of MODELS) {
+    console.log(`\n--- Model: ${model} ---`)
+    for (const { q, ideal } of queries) {
+      const r = await runOne(model, q, ideal)
+      allResults.push(r)
+      const flag = r.error
+        ? `❌ ${r.error.slice(0, 60)}`
+        : r.emptyResult
+          ? '⚠️  empty'
+          : r.idealMatch
+            ? '✅'
+            : `△  top=${r.rankedTop.split('/').pop()}`
+      console.log(`  [${r.latencyMs.toString().padStart(6)}ms] "${q}"  ${flag}`)
     }
   }
 
-  console.log('\n=== Dogfood done ===')
+  console.log('\n=== Summary ===\n')
+  console.log('Model'.padEnd(50) + 'Avg latency  Correct top-1  Empty  Errors')
+  console.log('-'.repeat(95))
+  for (const model of MODELS) {
+    const modelResults = allResults.filter((r) => r.model === model)
+    const successful = modelResults.filter((r) => !r.error)
+    const avgLat = successful.length
+      ? Math.round(successful.reduce((s, r) => s + r.latencyMs, 0) / successful.length)
+      : 0
+    const correctTop1 = modelResults.filter((r) => r.idealMatch).length
+    const empty = modelResults.filter((r) => r.emptyResult && !r.error).length
+    const errors = modelResults.filter((r) => r.error).length
+    console.log(
+      model.padEnd(50) +
+        `${avgLat.toString().padStart(6)}ms    ` +
+        `${correctTop1}/${modelResults.length}         ` +
+        `${empty}      ${errors}`,
+    )
+  }
+  console.log('\n(Correct top-1 = ranked[0] exactly matches the ideal answer for that query.)')
 }
 
 run().catch((err) => {

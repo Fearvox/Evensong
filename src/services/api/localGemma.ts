@@ -5,6 +5,42 @@ export const LOCAL_GEMMA_DEFAULT_BASE_URL = 'http://127.0.0.1:1337/v1'
 // switches model or when pointing at a different endpoint.
 export const LOCAL_GEMMA_DEFAULT_MODEL = 'Gemma-4-E4B-Uncensored-HauhauCS-Aggressive-Q4_K_M'
 
+/**
+ * Atomic Chat (local multi-backend gateway at LOCAL_GEMMA_DEFAULT_BASE_URL)
+ * routes a mix of local llama.cpp + proxied cloud models. IDs recorded here
+ * are verified-reachable as of 2026-04-19 probe.
+ *
+ * NOT RECORDED (intentionally):
+ *   - `MiniMax-M2.{5,7}-highspeed` — requires higher-tier MiniMax token plan,
+ *     server returns 500 "your current token plan not support".
+ *   - `deepseek/deepseek-r1:free`, `qwen/qwen3-30b-a3b:free` — Atomic returns
+ *     404 "No endpoints found" (OpenRouter free-route mapping has drifted).
+ *     Re-add once the user refreshes OR endpoints on Atomic side.
+ *   - `grok-2-vision-1212`, `grok-imagine-image` — non-text workloads.
+ *
+ * Pick primary by workload:
+ *   - Interactive retrieval judge: FAST (sub-second, no thinking stage)
+ *   - Deep reasoning / agentic: FAST_REASONING
+ *   - Long-context QA backup: MINIMAX_M27 or MINIMAX_M25
+ *   - Offline/airgap only: LOCAL_GEMMA (slow CPU inference, judge noise)
+ */
+export const ATOMIC_MODELS = {
+  /** grok-4-fast-reasoning — 445ms probe latency, best single-shot judge. */
+  FAST: 'grok-4-fast-reasoning',
+  /** grok-4-1-fast-reasoning — 985ms probe, deeper reasoning trace. */
+  FAST_REASONING: 'grok-4-1-fast-reasoning',
+  /** MiniMax-M2.7 — 1.9s, strong multilingual + long context backup. */
+  MINIMAX_M27: 'MiniMax-M2.7',
+  /** MiniMax-M2.5 — 1.1s, faster than M2.7 for less demanding tasks. */
+  MINIMAX_M25: 'MiniMax-M2.5',
+  /** grok-3 — 358ms, legacy fast fallback if grok-4* route breaks. */
+  GROK_3: 'grok-3',
+  /** Local Gemma via llama.cpp — offline-only tier; see LOCAL_GEMMA_DEFAULT_MODEL for the exact ID. */
+  LOCAL_GEMMA: LOCAL_GEMMA_DEFAULT_MODEL,
+} as const
+
+export type AtomicModelId = (typeof ATOMIC_MODELS)[keyof typeof ATOMIC_MODELS]
+
 export interface LocalGemmaClientOptions {
   baseURL?: string
   model?: string
