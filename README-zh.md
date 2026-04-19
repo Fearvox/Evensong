@@ -20,7 +20,7 @@
   <a href="https://bun.sh"><img src="https://img.shields.io/badge/%E8%BF%90%E8%A1%8C%E6%97%B6-Bun-F472B6?style=for-the-badge&logo=bun&logoColor=white" alt="Bun"/></a>
   <a href="https://www.typescriptlang.org/"><img src="https://img.shields.io/badge/TypeScript-100%25-3178C6?style=for-the-badge&logo=typescript&logoColor=white" alt="TypeScript"/></a>
   <a href="./benchmarks/runs"><img src="https://img.shields.io/badge/%E5%9F%BA%E5%87%86-648%E6%AC%A1%E7%9B%B2%E6%B5%8B-F59E0B?style=for-the-badge&logo=lightning&logoColor=white" alt="648 次盲测"/></a>
-  <a href="https://github.com/EverMind-AI/EverOS"><img src="https://img.shields.io/badge/%E5%AF%B9%E8%AF%9D-EverMemOS-00D4AA?style=for-the-badge&logo=brain&logoColor=white" alt="对话 EverMemOS"/></a>
+  <a href="https://github.com/EverMind-AI/EverOS"><img src="https://img.shields.io/badge/%E5%AF%B9%E8%AF%9D-EverOS-00D4AA?style=for-the-badge&logo=brain&logoColor=white" alt="对话 EverOS"/></a>
 </p>
 
 <p align="center">
