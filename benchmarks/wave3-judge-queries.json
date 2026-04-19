@@ -1,0 +1,56 @@
+{
+  "_meta": {
+    "version": "1.0.0",
+    "created": "2026-04-19",
+    "manifestSource": "_vault (18 entries)",
+    "idealPolicy": "top-1: LLM must rank the ideal md first in its response",
+    "categories": ["direct", "abstract", "zh", "comparative", "negation", "engineering"]
+  },
+  "queries": [
+    { "id": 1, "category": "direct", "q": "memory sparse attention for 100M token scaling",
+      "ideal": "knowledge/ai-agents/memory-systems/20260411-msa-memory-sparse-attention.md" },
+    { "id": 2, "category": "direct", "q": "hypergraph memory for long-term conversations",
+      "ideal": "knowledge/ai-agents/memory-systems/20260411-2604-08256-hypermem.md" },
+    { "id": 3, "category": "direct", "q": "LLM as operating system memory paging",
+      "ideal": "knowledge/ai-agents/memory-systems/20260411-2310-08560-memgpt.md" },
+    { "id": 4, "category": "direct", "q": "lottery ticket hypothesis sparse trainable network",
+      "ideal": "knowledge/llm-architecture/training/20260411-1803-03635-lottery-ticket-hypothesis.md" },
+    { "id": 5, "category": "direct", "q": "attention is all you need transformer architecture",
+      "ideal": "knowledge/llm-architecture/attention/20260411--1706-03762-attention-is-all-you-need.md" },
+
+    { "id": 6, "category": "abstract", "q": "agent self-reflection with verbal reinforcement feedback",
+      "ideal": "knowledge/ai-agents/self-evolution/20260411-2303-11366-reflexion.md" },
+    { "id": 7, "category": "abstract", "q": "LLM insider threat blackmail misalignment",
+      "ideal": "knowledge/ai-agents/benchmarking/20260411-2510-05179v2.md" },
+    { "id": 8, "category": "abstract", "q": "emotional stimuli enhance LLM performance",
+      "ideal": "knowledge/ai-agents/self-evolution/20260411-2307-11760-emotionprompt.md" },
+
+    { "id": 9, "category": "zh", "q": "持久记忆如何因果改变 AI 智能体行为",
+      "ideal": "knowledge/ai-agents/self-evolution/20260411-evensong-paper-zh.md" },
+    { "id": 10, "category": "zh", "q": "AI agent memory 竞品有哪些最近趋势",
+      "ideal": "knowledge/ai-agents/memory-systems/20260411-competitor-landscape.md" },
+    { "id": 11, "category": "zh", "q": "埃隆马斯克第一性原理方法论",
+      "ideal": "knowledge/research-methods/methodology/20260411-elon-musk-biography.md" },
+    { "id": 12, "category": "zh", "q": "快思慢想 认知系统 1 系统 2",
+      "ideal": "knowledge/research-methods/methodology/20260411-thinking-fast-and-slow.md" },
+
+    { "id": 13, "category": "comparative", "q": "extended mind philosophy cognition beyond skull",
+      "ideal": "knowledge/ai-agents/ethics-and-agency/20260411-clark-chalmers-extended-mind.md" },
+    { "id": 14, "category": "comparative", "q": "Evensong 五大发现哲学前沿对标 supervisor",
+      "ideal": "knowledge/research-methods/methodology/20260411-philosophy-supervisor-evensong.md" },
+    { "id": 15, "category": "comparative", "q": "Hermes Evensong 综合对话公共传播",
+      "ideal": "knowledge/ai-agents/self-evolution/20260411-hermes-evensong-synthesis.md" },
+
+    { "id": 16, "category": "negation", "q": "memory architecture that goes beyond pairwise RAG retrieval",
+      "ideal": "knowledge/ai-agents/memory-systems/20260411-2604-08256-hypermem.md" },
+    { "id": 17, "category": "negation", "q": "how to scale LLM context window past 1 million tokens",
+      "ideal": "knowledge/ai-agents/memory-systems/20260411-msa-memory-sparse-attention.md" },
+    { "id": 18, "category": "negation", "q": "AI agent memory benchmark competitor landscape 2026",
+      "ideal": "knowledge/ai-agents/memory-systems/20260411-competitor-landscape.md" },
+
+    { "id": 19, "category": "engineering", "q": "agent scaling harness engineering three dimensions",
+      "ideal": "knowledge/software-engineering/architecture/20260411-leo-harness-engineering-3d.md" },
+    { "id": 20, "category": "engineering", "q": "Evensong 第一性原理自审 假设缺口",
+      "ideal": "knowledge/research-methods/methodology/20260411-evensong-first-principles-audit.md" }
+  ]
+}
