@@ -14,8 +14,12 @@ export interface BM25ProviderOptions {
  * for almost any query about that paper).
  */
 function manifestEntryToDoc(entry: VaultRetrievalRequest['manifest'][number]): Doc {
+  // Indexed surface: title + excerpt + (optional) body.
+  // Path is intentionally NOT indexed to avoid the judge gaming the match
+  // via filenames like `20260411-msa-memory-sparse-attention.md`.
   const parts: string[] = [entry.title]
   if (entry.excerpt) parts.push(entry.excerpt)
+  if (entry.body) parts.push(entry.body)
   return { id: entry.path, text: parts.join(' ') }
 }
 

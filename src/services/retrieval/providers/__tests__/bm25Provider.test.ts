@@ -69,4 +69,25 @@ describe('createBM25Provider', () => {
     const p = createBM25Provider({ providerName: 'stage1-bm25' })
     expect(p.name).toBe('stage1-bm25')
   })
+
+  test('indexes body when manifest entry provides it (boosts recall on body-only terms)', async () => {
+    const manifestWithBody: VaultManifestEntry[] = [
+      // title+excerpt contain nothing about 'carbonara' but body does
+      { path: 'a.md', title: 'Generic recipe', retentionScore: 0.9, accessCount: 1, lastAccess: '2026-01-01', summaryLevel: 'deep', excerpt: 'food ingredients', body: 'carbonara uses pancetta and pecorino cheese with eggs.' },
+      { path: 'b.md', title: 'Generic recipe', retentionScore: 0.9, accessCount: 1, lastAccess: '2026-01-01', summaryLevel: 'deep', excerpt: 'food ingredients', body: 'ratatouille is a vegetable stew from Provence.' },
+    ]
+    const p = createBM25Provider()
+    const r = await p.retrieve({ query: 'carbonara', manifest: manifestWithBody, topK: 2 })
+    expect(r.rankedPaths[0]).toBe('a.md')
+  })
+
+  test('without body, the same query returns nothing (recall proof)', async () => {
+    const manifestNoBody: VaultManifestEntry[] = [
+      { path: 'a.md', title: 'Generic recipe', retentionScore: 0.9, accessCount: 1, lastAccess: '2026-01-01', summaryLevel: 'deep', excerpt: 'food ingredients' },
+      { path: 'b.md', title: 'Generic recipe', retentionScore: 0.9, accessCount: 1, lastAccess: '2026-01-01', summaryLevel: 'deep', excerpt: 'food ingredients' },
+    ]
+    const p = createBM25Provider()
+    const r = await p.retrieve({ query: 'carbonara', manifest: manifestNoBody, topK: 2 })
+    expect(r.rankedPaths).toEqual([])
+  })
 })

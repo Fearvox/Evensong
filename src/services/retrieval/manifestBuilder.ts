@@ -53,6 +53,14 @@ export interface BuildManifestOptions {
   limit?: number
   /** Injectable file reader; defaults to node:fs readFileSync utf8. */
   readFile?: (absolutePath: string) => string
+  /**
+   * If true, populate `entry.body` with a capped slice of the md file's
+   * full content so BM25 (or any indexer) can reach terms not present in
+   * title/excerpt. Adds ~bodyCapBytes per entry to manifest memory.
+   */
+  withBody?: boolean
+  /** Cap per-entry body content to this many UTF-8 chars. Default 8000. */
+  bodyCapChars?: number
 }
 
 const DEFAULT_FRESH_DECAY: Omit<DecayEntry, 'itemId'> = {
@@ -136,6 +144,7 @@ export async function buildVaultManifest(
 ): Promise<VaultManifestEntry[]> {
   const vaultRoot = options.vaultRoot ?? path.join(process.cwd(), '_vault')
   const read = options.readFile ?? ((p: string) => readFileSync(p, 'utf-8'))
+  const bodyCapChars = options.bodyCapChars ?? 8000
 
   const registryPath = path.join(vaultRoot, '.meta', 'registry.jsonl')
   const decayPath = path.join(vaultRoot, '.meta', 'decay-scores.json')
@@ -154,7 +163,7 @@ export async function buildVaultManifest(
     } catch {
       continue
     }
-    manifest.push({
+    const built: VaultManifestEntry = {
       path: entry.knowledgePath,
       title: entry.title,
       retentionScore: entry.retentionScore,
@@ -162,7 +171,11 @@ export async function buildVaultManifest(
       lastAccess: entry.lastAccess,
       summaryLevel: entry.summaryLevel,
       excerpt: extractExcerpt(content),
-    })
+    }
+    if (options.withBody) {
+      built.body = content.length > bodyCapChars ? content.slice(0, bodyCapChars) : content
+    }
+    manifest.push(built)
     if (options.limit !== undefined && manifest.length >= options.limit) break
   }
 
