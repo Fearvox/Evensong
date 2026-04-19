@@ -1,11 +1,44 @@
 {
-  "name": "research-vault-mcp",
+  "name": "@syndash/research-vault-mcp",
   "version": "1.0.0",
+  "description": "MCP server for Nolan's research vault — semantic search + memory persistence over 200+ markdown docs via local Gemma (Atomic Chat) or cloud LLM fallback. Part of DASH SHATTER / SynDASH.",
   "type": "module",
+  "bin": {
+    "research-vault-mcp": "./bin/research-vault-mcp.mjs"
+  },
   "scripts": {
     "dev": "bun run src/server.ts",
-    "build": "bun build src/server.ts --outdir=dist --target=bun"
+    "build": "bun build src/server.ts --outdir=dist --target=bun",
+    "test": "bun test"
   },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Fearvox/Evensong.git",
+    "directory": "packages/research-vault-mcp"
+  },
+  "homepage": "https://github.com/Fearvox/Evensong/tree/main/packages/research-vault-mcp",
+  "bugs": {
+    "url": "https://github.com/Fearvox/Evensong/issues"
+  },
+  "license": "UNLICENSED",
+  "publishConfig": {
+    "access": "public"
+  },
+  "files": [
+    "src/**/*.ts",
+    "bin/**/*.mjs",
+    "README.md",
+    "package.json"
+  ],
+  "keywords": [
+    "mcp",
+    "model-context-protocol",
+    "research-vault",
+    "claude-code",
+    "evermind",
+    "dash-shatter",
+    "syndash"
+  ],
   "dependencies": {
     "@anthropic-ai/sdk": "^0.80.0"
   }

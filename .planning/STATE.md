@@ -113,3 +113,15 @@ Not part of v2.0 phases — cross-cutting hook/docs work.
 - **PR #8 merged** (1625ecd): spec + plan docs committed. Side-effect: squash also absorbed 19 accumulated local commits (or-elephant-alpha, R065/R066-R070, seed v1-v3, phase 15 handoff) — origin/main now includes all of it.
 - **Docs drift discovery**: `/memories/search` enum is `{agent_memory, episodic_memory, profile, raw_message}`, NOT the `{agent_case, agent_skill}` that llms.txt shows for `/memories/get`. Wrong enum caused 400, corrected live during Task 1.
 - **Data-loss window**: today 07:00–21:15 all session transcripts missing from EverMem server (store silent-exit). Future sessions fixed; manual flush is optional.
+
+## Off-milestone Work (2026-04-19)
+
+Vault Foundation rebuild (Wave 1 ship + Wave 2A/2D execute).
+
+- **Wave 1 SHIPPED** (4 commits): `_vault` L1 canonical protocol push + infra/ baseline inventory + MASTER-PREAMBLE-INDEX v0.1 + CCR spec `docs/superpowers/specs/2026-04-19-vault-foundation-and-preamble-design.md`. See `memory/projects/project_vault_foundation_wave1_shipped.md`.
+- **Wave 2 plans** (4 plans, 1 commit): Wave 2A/2B/2C/2D in `docs/superpowers/plans/2026-04-19-wave2*.md`.
+- **Wave 2A SHIPPED** (1 commit to _vault): 3 archives + 1 rename + 2 keeps (DS-EverOS-RR, dash-persona SF EverMind 得奖里程碑); 4 deferred (delete×3 auth scope + merge×1 src scope). See `_vault/infra/CLEANUP-DECISIONS.md` Wave 2A execution record.
+- **Wave 2D SHIPPED** (2 commits to CCR): submodule `research-vault` declaration removed + `.gitignore` updated + `packages/research-vault-mcp/` npx-ready as `@syndash/research-vault-mcp` (scoped under `SynDASH` GitHub org; bin shim + 13-test shape validation + npm pack dry-run verified 6 files / 9 KB / clean allowlist).
+- **Wave 2B deferred**: Local Gemma provider + vault retrieval chain (13 TDD tasks, src touch) — fresh脑 明天做。
+- **Wave 2C deferred**: MLX embedding prep (Qwen3-Embedding-4B in Atomic) — GUI work, 选 fresh脑做。
+- **EverMem Stop hook retry wrapper shipped** (`~/.claude/hooks/evermem-with-key.sh`): 3-attempt exponential backoff for `RemoteDisconnected`/5xx; 4-scenario test pass. Backup at `.bak-20260419-pre-retry`.

@@ -1,0 +1,76 @@
+import { describe, test, expect } from 'bun:test'
+import { readFileSync, existsSync, statSync } from 'fs'
+import { join, dirname } from 'path'
+import { fileURLToPath } from 'url'
+
+const __dirname = dirname(fileURLToPath(import.meta.url))
+const PKG_ROOT = join(__dirname, '..')
+const pkg = JSON.parse(readFileSync(join(PKG_ROOT, 'package.json'), 'utf8'))
+
+describe('@syndash/research-vault-mcp package shape (npx publish readiness)', () => {
+  test('has scoped name @syndash/research-vault-mcp', () => {
+    expect(pkg.name).toBe('@syndash/research-vault-mcp')
+  })
+
+  test('name passes npm lowercase+scope regex', () => {
+    expect(pkg.name).toMatch(/^@[a-z0-9][a-z0-9._-]*\/[a-z0-9][a-z0-9._-]*$/)
+  })
+
+  test('has version', () => {
+    expect(pkg.version).toMatch(/^\d+\.\d+\.\d+/)
+  })
+
+  test('has bin entry', () => {
+    expect(pkg.bin).toBeDefined()
+    expect(typeof pkg.bin).toBe('object')
+    expect(pkg.bin['research-vault-mcp']).toBeTruthy()
+  })
+
+  test('bin entry file exists', () => {
+    const binPath = pkg.bin['research-vault-mcp']
+    expect(existsSync(join(PKG_ROOT, binPath))).toBe(true)
+  })
+
+  test('bin entry is executable', () => {
+    const binPath = join(PKG_ROOT, pkg.bin['research-vault-mcp'])
+    const mode = statSync(binPath).mode
+    const isExecutableByOwner = (mode & 0o100) !== 0
+    expect(isExecutableByOwner).toBe(true)
+  })
+
+  test('has description (>= 20 chars)', () => {
+    expect(typeof pkg.description).toBe('string')
+    expect(pkg.description.length).toBeGreaterThan(20)
+  })
+
+  test('has repository with correct shape', () => {
+    expect(pkg.repository).toBeDefined()
+    expect(pkg.repository.type).toBe('git')
+    expect(pkg.repository.url).toMatch(/github\.com/)
+    expect(pkg.repository.directory).toBe('packages/research-vault-mcp')
+  })
+
+  test('has publishConfig.access=public (required for scoped name)', () => {
+    expect(pkg.publishConfig?.access).toBe('public')
+  })
+
+  test('has files allowlist', () => {
+    expect(Array.isArray(pkg.files)).toBe(true)
+    expect(pkg.files.length).toBeGreaterThan(0)
+    expect(pkg.files).toContain('README.md')
+    expect(pkg.files).toContain('package.json')
+  })
+
+  test('README.md exists', () => {
+    expect(existsSync(join(PKG_ROOT, 'README.md'))).toBe(true)
+  })
+
+  test('type=module for ESM', () => {
+    expect(pkg.type).toBe('module')
+  })
+
+  test('has keywords array', () => {
+    expect(Array.isArray(pkg.keywords)).toBe(true)
+    expect(pkg.keywords).toContain('mcp')
+  })
+})
