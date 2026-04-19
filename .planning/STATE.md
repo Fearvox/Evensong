@@ -4,8 +4,8 @@ milestone: v2.0
 milestone_name: Agent Intelligence Enhancement
 status: executing
 stopped_at: Completed Phase 6 (MEM-01/02/03)
-last_updated: "2026-04-14T12:00:00.000Z"
-last_activity: 2026-04-14
+last_updated: "2026-04-18T22:00:00.000Z"
+last_activity: 2026-04-18
 progress:
   total_phases: 14
   completed_phases: 6
@@ -103,3 +103,13 @@ Resume file: None
 - Grok CLI consolidated: grok-dev (3 copies) → @vibe-kit/grok-cli (1 copy)
 - PR #6 assessed: 48 conflicts, recommend cherry-pick over full merge
 - Grok claims verified: 516 tests ✅, xai-fast default ✅, 92% progress ❌ (actual 43%)
+
+## Off-milestone Work (2026-04-18)
+
+Not part of v2.0 phases — cross-cutting hook/docs work.
+
+- **EverMem hook ranking fix** (target: `~/.claude/hooks/evermem-multi-inject.mjs`, outside repo): 5 logical changes via subagent-driven execution — memory_types expand (`agent_memory`), MIN_SCORE 0.05→0.35, remove fallback bypass, add matchedGroup+weighted_score, add [agent]/[project] badges. Regression Prompt B (minecraft) injected=0 proves MIN_SCORE works.
+- **Stop hook補丁** (settings.json): plugin store-memories.js silent-exited because EVERMEM_API_KEY env var not injected; added evermem-with-key.sh wrapper in `.hooks.Stop` array. Hot-loaded without restart.
+- **PR #8 merged** (1625ecd): spec + plan docs committed. Side-effect: squash also absorbed 19 accumulated local commits (or-elephant-alpha, R065/R066-R070, seed v1-v3, phase 15 handoff) — origin/main now includes all of it.
+- **Docs drift discovery**: `/memories/search` enum is `{agent_memory, episodic_memory, profile, raw_message}`, NOT the `{agent_case, agent_skill}` that llms.txt shows for `/memories/get`. Wrong enum caused 400, corrected live during Task 1.
+- **Data-loss window**: today 07:00–21:15 all session transcripts missing from EverMem server (store silent-exit). Future sessions fixed; manual flush is optional.
