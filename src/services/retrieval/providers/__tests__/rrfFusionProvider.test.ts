@@ -183,6 +183,124 @@ describe('createRRFFusionProvider — tie-breaking', () => {
   })
 })
 
+describe('createRRFFusionProvider — skipUnavailable + per-child timeout (Codex fix)', () => {
+  test('skipUnavailable=true (default) skips children that report available=false before retrieve', async () => {
+    let deadRetrieveCalls = 0
+    let liveRetrieveCalls = 0
+    const dead: VaultRetrievalProvider = {
+      name: 'dead',
+      available: async () => false,
+      retrieve: async () => {
+        deadRetrieveCalls++
+        throw new Error('dead provider was called despite available=false')
+      },
+    }
+    const live: VaultRetrievalProvider = {
+      name: 'live',
+      available: async () => true,
+      retrieve: async () => {
+        liveRetrieveCalls++
+        return { rankedPaths: ['a.md'], provider: 'live', latencyMs: 1 }
+      },
+    }
+    const rrf = createRRFFusionProvider({ providers: [dead, live] })
+    const r = await rrf.retrieve({ query: 'q', manifest, topK: 1 })
+    expect(deadRetrieveCalls).toBe(0)
+    expect(liveRetrieveCalls).toBe(1)
+    expect(r.rankedPaths).toEqual(['a.md'])
+  })
+
+  test('skipUnavailable=false preserves pre-Codex semantics (call retrieve on every child)', async () => {
+    let deadRetrieveCalls = 0
+    const dead: VaultRetrievalProvider = {
+      name: 'dead',
+      available: async () => false,
+      retrieve: async () => {
+        deadRetrieveCalls++
+        throw new Error('dead provider failure')
+      },
+    }
+    const live = stubProvider('live', ['a.md'])
+    const rrf = createRRFFusionProvider({
+      providers: [dead, live],
+      skipUnavailable: false,
+    })
+    await rrf.retrieve({ query: 'q', manifest, topK: 1 })
+    expect(deadRetrieveCalls).toBe(1)
+  })
+
+  test('perChildTimeoutMs times out a stalled child without blocking healthy ones', async () => {
+    const slow: VaultRetrievalProvider = {
+      name: 'slow',
+      available: async () => true,
+      retrieve: () =>
+        new Promise((resolve) =>
+          setTimeout(
+            () => resolve({ rankedPaths: ['never.md'], provider: 'slow', latencyMs: 0 }),
+            500,
+          ),
+        ),
+    }
+    const fast = stubProvider('fast', ['a.md', 'b.md'])
+    const rrf = createRRFFusionProvider({
+      providers: [slow, fast],
+      perChildTimeoutMs: 50,
+    })
+    const t0 = Date.now()
+    const r = await rrf.retrieve({ query: 'q', manifest, topK: 2 })
+    const elapsed = Date.now() - t0
+    // Fusion must return within (timeout + overhead), not wait for 500ms slow child
+    expect(elapsed).toBeLessThan(200)
+    // Fast child's ranking survives; slow child is dropped
+    expect(r.rankedPaths).toEqual(['a.md', 'b.md'])
+  })
+
+  test('all children timeout → empty result, fusion still returns cleanly', async () => {
+    const slow1: VaultRetrievalProvider = {
+      name: 's1',
+      available: async () => true,
+      retrieve: () => new Promise((resolve) =>
+        setTimeout(() => resolve({ rankedPaths: [], provider: 's1', latencyMs: 0 }), 500),
+      ),
+    }
+    const slow2: VaultRetrievalProvider = {
+      name: 's2',
+      available: async () => true,
+      retrieve: () => new Promise((resolve) =>
+        setTimeout(() => resolve({ rankedPaths: [], provider: 's2', latencyMs: 0 }), 500),
+      ),
+    }
+    const rrf = createRRFFusionProvider({
+      providers: [slow1, slow2],
+      perChildTimeoutMs: 30,
+    })
+    const r = await rrf.retrieve({ query: 'q', manifest, topK: 2 })
+    expect(r.rankedPaths).toEqual([])
+  })
+
+  test('perChildTimeoutMs=Infinity disables the timer (opt-out)', async () => {
+    let resolved = false
+    const slow: VaultRetrievalProvider = {
+      name: 'slow',
+      available: async () => true,
+      retrieve: () =>
+        new Promise((resolve) =>
+          setTimeout(() => {
+            resolved = true
+            resolve({ rankedPaths: ['a.md'], provider: 'slow', latencyMs: 0 })
+          }, 50),
+        ),
+    }
+    const rrf = createRRFFusionProvider({
+      providers: [slow],
+      perChildTimeoutMs: Number.POSITIVE_INFINITY,
+    })
+    const r = await rrf.retrieve({ query: 'q', manifest, topK: 1 })
+    expect(resolved).toBe(true)
+    expect(r.rankedPaths).toEqual(['a.md'])
+  })
+})
+
 describe('createRRFFusionProvider — availability', () => {
   test('available = true if at least one child is available', async () => {
     const up: VaultRetrievalProvider = {

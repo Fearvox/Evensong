@@ -20,25 +20,41 @@
  */
 
 /**
- * Default "future unified gateway" — Atomic Chat on 1337. When v1.1.44's
- * `embedding: true` model.yml field translates to the `--embedding` CLI
- * flag in llama-server spawn, this target will work directly.
+ * Default base URL — ccr-droplet via Tailscale. This is the only backend
+ * currently known to serve `/v1/embeddings` correctly (Wave 2C shipped
+ * 2026-04-19, llama-server launched with `--embedding`; 508ms cold
+ * round-trip including ~180ms Tailscale transit).
  *
- * 2026-04-19 reality: Atomic Chat v1.1.44 spawns llama-server without
- * `--embedding`, so this endpoint returns HTTP 501 for /v1/embeddings
- * even though the model is loaded. Temporary workaround: use
- * BGE_EMBEDDING_DROPLET_BASE_URL instead.
+ * History: Pre-Codex-review (2026-04-19 afternoon), default pointed at
+ * Atomic Chat 1337 on the assumption that the 1337 gateway would proxy
+ * embedding requests to an internal llama-server. Atomic Chat v1.1.44
+ * DOES load the bge-m3 gguf and expose `/v1/embeddings`, but it spawns
+ * its llama-server without the `--embedding` CLI flag — so the proxy
+ * target returns HTTP 501 on every embed call. Pointing the default at
+ * 1337 lets `isBgeEmbeddingAvailable()` green-light a known-broken
+ * backend (Codex finding, 2026-04-19). Until Atomic Chat upstream fixes
+ * the spawn flag, default lives on the droplet.
+ *
+ * To pin explicitly to Atomic Chat 1337 (e.g. in tests, or after
+ * upstream fix lands), use BGE_EMBEDDING_ATOMIC_BASE_URL.
  */
-export const BGE_EMBEDDING_DEFAULT_BASE_URL = 'http://127.0.0.1:1337/v1'
+export const BGE_EMBEDDING_DEFAULT_BASE_URL = 'http://100.65.234.77:8080/v1'
 
 /**
- * Working BGE-M3 endpoint via Tailscale to ccr-droplet (Wave 2C shipped
- * 2026-04-19). llama-server launched with `--embedding` so
- * /v1/embeddings returns real 1024-dim vectors. 508ms cold round-trip
- * including Tailscale transit (~180ms base). See
- * `_vault/infra/retrieval-endpoints.md` for systemd/monitor details.
+ * Tailscale address of ccr-droplet's dedicated BGE-M3 server. Equal to
+ * BGE_EMBEDDING_DEFAULT_BASE_URL today — kept as a separate named
+ * export so callers that care about the "droplet, not atomic" invariant
+ * can declare intent, and so that flipping the default back to atomic
+ * (after upstream fix) is a one-constant change.
  */
 export const BGE_EMBEDDING_DROPLET_BASE_URL = 'http://100.65.234.77:8080/v1'
+
+/**
+ * Future-unified-gateway endpoint — Atomic Chat at 1337. Currently
+ * returns HTTP 501 for `/v1/embeddings`; use only when explicitly
+ * testing the upstream-fix migration path.
+ */
+export const BGE_EMBEDDING_ATOMIC_BASE_URL = 'http://127.0.0.1:1337/v1'
 
 /**
  * Model alias accepted by BOTH droplet and atomic-chat-future.
@@ -164,45 +180,40 @@ export async function embedBge(
 }
 
 /**
- * Liveness probe: check /v1/models returns 200 and contains at least one
- * model whose id includes "bge" (loose match — droplet exposes
- * `bge-m3-Q4_K_M.gguf`, atomic chat exposes `gpustack/bge-m3-Q4_K_M`,
- * both are valid embedding backends and both accept the short `bge-m3`
- * alias on the /embeddings call). Strict exact-id match was too
- * brittle — droplet llama-server would fail this even though
- * /embeddings works fine with the short alias.
+ * Liveness probe at the actual trust boundary: send a one-token
+ * embedding POST and verify it returns a non-empty vector. This is
+ * strictly stronger than the older `/v1/models`-only check — Atomic
+ * Chat v1.1.44 happily lists bge-m3 in /models but returns HTTP 501 on
+ * /embeddings because its internal llama-server was spawned without
+ * `--embedding`. A models-only probe would green-light that broken
+ * backend. Codex adversarial review flagged this 2026-04-19 as a
+ * high-severity false-positive at the availability boundary.
  *
- * Returns false on any failure (network, HTTP, shape, no BGE model).
- * Does NOT throw.
+ * Returns false on any failure (network, HTTP non-200, empty vector,
+ * timeout). Does NOT throw — callers treat it as a boolean gate.
  */
 export async function isBgeEmbeddingAvailable(
   client: BgeEmbeddingClient,
-  probeTimeoutMs = 3000,
+  probeTimeoutMs = 5000,
 ): Promise<boolean> {
   const controller = new AbortController()
-  let timer: ReturnType<typeof setTimeout> | undefined
-  const timeoutPromise = new Promise<'timeout'>((resolve) => {
-    timer = setTimeout(() => {
-      controller.abort()
-      resolve('timeout')
-    }, probeTimeoutMs)
-  })
+  const timer = setTimeout(() => controller.abort(), probeTimeoutMs)
   try {
-    const result = await Promise.race([
-      fetch(`${client.baseURL}/models`, { method: 'GET', signal: controller.signal }),
-      timeoutPromise,
-    ])
-    if (result === 'timeout') return false
-    if (result.status !== 200) return false
-    const body = (await result.json()) as { data?: Array<{ id?: string }> }
-    const modelIds = (body.data ?? []).map((m) => m.id).filter((x): x is string => !!x)
-    // Loose: any model id containing "bge" (case-insensitive) counts as an
-    // embedding backend. Callers that need strict id match should check
-    // client.model against the response themselves.
-    return modelIds.some((id) => id.toLowerCase().includes('bge'))
+    const response = await fetch(`${client.baseURL}/embeddings`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ model: client.model, input: 'ping' }),
+      signal: controller.signal,
+    })
+    if (response.status !== 200) return false
+    const body = (await response.json().catch(() => null)) as
+      | { data?: Array<{ embedding?: number[] }> }
+      | null
+    const first = body?.data?.[0]?.embedding
+    return Array.isArray(first) && first.length > 0
   } catch {
     return false
   } finally {
-    if (timer) clearTimeout(timer)
+    clearTimeout(timer)
   }
 }

@@ -5,6 +5,8 @@ import {
   isBgeEmbeddingAvailable,
   BgeEmbeddingConnectionError,
   BGE_EMBEDDING_DEFAULT_BASE_URL,
+  BGE_EMBEDDING_DROPLET_BASE_URL,
+  BGE_EMBEDDING_ATOMIC_BASE_URL,
   BGE_EMBEDDING_DEFAULT_MODEL,
   BGE_EMBEDDING_DEFAULT_DIMS,
 } from '../bgeEmbedding.js'
@@ -23,12 +25,17 @@ function restoreFetch() {
 }
 
 describe('createBgeEmbeddingClient', () => {
-  test('defaults point at Atomic Chat 1337 with bge-m3', () => {
+  test('defaults point at ccr-droplet (not atomic 1337 — atomic upstream bug blocks embed)', () => {
     const c = createBgeEmbeddingClient()
     expect(c.baseURL).toBe(BGE_EMBEDDING_DEFAULT_BASE_URL)
-    expect(c.baseURL).toBe('http://127.0.0.1:1337/v1')
+    expect(c.baseURL).toBe('http://100.65.234.77:8080/v1')
+    expect(BGE_EMBEDDING_DEFAULT_BASE_URL).toBe(BGE_EMBEDDING_DROPLET_BASE_URL)
     expect(c.model).toBe(BGE_EMBEDDING_DEFAULT_MODEL)
     expect(c.model).toBe('bge-m3')
+  })
+
+  test('BGE_EMBEDDING_ATOMIC_BASE_URL exposed for the post-upstream-fix migration', () => {
+    expect(BGE_EMBEDDING_ATOMIC_BASE_URL).toBe('http://127.0.0.1:1337/v1')
   })
 
   test('timeout defaults to 60s (covers cold corpus batch on CPU llama-server)', () => {
@@ -68,7 +75,7 @@ describe('embedBge', () => {
   test('posts to /embeddings with model + input[] and returns aligned vectors', async () => {
     let seenBody: any = null
     installMockFetch(async (input, init) => {
-      expect(String(input)).toBe('http://127.0.0.1:1337/v1/embeddings')
+      expect(String(input)).toBe(`${BGE_EMBEDDING_DEFAULT_BASE_URL}/embeddings`)
       expect(init?.method).toBe('POST')
       seenBody = JSON.parse((init?.body as string) ?? '{}')
       return new Response(
@@ -152,30 +159,52 @@ describe('embedBge', () => {
   })
 })
 
-describe('isBgeEmbeddingAvailable', () => {
+describe('isBgeEmbeddingAvailable — POST /embeddings probe (not /models)', () => {
   afterEach(restoreFetch)
 
-  test('true when /v1/models lists the configured model', async () => {
-    installMockFetch(async () =>
-      new Response(
-        JSON.stringify({
-          data: [
-            { id: 'bge-m3' },
-            { id: 'Gemma-4-E4B-Uncensored-HauhauCS-Aggressive-Q4_K_M' },
-          ],
-        }),
+  test('true on HTTP 200 with non-empty embedding vector', async () => {
+    installMockFetch(async (input, init) => {
+      // Hard contract: probe must POST to /embeddings, not GET /models
+      expect(String(input)).toContain('/embeddings')
+      expect(init?.method).toBe('POST')
+      return new Response(
+        JSON.stringify({ data: [{ embedding: [0.1, 0.2, 0.3], index: 0 }] }),
         { status: 200 },
-      ),
-    )
+      )
+    })
     expect(await isBgeEmbeddingAvailable(createBgeEmbeddingClient())).toBe(true)
   })
 
-  test('false when /v1/models does NOT list the model', async () => {
+  test('false on HTTP 501 (the exact atomic-chat upstream bug it is meant to catch)', async () => {
     installMockFetch(async () =>
       new Response(
-        JSON.stringify({ data: [{ id: 'grok-3' }, { id: 'deepseek/deepseek-v3.2' }] }),
-        { status: 200 },
+        JSON.stringify({
+          error: {
+            code: 501,
+            message: 'This server does not support embeddings. Start it with `--embeddings`',
+          },
+        }),
+        { status: 501 },
       ),
+    )
+    expect(await isBgeEmbeddingAvailable(createBgeEmbeddingClient())).toBe(false)
+  })
+
+  test('false on HTTP 404 (model not loaded)', async () => {
+    installMockFetch(async () => new Response('No running session', { status: 404 }))
+    expect(await isBgeEmbeddingAvailable(createBgeEmbeddingClient())).toBe(false)
+  })
+
+  test('false on HTTP 200 but empty embedding vector', async () => {
+    installMockFetch(async () =>
+      new Response(JSON.stringify({ data: [{ embedding: [] }] }), { status: 200 }),
+    )
+    expect(await isBgeEmbeddingAvailable(createBgeEmbeddingClient())).toBe(false)
+  })
+
+  test('false on malformed response shape', async () => {
+    installMockFetch(async () =>
+      new Response(JSON.stringify({ some: 'other' }), { status: 200 }),
     )
     expect(await isBgeEmbeddingAvailable(createBgeEmbeddingClient())).toBe(false)
   })
@@ -184,11 +213,6 @@ describe('isBgeEmbeddingAvailable', () => {
     installMockFetch(async () => {
       throw new Error('ECONNREFUSED')
     })
-    expect(await isBgeEmbeddingAvailable(createBgeEmbeddingClient())).toBe(false)
-  })
-
-  test('false on HTTP non-200', async () => {
-    installMockFetch(async () => new Response('', { status: 500 }))
     expect(await isBgeEmbeddingAvailable(createBgeEmbeddingClient())).toBe(false)
   })
 })

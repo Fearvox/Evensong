@@ -1,18 +1,18 @@
 # Wave 3+H Phase 4 Smoke — BGE/RRF
 
-- Manifest: 18 real + 182 junk = 200
+- Manifest: 24 real + 182 junk = 206
 - Queries: 20 (handwritten wave3-judge-queries.json)
 - RRF k: 10
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-  Wave 3+H Phase 4 Smoke — 20q × 200-entry manifest, rrf k=10
+  Wave 3+H Phase 4 Smoke — 20q × 206-entry manifest, rrf k=10
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 | Stage-1 pipeline            | Top-1 accuracy              | Avg latency |
 |-----------------------------|-----------------------------|-------------|
-| BM25 alone                  | 18/20 (90.0%)            | 24ms      |
-| BGE-M3 dense alone          | 20/20 (100.0%)            | 470ms     |
-| **RRF(BM25, BGE) k=10**       | **19/20 (95.0%)**            | 794ms     |
+| BM25 alone                  | 18/20 (90.0%)            | 14ms      |
+| BGE-M3 dense alone          | 20/20 (100.0%)            | 465ms     |
+| **RRF(BM25, BGE) k=10**       | **19/20 (95.0%)**            | 693ms     |
 
 ## Per-category top-1
 

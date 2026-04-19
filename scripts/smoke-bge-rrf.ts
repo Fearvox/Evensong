@@ -134,11 +134,14 @@ async function main() {
   let i = 0
   for (const q of queries) {
     i++
-    const [bm, dn, rf] = await Promise.all([
-      timedRun(bm25, q.q, manifest),
-      timedRun(dense, q.q, manifest),
-      timedRun(rrf, q.q, manifest),
-    ])
+    // Serialize per-query so the dense backend is never hit by two
+    // parallel embed requests at once (RRF internally calls dense
+    // itself). Without this, rrfLatencyMs is inflated by self-
+    // contention with the standalone dense timing. Codex adversarial
+    // review flagged this 2026-04-19.
+    const bm = await timedRun(bm25, q.q, manifest)
+    const dn = await timedRun(dense, q.q, manifest)
+    const rf = await timedRun(rrf, q.q, manifest)
     const row: Row = {
       queryId: q.id,
       category: q.category,

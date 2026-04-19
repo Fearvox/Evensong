@@ -33,6 +33,30 @@ export interface RRFFusionProviderOptions {
    * input.
    */
   stagePoolTopK?: number
+  /**
+   * Soft per-child retrieval deadline in ms. Each child's retrieve() is
+   * raced against this timer; if the child has not returned by then, it
+   * is treated as unavailable for this query and its signal is dropped
+   * from the fusion. Prevents a degraded backend (e.g. the BGE droplet
+   * stalling on a cold batch) from dragging the whole fusion latency
+   * up to the child's own transport timeout (which can be 60-180s).
+   *
+   * Default 10000ms — BM25 returns in single-digit ms, dense warm query
+   * in 200-500ms. A healthy child will never come close; a degraded
+   * one gets timed out and skipped. Set to Infinity to disable.
+   */
+  perChildTimeoutMs?: number
+  /**
+   * When true (default), query each child's `available()` first and skip
+   * any that return false before issuing retrieve(). Pairs with
+   * perChildTimeoutMs to make the fusion behave well under partial
+   * outage — the Codex-flagged "RRF waits on known-dead child" failure
+   * mode is blocked at the front.
+   *
+   * Set to false to preserve pre-Codex semantics (always call retrieve,
+   * rely only on per-child timeout).
+   */
+  skipUnavailable?: boolean
   /** Provider name in result. Default `rrf:<child-names-joined-by-+>`. */
   providerName?: string
 }
@@ -68,6 +92,8 @@ export function createRRFFusionProvider(
   }
   const k = options.k ?? 10
   const stagePoolTopK = options.stagePoolTopK ?? 50
+  const perChildTimeoutMs = options.perChildTimeoutMs ?? 10000
+  const skipUnavailable = options.skipUnavailable ?? true
   const providerName =
     options.providerName ?? `rrf:${providers.map((p) => p.name).join('+')}`
 
@@ -82,13 +108,51 @@ export function createRRFFusionProvider(
     retrieve: async (req: VaultRetrievalRequest): Promise<VaultRetrievalResult> => {
       const start = performance.now()
 
+      // Filter out known-unavailable children before doing any retrieve
+      // work. This is the primary mitigation for the Codex-flagged
+      // "RRF waits on dead child" failure mode — combined with a
+      // per-child timeout below, an outage in one backend no longer
+      // inflates the fusion's wall time.
+      let activeProviders = providers
+      if (skipUnavailable) {
+        const probes = await Promise.all(
+          providers.map((p) => p.available().catch(() => false)),
+        )
+        activeProviders = providers.filter((_, i) => probes[i])
+      }
+
       const stageReq: VaultRetrievalRequest = {
         query: req.query,
         manifest: req.manifest,
         topK: stagePoolTopK,
       }
+
+      // Per-child soft timeout via Promise.race against a timer that
+      // resolves to a synthetic "timeout" sentinel. We use resolve
+      // rather than reject so Promise.allSettled still returns a
+      // uniform shape and we can count timeouts vs throws if desired.
+      const timedOut = Symbol('rrf-child-timeout')
       const stageResults = await Promise.allSettled(
-        providers.map((p) => p.retrieve(stageReq)),
+        activeProviders.map(async (p) => {
+          if (!Number.isFinite(perChildTimeoutMs)) {
+            return p.retrieve(stageReq)
+          }
+          let timer: ReturnType<typeof setTimeout> | undefined
+          const timeoutPromise = new Promise<typeof timedOut>((resolve) => {
+            timer = setTimeout(() => resolve(timedOut), perChildTimeoutMs)
+          })
+          try {
+            const result = await Promise.race([p.retrieve(stageReq), timeoutPromise])
+            if (result === timedOut) {
+              throw new Error(
+                `RRF child '${p.name}' exceeded per-child timeout ${perChildTimeoutMs}ms`,
+              )
+            }
+            return result
+          } finally {
+            if (timer) clearTimeout(timer)
+          }
+        }),
       )
 
       // Accumulate RRF scores + remember the first rank each path appeared at

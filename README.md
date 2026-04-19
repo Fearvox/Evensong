@@ -2,7 +2,7 @@
 
 <p align="center">
   <em>Reverse-engineered Claude Code. Hybrid memory retrieval that actually scales.<br/>
-  <strong>648 trials. Cross-LLM design. All raw data committed.</strong></em>
+  <strong>Two formal artifacts (648 + 972 trials). Cross-LLM design. All raw data committed.</strong></em>
 </p>
 
 <p align="center">
@@ -19,7 +19,7 @@
 <p align="center">
   <a href="https://bun.sh"><img src="https://img.shields.io/badge/Runtime-Bun-F472B6?style=for-the-badge&logo=bun&logoColor=white" alt="Bun"/></a>
   <a href="https://www.typescriptlang.org/"><img src="https://img.shields.io/badge/TypeScript-100%25-3178C6?style=for-the-badge&logo=typescript&logoColor=white" alt="TypeScript"/></a>
-  <a href="./benchmarks/runs"><img src="https://img.shields.io/badge/Benchmark-648_trials-F59E0B?style=for-the-badge&logo=lightning&logoColor=white" alt="648-trial benchmark"/></a>
+  <a href="./benchmarks/runs"><img src="https://img.shields.io/badge/Benchmark-972%2B648_trials-F59E0B?style=for-the-badge&logo=lightning&logoColor=white" alt="972+648-trial benchmark"/></a>
   <a href="https://github.com/EverMind-AI/EverOS"><img src="https://img.shields.io/badge/Dialogs_with-EverOS-00D4AA?style=for-the-badge&logo=brain&logoColor=white" alt="Dialogs with EverOS"/></a>
 </p>
 
@@ -134,6 +134,10 @@ The always-rerank Hybrid pays 1 LLM call per query. For a large fraction of quer
 **Positioning vs EverOS**: this fills the gap between EverOS's published Fast tier (0 LLM calls, 200-600 ms) and Agentic tier (1-3 LLM calls, 2-5 s) — **Adaptive Hybrid is 0 _or_ 1 conditional LLM call, with a user-tunable gating knob**. Not covered by any published EverOS / EverMemOS / HyperMem design.
 
 See [`src/services/retrieval/providers/adaptiveHybridProvider.ts`](./src/services/retrieval/providers/adaptiveHybridProvider.ts) and the 7 unit tests in `adaptiveHybridProvider.test.ts`. Shipped at [`86bb4ee`](https://github.com/Fearvox/Evensong/commit/86bb4ee). **66/66 retrieval-domain tests pass.**
+
+### Wave 3+H preview — dense stage 1 + RRF fusion (preliminary, not summarized) 🟡
+
+A dense-retrieval lane using BGE-M3 (via ccr-droplet over Tailscale) and a Reciprocal Rank Fusion provider (k=10) is committed but **not** summarized in the headline above. Code shipped at [`5f2a646`](https://github.com/Fearvox/Evensong/commit/5f2a646); Codex-adversarial-review fixes (availability probe, RRF timeout/skip, harness contention) shipped as a follow-up. Early signal on a 20q × 206-entry smoke (handwritten reference set): BGE alone 20/20 (100%), BM25 alone 18/20 (90%), RRF(BM25, BGE) 19/20 (95%). Preliminary artifact: [`benchmarks/runs/wave3h-smoke-bge-rrf-*.md`](./benchmarks/runs). **Do not cite these numbers as production evidence** — the full 108q × 3-run cross-LLM re-run + RRF k-sweep (Phase 4/5) is pending.
 
 <p align="right"><a href="#目录">↑ back to top</a></p>
 
