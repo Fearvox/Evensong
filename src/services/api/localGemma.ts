@@ -25,17 +25,32 @@ export const LOCAL_GEMMA_DEFAULT_MODEL = 'Gemma-4-E4B-Uncensored-HauhauCS-Aggres
  *   - Offline/airgap only: LOCAL_GEMMA (slow CPU inference, judge noise)
  */
 export const ATOMIC_MODELS = {
-  /** grok-4-fast-reasoning — 445ms probe latency, best single-shot judge. */
-  FAST: 'grok-4-fast-reasoning',
-  /** grok-4-1-fast-reasoning — 985ms probe, deeper reasoning trace. */
-  FAST_REASONING: 'grok-4-1-fast-reasoning',
-  /** MiniMax-M2.7 — 1.9s, strong multilingual + long context backup. */
-  MINIMAX_M27: 'MiniMax-M2.7',
-  /** MiniMax-M2.5 — 1.1s, faster than M2.7 for less demanding tasks. */
-  MINIMAX_M25: 'MiniMax-M2.5',
-  /** grok-3 — 358ms, legacy fast fallback if grok-4* route breaks. */
+  // ── Primary retrieval-judge candidates (all 3/3 top-1 on dogfood reference manifest) ──
+  /** deepseek/deepseek-v3.2 — 729ms judge avg, 3/3 correct. Current primary. */
+  DEEPSEEK_V32: 'deepseek/deepseek-v3.2',
+  /** grok-3 — 886ms judge avg, 3/3 correct. Secondary (xAI paid). */
   GROK_3: 'grok-3',
-  /** Local Gemma via llama.cpp — offline-only tier; see LOCAL_GEMMA_DEFAULT_MODEL for the exact ID. */
+  /** openrouter/auto:free — 2325ms judge avg, 3/3 correct. Free tier fallback. */
+  OR_AUTO_FREE: 'openrouter/auto:free',
+
+  // ── Fast-reasoning tier (use only when thinking trace is actually wanted) ──
+  /** grok-4-fast-reasoning — 445ms probe, but 1/3 on judge (reasoning hurts listwise rank). */
+  FAST: 'grok-4-fast-reasoning',
+  /** grok-4-1-fast-reasoning — 985ms probe, 2/3 on judge. */
+  FAST_REASONING: 'grok-4-1-fast-reasoning',
+
+  // ── MiniMax tier (multilingual + long-context) ──
+  /** MiniMax-M2.7 — 1.9s probe, Chinese and long-context capable. */
+  MINIMAX_M27: 'MiniMax-M2.7',
+  /** MiniMax-M2.5 — 1.1s probe, faster sibling of M2.7. */
+  MINIMAX_M25: 'MiniMax-M2.5',
+
+  // ── OR paid backup ──
+  /** qwen/qwen3.6-plus — 24s judge on dogfood (too slow for interactive) but 3/3 correct. */
+  QWEN_36_PLUS: 'qwen/qwen3.6-plus',
+
+  // ── Offline tier ──
+  /** Local Gemma via llama.cpp — offline-only (26s judge, 3/3 correct). */
   LOCAL_GEMMA: LOCAL_GEMMA_DEFAULT_MODEL,
 } as const
 

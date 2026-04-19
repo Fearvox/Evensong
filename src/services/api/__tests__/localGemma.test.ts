@@ -31,12 +31,19 @@ describe('createLocalGemmaClient', () => {
 })
 
 describe('ATOMIC_MODELS registry', () => {
-  test('exposes 6 verified-reachable model IDs', () => {
+  test('exposes judge-tier 3/3-correct primary + backups', () => {
+    // Primary trio (all 3/3 on dogfood reference manifest)
+    expect(ATOMIC_MODELS.DEEPSEEK_V32).toBe('deepseek/deepseek-v3.2')
+    expect(ATOMIC_MODELS.GROK_3).toBe('grok-3')
+    expect(ATOMIC_MODELS.OR_AUTO_FREE).toBe('openrouter/auto:free')
+  })
+
+  test('exposes reasoning tier + MiniMax tier + OR paid backup + offline', () => {
     expect(ATOMIC_MODELS.FAST).toBe('grok-4-fast-reasoning')
     expect(ATOMIC_MODELS.FAST_REASONING).toBe('grok-4-1-fast-reasoning')
     expect(ATOMIC_MODELS.MINIMAX_M27).toBe('MiniMax-M2.7')
     expect(ATOMIC_MODELS.MINIMAX_M25).toBe('MiniMax-M2.5')
-    expect(ATOMIC_MODELS.GROK_3).toBe('grok-3')
+    expect(ATOMIC_MODELS.QWEN_36_PLUS).toBe('qwen/qwen3.6-plus')
     expect(ATOMIC_MODELS.LOCAL_GEMMA).toBe(LOCAL_GEMMA_DEFAULT_MODEL)
   })
 
@@ -46,6 +53,8 @@ describe('ATOMIC_MODELS registry', () => {
     expect(values).not.toContain('MiniMax-M2.5-highspeed')
     expect(values).not.toContain('deepseek/deepseek-r1:free')
     expect(values).not.toContain('qwen/qwen3-30b-a3b:free')
+    expect(values).not.toContain('moonshotai/kimi-k2.5:free')
+    expect(values).not.toContain('llama-4-maverick:free')
   })
 })
 
