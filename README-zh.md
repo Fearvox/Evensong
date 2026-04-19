@@ -371,3 +371,10 @@ claude-code-reimagined/
 <p align="center">
   <i>从反编译到工程化。从黑箱到开放平台。从单一 LLM 到混合检索与再排。</i>
 </p>
+
+<p align="center">
+  <a href="https://github.com/Fearvox/Evensong/issues/new/choose">提 Issue</a> ·
+  <a href="https://github.com/Fearvox/Evensong/discussions">开 Discussion</a> ·
+  <a href="https://github.com/Fearvox/Evensong">Star</a> ·
+  <a href="https://github.com/Fearvox/Evensong/fork">Fork</a>
+</p>

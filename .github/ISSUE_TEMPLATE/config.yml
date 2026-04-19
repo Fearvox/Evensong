@@ -1,0 +1,17 @@
+blank_issues_enabled: false
+contact_links:
+  - name: 💬 Ask a question (Discussions)
+    url: https://github.com/Fearvox/Evensong/discussions/new?category=q-a
+    about: For questions, please use GitHub Discussions Q&A — faster turnaround.
+  - name: 💡 Propose an idea (Discussions)
+    url: https://github.com/Fearvox/Evensong/discussions/new?category=ideas
+    about: Half-baked ideas, architectural musings, "what if" threads.
+  - name: 📊 Share a benchmark result (Discussions)
+    url: https://github.com/Fearvox/Evensong/discussions/new?category=benchmarks
+    about: Ran the harness on your own vault or model? Post the numbers.
+  - name: 📖 Read the benchmark methodology
+    url: https://github.com/Fearvox/Evensong/tree/main/benchmarks/runs
+    about: Raw JSONL + Markdown summaries of the 648-trial Hybrid vs LLM-only runs.
+  - name: 📄 Licensing questions
+    url: https://github.com/Fearvox/Evensong/blob/main/LICENSING.md
+    about: Apache 2.0 (code) vs CC BY-NC-ND 4.0 (research) per-directory mapping.

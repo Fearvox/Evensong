@@ -1,0 +1,42 @@
+title: "[show] "
+labels: ["show-and-tell"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Built something on top of Evensong? Integrated it into your agent stack?
+        Post a short writeup + screenshots / numbers. We read every post.
+
+  - type: textarea
+    id: what
+    attributes:
+      label: What you built
+      placeholder: "Wired up Hybrid retrieval to my personal Obsidian vault (~2k notes), using Atomic Chat grok-4-fast as judge."
+    validations:
+      required: true
+
+  - type: textarea
+    id: how
+    attributes:
+      label: How it fits together
+      description: High-level architecture. Diagrams welcome (paste as image).
+
+  - type: textarea
+    id: numbers
+    attributes:
+      label: Any numbers worth sharing
+      description: Latency, accuracy, cost, scale — anything real.
+      placeholder: "200ms avg retrieval on 2k-entry vault, adapter shim is ~80 LOC."
+
+  - type: input
+    id: link
+    attributes:
+      label: Link (blog post, repo, demo video) — optional
+
+  - type: checkboxes
+    id: can-feature
+    attributes:
+      label: Sharing preferences
+      options:
+        - label: You can feature this in a follow-up README section or blog post with attribution.
+        - label: Please don't redistribute — this is just a heads-up.

@@ -1,0 +1,41 @@
+title: "[idea] "
+labels: ["idea"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Got a half-baked thought, a "what if", or a new direction for Evensong /
+        CCR? This is the right place. No pressure to have a full design.
+
+  - type: textarea
+    id: seed
+    attributes:
+      label: The seed idea (one paragraph)
+      placeholder: |
+        What if we swap BM25 stage 1 for a learned-sparse model like SPLADE v3?
+        Would preserve the "cheap stage 1" property but recover semantic cases
+        where term-overlap fails…
+    validations:
+      required: true
+
+  - type: textarea
+    id: why-now
+    attributes:
+      label: Why this might matter
+      description: What improvement / unlock does this point at?
+
+  - type: textarea
+    id: risks
+    attributes:
+      label: Obvious risks or reasons to drop it
+      placeholder: "Learned sparse models need fine-tuning on domain data — maybe too heavy for a reference harness."
+
+  - type: dropdown
+    id: stage
+    attributes:
+      label: How cooked is this
+      options:
+        - Napkin doodle (just flagging)
+        - Prototype sketched, not coded
+        - Quick experiment done, wants feedback
+        - Ready to turn into a feature request / PR

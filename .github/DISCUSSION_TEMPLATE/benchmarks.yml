@@ -1,0 +1,48 @@
+title: "[bench-discussion] "
+labels: ["benchmark"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Informal benchmark discussion — share results, propose new query sets,
+        argue about methodology. For structured reproduction reports that
+        should be tracked formally, open a
+        [Benchmark Report issue](https://github.com/Fearvox/Evensong/issues/new?template=benchmark_report.yml) instead.
+
+  - type: dropdown
+    id: kind
+    attributes:
+      label: Kind of discussion
+      options:
+        - Ran the harness — here are my numbers
+        - Proposing a new query category / test set
+        - Methodology question (fairness, bias, cross-LLM design)
+        - Comparing Evensong Hybrid vs another system
+        - Reproducibility concern
+        - Something else
+    validations:
+      required: true
+
+  - type: textarea
+    id: summary
+    attributes:
+      label: Summary
+      placeholder: "Tried the 108-query set with qwen/qwen3-235b-a22b as judge. Hybrid edge dropped to +0.8pp. Posting for discussion whether this means qwen is more consistent or our harness is tuned for deepseek."
+    validations:
+      required: true
+
+  - type: textarea
+    id: data
+    attributes:
+      label: Data (if applicable)
+      description: Paste the summary table, raw numbers, or link to your benchmarks/runs/ output.
+
+  - type: dropdown
+    id: want
+    attributes:
+      label: What you want out of this discussion
+      options:
+        - Feedback on methodology
+        - Help diagnosing divergent results
+        - Propose the change officially (moving toward a PR)
+        - Just sharing, no ask

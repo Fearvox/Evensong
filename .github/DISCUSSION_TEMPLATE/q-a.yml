@@ -1,0 +1,37 @@
+title: "[question] "
+labels: ["question"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Ask anything about CCR, the retrieval pipeline, running the benchmark,
+        or extending the code. Questions are not lesser than issues — they
+        often surface docs gaps we should fix.
+
+  - type: textarea
+    id: question
+    attributes:
+      label: Your question
+      placeholder: "How do I point `buildVaultManifest` at an Obsidian vault instead of the _vault/ convention?"
+    validations:
+      required: true
+
+  - type: textarea
+    id: already-tried
+    attributes:
+      label: What you've already tried or read
+      description: Not required, but speeds up the answer.
+      placeholder: "Read manifestBuilder.ts and tried passing vaultRoot: '/path/to/obsidian' — got 'ENOENT .meta/registry.jsonl'."
+
+  - type: dropdown
+    id: area
+    attributes:
+      label: Topic area
+      options:
+        - CCR runtime / REPL
+        - Retrieval pipeline (BM25, Hybrid, providers)
+        - Benchmark harness / reproducibility
+        - Atomic Chat / model config
+        - Build / Bun runtime
+        - Licensing / contribution
+        - Other

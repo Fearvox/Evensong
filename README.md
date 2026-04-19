@@ -230,6 +230,6 @@ EverMemOS published design.
 
 **If you build an agent memory system on top of this, we'd love to hear about it.**
 
-Open an issue · Star the repo · Fork and ship
+[Open an issue](https://github.com/Fearvox/Evensong/issues/new/choose) · [Start a discussion](https://github.com/Fearvox/Evensong/discussions) · [Star the repo](https://github.com/Fearvox/Evensong) · [Fork and ship](https://github.com/Fearvox/Evensong/fork)
 
 </div>

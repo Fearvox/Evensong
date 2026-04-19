@@ -1,0 +1,79 @@
+name: ✨ Feature request
+description: Propose a new capability, provider, benchmark category, or architectural change.
+title: "[feature] "
+labels: ["enhancement", "triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Before filing, please skim [Discussions Ideas](https://github.com/Fearvox/Evensong/discussions/new?category=ideas)
+        to see if this is better as an open-ended thread. File an issue when you have
+        a concrete proposal with rough scope + success criteria.
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem / use case
+      description: What are you trying to do that CCR / retrieval / benchmark can't currently do?
+      placeholder: |
+        I want to plug in a dense-vector stage 1 (BGE-M3 via BGE API or
+        Cloudflare Workers AI) alongside BM25 in the hybrid pipeline, so
+        semantic recall can rescue cases where BM25 term overlap sends
+        the wrong doc to stage 2 (see Q44 Q56 Q59 in the 108-query run).
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed change
+      description: Shape of the implementation. API sketch is ideal.
+      placeholder: |
+        New file: src/services/retrieval/providers/denseProvider.ts
+        Factory: createDenseProvider({ endpoint, model }): VaultRetrievalProvider
+        Composed via: createHybridProvider({ stage1: rrfFuse([bm25, dense]), stage2 })
+      render: markdown
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+      description: What other shapes did you reject, and why?
+      placeholder: "Considered replacing BM25 entirely with dense — rejected because BM25 zero-cost is too good to give up."
+
+  - type: dropdown
+    id: scope
+    attributes:
+      label: Rough scope
+      options:
+        - S (≤ 1 file, ≤ 50 LOC)
+        - M (new module, ≤ 300 LOC)
+        - L (multi-module, new provider type, benchmark update)
+        - XL (architectural — warrants an RFC discussion first)
+    validations:
+      required: true
+
+  - type: textarea
+    id: success
+    attributes:
+      label: Success criteria
+      description: How will we know the feature works? Include a benchmark target if relevant.
+      placeholder: |
+        - Hybrid (BM25 + dense RRF → LLM) beats BM25-only Hybrid by ≥ 2pp top-1
+          on the 108-query generated benchmark, 3 runs, stddev < 1pp
+        - Latency overhead < 200ms p50 for dense stage
+        - No regression on the 20-query manual benchmark
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: willing
+    attributes:
+      label: Willing to contribute
+      description: "Are you offering to PR this? No obligation either way."
+      options:
+        - label: I plan to open a PR for this.
+        - label: I can test / review a PR but don't plan to write it.
+        - label: I'm just flagging; no bandwidth to contribute.

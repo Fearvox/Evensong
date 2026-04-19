@@ -1,0 +1,87 @@
+name: 📊 Benchmark report
+description: You reproduced (or failed to reproduce) our headline numbers — share the data.
+title: "[bench] "
+labels: ["benchmark", "reproduction"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for running the benchmark! This template is for **structured** reproduction
+        reports that we can fold back into the research narrative. For informal
+        comparisons or "I tried X, what do you think?" posts, use
+        [Discussions Benchmarks](https://github.com/Fearvox/Evensong/discussions/new?category=benchmarks) instead.
+
+  - type: dropdown
+    id: kind
+    attributes:
+      label: Report kind
+      options:
+        - Reproduction of headline 648-trial Hybrid vs LLM-only
+        - Reproduction on different vault (size / language / domain)
+        - Reproduction with different judge model
+        - Reproduction with different generator model
+        - Reproduction failed / numbers diverge
+        - Novel configuration (new stage 1, new rerank model, adaptive gating)
+    validations:
+      required: true
+
+  - type: input
+    id: commit
+    attributes:
+      label: Commit SHA you tested
+      placeholder: "e.g. 1ed69de or a tag like v1.0"
+    validations:
+      required: true
+
+  - type: textarea
+    id: setup
+    attributes:
+      label: Setup
+      description: Manifest size, real vs synthetic split, generator model, judge model, concurrency, runs.
+      placeholder: |
+        - Manifest: 200 entries (18 real + 182 synthetic junk, same as default)
+        - Generator: grok-3
+        - Judge: deepseek-v3.2
+        - Runs per (pipeline × query): 3
+        - Concurrency: 3
+        - stage1TopK: 50
+        - withBody: true
+      render: markdown
+    validations:
+      required: true
+
+  - type: textarea
+    id: results
+    attributes:
+      label: Results
+      description: Paste the summary table (or attach the generated .md file).
+      placeholder: |
+        | Pipeline | Top-1 | p50 | p90 |
+        | hybrid   | ... / ... | ...ms | ...ms |
+        | llm-only | ... / ... | ...ms | ...ms |
+      render: markdown
+    validations:
+      required: true
+
+  - type: textarea
+    id: divergence
+    attributes:
+      label: Divergence from our numbers
+      description: If your numbers differ from the README headline (Hybrid 79.3%, LLM 76.9%), what accounts for it?
+      placeholder: "My manifest uses Chinese-only content; Hybrid edge grew to +4pp because BM25 CJK tokenization matters more on shorter-title docs."
+
+  - type: textarea
+    id: attachments
+    attributes:
+      label: Attachments
+      description: Link or attach the raw JSONL + summary MD from your `benchmarks/runs/` folder.
+
+  - type: checkboxes
+    id: agree
+    attributes:
+      label: Sharing terms
+      options:
+        - label: Data I submit can be referenced in future benchmark summaries with attribution to my GitHub handle.
+          required: true
+        - label: I removed any private vault content / PII from the raw data before posting.
+          required: true
