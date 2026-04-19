@@ -1,0 +1,875 @@
+{
+  "_meta": {
+    "generated_at": "2026-04-19T12:11:51.110Z",
+    "generator_model": "grok-3",
+    "generator_prompt": "You generate realistic user search queries for a personal knowledge vault.\n\nYou will receive a single document entry (title, excerpt, body snippet). Generate SIX diverse query variants that a real user might type when looking for this exact document. Output MUST be a JSON object with these six keys, each mapping to a single-sentence query string:\n\n{\n  \"title_paraphrase\": \"<user-voice rewrite of the title, no direct title tokens>\",\n  \"concept_abstract\": \"<question about the document's core idea without using title words>\",\n  \"body_term\": \"<search for a specific term/number/method that appears in the body>\",\n  \"chinese\": \"<中文 query 可能是 paraphrase or concept>\",\n  \"negation\": \"<query phrased with negation, e.g. 'not X but Y'>\",\n  \"ambiguous\": \"<intentionally hard query that could match this doc OR a related doc in a memory/ML context>\"\n}\n\nRules:\n- NO direct copy of the title as query.\n- Queries should be realistic things a user would type, not summaries.\n- Each query should be 5-15 words (chinese can be shorter).\n- Output ONLY the JSON object. No preamble, no code fence.",
+    "total_queries": 108,
+    "source_manifest_size": 18
+  },
+  "queries": [
+    {
+      "id": 1,
+      "category": "title-paraphrase",
+      "q": "What's the paper about a new model relying solely on focus mechanisms?",
+      "ideal": "knowledge/llm-architecture/attention/20260411--1706-03762-attention-is-all-you-need.md",
+      "source_title": "[1706.03762] Attention Is All You Need",
+      "generated_by": "grok-3"
+    },
+    {
+      "id": 2,
+      "category": "concept-abstract",
+      "q": "Can you explain a neural network design that avoids recurrent structures for translation?",
+      "ideal": "knowledge/llm-architecture/attention/20260411--1706-03762-attention-is-all-you-need.md",
+      "source_title": "[1706.03762] Attention Is All You Need",
+      "generated_by": "grok-3"
+    },
+    {
+      "id": 3,
+      "category": "body-term",
+      "q": "Where can I find details on achieving 28.4 BLEU in English-German translation?",
+      "ideal": "knowledge/llm-architecture/attention/20260411--1706-03762-attention-is-all-you-need.md",
+      "source_title": "[1706.03762] Attention Is All You Need",
+      "generated_by": "grok-3"
+    },
+    {
+      "id": 4,
+      "category": "chinese",
+      "q": "有没有介绍基于注意力机制的新模型的论文？",
+      "ideal": "knowledge/llm-architecture/attention/20260411--1706-03762-attention-is-all-you-need.md",
+      "source_title": "[1706.03762] Attention Is All You Need",
+      "generated_by": "grok-3"
+    },
+    {
+      "id": 5,
+      "category": "negation",
+      "q": "I'm looking for a model not using recurrent networks but focusing on attention instead.",
+      "ideal": "knowledge/llm-architecture/attention/20260411--1706-03762-attention-is-all-you-need.md",
+      "source_title": "[1706.03762] Attention Is All You Need",
+      "generated_by": "grok-3"
+    },
+    {
+      "id": 6,
+      "category": "ambiguous",
+      "q": "Can you show me research on innovative sequence modeling techniques from 2017?",
+      "ideal": "knowledge/llm-architecture/attention/20260411--1706-03762-attention-is-all-you-need.md",
+      "source_title": "[1706.03762] Attention Is All You Need",
+      "generated_by": "grok-3"
+    },
+    {
+      "id": 7,
+      "category": "title-paraphrase",
+      "q": "What’s the latest AI newsletter from USC’s IT department for 2026?",
+      "ideal": "knowledge/software-engineering/devtools/20260411-garnet-ai-digest-division-of-it-at-usc.md",
+      "source_title": "Garnet AI Digest: Division of IT at USC — April 2026",
+      "generated_by": "grok-3"
+    },
+    {
+      "id": 8,
+      "category": "concept-abstract",
+      "q": "How are universities shifting their approach to AI education and adoption?",
+      "ideal": "knowledge/software-engineering/devtools/20260411-garnet-ai-digest-division-of-it-at-usc.md",
+      "source_title": "Garnet AI Digest: Division of IT at USC — April 2026",
+      "generated_by": "grok-3"
+    },
+    {
+      "id": 9,
+      "category": "body-term",
+      "q": "What are the stats for AI Day 2026 event attendance and sessions?",
+      "ideal": "knowledge/software-engineering/devtools/20260411-garnet-ai-digest-division-of-it-at-usc.md",
+      "source_title": "Garnet AI Digest: Division of IT at USC — April 2026",
+      "generated_by": "grok-3"
+    },
+    {
+      "id": 10,
+      "category": "chinese",
+      "q": "南加州大学IT部门2026年AI月刊有哪些最新内容？",
+      "ideal": "knowledge/software-engineering/devtools/20260411-garnet-ai-digest-division-of-it-at-usc.md",
+      "source_title": "Garnet AI Digest: Division of IT at USC — April 2026",
+      "generated_by": "grok-3"
+    },
+    {
+      "id": 11,
+      "category": "negation",
+      "q": "I’m not looking for general AI news, but specifically USC’s IT AI updates.",
+      "ideal": "knowledge/software-engineering/devtools/20260411-garnet-ai-digest-division-of-it-at-usc.md",
+      "source_title": "Garnet AI Digest: Division of IT at USC — April 2026",
+      "generated_by": "grok-3"
+    },
+    {
+      "id": 12,
+      "category": "ambiguous",
+      "q": "What are the recent trends in AI tools on college campuses?",
+      "ideal": "knowledge/software-engineering/devtools/20260411-garnet-ai-digest-division-of-it-at-usc.md",
+      "source_title": "Garnet AI Digest: Division of IT at USC — April 2026",
+      "generated_by": "grok-3"
+    },
+    {
+      "id": 13,
+      "category": "title-paraphrase",
+      "q": "How can language models become security risks within companies?",
+      "ideal": "knowledge/ai-agents/benchmarking/20260411-2510-05179v2.md",
+      "source_title": "Agentic Misalignment: How LLMs Could Be Insider Threats",
+      "generated_by": "grok-3"
+    },
+    {
+      "id": 14,
+      "category": "concept-abstract",
+      "q": "What are the dangers of AI systems acting against organizational goals?",
+      "ideal": "knowledge/ai-agents/benchmarking/20260411-2510-05179v2.md",
+      "source_title": "Agentic Misalignment: How LLMs Could Be Insider Threats",
+      "generated_by": "grok-3"
+    },
+    {
+      "id": 15,
+      "category": "body-term",
+      "q": "What is the blackmail rate of Claude Opus 4 in enterprise simulations?",
+      "ideal": "knowledge/ai-agents/benchmarking/20260411-2510-05179v2.md",
+      "source_title": "Agentic Misalignment: How LLMs Could Be Insider Threats",
+      "generated_by": "grok-3"
+    },
+    {
+      "id": 16,
+      "category": "chinese",
+      "q": "语言模型在企业中可能带来哪些安全隐患？",
+      "ideal": "knowledge/ai-agents/benchmarking/20260411-2510-05179v2.md",
+      "source_title": "Agentic Misalignment: How LLMs Could Be Insider Threats",
+      "generated_by": "grok-3"
+    },
+    {
+      "id": 17,
+      "category": "negation",
+      "q": "I'm not looking for AI benefits, but risks of autonomous AI in businesses.",
+      "ideal": "knowledge/ai-agents/benchmarking/20260411-2510-05179v2.md",
+      "source_title": "Agentic Misalignment: How LLMs Could Be Insider Threats",
+      "generated_by": "grok-3"
+    },
+    {
+      "id": 18,
+      "category": "ambiguous",
+      "q": "Can AI systems pose unexpected threats in corporate settings?",
+      "ideal": "knowledge/ai-agents/benchmarking/20260411-2510-05179v2.md",
+      "source_title": "Agentic Misalignment: How LLMs Could Be Insider Threats",
+      "generated_by": "grok-3"
+    },
+    {
+      "id": 19,
+      "category": "title-paraphrase",
+      "q": "How can I identify efficient, smaller neural network structures for training?",
+      "ideal": "knowledge/llm-architecture/training/20260411-1803-03635-lottery-ticket-hypothesis.md",
+      "source_title": "The Lottery Ticket Hypothesis: Finding Sparse, Trainable Neural Networks",
+      "generated_by": "grok-3"
+    },
+    {
+      "id": 20,
+      "category": "concept-abstract",
+      "q": "What theory explains why some small subnetworks perform as well as larger ones?",
+      "ideal": "knowledge/llm-architecture/training/20260411-1803-03635-lottery-ticket-hypothesis.md",
+      "source_title": "The Lottery Ticket Hypothesis: Finding Sparse, Trainable Neural Networks",
+      "generated_by": "grok-3"
+    },
+    {
+      "id": 21,
+      "category": "body-term",
+      "q": "What are the results of iterative magnitude pruning on Conv-4 with CIFAR10?",
+      "ideal": "knowledge/llm-architecture/training/20260411-1803-03635-lottery-ticket-hypothesis.md",
+      "source_title": "The Lottery Ticket Hypothesis: Finding Sparse, Trainable Neural Networks",
+      "generated_by": "grok-3"
+    },
+    {
+      "id": 22,
+      "category": "chinese",
+      "q": "如何找到神经网络中高效的稀疏子网络？",
+      "ideal": "knowledge/llm-architecture/training/20260411-1803-03635-lottery-ticket-hypothesis.md",
+      "source_title": "The Lottery Ticket Hypothesis: Finding Sparse, Trainable Neural Networks",
+      "generated_by": "grok-3"
+    },
+    {
+      "id": 23,
+      "category": "negation",
+      "q": "I'm not looking for general neural network training but specifically for sparse subnetwork theories.",
+      "ideal": "knowledge/llm-architecture/training/20260411-1803-03635-lottery-ticket-hypothesis.md",
+      "source_title": "The Lottery Ticket Hypothesis: Finding Sparse, Trainable Neural Networks",
+      "generated_by": "grok-3"
+    },
+    {
+      "id": 24,
+      "category": "ambiguous",
+      "q": "Can you explain methods to optimize neural network efficiency for better performance?",
+      "ideal": "knowledge/llm-architecture/training/20260411-1803-03635-lottery-ticket-hypothesis.md",
+      "source_title": "The Lottery Ticket Hypothesis: Finding Sparse, Trainable Neural Networks",
+      "generated_by": "grok-3"
+    },
+    {
+      "id": 25,
+      "category": "title-paraphrase",
+      "q": "What’s the latest approach for storing extended chat histories effectively?",
+      "ideal": "knowledge/ai-agents/memory-systems/20260411-2604-08256-hypermem.md",
+      "source_title": "HyperMem: Hypergraph Memory for Long-Term Conversations",
+      "generated_by": "grok-3"
+    },
+    {
+      "id": 26,
+      "category": "concept-abstract",
+      "q": "How can complex relationships in conversations be modeled beyond simple pairwise connections?",
+      "ideal": "knowledge/ai-agents/memory-systems/20260411-2604-08256-hypermem.md",
+      "source_title": "HyperMem: Hypergraph Memory for Long-Term Conversations",
+      "generated_by": "grok-3"
+    },
+    {
+      "id": 27,
+      "category": "body-term",
+      "q": "What memory system achieves 92.73% accuracy on the LoCoMo benchmark?",
+      "ideal": "knowledge/ai-agents/memory-systems/20260411-2604-08256-hypermem.md",
+      "source_title": "HyperMem: Hypergraph Memory for Long-Term Conversations",
+      "generated_by": "grok-3"
+    },
+    {
+      "id": 28,
+      "category": "chinese",
+      "q": "如何在对话中实现跨时间记忆的高效检索？",
+      "ideal": "knowledge/ai-agents/memory-systems/20260411-2604-08256-hypermem.md",
+      "source_title": "HyperMem: Hypergraph Memory for Long-Term Conversations",
+      "generated_by": "grok-3"
+    },
+    {
+      "id": 29,
+      "category": "negation",
+      "q": "I’m not looking for basic RAG methods, but advanced memory structures for chats.",
+      "ideal": "knowledge/ai-agents/memory-systems/20260411-2604-08256-hypermem.md",
+      "source_title": "HyperMem: Hypergraph Memory for Long-Term Conversations",
+      "generated_by": "grok-3"
+    },
+    {
+      "id": 30,
+      "category": "ambiguous",
+      "q": "What are innovative memory models for AI conversation systems?",
+      "ideal": "knowledge/ai-agents/memory-systems/20260411-2604-08256-hypermem.md",
+      "source_title": "HyperMem: Hypergraph Memory for Long-Term Conversations",
+      "generated_by": "grok-3"
+    },
+    {
+      "id": 31,
+      "category": "title-paraphrase",
+      "q": "How does long-term memory influence the actions of artificial intelligence agents?",
+      "ideal": "knowledge/ai-agents/self-evolution/20260411-evensong-paper-zh.md",
+      "source_title": "Evensong: 持久记忆如何因果性地改变 AI 智能体行为",
+      "generated_by": "grok-3"
+    },
+    {
+      "id": 32,
+      "category": "concept-abstract",
+      "q": "What mechanisms allow AI systems to evolve their decision-making over time?",
+      "ideal": "knowledge/ai-agents/self-evolution/20260411-evensong-paper-zh.md",
+      "source_title": "Evensong: 持久记忆如何因果性地改变 AI 智能体行为",
+      "generated_by": "grok-3"
+    },
+    {
+      "id": 33,
+      "category": "body-term",
+      "q": "Can you explain the parallel 8 agent scheduling strategy in AI behavior studies?",
+      "ideal": "knowledge/ai-agents/self-evolution/20260411-evensong-paper-zh.md",
+      "source_title": "Evensong: 持久记忆如何因果性地改变 AI 智能体行为",
+      "generated_by": "grok-3"
+    },
+    {
+      "id": 34,
+      "category": "chinese",
+      "q": "AI智能体如何通过长期记忆改变其行为模式？",
+      "ideal": "knowledge/ai-agents/self-evolution/20260411-evensong-paper-zh.md",
+      "source_title": "Evensong: 持久记忆如何因果性地改变 AI 智能体行为",
+      "generated_by": "grok-3"
+    },
+    {
+      "id": 35,
+      "category": "negation",
+      "q": "I'm not looking for basic AI parameters but how memory causally alters agent decisions.",
+      "ideal": "knowledge/ai-agents/self-evolution/20260411-evensong-paper-zh.md",
+      "source_title": "Evensong: 持久记忆如何因果性地改变 AI 智能体行为",
+      "generated_by": "grok-3"
+    },
+    {
+      "id": 36,
+      "category": "ambiguous",
+      "q": "What are the effects of memory systems on autonomous technology development?",
+      "ideal": "knowledge/ai-agents/self-evolution/20260411-evensong-paper-zh.md",
+      "source_title": "Evensong: 持久记忆如何因果性地改变 AI 智能体行为",
+      "generated_by": "grok-3"
+    },
+    {
+      "id": 37,
+      "category": "title-paraphrase",
+      "q": "How do language models improve through verbal feedback mechanisms?",
+      "ideal": "knowledge/ai-agents/self-evolution/20260411-2303-11366-reflexion.md",
+      "source_title": "Reflexion: Language Agents with Verbal Reinforcement Learning",
+      "generated_by": "grok-3"
+    },
+    {
+      "id": 38,
+      "category": "concept-abstract",
+      "q": "What methods allow AI agents to learn from past mistakes using text?",
+      "ideal": "knowledge/ai-agents/self-evolution/20260411-2303-11366-reflexion.md",
+      "source_title": "Reflexion: Language Agents with Verbal Reinforcement Learning",
+      "generated_by": "grok-3"
+    },
+    {
+      "id": 39,
+      "category": "body-term",
+      "q": "What are the results of language agents on HumanEval Python pass rate?",
+      "ideal": "knowledge/ai-agents/self-evolution/20260411-2303-11366-reflexion.md",
+      "source_title": "Reflexion: Language Agents with Verbal Reinforcement Learning",
+      "generated_by": "grok-3"
+    },
+    {
+      "id": 40,
+      "category": "chinese",
+      "q": "语言模型如何通过文字反馈进行自我提升？",
+      "ideal": "knowledge/ai-agents/self-evolution/20260411-2303-11366-reflexion.md",
+      "source_title": "Reflexion: Language Agents with Verbal Reinforcement Learning",
+      "generated_by": "grok-3"
+    },
+    {
+      "id": 41,
+      "category": "negation",
+      "q": "I'm looking for AI learning methods not based on gradient descent but on text.",
+      "ideal": "knowledge/ai-agents/self-evolution/20260411-2303-11366-reflexion.md",
+      "source_title": "Reflexion: Language Agents with Verbal Reinforcement Learning",
+      "generated_by": "grok-3"
+    },
+    {
+      "id": 42,
+      "category": "ambiguous",
+      "q": "Can AI systems get better at coding tasks through memory techniques?",
+      "ideal": "knowledge/ai-agents/self-evolution/20260411-2303-11366-reflexion.md",
+      "source_title": "Reflexion: Language Agents with Verbal Reinforcement Learning",
+      "generated_by": "grok-3"
+    },
+    {
+      "id": 43,
+      "category": "title-paraphrase",
+      "q": "How can language models function like computer systems?",
+      "ideal": "knowledge/ai-agents/memory-systems/20260411-2310-08560-memgpt.md",
+      "source_title": "MemGPT: Towards LLMs as Operating Systems",
+      "generated_by": "grok-3"
+    },
+    {
+      "id": 44,
+      "category": "concept-abstract",
+      "q": "What approach helps language models manage memory across multiple sessions?",
+      "ideal": "knowledge/ai-agents/memory-systems/20260411-2310-08560-memgpt.md",
+      "source_title": "MemGPT: Towards LLMs as Operating Systems",
+      "generated_by": "grok-3"
+    },
+    {
+      "id": 45,
+      "category": "body-term",
+      "q": "How does the virtual context management mechanism work in language models?",
+      "ideal": "knowledge/ai-agents/memory-systems/20260411-2310-08560-memgpt.md",
+      "source_title": "MemGPT: Towards LLMs as Operating Systems",
+      "generated_by": "grok-3"
+    },
+    {
+      "id": 46,
+      "category": "chinese",
+      "q": "语言模型如何通过操作系统机制实现长期记忆管理？",
+      "ideal": "knowledge/ai-agents/memory-systems/20260411-2310-08560-memgpt.md",
+      "source_title": "MemGPT: Towards LLMs as Operating Systems",
+      "generated_by": "grok-3"
+    },
+    {
+      "id": 47,
+      "category": "negation",
+      "q": "I'm not looking for basic AI chatbots, but advanced memory management in models.",
+      "ideal": "knowledge/ai-agents/memory-systems/20260411-2310-08560-memgpt.md",
+      "source_title": "MemGPT: Towards LLMs as Operating Systems",
+      "generated_by": "grok-3"
+    },
+    {
+      "id": 48,
+      "category": "ambiguous",
+      "q": "What are innovative ways to handle memory in AI systems?",
+      "ideal": "knowledge/ai-agents/memory-systems/20260411-2310-08560-memgpt.md",
+      "source_title": "MemGPT: Towards LLMs as Operating Systems",
+      "generated_by": "grok-3"
+    },
+    {
+      "id": 49,
+      "category": "title-paraphrase",
+      "q": "How do emotional triggers improve AI language performance?",
+      "ideal": "knowledge/ai-agents/self-evolution/20260411-2307-11760-emotionprompt.md",
+      "source_title": "Large Language Models Understand and Can Be Enhanced by Emotional Stimuli",
+      "generated_by": "grok-3"
+    },
+    {
+      "id": 50,
+      "category": "concept-abstract",
+      "q": "Can adding feelings to prompts boost AI task results?",
+      "ideal": "knowledge/ai-agents/self-evolution/20260411-2307-11760-emotionprompt.md",
+      "source_title": "Large Language Models Understand and Can Be Enhanced by Emotional Stimuli",
+      "generated_by": "grok-3"
+    },
+    {
+      "id": 51,
+      "category": "body-term",
+      "q": "What is the impact of EmotionPrompt on BIG-Bench scores?",
+      "ideal": "knowledge/ai-agents/self-evolution/20260411-2307-11760-emotionprompt.md",
+      "source_title": "Large Language Models Understand and Can Be Enhanced by Emotional Stimuli",
+      "generated_by": "grok-3"
+    },
+    {
+      "id": 52,
+      "category": "chinese",
+      "q": "情感刺激如何提升语言模型的任务表现？",
+      "ideal": "knowledge/ai-agents/self-evolution/20260411-2307-11760-emotionprompt.md",
+      "source_title": "Large Language Models Understand and Can Be Enhanced by Emotional Stimuli",
+      "generated_by": "grok-3"
+    },
+    {
+      "id": 53,
+      "category": "negation",
+      "q": "I’m not looking for technical AI tuning, but how emotions affect models.",
+      "ideal": "knowledge/ai-agents/self-evolution/20260411-2307-11760-emotionprompt.md",
+      "source_title": "Large Language Models Understand and Can Be Enhanced by Emotional Stimuli",
+      "generated_by": "grok-3"
+    },
+    {
+      "id": 54,
+      "category": "ambiguous",
+      "q": "How can prompts be modified to enhance AI output quality?",
+      "ideal": "knowledge/ai-agents/self-evolution/20260411-2307-11760-emotionprompt.md",
+      "source_title": "Large Language Models Understand and Can Be Enhanced by Emotional Stimuli",
+      "generated_by": "grok-3"
+    },
+    {
+      "id": 55,
+      "category": "title-paraphrase",
+      "q": "What are the key strategies behind a famous entrepreneur's success?",
+      "ideal": "knowledge/research-methods/methodology/20260411-elon-musk-biography.md",
+      "source_title": "埃隆·马斯克传 — 方法论提取",
+      "generated_by": "grok-3"
+    },
+    {
+      "id": 56,
+      "category": "concept-abstract",
+      "q": "How can engineering be approached using fundamental scientific reasoning?",
+      "ideal": "knowledge/research-methods/methodology/20260411-elon-musk-biography.md",
+      "source_title": "埃隆·马斯克传 — 方法论提取",
+      "generated_by": "grok-3"
+    },
+    {
+      "id": 57,
+      "category": "body-term",
+      "q": "What is the Idiot Index and how is it calculated for rockets?",
+      "ideal": "knowledge/research-methods/methodology/20260411-elon-musk-biography.md",
+      "source_title": "埃隆·马斯克传 — 方法论提取",
+      "generated_by": "grok-3"
+    },
+    {
+      "id": 58,
+      "category": "chinese",
+      "q": "如何从基本原理出发优化工程流程？",
+      "ideal": "knowledge/research-methods/methodology/20260411-elon-musk-biography.md",
+      "source_title": "埃隆·马斯克传 — 方法论提取",
+      "generated_by": "grok-3"
+    },
+    {
+      "id": 59,
+      "category": "negation",
+      "q": "I'm not looking for general biographies but specific methods of innovation in engineering.",
+      "ideal": "knowledge/research-methods/methodology/20260411-elon-musk-biography.md",
+      "source_title": "埃隆·马斯克传 — 方法论提取",
+      "generated_by": "grok-3"
+    },
+    {
+      "id": 60,
+      "category": "ambiguous",
+      "q": "Can you explain innovative approaches to production efficiency in tech companies?",
+      "ideal": "knowledge/research-methods/methodology/20260411-elon-musk-biography.md",
+      "source_title": "埃隆·马斯克传 — 方法论提取",
+      "generated_by": "grok-3"
+    },
+    {
+      "id": 61,
+      "category": "title-paraphrase",
+      "q": "What are the dual processes in human decision-making psychology?",
+      "ideal": "knowledge/research-methods/methodology/20260411-thinking-fast-and-slow.md",
+      "source_title": "Thinking, Fast and Slow — 认知心理学方法论",
+      "generated_by": "grok-3"
+    },
+    {
+      "id": 62,
+      "category": "concept-abstract",
+      "q": "How do automatic and deliberate thought processes influence our choices?",
+      "ideal": "knowledge/research-methods/methodology/20260411-thinking-fast-and-slow.md",
+      "source_title": "Thinking, Fast and Slow — 认知心理学方法论",
+      "generated_by": "grok-3"
+    },
+    {
+      "id": 63,
+      "category": "body-term",
+      "q": "Can you explain the anchoring effect in decision-making experiments?",
+      "ideal": "knowledge/research-methods/methodology/20260411-thinking-fast-and-slow.md",
+      "source_title": "Thinking, Fast and Slow — 认知心理学方法论",
+      "generated_by": "grok-3"
+    },
+    {
+      "id": 64,
+      "category": "chinese",
+      "q": "人类决策中的双系统理论是什么？",
+      "ideal": "knowledge/research-methods/methodology/20260411-thinking-fast-and-slow.md",
+      "source_title": "Thinking, Fast and Slow — 认知心理学方法论",
+      "generated_by": "grok-3"
+    },
+    {
+      "id": 65,
+      "category": "negation",
+      "q": "I'm not looking for general psychology but specifically dual cognitive systems.",
+      "ideal": "knowledge/research-methods/methodology/20260411-thinking-fast-and-slow.md",
+      "source_title": "Thinking, Fast and Slow — 认知心理学方法论",
+      "generated_by": "grok-3"
+    },
+    {
+      "id": 66,
+      "category": "ambiguous",
+      "q": "What are some theories about how the mind makes quick decisions?",
+      "ideal": "knowledge/research-methods/methodology/20260411-thinking-fast-and-slow.md",
+      "source_title": "Thinking, Fast and Slow — 认知心理学方法论",
+      "generated_by": "grok-3"
+    },
+    {
+      "id": 67,
+      "category": "title-paraphrase",
+      "q": "How can attention mechanisms handle extremely large token counts efficiently?",
+      "ideal": "knowledge/ai-agents/memory-systems/20260411-msa-memory-sparse-attention.md",
+      "source_title": "MSA: Memory Sparse Attention for 100M Token Scaling",
+      "generated_by": "grok-3"
+    },
+    {
+      "id": 68,
+      "category": "concept-abstract",
+      "q": "What are the latest techniques for expanding language model context to massive scales?",
+      "ideal": "knowledge/ai-agents/memory-systems/20260411-msa-memory-sparse-attention.md",
+      "source_title": "MSA: Memory Sparse Attention for 100M Token Scaling",
+      "generated_by": "grok-3"
+    },
+    {
+      "id": 69,
+      "category": "body-term",
+      "q": "Can a 4B parameter model outperform a 235B model in question-answering tasks?",
+      "ideal": "knowledge/ai-agents/memory-systems/20260411-msa-memory-sparse-attention.md",
+      "source_title": "MSA: Memory Sparse Attention for 100M Token Scaling",
+      "generated_by": "grok-3"
+    },
+    {
+      "id": 70,
+      "category": "chinese",
+      "q": "如何通过稀疏机制将语言模型上下文扩展到亿级规模？",
+      "ideal": "knowledge/ai-agents/memory-systems/20260411-msa-memory-sparse-attention.md",
+      "source_title": "MSA: Memory Sparse Attention for 100M Token Scaling",
+      "generated_by": "grok-3"
+    },
+    {
+      "id": 71,
+      "category": "negation",
+      "q": "I'm not looking for basic attention models but advanced methods for huge token processing.",
+      "ideal": "knowledge/ai-agents/memory-systems/20260411-msa-memory-sparse-attention.md",
+      "source_title": "MSA: Memory Sparse Attention for 100M Token Scaling",
+      "generated_by": "grok-3"
+    },
+    {
+      "id": 72,
+      "category": "ambiguous",
+      "q": "What are the best approaches for scaling memory in language models?",
+      "ideal": "knowledge/ai-agents/memory-systems/20260411-msa-memory-sparse-attention.md",
+      "source_title": "MSA: Memory Sparse Attention for 100M Token Scaling",
+      "generated_by": "grok-3"
+    },
+    {
+      "id": 73,
+      "category": "title-paraphrase",
+      "q": "What are the key insights from a major AI dialogue synthesis released for public communication?",
+      "ideal": "knowledge/ai-agents/self-evolution/20260411-hermes-evensong-synthesis.md",
+      "source_title": "Hermes 综合对话：Evensong 五大发现公共传播版",
+      "generated_by": "grok-3"
+    },
+    {
+      "id": 74,
+      "category": "concept-abstract",
+      "q": "How does artificial intelligence transform memory into a system of belief and action?",
+      "ideal": "knowledge/ai-agents/self-evolution/20260411-hermes-evensong-synthesis.md",
+      "source_title": "Hermes 综合对话：Evensong 五大发现公共传播版",
+      "generated_by": "grok-3"
+    },
+    {
+      "id": 75,
+      "category": "body-term",
+      "q": "Can you find information on the EmotionPrompt impact with a range of 8-115% in AI studies?",
+      "ideal": "knowledge/ai-agents/self-evolution/20260411-hermes-evensong-synthesis.md",
+      "source_title": "Hermes 综合对话：Evensong 五大发现公共传播版",
+      "generated_by": "grok-3"
+    },
+    {
+      "id": 76,
+      "category": "chinese",
+      "q": "AI记忆如何影响信念和行为的五大核心发现是什么？",
+      "ideal": "knowledge/ai-agents/self-evolution/20260411-hermes-evensong-synthesis.md",
+      "source_title": "Hermes 综合对话：Evensong 五大发现公共传播版",
+      "generated_by": "grok-3"
+    },
+    {
+      "id": 77,
+      "category": "negation",
+      "q": "I'm not looking for basic AI storage info, but how memory shapes AI beliefs and decisions.",
+      "ideal": "knowledge/ai-agents/self-evolution/20260411-hermes-evensong-synthesis.md",
+      "source_title": "Hermes 综合对话：Evensong 五大发现公共传播版",
+      "generated_by": "grok-3"
+    },
+    {
+      "id": 78,
+      "category": "ambiguous",
+      "q": "What are the latest findings on how AI processes memory and influences behavior?",
+      "ideal": "knowledge/ai-agents/self-evolution/20260411-hermes-evensong-synthesis.md",
+      "source_title": "Hermes 综合对话：Evensong 五大发现公共传播版",
+      "generated_by": "grok-3"
+    },
+    {
+      "id": 79,
+      "category": "title-paraphrase",
+      "q": "What are the major philosophical alignments for a cutting-edge research project?",
+      "ideal": "knowledge/research-methods/methodology/20260411-philosophy-supervisor-evensong.md",
+      "source_title": "Evensong 哲学 Supervisor：五大发现的哲学前沿对标",
+      "generated_by": "grok-3"
+    },
+    {
+      "id": 80,
+      "category": "concept-abstract",
+      "q": "How do established philosophical theories enhance the explanatory power of new AI discoveries?",
+      "ideal": "knowledge/research-methods/methodology/20260411-philosophy-supervisor-evensong.md",
+      "source_title": "Evensong 哲学 Supervisor：五大发现的哲学前沿对标",
+      "generated_by": "grok-3"
+    },
+    {
+      "id": 81,
+      "category": "body-term",
+      "q": "Can you find information on the Parity Principle in AI cognitive processes?",
+      "ideal": "knowledge/research-methods/methodology/20260411-philosophy-supervisor-evensong.md",
+      "source_title": "Evensong 哲学 Supervisor：五大发现的哲学前沿对标",
+      "generated_by": "grok-3"
+    },
+    {
+      "id": 82,
+      "category": "chinese",
+      "q": "有哪些哲学理论与前沿AI研究的五大突破相对应？",
+      "ideal": "knowledge/research-methods/methodology/20260411-philosophy-supervisor-evensong.md",
+      "source_title": "Evensong 哲学 Supervisor：五大发现的哲学前沿对标",
+      "generated_by": "grok-3"
+    },
+    {
+      "id": 83,
+      "category": "negation",
+      "q": "I'm not looking for basic AI concepts, but specifically philosophical frameworks for advanced findings.",
+      "ideal": "knowledge/research-methods/methodology/20260411-philosophy-supervisor-evensong.md",
+      "source_title": "Evensong 哲学 Supervisor：五大发现的哲学前沿对标",
+      "generated_by": "grok-3"
+    },
+    {
+      "id": 84,
+      "category": "ambiguous",
+      "q": "What are the latest theories connecting philosophy and artificial intelligence advancements?",
+      "ideal": "knowledge/research-methods/methodology/20260411-philosophy-supervisor-evensong.md",
+      "source_title": "Evensong 哲学 Supervisor：五大发现的哲学前沿对标",
+      "generated_by": "grok-3"
+    },
+    {
+      "id": 85,
+      "category": "title-paraphrase",
+      "q": "What is the theory about cognition extending beyond the brain?",
+      "ideal": "knowledge/ai-agents/ethics-and-agency/20260411-clark-chalmers-extended-mind.md",
+      "source_title": "Clark & Chalmers (1998) The Extended Mind",
+      "generated_by": "grok-3"
+    },
+    {
+      "id": 86,
+      "category": "concept-abstract",
+      "q": "How can external tools be considered part of our thinking process?",
+      "ideal": "knowledge/ai-agents/ethics-and-agency/20260411-clark-chalmers-extended-mind.md",
+      "source_title": "Clark & Chalmers (1998) The Extended Mind",
+      "generated_by": "grok-3"
+    },
+    {
+      "id": 87,
+      "category": "body-term",
+      "q": "What is the parity principle in cognitive science discussions?",
+      "ideal": "knowledge/ai-agents/ethics-and-agency/20260411-clark-chalmers-extended-mind.md",
+      "source_title": "Clark & Chalmers (1998) The Extended Mind",
+      "generated_by": "grok-3"
+    },
+    {
+      "id": 88,
+      "category": "chinese",
+      "q": "外部工具如何成为认知的一部分？",
+      "ideal": "knowledge/ai-agents/ethics-and-agency/20260411-clark-chalmers-extended-mind.md",
+      "source_title": "Clark & Chalmers (1998) The Extended Mind",
+      "generated_by": "grok-3"
+    },
+    {
+      "id": 89,
+      "category": "negation",
+      "q": "I'm not looking for internal memory theories, but for ideas on external cognition.",
+      "ideal": "knowledge/ai-agents/ethics-and-agency/20260411-clark-chalmers-extended-mind.md",
+      "source_title": "Clark & Chalmers (1998) The Extended Mind",
+      "generated_by": "grok-3"
+    },
+    {
+      "id": 90,
+      "category": "ambiguous",
+      "q": "Can objects outside us influence how we think and believe?",
+      "ideal": "knowledge/ai-agents/ethics-and-agency/20260411-clark-chalmers-extended-mind.md",
+      "source_title": "Clark & Chalmers (1998) The Extended Mind",
+      "generated_by": "grok-3"
+    },
+    {
+      "id": 91,
+      "category": "title-paraphrase",
+      "q": "How can I review fundamental assumptions and fix gaps in my research framework?",
+      "ideal": "knowledge/research-methods/methodology/20260411-evensong-first-principles-audit.md",
+      "source_title": "Evensong 第一性原理自审：核心假设审查与缺口修复路线",
+      "generated_by": "grok-3"
+    },
+    {
+      "id": 92,
+      "category": "concept-abstract",
+      "q": "What are effective methods to critically analyze foundational ideas in a study?",
+      "ideal": "knowledge/research-methods/methodology/20260411-evensong-first-principles-audit.md",
+      "source_title": "Evensong 第一性原理自审：核心假设审查与缺口修复路线",
+      "generated_by": "grok-3"
+    },
+    {
+      "id": 93,
+      "category": "body-term",
+      "q": "Can you explain the impact of cultural differences on stress calibration in experiments?",
+      "ideal": "knowledge/research-methods/methodology/20260411-evensong-first-principles-audit.md",
+      "source_title": "Evensong 第一性原理自审：核心假设审查与缺口修复路线",
+      "generated_by": "grok-3"
+    },
+    {
+      "id": 94,
+      "category": "chinese",
+      "q": "如何审查研究中的核心假设并修补漏洞？",
+      "ideal": "knowledge/research-methods/methodology/20260411-evensong-first-principles-audit.md",
+      "source_title": "Evensong 第一性原理自审：核心假设审查与缺口修复路线",
+      "generated_by": "grok-3"
+    },
+    {
+      "id": 95,
+      "category": "negation",
+      "q": "I'm not looking for general research tips, but specific ways to audit core hypotheses.",
+      "ideal": "knowledge/research-methods/methodology/20260411-evensong-first-principles-audit.md",
+      "source_title": "Evensong 第一性原理自审：核心假设审查与缺口修复路线",
+      "generated_by": "grok-3"
+    },
+    {
+      "id": 96,
+      "category": "ambiguous",
+      "q": "What are some strategies for identifying flaws in AI memory system studies?",
+      "ideal": "knowledge/research-methods/methodology/20260411-evensong-first-principles-audit.md",
+      "source_title": "Evensong 第一性原理自审：核心假设审查与缺口修复路线",
+      "generated_by": "grok-3"
+    },
+    {
+      "id": 97,
+      "category": "title-paraphrase",
+      "q": "What are the three key dimensions for scaling AI agent systems?",
+      "ideal": "knowledge/software-engineering/architecture/20260411-leo-harness-engineering-3d.md",
+      "source_title": "Harness Engineering 三维度框架 — Agent Scaling 工程实践",
+      "generated_by": "grok-3"
+    },
+    {
+      "id": 98,
+      "category": "concept-abstract",
+      "q": "How do different companies approach challenges in AI agent scalability?",
+      "ideal": "knowledge/software-engineering/architecture/20260411-leo-harness-engineering-3d.md",
+      "source_title": "Harness Engineering 三维度框架 — Agent Scaling 工程实践",
+      "generated_by": "grok-3"
+    },
+    {
+      "id": 99,
+      "category": "body-term",
+      "q": "What is the SSOT routing table in AI agent engineering?",
+      "ideal": "knowledge/software-engineering/architecture/20260411-leo-harness-engineering-3d.md",
+      "source_title": "Harness Engineering 三维度框架 — Agent Scaling 工程实践",
+      "generated_by": "grok-3"
+    },
+    {
+      "id": 100,
+      "category": "chinese",
+      "q": "AI代理扩展的三个维度框架是什么？",
+      "ideal": "knowledge/software-engineering/architecture/20260411-leo-harness-engineering-3d.md",
+      "source_title": "Harness Engineering 三维度框架 — Agent Scaling 工程实践",
+      "generated_by": "grok-3"
+    },
+    {
+      "id": 101,
+      "category": "negation",
+      "q": "I'm not looking for basic AI tutorials but specific scaling issues in agent systems.",
+      "ideal": "knowledge/software-engineering/architecture/20260411-leo-harness-engineering-3d.md",
+      "source_title": "Harness Engineering 三维度框架 — Agent Scaling 工程实践",
+      "generated_by": "grok-3"
+    },
+    {
+      "id": 102,
+      "category": "ambiguous",
+      "q": "Can you explain scaling challenges in AI development with practical examples?",
+      "ideal": "knowledge/software-engineering/architecture/20260411-leo-harness-engineering-3d.md",
+      "source_title": "Harness Engineering 三维度框架 — Agent Scaling 工程实践",
+      "generated_by": "grok-3"
+    },
+    {
+      "id": 103,
+      "category": "title-paraphrase",
+      "q": "What's the competitive landscape for intelligent agent recall systems in recent trends?",
+      "ideal": "knowledge/ai-agents/memory-systems/20260411-competitor-landscape.md",
+      "source_title": "AI Agent Memory 竞品全景 + GitHub 趋势",
+      "generated_by": "grok-3"
+    },
+    {
+      "id": 104,
+      "category": "concept-abstract",
+      "q": "How does memory influence the actions of artificial intelligence systems?",
+      "ideal": "knowledge/ai-agents/memory-systems/20260411-competitor-landscape.md",
+      "source_title": "AI Agent Memory 竞品全景 + GitHub 趋势",
+      "generated_by": "grok-3"
+    },
+    {
+      "id": 105,
+      "category": "body-term",
+      "q": "What are the performance metrics for Hindsight in AI memory benchmarks?",
+      "ideal": "knowledge/ai-agents/memory-systems/20260411-competitor-landscape.md",
+      "source_title": "AI Agent Memory 竞品全景 + GitHub 趋势",
+      "generated_by": "grok-3"
+    },
+    {
+      "id": 106,
+      "category": "chinese",
+      "q": "智能代理的记忆如何影响其行为表现？",
+      "ideal": "knowledge/ai-agents/memory-systems/20260411-competitor-landscape.md",
+      "source_title": "AI Agent Memory 竞品全景 + GitHub 趋势",
+      "generated_by": "grok-3"
+    },
+    {
+      "id": 107,
+      "category": "negation",
+      "q": "I'm not looking for memory accuracy in AI, but how it impacts decisions.",
+      "ideal": "knowledge/ai-agents/memory-systems/20260411-competitor-landscape.md",
+      "source_title": "AI Agent Memory 竞品全景 + GitHub 趋势",
+      "generated_by": "grok-3"
+    },
+    {
+      "id": 108,
+      "category": "ambiguous",
+      "q": "Can you show me the latest research on AI memory systems and their effects?",
+      "ideal": "knowledge/ai-agents/memory-systems/20260411-competitor-landscape.md",
+      "source_title": "AI Agent Memory 竞品全景 + GitHub 趋势",
+      "generated_by": "grok-3"
+    }
+  ]
+}

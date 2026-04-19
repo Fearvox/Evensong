@@ -28,7 +28,8 @@ import { createBM25Provider } from '../src/services/retrieval/providers/bm25Prov
 import { createHybridProvider } from '../src/services/retrieval/providers/hybridProvider.js'
 import { vaultRetrieve } from '../src/services/retrieval/vaultRetrieve.js'
 import type { VaultManifestEntry, VaultRetrievalProvider } from '../src/services/retrieval/types.js'
-import queriesJson from '../benchmarks/wave3-judge-queries.json' with { type: 'json' }
+import { readFileSync } from 'node:fs'
+import defaultQueriesJson from '../benchmarks/wave3-judge-queries.json' with { type: 'json' }
 
 interface QueryEntry {
   id: number
@@ -155,8 +156,16 @@ async function main() {
   const junkCount = parseInt(process.argv.find((a) => a.startsWith('--junk='))?.split('=')[1] ?? '182', 10)
   const stage1TopK = parseInt(process.argv.find((a) => a.startsWith('--stage1='))?.split('=')[1] ?? '50', 10)
   const runs = parseInt(process.argv.find((a) => a.startsWith('--runs='))?.split('=')[1] ?? '1', 10)
+  const queriesFile = process.argv.find((a) => a.startsWith('--queries-file='))?.split('=')[1]
+  const withBody = process.argv.includes('--with-body')
 
-  const real = await buildVaultManifest({ vaultRoot: process.cwd() + '/_vault' })
+  const queriesObj = queriesFile
+    ? JSON.parse(readFileSync(queriesFile, 'utf-8'))
+    : defaultQueriesJson
+  const queries = queriesObj.queries as QueryEntry[]
+  console.log(`[scale] queries: ${queries.length} from ${queriesFile ?? 'default wave3-judge-queries.json'}`)
+
+  const real = await buildVaultManifest({ vaultRoot: process.cwd() + '/_vault', withBody })
   const junk = generateJunk(junkCount)
   const manifest = [...real, ...junk]
   console.log(`[scale] manifest: ${real.length} real + ${junk.length} junk = ${manifest.length} total`)
@@ -169,7 +178,6 @@ async function main() {
     stage1TopK,
   })
 
-  const queries = queriesJson.queries as QueryEntry[]
   const work: Array<{ provider: VaultRetrievalProvider; pipeline: 'llm-only' | 'hybrid'; q: QueryEntry; runIdx: number }> = []
   // Interleave runs + pipelines + queries so transient rate-limits don't
   // cluster into one cell of the result matrix.
