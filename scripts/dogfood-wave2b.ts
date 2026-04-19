@@ -13,7 +13,7 @@
  */
 
 import { createLocalGemmaClient, ATOMIC_MODELS } from '../src/services/api/localGemma.js'
-import { createLocalGemmaProvider } from '../src/services/retrieval/providers/localGemmaProvider.js'
+import { createAtomicProvider } from '../src/services/retrieval/providers/atomicProvider.js'
 import { vaultRetrieve } from '../src/services/retrieval/vaultRetrieve.js'
 import type { VaultManifestEntry } from '../src/services/retrieval/types.js'
 
@@ -96,7 +96,9 @@ interface RunResult {
 
 async function runOne(model: string, q: string, ideal: string): Promise<RunResult> {
   const client = createLocalGemmaClient({ model })
-  const provider = createLocalGemmaProvider(client)
+  // Use the generic atomic provider so VaultRetrievalResult.provider reflects
+  // the actual model (e.g. atomic:grok-3), not the legacy `local-gemma` label.
+  const provider = createAtomicProvider(client)
   const manifestPaths = new Set(manifest.map((m) => m.path))
   try {
     const result = await vaultRetrieve({ query: q, manifest, topK: 2 }, { providers: [provider] })
