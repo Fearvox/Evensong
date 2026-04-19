@@ -1,0 +1,51 @@
+cff-version: 1.2.0
+message: "If you use Evensong / the Hybrid RaR benchmark harness in your work, please cite it."
+title: "Evensong: Reverse-engineered Claude Code with Hybrid Retrieve-and-Rerank benchmarks"
+authors:
+  - family-names: "Zhu"
+    given-names: "Hengyuan"
+    alias: "Fearvox"
+    orcid: "https://orcid.org/0000-0000-0000-0000"
+type: software
+repository-code: "https://github.com/Fearvox/Evensong"
+url: "https://github.com/Fearvox/Evensong"
+license: Apache-2.0
+license-url: "https://github.com/Fearvox/Evensong/blob/main/LICENSE-APACHE"
+version: "0.1.0"
+date-released: "2026-04-19"
+keywords:
+  - retrieval-augmented-generation
+  - hybrid-search
+  - bm25
+  - llm-reranking
+  - agent-memory
+  - benchmark
+  - claude-code
+  - typescript
+  - bun
+abstract: >-
+  Evensong is a reverse-engineered, modifiable implementation of Anthropic's
+  Claude Code CLI, together with a production-grade Hybrid Retrieve-and-Rerank
+  (RaR) benchmark suite for agent memory systems. The benchmark uses a
+  cross-LLM design (grok-3 generator + deepseek-v3.2 judge) over 648 trials
+  (108 generated queries × 2 pipelines × 3 runs) on a 200-entry knowledge
+  vault, showing a hybrid BM25 + LLM-rerank pipeline achieving +2.5pp top-1
+  accuracy over an LLM-only baseline while cutting p50 latency by 27%, p90
+  latency by 63%, and LLM prompt token cost by 75%.
+preferred-citation:
+  type: software
+  title: "Evensong: Reverse-engineered Claude Code with Hybrid Retrieve-and-Rerank benchmarks"
+  authors:
+    - family-names: "Zhu"
+      given-names: "Hengyuan"
+      alias: "Fearvox"
+  year: 2026
+  url: "https://github.com/Fearvox/Evensong"
+  version: "0.1.0"
+references:
+  - type: article
+    title: "EverMemOS: Memory for Self-Evolving AI Agents (arxiv 2601.02163)"
+    authors:
+      - name: "EverMind / Shanda"
+    url: "https://arxiv.org/abs/2601.02163"
+    notes: "Architectural inspiration for the Hybrid stage 1 + LLM rerank stage 2 design adopted in this repository."
