@@ -1,19 +1,43 @@
 <p align="right"><a href="./README.md">English</a></p>
 
-# Claude Code Reimagined
+# Evensong · Claude Code Reimagined
 
-**你可以真正阅读的 AI Agent。**
+**你可以真正阅读的 AI Agent。混合检索基准。开源。**
 
 <p align="center">
-  <img src="https://img.shields.io/badge/TypeScript-520K%2B%E8%A1%8C-3178C6?style=flat-square&logo=typescript&logoColor=white" alt="TypeScript 520K+ 行" />
+  <img src="https://img.shields.io/badge/%E4%BB%A3%E7%A0%81-Apache%202.0-3b82f6?style=flat-square" alt="代码 Apache 2.0" />
+  <img src="https://img.shields.io/badge/%E7%A0%94%E7%A9%B6-CC%20BY--NC--ND%204.0-888?style=flat-square" alt="研究 CC BY-NC-ND 4.0" />
   <img src="https://img.shields.io/badge/Bun-%E8%BF%90%E8%A1%8C%E6%97%B6-f472b6?style=flat-square&logo=bun&logoColor=white" alt="Bun 运行时" />
-  <img src="https://img.shields.io/badge/%E6%B5%8B%E8%AF%95-1%2C419_%E9%80%9A%E8%BF%87-22c55e?style=flat-square" alt="1,419 测试通过" />
-  <img src="https://img.shields.io/badge/%E8%B7%AF%E7%BA%BF%E5%9B%BE-%E7%AC%AC_5%2F14_%E9%98%B6%E6%AE%B5-14-brightgreen?style=flat-square" alt="阶段 5/14" />
+  <img src="https://img.shields.io/badge/TypeScript-100%25-3178c6?style=flat-square&logo=typescript&logoColor=white" alt="TypeScript" />
+  <img src="https://img.shields.io/badge/%E5%9F%BA%E5%87%86-648--%E8%AF%95%E9%AA%8C-f59e0b?style=flat-square" alt="648 试验基准" />
 </p>
 
 <p align="center">
-  <b>支持的 Provider:</b> Anthropic | Bedrock | Vertex | Azure | MiniMax | OpenAI/Codex | Gemini | 本地 (Ollama/Atomic Chat)
+  <b>支持的 Provider:</b> Anthropic | Bedrock | Vertex | Azure | MiniMax | OpenAI/Codex | Gemini | xAI | OpenRouter | 本地 Atomic Chat
 </p>
+
+---
+
+## 🔥 Wave 3+ 重磅结果（2026-04-19）
+
+200 条知识库 × 108 道生成查询 × 3 次重复 = **648 次盲测**。跨模型测试（grok-3 出题 / deepseek-v3.2 答题）杜绝自关联偏倚。
+
+| 流水线 | Top-1 准确度 | p50 延迟 | p90 延迟 | Prompt 成本 |
+|--------|-------------|----------|----------|-------------|
+| LLM-only 直判 | 76.9% (249/324) | 2056ms | 3595ms | 100% |
+| **Hybrid BM25 + LLM Rerank** | **79.3%** (257/324) | **1509ms** | **2725ms** | **25%** |
+
+Hybrid **+2.5pp 准确度 / −27% p50 延迟 / −24% p90 延迟 / −75% Token 成本**。
+3 次跑 stddev 仅 0.00–0.44pp —— 信号远超噪声。
+
+一条命令复现：
+
+```bash
+bun run scripts/benchmark-hybrid-scale.ts --runs=3 --with-body \
+  --queries-file=benchmarks/wave3f-generated-queries-2026-04-19.json
+```
+
+原始 JSONL + Markdown 摘要存 [`benchmarks/runs/`](./benchmarks/runs/)，生成器 prompt 也 committed 可审计。
 
 ---
 
@@ -323,18 +347,27 @@ claude-code-reimagined/
 
 ## 许可证
 
-本项目采用非商业许可证。详见 [LICENSE](LICENSE) 文件。
+**双许可** · 详见 [LICENSING.md](./LICENSING.md) 完整映射 + 兼容性矩阵。
+
+| 部分 | 许可证 | 文件 |
+|------|--------|------|
+| 源代码、测试、基准、脚本、配置、开发者文档 | **Apache License 2.0** | [LICENSE-APACHE](./LICENSE-APACHE) |
+| 研究论文文本、长文叙述 | **CC BY-NC-ND 4.0** | [LICENSE-CC-BY-NC-ND](./LICENSE-CC-BY-NC-ND) |
+
+所有代码 Apache 2.0 授权，可被其他 Apache 兼容开源项目自由引用集成（含 EverMind-AI/EverOS 等）。
 
 <p align="right"><a href="#目录">↑ 顶部</a></p>
 
 ---
 
 > [!NOTE]
-> 本项目**仅用于教育和研究目的**。原始 Claude Code 的所有权利归 [Anthropic](https://www.anthropic.com/) 所有。这是一个对他们工作的逆向工程研究，不是官方产品。请负责任地使用。
+> 本项目**源自教育和研究目的**。原始 Claude Code 的所有权利归 [Anthropic](https://www.anthropic.com/) 所有。这是一个对他们工作的逆向工程研究，不是官方产品。请负责任地使用。
+>
+> 混合检索架构、基准 harness、以及 `src/services/retrieval/` 等目录的所有原创代码均为 @Fearvox 原创工作，独立受 EverMemOS（arxiv 2601.02163）公开设计启发。
 
 <p align="center">
-  <a href="https://github.com/Fearvox/claude-code-reimagine-for-learning"><b>github.com/Fearvox/claude-code-reimagine-for-learning</b></a>
+  <a href="https://github.com/Fearvox/Evensong"><b>github.com/Fearvox/Evensong</b></a>
 </p>
 <p align="center">
-  <i>从反编译到工程化。从黑箱到开放平台。</i>
+  <i>从反编译到工程化。从黑箱到开放平台。从单一 LLM 到混合检索与再排。</i>
 </p>
