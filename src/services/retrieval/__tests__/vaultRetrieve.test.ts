@@ -17,3 +17,42 @@ describe('vaultRetrieve', () => {
     expect(retrieve).toHaveBeenCalledTimes(1)
   })
 })
+
+describe('vaultRetrieve fallback', () => {
+  test('skips unavailable provider to next', async () => {
+    const a = mock(async () => ({ rankedPaths: [], provider: 'a', latencyMs: 0 }))
+    const b = mock(async () => ({ rankedPaths: ['x.md'], provider: 'b', latencyMs: 100 }))
+    const result = await vaultRetrieve({ query: 'q', manifest: sample }, {
+      providers: [
+        { name: 'a', available: async () => false, retrieve: a },
+        { name: 'b', available: async () => true, retrieve: b },
+      ],
+    })
+    expect(result.provider).toBe('b')
+    expect(a).toHaveBeenCalledTimes(0)
+    expect(b).toHaveBeenCalledTimes(1)
+  })
+
+  test('falls through 3 providers when first 2 throw', async () => {
+    const a = mock(async () => { throw new Error('conn') })
+    const b = mock(async () => { throw new Error('5xx') })
+    const c = mock(async () => ({ rankedPaths: ['x.md'], provider: 'c', latencyMs: 200 }))
+    const result = await vaultRetrieve({ query: 'q', manifest: sample }, {
+      providers: [
+        { name: 'a', available: async () => true, retrieve: a },
+        { name: 'b', available: async () => true, retrieve: b },
+        { name: 'c', available: async () => true, retrieve: c },
+      ],
+    })
+    expect(result.provider).toBe('c')
+  })
+
+  test('throws AllProvidersFailedError when every provider fails', async () => {
+    await expect(vaultRetrieve({ query: 'q', manifest: sample }, {
+      providers: [
+        { name: 'x', available: async () => false, retrieve: mock(async () => ({ rankedPaths: [], provider: 'x', latencyMs: 0 })) },
+        { name: 'y', available: async () => true, retrieve: mock(async () => { throw new Error('boom') }) },
+      ],
+    })).rejects.toBeInstanceOf(AllProvidersFailedError)
+  })
+})
