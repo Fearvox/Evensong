@@ -40,6 +40,7 @@ interface QueryEntry {
 interface PipelineResult {
   pipeline: 'llm-only' | 'hybrid'
   queryId: number
+  runIdx: number
   query: string
   ideal: string
   top1: string
@@ -92,10 +93,12 @@ async function runOne(
   pipeline: 'llm-only' | 'hybrid',
   q: QueryEntry,
   manifest: VaultManifestEntry[],
+  runIdx: number,
 ): Promise<PipelineResult> {
   const base: Omit<PipelineResult, 'top1' | 'top5' | 'top1Hit' | 'top5Hit' | 'latencyMs'> = {
     pipeline,
     queryId: q.id,
+    runIdx,
     query: q.q,
     ideal: q.ideal,
     manifestSize: manifest.length,
@@ -151,6 +154,7 @@ async function main() {
   const concurrency = parseInt(process.argv.find((a) => a.startsWith('--concurrency='))?.split('=')[1] ?? '3', 10)
   const junkCount = parseInt(process.argv.find((a) => a.startsWith('--junk='))?.split('=')[1] ?? '182', 10)
   const stage1TopK = parseInt(process.argv.find((a) => a.startsWith('--stage1='))?.split('=')[1] ?? '50', 10)
+  const runs = parseInt(process.argv.find((a) => a.startsWith('--runs='))?.split('=')[1] ?? '1', 10)
 
   const real = await buildVaultManifest({ vaultRoot: process.cwd() + '/_vault' })
   const junk = generateJunk(junkCount)
@@ -166,19 +170,23 @@ async function main() {
   })
 
   const queries = queriesJson.queries as QueryEntry[]
-  const work: Array<{ provider: VaultRetrievalProvider; pipeline: 'llm-only' | 'hybrid'; q: QueryEntry }> = []
-  for (const q of queries) {
-    work.push({ provider: llmOnly, pipeline: 'llm-only', q })
-    work.push({ provider: hybrid, pipeline: 'hybrid', q })
+  const work: Array<{ provider: VaultRetrievalProvider; pipeline: 'llm-only' | 'hybrid'; q: QueryEntry; runIdx: number }> = []
+  // Interleave runs + pipelines + queries so transient rate-limits don't
+  // cluster into one cell of the result matrix.
+  for (let runIdx = 0; runIdx < runs; runIdx++) {
+    for (const q of queries) {
+      work.push({ provider: llmOnly, pipeline: 'llm-only', q, runIdx })
+      work.push({ provider: hybrid, pipeline: 'hybrid', q, runIdx })
+    }
   }
 
-  console.log(`[scale] total calls: ${work.length}, concurrency: ${concurrency}, stage1TopK: ${stage1TopK}`)
+  console.log(`[scale] runs: ${runs}, total calls: ${work.length}, concurrency: ${concurrency}, stage1TopK: ${stage1TopK}`)
   const t0 = Date.now()
   let done = 0
   const results = await runWithConcurrency(work, concurrency, async (u) => {
-    const r = await runOne(u.provider, u.pipeline, u.q, manifest)
+    const r = await runOne(u.provider, u.pipeline, u.q, manifest, u.runIdx)
     done++
-    if (done % 8 === 0 || done === work.length) console.log(`  [${done}/${work.length}] ${((Date.now() - t0) / 1000).toFixed(1)}s`)
+    if (done % 10 === 0 || done === work.length) console.log(`  [${done}/${work.length}] ${((Date.now() - t0) / 1000).toFixed(1)}s`)
     return r
   })
 
@@ -195,8 +203,11 @@ async function main() {
   lines.push('')
   lines.push(`- Manifest: **${manifest.length} entries** (${real.length} real + ${junk.length} junk)`)
   lines.push(`- Queries: **${queries.length}**`)
+  lines.push(`- Runs per (pipeline × query): **${runs}**`)
   lines.push(`- Pipelines: **llm-only** (deepseek-v3.2 over full manifest) vs **hybrid** (BM25 top-${stage1TopK} → deepseek-v3.2)`)
   lines.push(`- Total calls: **${work.length}**`)
+  lines.push('')
+  lines.push('## Aggregated (all runs flattened)')
   lines.push('')
   lines.push('| Pipeline | Top-1 | Top-5 | p50 latency | p90 latency | Avg manifest handed to LLM |')
   lines.push('|----------|-------|-------|-------------|-------------|-----------------------------|')
@@ -210,25 +221,84 @@ async function main() {
     const p50 = Math.round(quantile(lats, 0.5))
     const p90 = Math.round(quantile(lats, 0.9))
     const avgManifest = pipe === 'hybrid' ? Math.min(stage1TopK, manifest.length) : manifest.length
-    lines.push(`| ${pipe} | ${top1}/${total} (${((top1 / total) * 100).toFixed(0)}%) | ${top5}/${total} (${((top5 / total) * 100).toFixed(0)}%) | ${p50}ms | ${p90}ms | ${avgManifest} |`)
+    lines.push(`| ${pipe} | ${top1}/${total} (${((top1 / total) * 100).toFixed(1)}%) | ${top5}/${total} (${((top5 / total) * 100).toFixed(1)}%) | ${p50}ms | ${p90}ms | ${avgManifest} |`)
   }
   lines.push('')
 
-  // Per-query disagreement: where hybrid picked differently than llm-only
-  const byQueryLLM = new Map(results.filter((r) => r.pipeline === 'llm-only').map((r) => [r.queryId, r]))
-  const byQueryHyb = new Map(results.filter((r) => r.pipeline === 'hybrid').map((r) => [r.queryId, r]))
+  // Per-run breakdown (variance visibility)
+  if (runs > 1) {
+    lines.push('## Per-run top-1 accuracy (variance inspection)')
+    lines.push('')
+    const header = ['Pipeline', ...Array.from({ length: runs }, (_, i) => `run ${i}`), 'mean', 'stddev']
+    lines.push(`| ${header.join(' | ')} |`)
+    lines.push(`| ${header.map(() => '---').join(' | ')} |`)
+    for (const pipe of ['llm-only', 'hybrid'] as const) {
+      const perRun: number[] = []
+      for (let runIdx = 0; runIdx < runs; runIdx++) {
+        const rs = results.filter((r) => r.pipeline === pipe && r.runIdx === runIdx && !r.error)
+        const total = results.filter((r) => r.pipeline === pipe && r.runIdx === runIdx).length
+        const top1 = rs.filter((r) => r.top1Hit).length
+        perRun.push(total > 0 ? top1 / total : 0)
+      }
+      const mean = perRun.reduce((s, x) => s + x, 0) / perRun.length
+      const variance = perRun.reduce((s, x) => s + (x - mean) ** 2, 0) / perRun.length
+      const stddev = Math.sqrt(variance)
+      const row = [
+        pipe,
+        ...perRun.map((x) => (x * 100).toFixed(1) + '%'),
+        (mean * 100).toFixed(2) + '%',
+        (stddev * 100).toFixed(2) + ' pp',
+      ]
+      lines.push(`| ${row.join(' | ')} |`)
+    }
+    lines.push('')
+  }
+
+  // Per-query consistency: how often does each pipeline pick the same top-1 across runs
+  if (runs > 1) {
+    lines.push('## Per-query run-to-run consistency')
+    lines.push('')
+    lines.push('| Pipeline | Queries w/ identical top-1 across all runs | Partial disagreement |')
+    lines.push('|----------|---------------------------------------------|----------------------|')
+    for (const pipe of ['llm-only', 'hybrid'] as const) {
+      const byQuery = new Map<number, Set<string>>()
+      for (const r of results.filter((r) => r.pipeline === pipe && !r.error)) {
+        if (!byQuery.has(r.queryId)) byQuery.set(r.queryId, new Set())
+        byQuery.get(r.queryId)!.add(r.top1)
+      }
+      let stable = 0
+      let partial = 0
+      for (const set of byQuery.values()) {
+        if (set.size === 1) stable++
+        else if (set.size > 1) partial++
+      }
+      lines.push(`| ${pipe} | ${stable}/${byQuery.size} | ${partial}/${byQuery.size} |`)
+    }
+    lines.push('')
+  }
+
+  // Per-query disagreement across pipelines (aggregated over runs: query is
+  // "disagreed" if ANY run shows a different top-1 between pipelines).
+  lines.push('## Top-1 disagreements between pipelines (any run)')
+  lines.push('')
   const disagreements: string[] = []
   for (const q of queries) {
-    const a = byQueryLLM.get(q.id)
-    const b = byQueryHyb.get(q.id)
-    if (!a || !b) continue
-    if (a.top1 !== b.top1) {
-      disagreements.push(`- Q${q.id} "${q.q.slice(0, 60)}": llm=${a.top1.split('/').pop()} | hybrid=${b.top1.split('/').pop()} | ideal=${q.ideal.split('/').pop()}`)
+    const llmTops = new Set(results.filter((r) => r.pipeline === 'llm-only' && r.queryId === q.id && !r.error).map((r) => r.top1))
+    const hybTops = new Set(results.filter((r) => r.pipeline === 'hybrid' && r.queryId === q.id && !r.error).map((r) => r.top1))
+    const llmSet = Array.from(llmTops).sort().join(' | ') || '(none)'
+    const hybSet = Array.from(hybTops).sort().join(' | ') || '(none)'
+    // Use union diff: disagreement if the sets aren't equal.
+    const equal = llmTops.size === hybTops.size && Array.from(llmTops).every((x) => hybTops.has(x))
+    if (!equal) {
+      disagreements.push(`- **Q${q.id}** "${q.q.slice(0, 60)}"  ideal=\`${q.ideal.split('/').pop()}\`  llm→\`${llmSet.split('/').pop()}\`  hybrid→\`${hybSet.split('/').pop()}\``)
     }
   }
-  lines.push(`## Top-1 disagreements between pipelines: ${disagreements.length}/${queries.length}`)
+  if (disagreements.length === 0) {
+    lines.push('(none — pipelines agree on top-1 across all runs)')
+  } else {
+    lines.push(...disagreements)
+  }
   lines.push('')
-  if (disagreements.length > 0) lines.push(...disagreements)
 
   const md = lines.join('\n')
   writeFileSync(mdPath, md + '\n')
