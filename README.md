@@ -68,37 +68,68 @@ This repository exists to:
 
 ## 📊 The headline result
 
-200-entry knowledge vault. **648 trials** (108 generated queries × 2 pipelines × 3 runs). **Cross-LLM** design to rule out self-correlation: generator = `grok-3`, judge = `deepseek/deepseek-v3.2`.
+**Two independent formal artifacts**, same harness + same 108-query cross-LLM design (generator = `grok-3`, judge = `deepseek/deepseek-v3.2`) + same 200-entry manifest (18 real `_vault` entries + 182 synthetic junk). Both committed raw under [`benchmarks/runs/`](./benchmarks/runs). Run against the Atomic Chat gateway in different load windows.
+
+### Wave 3+F — 648-call two-pipeline run ✅
 
 | Pipeline | Top-1 accuracy | p50 latency | p90 latency | Prompt token cost |
 |----------|----------------|-------------|-------------|-------------------|
 | LLM-only judge | 76.9% (249/324) | 2056 ms | 3595 ms | 100% (200 entries) |
 | **Hybrid BM25 + LLM rerank** | **79.3%** (257/324) | **1509 ms** | **2725 ms** | **25%** (50 entries) |
 
-**Hybrid wins on both axes**: +2.5pp top-1 accuracy **and** −27% p50 / −24% p90 latency, while cutting LLM prompt token cost by 75%. Per-run stddev 0.00–0.44pp — the gap is well outside measurement noise.
+Raw: [`benchmarks/runs/wave3d-hybrid-scale-2026-04-19T1220.md`](./benchmarks/runs/wave3d-hybrid-scale-2026-04-19T1220.md). Per-run stddev 0.00–0.44pp.
 
-Reproduce with one command:
+### Wave 3+G — 972-call three-pipeline formal re-run ✅
+
+| Pipeline | Top-1 | p50 | p90 | Avg latency | LLM calls |
+|----------|-------|-----|-----|-------------|-----------|
+| LLM-only judge | 77.8% (252/324) | 3861 ms | 6404 ms | 4139 ms | 100% (200 entries) |
+| Hybrid BM25 + LLM rerank | 77.5% (251/324) | 2919 ms | 4669 ms | 3248 ms | 100% (50 entries) |
+| **Adaptive Hybrid** | **73.1%** (237/324) | **2519 ms** | **4376 ms** | **2365 ms** | **73%** (27% skip) |
+
+Raw: [`benchmarks/runs/wave3g-pipelines-2026-04-19T1652.md`](./benchmarks/runs/wave3g-pipelines-2026-04-19T1652.md). Wall time: **10.5 min**. Per-run stddev: llm-only 0.76pp · hybrid 1.15pp · adaptive 0.76pp.
+
+### What holds across both runs
+
+| Property | Wave 3+F (648 calls) | Wave 3+G (972 calls) | Verdict |
+|----------|----------------------|----------------------|---------|
+| Hybrid vs LLM-only **latency** (p50) | **−27%** | **−24%** | ✅ consistent latency edge |
+| Hybrid **prompt token cost** | **−75%** | **−75%** | ✅ identical |
+| Hybrid vs LLM-only **top-1 accuracy** | **+2.5pp** | **−0.3pp** (parity) | ⚠️ run-to-run variance — within 2σ of per-run stddev |
+| Adaptive **skip rate** | — (not run) | **26.9%** | ✅ dead-on internal prelim 27% |
+| Adaptive **top-1** | — | **73.1%** | ✅ dead-on internal prelim |
+
+### Honest read
+
+- **The latency + token-cost edges are the rock-solid win.** Both runs agree: BM25 stage 1 narrowing the LLM's pool saves 22-27% p50 latency and 75% prompt tokens. That's what ships.
+- **The accuracy edge is noisier than first measured.** Wave 3+F caught Hybrid +2.5pp over LLM-only. Wave 3+G's 972-call re-run caught parity (−0.3pp). Per-run stddev (0.8-1.2pp) + API-load-window variance together cover the delta. Treat Hybrid as *"accuracy parity-to-slight-edge vs LLM-only, with a consistent latency + token-cost win"* — not a strict accuracy winner.
+- **The Adaptive tier is the real new contribution.** See the next subsection — trading −4.7pp accuracy for −43% avg latency and 27% zero-LLM queries, with the most stable per-run variance of the three pipelines (0.76pp).
+
+Reproduce with one command (produces Wave 3+G's artifact):
 
 ```bash
 bun run scripts/benchmark-hybrid-scale.ts \
   --runs=3 --with-body \
+  --pipelines=llm-only,hybrid,adaptive \
   --queries-file=benchmarks/wave3f-generated-queries-2026-04-19.json
 ```
 
-Raw JSONL + Markdown summaries live in [`benchmarks/runs/`](./benchmarks/runs). Generator prompt is committed too — reviewers can audit exactly how queries were produced.
+Generator prompt is committed too — reviewers can audit exactly how queries were produced.
 
-### Adaptive tier (Wave 3+G, shipped 2026-04-19)
+### Adaptive tier (Wave 3+G, shipped 2026-04-19) ✅
 
-The always-rerank Hybrid pays 1 LLM call per query. For a large fraction of queries, BM25 alone is already confidently correct — paying for the LLM adds latency without changing the top-1. The new **`createAdaptiveHybridProvider`** adds a gap-ratio gate: if `BM25 scores[0] / scores[1] >= 1.5`, trust stage 1 and **skip the LLM entirely**. Else fall through to stage 2.
+The always-rerank Hybrid pays 1 LLM call per query. For a large fraction of queries, BM25 alone is already confidently correct — paying for the LLM adds latency without changing the top-1. The **`createAdaptiveHybridProvider`** adds a gap-ratio gate: if `BM25 scores[0] / scores[1] >= 1.5`, trust stage 1 and **skip the LLM entirely**. Else fall through to stage 2.
 
-| Pipeline | Top-1 | p50 | p90 | Avg | LLM calls |
-|----------|-------|-----|-----|-----|-----------|
-| Hybrid (always-rerank) | 77.8% (84/108) | 3447 ms | 12759 ms | 6365 ms | 100% |
-| **Adaptive Hybrid (Wave 3+G)** | **73.1% (79/108)** | **1896 ms** | **4479 ms** | **2130 ms** | **73%** (27% skip) |
+**Formal 972-call numbers** (3 runs × 108 queries, `benchmarks/runs/wave3g-pipelines-2026-04-19T1652.md`):
 
-> 🟡 **Preliminary** — measured in a single 108q × 1-run internal dogfood on 2026-04-19. Formal `wave3g-adaptive-*.md` artifact re-run is scheduled; numbers may shift within ~±3pp.
+- Skip rate: **26.9%** (87/324 queries) — stage 2 LLM call avoided when BM25 is confident
+- Top-1 on skipped: **58.6%** (51/87) — BM25-alone is right ~59% on its confident picks
+- Top-1 on invoked: **78.5%** (186/237) — LLM resolves the ambiguous BM25 cases
+- Overall Adaptive top-1: **73.1%** — matches internal preliminary dogfood exactly
+- Latency: **avg 2365 ms / p90 4376 ms** (vs always-rerank hybrid 3248 / 4669, vs llm-only 4139 / 6404)
+- Per-run stddev: **0.76pp** — the most stable of the three pipelines
 
-**Trade-off**: −4.7pp top-1 accuracy buys **−67% avg latency + −65% p90**. The gate also eliminates Hybrid's worst-case 12-second tail — when BM25 is confident, you skip the variable-latency LLM entirely. Threshold is a tuning knob: `gapRatioThreshold: 1.3` raises skip rate and drops accuracy; `2.0` reverts toward Hybrid parity.
+**Trade-off**: −4.7pp top-1 accuracy vs llm-only buys **−43% avg latency**. The gate is a tuning knob: `gapRatioThreshold: 1.3` raises skip rate and drops accuracy; `2.0` reverts toward Hybrid parity.
 
 **Positioning vs EverOS**: this fills the gap between EverOS's published Fast tier (0 LLM calls, 200-600 ms) and Agentic tier (1-3 LLM calls, 2-5 s) — **Adaptive Hybrid is 0 _or_ 1 conditional LLM call, with a user-tunable gating knob**. Not covered by any published EverOS / EverMemOS / HyperMem design.
 

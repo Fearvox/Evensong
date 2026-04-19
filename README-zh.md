@@ -68,37 +68,68 @@
 
 ## 📊 核心数据
 
-200 条知识库 · **648 次盲测**（108 道生成查询 × 2 条流水线 × 3 次重复）· 跨 LLM 设计杜绝自关联偏倚：出题 = `grok-3`，答题 = `deepseek/deepseek-v3.2`。
+**两份独立正式 artifact**，同 harness、同 108 道跨 LLM 测试题（出题 = `grok-3`，答题 = `deepseek/deepseek-v3.2`）、同 200 条 manifest（18 条真实 `_vault` + 182 条合成 junk）。两次 raw 数据均已 commit 至 [`benchmarks/runs/`](./benchmarks/runs)。只是跑在 Atomic Chat gateway 的不同负载窗口下。
+
+### Wave 3+F — 648 次两流水线对比 ✅
 
 | 流水线 | Top-1 准确度 | p50 延迟 | p90 延迟 | Prompt Token 成本 |
 |--------|-------------|----------|----------|-------------------|
 | LLM 直判 | 76.9% (249/324) | 2056 ms | 3595 ms | 100% (200 entries) |
 | **Hybrid BM25 + LLM Rerank** | **79.3%** (257/324) | **1509 ms** | **2725 ms** | **25%** (50 entries) |
 
-**Hybrid 双面赢**：准确度 +2.5pp **同时** 延迟 p50 -27% / p90 -24%，LLM prompt token 成本砍 75%。3 次跑 stddev 0.00–0.44pp——差距远超测量噪声。
+原始 artifact：[`benchmarks/runs/wave3d-hybrid-scale-2026-04-19T1220.md`](./benchmarks/runs/wave3d-hybrid-scale-2026-04-19T1220.md)。3 次跑 stddev 0.00–0.44pp。
 
-一条命令复现：
+### Wave 3+G — 972 次三流水线正式复测 ✅
+
+| 流水线 | Top-1 | p50 | p90 | Avg 延迟 | LLM 调用 |
+|--------|-------|-----|-----|---------|---------|
+| LLM 直判 | 77.8% (252/324) | 3861 ms | 6404 ms | 4139 ms | 100% (200 entries) |
+| Hybrid BM25 + LLM Rerank | 77.5% (251/324) | 2919 ms | 4669 ms | 3248 ms | 100% (50 entries) |
+| **Adaptive Hybrid** | **73.1%** (237/324) | **2519 ms** | **4376 ms** | **2365 ms** | **73%**（27% 跳过） |
+
+原始 artifact：[`benchmarks/runs/wave3g-pipelines-2026-04-19T1652.md`](./benchmarks/runs/wave3g-pipelines-2026-04-19T1652.md)。墙钟时间 **10.5 min**。3 次跑 stddev：llm-only 0.76pp · hybrid 1.15pp · adaptive 0.76pp。
+
+### 两次跑都站得住的结论
+
+| 指标 | Wave 3+F (648 次) | Wave 3+G (972 次) | 结论 |
+|------|-------------------|-------------------|------|
+| Hybrid vs LLM-only **延迟**（p50） | **−27%** | **−24%** | ✅ 延迟优势稳定 |
+| Hybrid **prompt token 成本** | **−75%** | **−75%** | ✅ 完全一致 |
+| Hybrid vs LLM-only **top-1 准确度** | **+2.5pp** | **−0.3pp**（持平） | ⚠️ 跑间方差存在，落在 per-run stddev 的 2σ 内 |
+| Adaptive **跳过率** | — （未跑） | **26.9%** | ✅ 精确命中内部 prelim 的 27% |
+| Adaptive **top-1** | — | **73.1%** | ✅ 精确命中内部 prelim |
+
+### 诚实解读
+
+- **延迟 + token 成本优势是稳的赢。** 两次跑都一致：BM25 stage 1 收窄 LLM 输入池，能节省 22–27% p50 延迟 + 75% prompt token。这是能 ship 的 claim。
+- **准确度优势比首次测量要 noisier。** Wave 3+F 测出 Hybrid 相对 LLM-only 领先 +2.5pp。Wave 3+G 的 972 次复测捕捉到的是持平（−0.3pp）。per-run stddev（0.8–1.2pp）+ API 负载时段方差一起足以覆盖这个 delta。请把 Hybrid 理解为 *"vs LLM-only 准确度持平到微胜，且带稳定的延迟 + token 成本优势"*——不是严格的准确度赢家。
+- **Adaptive 层才是真正的新贡献。** 见下一节——用 −4.7pp 准确度换 −43% 平均延迟 + 27% 查询完全零 LLM 调用，且是三条流水线中 per-run 方差最稳的（0.76pp）。
+
+一条命令复现（产出 Wave 3+G 的 artifact）：
 
 ```bash
 bun run scripts/benchmark-hybrid-scale.ts \
   --runs=3 --with-body \
+  --pipelines=llm-only,hybrid,adaptive \
   --queries-file=benchmarks/wave3f-generated-queries-2026-04-19.json
 ```
 
-原始 JSONL + Markdown 摘要存于 [`benchmarks/runs/`](./benchmarks/runs)。生成器 prompt 也 committed——审阅者可直接 audit 查询是怎么出的。
+生成器 prompt 也 committed——审阅者可直接 audit 查询是怎么出的。
 
-### 自适应层（Wave 3+G，2026-04-19 ship）
+### 自适应层（Wave 3+G，2026-04-19 ship）✅
 
-always-rerank 的 Hybrid 每 query 付 1 次 LLM 调用。但对相当大比例的 query，BM25 自身就已经置信给出 top-1——继续付 LLM 只加延迟不换准确度。新的 **`createAdaptiveHybridProvider`** 引入 gap-ratio 门禁：若 `BM25 scores[0] / scores[1] >= 1.5`，信任 stage 1 并 **完全跳过 LLM**；否则走 stage 2。
+always-rerank 的 Hybrid 每 query 付 1 次 LLM 调用。但对相当大比例的 query，BM25 自身就已经置信给出 top-1——继续付 LLM 只加延迟不换准确度。**`createAdaptiveHybridProvider`** 引入 gap-ratio 门禁：若 `BM25 scores[0] / scores[1] >= 1.5`，信任 stage 1 并 **完全跳过 LLM**；否则走 stage 2。
 
-| 流水线 | Top-1 | p50 | p90 | Avg | LLM 调用 |
-|--------|-------|-----|-----|-----|---------|
-| Hybrid（始终 rerank） | 77.8% (84/108) | 3447 ms | 12759 ms | 6365 ms | 100% |
-| **Adaptive Hybrid（Wave 3+G）** | **73.1% (79/108)** | **1896 ms** | **4479 ms** | **2130 ms** | **73%**（27% 跳过） |
+**正式 972 次数据**（3 runs × 108 queries，`benchmarks/runs/wave3g-pipelines-2026-04-19T1652.md`）：
 
-> 🟡 **初测数据** —— 2026-04-19 内部 dogfood 单次 108q × 1 run 实测。正式 `wave3g-adaptive-*.md` artifact 重跑已排期；数字可能在 ±3pp 内漂移。
+- 跳过率：**26.9%**（87/324）—— BM25 置信时跳过 stage 2 LLM 调用
+- 跳过分支 top-1：**58.6%**（51/87）—— BM25 自信时单独上有约 59% 概率对
+- 未跳过分支 top-1：**78.5%**（186/237）—— LLM 解决 BM25 模糊情况
+- 整体 Adaptive top-1：**73.1%** —— 与内部 preliminary dogfood 精确吻合
+- 延迟：**avg 2365 ms / p90 4376 ms**（vs always-rerank hybrid 3248 / 4669，vs llm-only 4139 / 6404）
+- Per-run stddev：**0.76pp** —— 三条流水线中最稳的
 
-**代价**：top-1 -4.7pp 换 **avg 延迟 -67% + p90 -65%**。门禁同时消除了 Hybrid 偶发的 12 秒尾延迟——BM25 自信时直接跳过延迟方差大的 LLM。阈值是可调旋钮：`gapRatioThreshold: 1.3` 提升跳过率但准确度下降；`2.0` 则回到接近 Hybrid 的状态。
+**代价**：vs llm-only top-1 -4.7pp，换 **avg 延迟 -43%**。门禁是可调旋钮：`gapRatioThreshold: 1.3` 提升跳过率但准确度下降；`2.0` 则回到接近 Hybrid 的状态。
 
 **对 EverOS 的定位**：填充 EverOS 已公开的 Fast 层（0 LLM 调用，200-600 ms）与 Agentic 层（1-3 LLM 调用，2-5 s）之间的空白——**Adaptive Hybrid 是 0 _或_ 1 次条件性 LLM 调用，且带用户可调门禁旋钮**。不在任何已公开的 EverOS / EverMemOS / HyperMem 设计覆盖范围内。
 
