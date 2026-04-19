@@ -43,6 +43,7 @@ export function createBM25Provider(options: BM25ProviderOptions = {}): VaultRetr
       const latencyMs = Math.round(performance.now() - start)
       return {
         rankedPaths: hits.map((h) => h.id),
+        scores: hits.map((h) => h.score),
         provider: providerName,
         latencyMs,
       }

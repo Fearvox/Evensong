@@ -26,6 +26,16 @@ export interface VaultRetrievalResult {
   rankedPaths: string[]
   provider: string
   latencyMs: number
+  /**
+   * Optional parallel array of relevance scores aligned with rankedPaths.
+   * Populated by providers that have access to a numeric relevance signal
+   * (e.g. BM25 score, dense-vector cosine, RRF fused score). Consumers
+   * like adaptiveHybridProvider use `scores[0] / scores[1]` as a gap
+   * ratio to decide whether the stage-1 result is confident enough to
+   * skip stage-2 LLM rerank. Providers without a numeric score (pure
+   * LLM rerankers) may omit this field.
+   */
+  scores?: number[]
 }
 
 export interface VaultRetrievalProvider {

@@ -65,6 +65,19 @@ describe('createBM25Provider', () => {
     expect(r.latencyMs).toBeLessThan(50)
   })
 
+  test('exposes scores aligned with rankedPaths for gap-based gating', async () => {
+    const p = createBM25Provider()
+    const r = await p.retrieve({ query: 'memory sparse attention', manifest, topK: 2 })
+    expect(r.scores).toBeDefined()
+    expect(r.scores!.length).toBe(r.rankedPaths.length)
+    // Scores are descending (BM25 top-1 highest)
+    for (let i = 1; i < r.scores!.length; i++) {
+      expect(r.scores![i - 1]).toBeGreaterThanOrEqual(r.scores![i]!)
+    }
+    // All positive for matching docs
+    expect(r.scores![0]).toBeGreaterThan(0)
+  })
+
   test('custom provider name passes through', () => {
     const p = createBM25Provider({ providerName: 'stage1-bm25' })
     expect(p.name).toBe('stage1-bm25')
