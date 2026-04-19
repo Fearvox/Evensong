@@ -93,7 +93,7 @@ Capture choice.
 
 ### Task 3: Download + import into Atomic
 
-**Files:** (download target TBD based on user choice in Task 2.3)
+**Files:** (download target chosen in Task 2.3 — one of: Atomic built-in catalog / HuggingFace GGUF variant / HuggingFace MLX-native safetensors)
 
 - [ ] **Step 1: Download chosen variant**
 
