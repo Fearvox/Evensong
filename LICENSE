@@ -1,30 +1,33 @@
-# CC BY-NC-ND 4.0 — Attribution-NonCommercial-NoDerivatives
+Evensong / CCR — Dual License
+==============================
 
-**Creative Commons License — Non-Commercial Use Only**
+This repository is dual-licensed under two distinct licenses that apply to
+different parts of the project. See **LICENSING.md** for the definitive
+directory-by-directory mapping.
 
-## TL;DR
+    +---------------------------------------------------+------------------------+
+    | Part of repository                                | Applicable license     |
+    +---------------------------------------------------+------------------------+
+    | Source code, tests, benchmark harness, scripts,   | Apache License 2.0     |
+    | packages, configs (src/, packages/, scripts/,     | (LICENSE-APACHE)       |
+    | benchmarks/, tests/, services/, api/, shared/,    |                        |
+    | skills/, *.json, *.toml, *.lock, *.ts, *.tsx)     |                        |
+    +---------------------------------------------------+------------------------+
+    | Research artifacts, paper drafts, long-form       | CC BY-NC-ND 4.0        |
+    | research docs, anything marked under              | (LICENSE-CC-BY-NC-ND)  |
+    | docs/research/ or NOTICE'd as research-only       |                        |
+    +---------------------------------------------------+------------------------+
+    | Everything else (developer docs, READMEs,         | Apache License 2.0     |
+    | CLAUDE.md, AGENTS.md, CONTRIBUTING.md, etc.)      | (LICENSE-APACHE)       |
+    +---------------------------------------------------+------------------------+
 
-You MAY:
-- Study this code privately
-- Share it with attribution (keep this license intact)
-- Build on it for personal/research purposes
+This dual-licensing model is intentional: the CODE is meant to be reusable
+by other open-source projects under a permissive Apache 2.0 grant (patent
+license included), while RESEARCH DELIVERABLES (paper text, novel experimental
+narratives, etc.) retain attribution-only / non-commercial / no-derivatives
+protections so they cannot be scraped into commercial training corpora or
+rewritten without credit.
 
-You MAY NOT:
-- **Commercialize** the code or any derivative works
-- Create derivative works (remixes, modifications, extensions)
-- Remove this license from any distribution
-- Claim authorship of original work
+Copyright 2026 Fearvox / 0xVox (Nolan Zhu / Hengyuan Zhu)
 
-## Full Legal Notice
-
-This work may not be used for commercial purposes. Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:
-
-1. Redistributions of source code must retain the above copyright notice, this list of conditions and the following disclaimer.
-
-2. The name "Claude Code Reimagined" and the author's name may not be used to endorse or promote products derived from this software without specific prior written permission.
-
-3. This software is provided by the copyright holders "as is" and any express or implied warranties are disclaimed, including but not limited to implied warranties of merchantability and fitness for a particular purpose.
-
-## Jurisdiction
-
-This license is governed by the laws of the jurisdiction in which the original author resides.
+For questions about scope or contribution licensing, see LICENSING.md.

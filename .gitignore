@@ -1,13 +1,46 @@
 node_modules
 .DS_Store
+**/.DS_Store
 dist
 coverage
-.env
 *.log
 .idea
 .vscode
 *.suo
 *.lock
+
+# Environment / secrets
+.env
+.env.local
+.env.*.local
+.env.vercel_check
+
+# LaTeX build artifacts
+*.aux
+*.fdb_latexmk
+*.fls
+*.toc
+*.xdv
+*.out
+*.synctex.gz
+
+# Python venv / caches
+.venv/
+__pycache__/
+*.pyc
+
+# Bun / Node build
+.bun/
+bun-debug*.log
+
+# Accidental paste artifacts (don't commit literal `~` or `tmp/` folders
+# that appear when a path pastes incorrectly into a shell)
+~/
+tmp/
+
+# Editor / OS
+.history/
+Thumbs.db
 
 # Session transcripts (private conversation data)
 .claude/session-transcript.jsonl
@@ -15,10 +48,31 @@ coverage
 .claude/settings.local.json
 .claude/scheduled_tasks.lock
 .claude/projects/
+.claude/worktrees/
+.claude/verify/
+.claude/plugins/
 .gstack/
+.agents/
+.algo-profile/
+.grok/
+.learnings/
+.shopify/
+.playwright-mcp/
+.worktrees/
+.vercel/
+
+# Backup files (manual .bak-YYYYMMDD patterns)
+*.bak
+*.bak-*
 
 # Vault working dirs (per 2026-04-19 Wave 2D — submodule removed)
 # Real vault is Fearvox/ds-research-vault (private), cloned standalone at _vault/.
 # CCR git does not track vault content.
 research-vault/
 _vault/
+_vault
+
+# macOS / IDE scratch
+.metadata/
+*.swp
+*.swo
