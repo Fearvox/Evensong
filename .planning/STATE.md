@@ -116,12 +116,12 @@ Not part of v2.0 phases — cross-cutting hook/docs work.
 
 ## Off-milestone Work (2026-04-19)
 
-Vault Foundation rebuild (Wave 1 ship + Wave 2A/2D execute).
+Vault Foundation rebuild (Wave 1 ship + Wave 2A/2B/2C/2D execute — full Wave 2 complete).
 
 - **Wave 1 SHIPPED** (4 commits): `_vault` L1 canonical protocol push + infra/ baseline inventory + MASTER-PREAMBLE-INDEX v0.1 + CCR spec `docs/superpowers/specs/2026-04-19-vault-foundation-and-preamble-design.md`. See `memory/projects/project_vault_foundation_wave1_shipped.md`.
 - **Wave 2 plans** (4 plans, 1 commit): Wave 2A/2B/2C/2D in `docs/superpowers/plans/2026-04-19-wave2*.md`.
 - **Wave 2A SHIPPED** (1 commit to _vault): 3 archives + 1 rename + 2 keeps (DS-EverOS-RR, dash-persona SF EverMind 得奖里程碑); 4 deferred (delete×3 auth scope + merge×1 src scope). See `_vault/infra/CLEANUP-DECISIONS.md` Wave 2A execution record.
 - **Wave 2D SHIPPED** (2 commits to CCR): submodule `research-vault` declaration removed + `.gitignore` updated + `packages/research-vault-mcp/` npx-ready as `@syndash/research-vault-mcp` (scoped under `SynDASH` GitHub org; bin shim + 13-test shape validation + npm pack dry-run verified 6 files / 9 KB / clean allowlist).
-- **Wave 2B deferred**: Local Gemma provider + vault retrieval chain (13 TDD tasks, src touch) — fresh脑 明天做。
+- **Wave 2B SHIPPED** (7 commits to CCR main): Local Gemma provider + vault retrieval chain per plan `2026-04-19-wave2b-provider-fallback-chain.md`. 3 new src modules (~160 LOC total: api/localGemma.ts + retrieval/types.ts + retrieval/vaultRetrieve.ts + retrieval/providers/localGemmaProvider.ts) + 3 new test files (18/18 pass). Zero modifications to existing withRetry.ts (main Anthropic-compat chain untouched). Spec §3.4 Wave 1 primary provider (Atomic Gemma at `http://127.0.0.1:1337/v1`) now wired for retrieval path with LLM listwise judge + JSON/heuristic parse + AllProvidersFailedError fallback. Full regression green (2000 pass / 1 pre-existing fail + 1 pre-existing error unchanged). Build clean (27.26 MB bundle).
 - **Wave 2C SHIPPED** (pivoted from Atomic MLX to DO droplet, 1 commit to _vault): Atomic 不支持 embeddings flag (501) → 升级 ccr-droplet 到 $12/mo 2GB → 装 llama.cpp b8840 + BGE-M3 Q4_K_M (417MB, 1024-dim multilingual) → Tailscale mesh only (`http://100.65.234.77:8080/v1/embeddings`) → systemd `bge-m3-embed.service` → 350-650ms end-to-end latency。endpoint 合约 doc 在 `_vault/infra/retrieval-endpoints.md`。
 - **EverMem Stop hook retry wrapper shipped** (`~/.claude/hooks/evermem-with-key.sh`): 3-attempt exponential backoff for `RemoteDisconnected`/5xx; 4-scenario test pass. Backup at `.bak-20260419-pre-retry`.
