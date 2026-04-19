@@ -1,6 +1,3 @@
-[submodule "research-vault"]
-	path = research-vault
-	url = https://github.com/Fearvox/ds-research-vault.git
 [submodule "benchmarks/data"]
 	path = benchmarks/data
 	url = https://github.com/Fearvox/ds-benchmark-data.git

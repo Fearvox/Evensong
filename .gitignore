@@ -16,3 +16,9 @@ coverage
 .claude/scheduled_tasks.lock
 .claude/projects/
 .gstack/
+
+# Vault working dirs (per 2026-04-19 Wave 2D — submodule removed)
+# Real vault is Fearvox/ds-research-vault (private), cloned standalone at _vault/.
+# CCR git does not track vault content.
+research-vault/
+_vault/
