@@ -1,12 +1,15 @@
 blank_issues_enabled: false
 contact_links:
-  - name: 💬 Ask a question (Discussions)
+  - name: 💬 Ask a question (Q&A)
     url: https://github.com/Fearvox/Evensong/discussions/new?category=q-a
     about: For questions, please use GitHub Discussions Q&A — faster turnaround.
-  - name: 💡 Propose an idea (Discussions)
+  - name: 💡 Propose an idea (Ideas)
     url: https://github.com/Fearvox/Evensong/discussions/new?category=ideas
     about: Half-baked ideas, architectural musings, "what if" threads.
-  - name: 📊 Share a benchmark result (Discussions)
+  - name: 🙌 Show what you built (Show and tell)
+    url: https://github.com/Fearvox/Evensong/discussions/new?category=show-and-tell
+    about: Built something on top of Evensong? Integrated it into your agent stack? Share it.
+  - name: 📊 Share a benchmark result (Benchmarks)
     url: https://github.com/Fearvox/Evensong/discussions/new?category=benchmarks
     about: Ran the harness on your own vault or model? Post the numbers.
   - name: 📖 Read the benchmark methodology
