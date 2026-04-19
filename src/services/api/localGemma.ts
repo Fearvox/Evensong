@@ -20,3 +20,29 @@ export function createLocalGemmaClient(options: LocalGemmaClientOptions = {}): L
     timeoutMs: options.timeoutMs ?? 30000,
   }
 }
+
+export async function isLocalGemmaAvailable(
+  client: LocalGemmaClient,
+  probeTimeoutMs = 2000,
+): Promise<boolean> {
+  const controller = new AbortController()
+  let timer: ReturnType<typeof setTimeout> | undefined
+  const timeoutPromise = new Promise<'timeout'>((resolve) => {
+    timer = setTimeout(() => {
+      controller.abort()
+      resolve('timeout')
+    }, probeTimeoutMs)
+  })
+  try {
+    const result = await Promise.race([
+      fetch(`${client.baseURL}/models`, { method: 'GET', signal: controller.signal }),
+      timeoutPromise,
+    ])
+    if (result === 'timeout') return false
+    return result.status === 200
+  } catch {
+    return false
+  } finally {
+    if (timer !== undefined) clearTimeout(timer)
+  }
+}
