@@ -4,7 +4,7 @@ import { homedir } from 'os'
 import { IngestJobStore, computeChecksum } from './vault_jobs.js'
 import { parseArxivId, fetchArxivMetadata } from './ingest/arxiv.js'
 import { fetchHtml } from './ingest/html.js'
-import type { VaultEntry, RawIngestInput, NoteSaveInput, VaultGetInput, VaultDeleteInput } from './types.js'
+import type { VaultEntry, RawIngestInput, NoteSaveInput, VaultGetInput, VaultDeleteInput, DecayScore } from './types.js'
 
 const VAULT_ROOT = process.env.VAULT_ROOT ?? `${homedir()}/Documents/Evensong/research-vault`
 const KNOWLEDGE_DIR = join(VAULT_ROOT, 'knowledge')
@@ -42,11 +42,11 @@ export function normalizeId(raw: string): string {
     .replace(/\.md$/, '')
 }
 
-function loadDecayScores(): Record<string, unknown> {
+function loadDecayScores(): Record<string, DecayScore> {
   try { return JSON.parse(readFileSync(DECAY_PATH, 'utf-8')) } catch { return {} }
 }
 
-function saveDecayScores(scores: Record<string, unknown>) {
+function saveDecayScores(scores: Record<string, DecayScore>) {
   ensureDir(dirname(DECAY_PATH))
   writeFileSync(DECAY_PATH, JSON.stringify(scores, null, 2), 'utf-8')
 }
@@ -105,8 +105,8 @@ async function ingestUrl(value: string, category: string) {
       saveChecksums(checksums)
 
       await jobStore.updateJob(job.jobId, { status: 'queued', rawPath })
-    } catch (e: any) {
-      await jobStore.updateJob(job.jobId, { status: 'failed', error: e.message })
+    } catch (e: unknown) {
+      await jobStore.updateJob(job.jobId, { status: 'failed', error: e instanceof Error ? e.message : String(e) })
     }
   })()
 
@@ -136,10 +136,8 @@ async function ingestFile(value: string, category: string) {
 async function saveNote(input: NoteSaveInput) {
   const safeTitle = input.title.replace(/[^a-z0-9]/gi, '-').slice(0, 32)
   const id = `${Date.now()}--${safeTitle}`
-  const dir = join(KNOWLEDGE_DIR, input.category)
-  safePath(KNOWLEDGE_DIR, join(input.category, `${id}.md`))
-  ensureDir(dir)
-  const filePath = join(dir, `${id}.md`)
+  const filePath = safePath(KNOWLEDGE_DIR, join(input.category, `${id}.md`))
+  ensureDir(dirname(filePath))
   const content = `# ${input.title}\n\n${input.content}\n`
   writeFileSync(filePath, content, 'utf-8')
 
@@ -277,8 +275,8 @@ export const vaultWriteTools = [
           job = await ingestFile(args.value, category)
         }
         return { content: [{ type: 'text', text: JSON.stringify(job) }] }
-      } catch (e: any) {
-        return { content: [{ type: 'text', text: e.message }], isError: true }
+      } catch (e: unknown) {
+        return { content: [{ type: 'text', text: e instanceof Error ? e.message : String(e) }], isError: true }
       }
     }
   },
@@ -301,8 +299,8 @@ export const vaultWriteTools = [
       try {
         const result = await saveNote(args)
         return { content: [{ type: 'text', text: JSON.stringify(result) }] }
-      } catch (e: any) {
-        return { content: [{ type: 'text', text: e.message }], isError: true }
+      } catch (e: unknown) {
+        return { content: [{ type: 'text', text: e instanceof Error ? e.message : String(e) }], isError: true }
       }
     }
   },
@@ -321,8 +319,8 @@ export const vaultWriteTools = [
       try {
         const result = getEntry(args)
         return { content: [{ type: 'text', text: JSON.stringify(result) }] }
-      } catch (e: any) {
-        return { content: [{ type: 'text', text: e.message }], isError: true }
+      } catch (e: unknown) {
+        return { content: [{ type: 'text', text: e instanceof Error ? e.message : String(e) }], isError: true }
       }
     }
   },
@@ -341,8 +339,8 @@ export const vaultWriteTools = [
       try {
         const result = deleteEntry(args)
         return { content: [{ type: 'text', text: JSON.stringify(result) }] }
-      } catch (e: any) {
-        return { content: [{ type: 'text', text: e.message }], isError: true }
+      } catch (e: unknown) {
+        return { content: [{ type: 'text', text: e instanceof Error ? e.message : String(e) }], isError: true }
       }
     }
   }
