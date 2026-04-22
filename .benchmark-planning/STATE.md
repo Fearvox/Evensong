@@ -6,16 +6,16 @@ See: .benchmark-planning/PROJECT.md (updated 2026-04-22)
 
 **Core value:** 在 SEED-001 触发前完成所有可独立准备的 benchmark 适配工作
 
-**Current focus:** Phase 2 LOCOMO Evaluation (02-01 + 02-02 done, 02-03/02-04 pending)
+**Current focus:** Phase 3 MTEB Evaluation (03-01 MTEB eval harness done, 03-02/03/04 pending)
 
 ## Current Position
 
-Phase: 2 of 4 (LOCOMO Evaluation + MTEB Protocol)
-Plan: 4 of 4 complete (02-01 RAG eval + 02-02 per-category + 02-03 SearchProtocol + 02-04 FAISS done)
-Status: Phase 2 complete — all plans finished
-Last activity: 2026-04-22 — MTEB SearchProtocol + FAISS shipped (620e8df)
+Phase: 3 of 4 (MTEB Evaluation + Resource Metrics)
+Plan: 1 of 4 complete (03-01 MTEB eval harness + synthetic benchmark)
+Status: Phase 3 in progress
+Last activity: 2026-04-22 — Synthetic MTEB benchmark ran: dense NDCG@5=0.992 > BM25=0.961; max_tokens fix committed (f722ddb)
 
-Progress: [██████████] 100%
+Progress: [██░░░░░░░░] 25%
 
 ## Performance Metrics
 
@@ -30,6 +30,7 @@ Progress: [██████████] 100%
 |-------|-------|-------|----------|
 | 1 | 5/5 | LOCOMO wrapper + BGE fixes | ~20 min |
 | 2 | 4/4 | LOCOMO eval + per-cat + SearchProtocol + FAISS | ~45 min |
+| 3 | 1/4 | MTEB eval harness + max_tokens fix | ~20 min |
 
 **Recent Trend:**
 - Last 5 plans: No plans completed yet

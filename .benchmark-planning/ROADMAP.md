@@ -110,5 +110,5 @@ Plans:
 |-------|----------------|--------|-----------|
 | 1. LOCOMO Infrastructure + BGE Fixes | 0/5 | Not started | - |
 | 2. LOCOMO Evaluation + MTEB Protocol | 4/4 | ✓ Complete (2026-04-22) | 620e8df |
-| 3. MTEB Evaluation + Resource Metrics | 0/4 | Planned (2026-04-22) | - |
+| 3. MTEB Evaluation + Resource Metrics | 3/4 | In progress (2026-04-22) | 03735a4 |
 | 4. Visualization Dashboard | 0/4 | Not started | - |
