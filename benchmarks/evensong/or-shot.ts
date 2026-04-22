@@ -115,7 +115,7 @@ async function runOrShot(config: OrShotConfig): Promise<OrShotResult> {
       body: JSON.stringify({
         model: preset.modelId,
         messages: [{ role: 'user', content: prompt }],
-        max_tokens: 16000,
+        max_tokens: preset.maxTokens ?? 16000,
       }),
       signal: controller.signal,
     })

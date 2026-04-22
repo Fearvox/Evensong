@@ -11,11 +11,11 @@ See: .benchmark-planning/PROJECT.md (updated 2026-04-22)
 ## Current Position
 
 Phase: 2 of 4 (LOCOMO Evaluation + MTEB Protocol)
-Plan: 2 of 4 complete (02-01 RAG eval + 02-02 per-category done, 02-03/02-04 pending)
-Status: Phase 2 in progress
-Last activity: 2026-04-22 — LOCOMO10 Conv1 done (R@5=0.583, F1=0.213), per-cat breakdown complete
+Plan: 4 of 4 complete (02-01 RAG eval + 02-02 per-category + 02-03 SearchProtocol + 02-04 FAISS done)
+Status: Phase 2 complete — all plans finished
+Last activity: 2026-04-22 — MTEB SearchProtocol + FAISS shipped (620e8df)
 
-Progress: [████████░░] 30%
+Progress: [██████████] 100%
 
 ## Performance Metrics
 

@@ -51,6 +51,7 @@ export interface ProviderPreset {
   provider: 'openrouter' | 'minimax-direct' | 'native' | 'grok-native'  // native = Claude OAuth, grok-native = local grok CLI
   baseUrl?: string          // for direct API routing (minimax-direct)
   apiKeyEnvVar?: string     // which env var holds the API key
+  maxTokens?: number        // max_tokens for this model (default 16000)
 }
 
 // The benchmark models — OpenRouter models + MiniMax direct
@@ -60,13 +61,13 @@ export const BENCHMARK_MODELS: ProviderPreset[] = [
   { name: 'or-gpt5',       modelId: 'openai/gpt-5.4',               displayName: 'GPT-5.4',              provider: 'openrouter' },
   { name: 'or-grok',       modelId: 'x-ai/grok-4.20',               displayName: 'Grok 4.20',            provider: 'openrouter' },
   { name: 'or-gemini',     modelId: 'google/gemini-3.1-pro-preview', displayName: 'Gemini 3.1 Pro',      provider: 'openrouter' },
-  { name: 'or-glm',        modelId: 'z-ai/glm-5.1',                 displayName: 'GLM-5.1',               provider: 'openrouter' },
+  { name: 'or-glm',           modelId: 'z-ai/glm-5.1',                 displayName: 'GLM-5.1',               provider: 'openrouter', maxTokens: 8192 },
   { name: 'or-qwen-coder', modelId: 'qwen/qwen3-coder-plus',        displayName: 'Qwen3 Coder+',         provider: 'openrouter' },
-  { name: 'or-qwen',       modelId: 'qwen/qwen3-max',                displayName: 'Qwen 3 Max',           provider: 'openrouter' },
-  { name: 'or-qwen-plus',  modelId: 'qwen/qwen3.6-plus',             displayName: 'Qwen 3.6 Plus (1M)',   provider: 'openrouter' },
+  { name: 'or-qwen',       modelId: 'qwen/qwen3-max',                displayName: 'Qwen 3 Max',           provider: 'openrouter', maxTokens: 8192 },
+  { name: 'or-qwen-plus',  modelId: 'qwen/qwen3.6-plus',             displayName: 'Qwen 3.6 Plus (1M)',   provider: 'openrouter', maxTokens: 12288 },
   { name: 'or-deepseek',    modelId: 'deepseek/deepseek-r1-0528',    displayName: 'DeepSeek R1',           provider: 'openrouter' },
-  { name: 'or-kimi',       modelId: 'moonshotai/kimi-k2.5',          displayName: 'Kimi K2.5',            provider: 'openrouter' },
-  { name: 'or-elephant-alpha', modelId: 'openrouter/elephant-alpha', displayName: 'Elephant-α (stealth)', provider: 'openrouter' },
+  { name: 'or-kimi',       modelId: 'moonshotai/kimi-k2.5',          displayName: 'Kimi K2.5',            provider: 'openrouter', maxTokens: 8192 },
+  { name: 'or-elephant-alpha', modelId: 'openrouter/elephant-alpha', displayName: 'Elephant-α (stealth)', provider: 'openrouter', maxTokens: 8192 },
   // MiniMax direct — via api.minimax.io/anthropic (Anthropic-compatible)
   {
     name: 'minimax-m27',
