@@ -1,11 +1,53 @@
 // packages/research-vault-mcp/src/ingest/html.ts
 
 /**
+ * Validate URL to prevent SSRF attacks.
+ * Blocks: private IP ranges, localhost, cloud metadata endpoints, invalid schemes.
+ */
+function validateUrl(url: string): void {
+  let parsed: URL
+  try {
+    parsed = new URL(url)
+  } catch {
+    throw new Error(`Invalid URL: ${url}`)
+  }
+
+  const scheme = parsed.protocol.toLowerCase()
+  if (scheme !== 'http:' && scheme !== 'https:') {
+    throw new Error(`URL scheme not allowed: ${scheme}. Only http/https permitted.`)
+  }
+
+  const hostname = parsed.hostname.toLowerCase()
+
+  // Block cloud metadata endpoints
+  if (hostname === '169.254.169.254' || hostname === 'metadata.google.internal') {
+    throw new Error(`Cloud metadata endpoint blocked: ${hostname}`)
+  }
+
+  // Block localhost variants
+  if (hostname === 'localhost' || hostname === '127.0.0.1' || hostname === '::1' || hostname === '[::1]') {
+    throw new Error(`Localhost not permitted: ${hostname}`)
+  }
+
+  // Block private IP ranges
+  const ip = hostname
+  if (/^(10\.\d+|172\.(1[6-9]|2\d|3[01])\.\d+\.\d+|192\.168\.\d+)$/.test(ip)) {
+    throw new Error(`Private IP not permitted: ${ip}`)
+  }
+
+  // Block link-local
+  if (hostname.startsWith('169.254.')) {
+    throw new Error(`Link-local IP blocked: ${hostname}`)
+  }
+}
+
+/**
  * Fetch a URL and convert HTML to plain markdown-like text.
  * Strips scripts, styles, nav, footer, header, aside elements.
  * Uses Bun's native fetch — no external dependencies.
  */
 export async function fetchHtml(url: string): Promise<string> {
+  validateUrl(url)
   const res = await fetch(url, {
     headers: {
       'User-Agent': 'Mozilla/5.0 research-vault-mcp/1.1.0',
