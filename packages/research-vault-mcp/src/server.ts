@@ -8,10 +8,12 @@
 //   4. Server sends JSON-RPC response via SSE: event: message\ndata: {...}
 
 import { vaultTools } from './vault'
+import { vaultWriteTools } from './vault_write.js'
 import { amplifyTools, configureAmplify } from './amplify'
 
-const PORT = 8765
 const HOST = '0.0.0.0'
+const TRANSPORT = process.env.MCP_TRANSPORT ?? 'sse'
+const PORT = parseInt(process.env.MCP_PORT ?? '8765')
 
 // ─── MCP Protocol Types ──────────────────────────────────────────────────────
 
@@ -40,6 +42,7 @@ interface Tool {
 
 const allTools: Tool[] = [
   ...vaultTools,
+  ...vaultWriteTools,
   ...amplifyTools
 ]
 
@@ -120,6 +123,38 @@ async function handleRequest(req: MCPRequest): Promise<MCPResponse | null> {
   }
 
   return makeResponse(id, undefined, { code: -32601, message: `Method not found: ${method}` })
+}
+
+// ─── STDIO Transport ──────────────────────────────────────────────────────────
+async function handleStdioTransport() {
+  const reader = Bun.stdin.getReader()
+  const writer = Bun.stdout.writer()
+  const decoder = new TextDecoder()
+  let buffer = ''
+
+  const send = (obj: MCPResponse) => {
+    writer.write(JSON.stringify(obj) + '\n')
+    writer.flush()
+  }
+
+  while (true) {
+    const { done, value } = await reader.read()
+    if (done) break
+    buffer += decoder.decode(value, { stream: true })
+    const lines = buffer.split('\n')
+    buffer = lines.pop() ?? ''
+
+    for (const line of lines) {
+      if (!line.trim()) continue
+      try {
+        const req = JSON.parse(line) as MCPRequest
+        const result = await handleRequest(req)
+        if (result) send(result)
+      } catch (e: any) {
+        send({ jsonrpc: '2.0', error: { code: -32700, message: `Parse error: ${e.message}` } })
+      }
+    }
+  }
 }
 
 // ─── HTTP Server ──────────────────────────────────────────────────────────────
@@ -244,7 +279,12 @@ const server = Bun.serve({
 
 // ─── Startup ─────────────────────────────────────────────────────────────────
 
-console.log(`
+if (TRANSPORT === 'stdio') {
+  console.error('[MCP] Running in stdio mode (stdin/stdout JSON-RPC)')
+  await handleStdioTransport()
+  process.exit(0)
+} else {
+  console.log(`
 ╔══════════════════════════════════════════════════════╗
 ║   Research Vault MCP Server — MCP SSE Transport     ║
 ╠══════════════════════════════════════════════════════╣
@@ -255,6 +295,7 @@ console.log(`
 ║  Tools:     ${String(allTools.length).padEnd(3)} (${vaultTools.length} vault, ${amplifyTools.length} amplify)     ║
 ╚══════════════════════════════════════════════════════╝
 `)
+}
 
 // ─── Graceful Shutdown ───────────────────────────────────────────────────────
 
