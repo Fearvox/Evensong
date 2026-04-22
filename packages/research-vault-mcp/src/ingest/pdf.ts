@@ -9,15 +9,21 @@ export async function convertPdfToMarkdown(pdfPath: string): Promise<string | nu
   // Try markitdown first
   try {
     const proc = Bun.spawn(['markitdown', pdfPath], { timeout: 60_000 })
-    const [exited, stdout] = await proc.exited
-    if (exited === 0 && stdout.trim()) return stdout
+    const [exited] = await proc.exited
+    if (exited === 0) {
+      const output = await new Response(proc.stdout as Blob).text()
+      if (output.trim()) return output
+    }
   } catch {}
 
   // Fallback: pandoc
   try {
     const proc = Bun.spawn(['pandoc', '--to', 'markdown', pdfPath], { timeout: 60_000 })
-    const [exited, stdout] = await proc.exited
-    if (exited === 0 && stdout.trim()) return stdout
+    const [exited] = await proc.exited
+    if (exited === 0) {
+      const output = await new Response(proc.stdout as Blob).text()
+      if (output.trim()) return output
+    }
   } catch {}
 
   return null
