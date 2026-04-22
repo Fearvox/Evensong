@@ -127,32 +127,23 @@ async function handleRequest(req: MCPRequest): Promise<MCPResponse | null> {
 
 // ─── STDIO Transport ──────────────────────────────────────────────────────────
 async function handleStdioTransport() {
-  const reader = Bun.stdin.getReader()
+  const rl = await import('readline')
+  const rli = rl.createInterface({ input: process.stdin as any, crlfDelay: Infinity })
   const writer = Bun.stdout.writer()
-  const decoder = new TextDecoder()
-  let buffer = ''
 
   const send = (obj: MCPResponse) => {
     writer.write(JSON.stringify(obj) + '\n')
     writer.flush()
   }
 
-  while (true) {
-    const { done, value } = await reader.read()
-    if (done) break
-    buffer += decoder.decode(value, { stream: true })
-    const lines = buffer.split('\n')
-    buffer = lines.pop() ?? ''
-
-    for (const line of lines) {
-      if (!line.trim()) continue
-      try {
-        const req = JSON.parse(line) as MCPRequest
-        const result = await handleRequest(req)
-        if (result) send(result)
-      } catch (e: any) {
-        send({ jsonrpc: '2.0', error: { code: -32700, message: `Parse error: ${e.message}` } })
-      }
+  for await (const line of rli) {
+    if (!line.trim()) continue
+    try {
+      const req = JSON.parse(line) as MCPRequest
+      const result = await handleRequest(req)
+      if (result) send(result)
+    } catch (e: unknown) {
+      send({ jsonrpc: '2.0', error: { code: -32700, message: `Parse error: ${e instanceof Error ? e.message : String(e)}` } })
     }
   }
 }
