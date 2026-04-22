@@ -25,6 +25,20 @@ BGE_USE_LOCAL = os.environ.get("BGE_USE_LOCAL", "0") == "1"
 _tokenizer = None
 _encoder = None
 
+# Persistent HTTP client for connection pooling
+_http_client = None
+
+
+def _get_http_client() -> httpx.Client:
+    """Get or create persistent HTTP client with connection pooling."""
+    global _http_client
+    if _http_client is None:
+        _http_client = httpx.Client(
+            timeout=httpx.Timeout(120.0, connect=30.0),
+            trust_env=False,
+        )
+    return _http_client
+
 
 def init_context_model(retriever: str) -> Tuple[Any, Any]:
     """
@@ -105,45 +119,64 @@ def get_embeddings(
             embeddings = _get_embeddings_via_endpoint(inputs)
             if embeddings is not None:
                 return embeddings
+        except ModuleNotFoundError:
+            raise  # Re-raise — local fallback impossible
         except Exception as e:
-            print(f"[rag_utils_patch] Endpoint unavailable ({e}), using local model")
+            print(f"[rag_utils_patch] Endpoint unavailable ({e}), retrying once...")
+            # Retry once — cold-start connection may time out on first call
+            try:
+                embeddings = _get_embeddings_via_endpoint(inputs)
+                if embeddings is not None:
+                    return embeddings
+            except Exception as e2:
+                print(f"[rag_utils_patch] Retry also failed ({e2}), using local model")
 
     # Local model fallback
     return _get_embeddings_local(inputs)
 
 
 def _get_embeddings_via_endpoint(inputs: List[str]) -> Optional[np.ndarray]:
-    """Get embeddings via BGE-M3 HTTP endpoint."""
-    try:
-        resp = httpx.post(
-            BGE_ENDPOINT,
-            json={"texts": inputs},
-            timeout=10.0
-        )
-        resp.raise_for_status()
-        data = resp.json()
+    """Get embeddings via BGE-M3 HTTP endpoint. Batches large inputs."""
+    # Batching: chunk to avoid endpoint timeout (>100 texts causes timeout)
+    BATCH_SIZE = 50
 
-        # Handle different response formats
-        if 'embeddings' in data:
-            embeddings = data['embeddings']
-        elif 'data' in data:
-            embeddings = [item['embedding'] for item in data['data']]
-        else:
-            return None
+    all_embeddings = []
+    for i in range(0, len(inputs), BATCH_SIZE):
+        chunk = inputs[i:i + BATCH_SIZE]
+        try:
+            resp = _get_http_client().post(
+                BGE_ENDPOINT,
+                json={"input": chunk},
+            )
+            resp.raise_for_status()
+            data = resp.json()
 
-        embeddings = np.array(embeddings, dtype=np.float32)
+            # Handle different response formats
+            if isinstance(data, list):
+                # Format: [{'index': 0, 'embedding': [[...], ...]}]
+                embeddings = [item['embedding'][0] for item in data]
+            elif 'embeddings' in data:
+                embeddings = data['embeddings']
+            elif 'data' in data:
+                embeddings = [item['embedding'] for item in data['data']]
+            else:
+                return None
 
-        # L2 normalize
-        norms = np.linalg.norm(embeddings, axis=1, keepdims=True)
-        norms = np.where(norms == 0, 1, norms)  # Avoid division by zero
-        embeddings = embeddings / norms
+            all_embeddings.append(np.array(embeddings, dtype=np.float32))
+        except Exception as e:
+            print(f"[rag_utils_patch] Endpoint error: {e}")
+            raise
 
-        print(f"[rag_utils_patch] Got {len(inputs)} embeddings from endpoint")
-        return embeddings
+    # Concatenate all batches
+    embeddings = np.concatenate(all_embeddings, axis=0)
 
-    except Exception as e:
-        print(f"[rag_utils_patch] Endpoint error: {e}")
-        raise
+    # L2 normalize
+    norms = np.linalg.norm(embeddings, axis=1, keepdims=True)
+    norms = np.where(norms == 0, 1, norms)  # Avoid division by zero
+    embeddings = embeddings / norms
+
+    print(f"[rag_utils_patch] Got {len(inputs)} embeddings from endpoint ({len(all_embeddings)} batches)")
+    return embeddings
 
 
 def _get_embeddings_local(inputs: List[str]) -> np.ndarray:
@@ -151,7 +184,13 @@ def _get_embeddings_local(inputs: List[str]) -> np.ndarray:
     global _tokenizer, _encoder
 
     if _tokenizer is None or _encoder is None:
-        init_context_model('hybrid')
+        try:
+            init_context_model('hybrid')
+        except ModuleNotFoundError as e:
+            raise RuntimeError(
+                "Local BGE-M3 unavailable: transformers not installed. "
+                "Use BGE_ENDPOINT or install transformers+torch."
+            ) from e
 
     with torch.no_grad():
         inputs_tok = _tokenizer(
