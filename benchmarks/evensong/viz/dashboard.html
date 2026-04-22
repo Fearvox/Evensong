@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Evensong x EverMind — Benchmark Dashboard</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Courier New', monospace; background: #0a0a0a; color: #e0e0e0; min-height: 100vh; }
+    header { background: #0f0f1e; border-bottom: 2px solid #00e5ff; padding: 1.2rem 2rem; display: flex; align-items: baseline; gap: 2rem; }
+    header h1 { font-size: 1.3rem; color: #00e5ff; }
+    header span { color: #444; font-size: 0.8rem; }
+    nav { background: #0f0f1e; border-bottom: 1px solid #1a1a3a; display: flex; gap: 0; }
+    nav button { background: transparent; color: #666; border: none; border-bottom: 2px solid transparent; padding: 0.8rem 1.5rem; cursor: pointer; font-family: inherit; font-size: 0.85rem; }
+    nav button:hover { color: #00e5ff; }
+    nav button.active { color: #00e5ff; border-bottom-color: #00e5ff; }
+    .section { display: none; padding: 2rem; }
+    .section.active { display: block; }
+    .iframe-wrap { border: 1px solid #1a1a3a; min-height: 600px; }
+    .note { color: #444; font-size: 0.75rem; margin-top: 1rem; line-height: 1.6; }
+    h2 { font-size: 1rem; color: #00e5ff; margin-bottom: 1rem; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Evensong x EverMind Benchmark Dashboard</h1>
+    <span>2026-04-22 · LOCOMO Conv1 baseline + MTEB synthetic + OR-shot resource metrics</span>
+  </header>
+  <nav>
+    <button class="active" onclick="showTab('locomo')">LOCOMO Per-Category</button>
+    <button onclick="showTab('mteb')">MTEB Retrieval</button>
+    <button onclick="showTab('resource')">Resource Metrics</button>
+  </nav>
+
+  <div id="locomo" class="section active">
+    <h2>LOCOMO Per-Category Performance — BGE-M3 Dense vs Dragon</h2>
+    <div class="iframe-wrap">
+      <iframe src="locomorag_chart.html" style="width:100%; height:600px; border:none;" title="LOCOMO bar chart"></iframe>
+    </div>
+  </div>
+
+  <div id="mteb" class="section">
+    <h2>MTEB Retrieval Comparison — BM25 vs Dense vs Adaptive-Hybrid</h2>
+    <div class="iframe-wrap">
+      <iframe src="mteb_radar_chart.html" style="width:100%; height:550px; border:none;" title="MTEB radar chart"></iframe>
+    </div>
+  </div>
+
+  <div id="resource" class="section">
+    <h2>OR-shot Resource Metrics — R066–R070</h2>
+    <iframe src="resource_table.html" style="width:100%; height:500px; border:none;" title="Resource table"></iframe>
+  </div>
+
+  <div style="padding: 1rem 2rem; border-top: 1px solid #1a1a3a; margin-top: 2rem;">
+    <div class="note">
+      Data provenance:<br>
+      · LOCOMO: benchmarks/evensong/locomo_hybrid/eval_locomorag.py — Conv1 (199 QAs), Phase 2 complete<br>
+      · MTEB: benchmarks/evensong/mteb_eval/results/mteb_Synthetic20_20260422_050504.json — synthetic 20-doc, Phase 3<br>
+      · Resource: benchmarks/evensong/registry.jsonl — R066-R070 or-shot runs, Phase 3/4<br>
+      · Source: github.com/Fearvox/Evensong/benchmarks/evensong/viz/
+    </div>
+  </div>
+
+  <script>
+    function showTab(id) {
+      document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+      document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
+      document.getElementById(id).classList.add('active');
+      event.target.classList.add('active');
+    }
+  </script>
+</body>
+</html>

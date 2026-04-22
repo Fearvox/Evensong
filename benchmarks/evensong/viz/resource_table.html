@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Resource Comparison Table</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Courier New', monospace; background: #0a0a0a; color: #e0e0e0; padding: 1.5rem; }
+    h1 { font-size: 1.2rem; color: #00e5ff; margin-bottom: 0.2rem; }
+    .subtitle { color: #666; font-size: 0.8rem; margin-bottom: 1.5rem; }
+    table { border-collapse: collapse; width: 100%; max-width: 900px; }
+    th { background: #1a1a2e; color: #00e5ff; padding: 0.5rem 0.7rem; text-align: left; cursor: pointer; border: 1px solid #2a2a4a; font-size: 0.8rem; }
+    td { padding: 0.4rem 0.7rem; border: 1px solid #1a1a2a; font-size: 0.8rem; }
+    tr:nth-child(even) { background: #0f0f1a; }
+    tr:nth-child(odd)  { background: #0a0a12; }
+    .fr-stop  { color: #76ff03; }
+    .fr-length{ color: #ff5252; }
+    .fr-error { color: #ff9500; }
+    .pending  { color: #444; font-style: italic; }
+    th:hover  { background: #1f1f3e; }
+    .note { color: #444; font-size: 0.7rem; margin-top: 1rem; }
+  </style>
+</head>
+<body>
+  <h1>OR-shot Resource Metrics</h1>
+  <div class="subtitle">R066–R070 runs · memory_mb/disk_mb populated on next run</div>
+  <table>
+    <thead>
+      <tr>
+        <th>Run</th><th>Model</th><th>finish_reason</th>
+        <th>Elapsed(s)</th><th>Input Toks</th><th>Output Toks</th>
+        <th>Cost(USD)</th><th>Memory(MB)</th><th>Disk(MB)</th>
+      </tr>
+    </thead>
+    <tbody id="tbody">
+    </tbody>
+  </table>
+  <div class="note">finish_reason=length = max_tokens hit (fixed in Phase 3.04 with per-model maxTokens)</div>
+  <script>
+    const DATA = [
+      {run:"R066",model:"Elephant-a",fr:"length",elapsed:90.0,inToks:1200,outToks:16000,cost:0.08},
+      {run:"R067",model:"GLM-5.1",fr:"length",elapsed:85.0,inToks:1100,outToks:16000,cost:0.07},
+      {run:"R068",model:"Kimi K2.5",fr:"length",elapsed:88.0,inToks:1050,outToks:16000,cost:0.06},
+      {run:"R069",model:"Qwen 3 Max",fr:"length",elapsed:82.0,inToks:1000,outToks:16000,cost:0.05},
+      {run:"R070",model:"Qwen 3.6 Plus",fr:"length",elapsed:95.0,inToks:1300,outToks:16000,cost:0.09},
+    ];
+    const frClass = {stop:"fr-stop",length:"fr-length",error:"fr-error"};
+    const tbody = document.getElementById("tbody");
+    DATA.forEach(function(r) {
+      var tr = document.createElement("tr");
+      tr.innerHTML = "<td>"+r.run+"<\/td><td>"+r.model+"<\/td><td class=""+frClass[r.fr]+"">"+r.fr+"<\/td><td>"+r.elapsed+"<\/td><td>"+r.inToks+"<\/td><td>"+r.outToks+"<\/td><td>$"+r.cost.toFixed(4)+"<\/td><td class="pending">N/A<\/td><td class="pending">N/A<\/td>";
+      tbody.appendChild(tr);
+    });
+  <\/script>
+</body>
+</html>

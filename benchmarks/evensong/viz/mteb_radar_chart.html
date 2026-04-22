@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MTEB Retrieval Comparison — Evensong x EverMind</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Courier New', monospace; background: #0a0a0a; color: #e0e0e0; padding: 2rem; }
+    h1 { font-size: 1.4rem; color: #00e5ff; margin-bottom: 0.3rem; }
+    .subtitle { color: #666; font-size: 0.85rem; margin-bottom: 2rem; }
+    .chart-wrap { max-width: 700px; margin: 0 auto; }
+    .controls { margin-bottom: 1rem; }
+    button { background: #1a1a2e; color: #00e5ff; border: 1px solid #00e5ff; padding: 0.4rem 1rem; cursor: pointer; font-family: inherit; }
+    button:hover { background: #00e5ff22; }
+    .note { color: #444; font-size: 0.75rem; margin-top: 1rem; }
+  </style>
+</head>
+<body>
+  <div class="chart-wrap">
+    <h1>MTEB Retrieval Comparison</h1>
+    <div class="subtitle">BM25 vs Dense (BGE-M3) vs Adaptive-Hybrid · 20-doc synthetic benchmark</div>
+    <div class="controls">
+      <button onclick="exportPNG()">Export PNG</button>
+    </div>
+    <canvas id="chart" width="600" height="500"></canvas>
+    <div class="note">
+      Data: mteb_eval/results/mteb_Synthetic20_20260422_050504.json · Axes: MRR@5, NDCG@5, Recall@5
+    </div>
+  </div>
+
+  <script>
+    // Phase 3 synthetic benchmark data
+    const DATA = {
+      labels: ['MRR@5', 'NDCG@5', 'Recall@5'],
+      datasets: [
+        {
+          label: 'Dense (BGE-M3)',
+          data: [1.000, 0.992, 1.000],
+          borderColor: '#00e5ff',
+          backgroundColor: '#00e5ff22',
+          borderWidth: 2,
+          fill: true,
+        },
+        {
+          label: 'BM25',
+          data: [1.000, 0.961, 0.950],
+          borderColor: '#ff9500',
+          backgroundColor: '#ff950022',
+          borderWidth: 2,
+          fill: true,
+        },
+        {
+          label: 'Adaptive-Hybrid',
+          data: [1.000, 0.923, 0.900],
+          borderColor: '#76ff03',
+          backgroundColor: '#76ff0322',
+          borderWidth: 2,
+          fill: true,
+        },
+      ]
+    };
+
+    const ctx = document.getElementById('chart').getContext('2d');
+    const chart = new Chart(ctx, {
+      type: 'radar',
+      data: DATA,
+      options: {
+        responsive: true,
+        scales: {
+          r: {
+            min: 0.8,
+            max: 1.05,
+            ticks: { stepSize: 0.05, color: '#666', backdropColor: 'transparent' },
+            grid: { color: '#2a2a2a' },
+            angleLines: { color: '#2a2a2a' },
+            pointLabels: { color: '#e0e0e0', font: { family: 'Courier New', size: 13 } },
+          }
+        },
+        plugins: {
+          legend: {
+            position: 'bottom',
+            labels: { color: '#e0e0e0', font: { family: 'Courier New' }, padding: 20 }
+          }
+        }
+      }
+    });
+
+    function exportPNG() {
+      const link = document.createElement('a');
+      link.download = 'mteb_radar_comparison.png';
+      link.href = document.getElementById('chart').toDataURL('image/png');
+      link.click();
+    }
+  </script>
+</body>
+</html>

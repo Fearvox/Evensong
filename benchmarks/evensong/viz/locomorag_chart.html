@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LOCOMO Per-Category Performance — Evensong x EverMind</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Courier New', monospace; background: #0a0a0a; color: #e0e0e0; padding: 2rem; }
+    h1 { font-size: 1.4rem; color: #00e5ff; margin-bottom: 0.3rem; }
+    .subtitle { color: #666; font-size: 0.85rem; margin-bottom: 2rem; }
+    .chart-wrap { max-width: 900px; margin: 0 auto; }
+    .controls { margin-bottom: 1rem; display: flex; gap: 1rem; align-items: center; }
+    button { background: #1a1a2e; color: #00e5ff; border: 1px solid #00e5ff; padding: 0.4rem 1rem; cursor: pointer; font-family: inherit; }
+    button:hover { background: #00e5ff22; }
+    .legend-note { color: #666; font-size: 0.75rem; margin-top: 0.5rem; }
+    .export-info { color: #444; font-size: 0.75rem; margin-top: 1rem; }
+  </style>
+</head>
+<body>
+  <div class="chart-wrap">
+    <h1>LOCOMO Per-Category Performance</h1>
+    <div class="subtitle">BGE-M3 Dense vs Dragon Baseline · Conv1 (199 QAs) · Recall@5 & F1</div>
+
+    <div class="controls">
+      <button onclick="showF1()">F1 View</button>
+      <button onclick="showRecall()">Recall@5 View</button>
+      <button onclick="showBoth()">Both</button>
+      <button onclick="exportPNG()">Export PNG</button>
+    </div>
+
+    <canvas id="chart" width="800" height="400"></canvas>
+    <div class="legend-note">
+      Data: LOCOMO Conv1 baseline (2026-04-22) · BGE-M3 dense retriever · Cat1 Personal Facts = TBD (pending full 10-conversation run)
+    </div>
+    <div class="export-info">Right-click chart → "Save image as..." to export PNG</div>
+  </div>
+
+  <script>
+    // Phase 2 Conv1 baseline data
+    const DATA = {
+      labels: ['Cat1\nPersonal Facts', 'Cat2\nTemporal', 'Cat3\nInferences', 'Cat4\nExplanations', 'Cat5\nAdversarial'],
+      recall5: { dense: [null, 0.86, 0.68, 0.63, 0.41], dragon: [0.59, 0.72, 0.55, 0.52, 0.35] },
+      f1:       { dense: [null, 0.29, null, null, 0.14],    dragon: [0.21, 0.25, 0.19, 0.18, 0.12] },
+    };
+
+    const ctx = document.getElementById('chart').getContext('2d');
+    let chart;
+
+    function makeChart(showF1, showRecall) {
+      if (chart) chart.destroy();
+      const datasets = [];
+      if (showRecall) {
+        datasets.push(
+          { label: 'Dense Recall@5', data: DATA.recall5.dense, borderColor: '#00e5ff', backgroundColor: '#00e5ff33', borderWidth: 2 },
+          { label: 'Dragon Recall@5', data: DATA.recall5.dragon, borderColor: '#ff9500', backgroundColor: '#ff950033', borderWidth: 2 }
+        );
+      }
+      if (showF1) {
+        datasets.push(
+          { label: 'Dense F1', data: DATA.f1.dense, borderColor: '#00e5ff', backgroundColor: '#00e5ff11', borderWidth: 1.5, borderDash: [4, 4] },
+          { label: 'Dragon F1', data: DATA.f1.dragon, borderColor: '#ff9500', backgroundColor: '#ff950011', borderWidth: 1.5, borderDash: [4, 4] }
+        );
+      }
+      chart = new Chart(ctx, {
+        type: 'bar',
+        data: { labels: DATA.labels, datasets },
+        options: {
+          responsive: true,
+          plugins: {
+            legend: { labels: { color: '#e0e0e0', font: { family: 'Courier New' } } },
+            title: { display: false },
+          },
+          scales: {
+            x: { ticks: { color: '#888' }, grid: { color: '#222' } },
+            y: {
+              min: 0, max: 1,
+              ticks: { color: '#888' },
+              grid: { color: '#222' },
+              title: { display: true, text: 'Score', color: '#666' }
+            }
+          }
+        }
+      });
+    }
+
+    function showF1()    { makeChart(true, false); }
+    function showRecall(){ makeChart(false, true); }
+    function showBoth()  { makeChart(true, true);  }
+
+    function exportPNG() {
+      const link = document.createElement('a');
+      link.download = 'locomorag_per_category.png';
+      link.href = document.getElementById('chart').toDataURL('image/png');
+      link.click();
+    }
+
+    showBoth();
+  </script>
+</body>
+</html>
