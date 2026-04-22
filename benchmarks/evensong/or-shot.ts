@@ -23,7 +23,7 @@
  *   bun benchmarks/evensong/or-shot.ts ... --dry-run   # preview only
  */
 
-import { mkdirSync, writeFileSync, appendFileSync, readFileSync } from 'fs'
+import { mkdirSync, writeFileSync, appendFileSync, readFileSync, statSync } from 'fs'
 import { join, resolve } from 'path'
 import { parseArgs } from 'util'
 import { buildPrompt, getPressureLabel } from './prompts.js'
@@ -57,6 +57,8 @@ interface OrShotResult {
   cost_usd: number
   input_tokens: number
   output_tokens: number
+  memory_mb: number
+  disk_mb: number
   raw_response_path: string
   registry_schema: 'or-shot-v1'
   invalid?: boolean
@@ -150,6 +152,8 @@ async function runOrShot(config: OrShotConfig): Promise<OrShotResult> {
       cost_usd: 0,
       input_tokens: 0,
       output_tokens: 0,
+      memory_mb: 0,
+      disk_mb: 0,
       raw_response_path: errPath,
       registry_schema: 'or-shot-v1',
       invalid: true,
@@ -171,6 +175,8 @@ async function runOrShot(config: OrShotConfig): Promise<OrShotResult> {
   writeFileSync(rawPath, content)
 
   const metrics = liteMetrics(content)
+  const memMB = Math.round(process.memoryUsage().heapUsed / 1024 / 1024 * 100) / 100
+  const diskMB = Math.round((statSync(rawPath).size / 1024 / 1024) * 100) / 100
   const result: OrShotResult = {
     run: config.runId,
     date: today,
@@ -184,6 +190,8 @@ async function runOrShot(config: OrShotConfig): Promise<OrShotResult> {
     cost_usd: usage.cost ?? 0,
     input_tokens: usage.prompt_tokens ?? 0,
     output_tokens: usage.completion_tokens ?? 0,
+    memory_mb: memMB,
+    disk_mb: diskMB,
     raw_response_path: rawPath,
     registry_schema: 'or-shot-v1',
   }
