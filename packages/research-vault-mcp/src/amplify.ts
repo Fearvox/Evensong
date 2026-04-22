@@ -81,12 +81,13 @@ export const amplifyTools = [
         modelId: { type: 'string', description: 'Model ID (from amplify_list_models)' },
         systemPrompt: { type: 'string', description: 'Optional system prompt override' },
         temperature: { type: 'number', description: 'Temperature (0-2, default 0.7)' },
-        maxTokens: { type: 'number', description: 'Max output tokens (default 4000)' }
+        maxTokens: { type: 'number', description: 'Max output tokens (default 4000)' },
+        stream: { type: 'boolean', description: 'If true, yield chunks via onProgress callback instead of waiting for complete response (default false)' }
       }
     },
-    call: async ({ message, modelId, systemPrompt, temperature = 0.7, maxTokens = 4000 }: {
-      message: string, modelId?: string, systemPrompt?: string, temperature?: number, maxTokens?: number
-    }) => {
+    call: async ({ message, modelId, systemPrompt, temperature = 0.7, maxTokens = 4000, stream = false }: {
+      message: string, modelId?: string, systemPrompt?: string, temperature?: number, maxTokens?: number, stream?: boolean
+    }, onProgress?: (data: { type: string; text?: string }) => void) => {
       try {
         const body: any = {
           data: {
@@ -132,6 +133,36 @@ export const amplifyTools = [
               } catch {}
             }
           }
+        }
+
+        // ── Stream mode: yield chunks via onProgress ─────────────────────────
+        if (stream && onProgress) {
+          const res2 = await fetch(`${AMPLIFY_BASE}/chat`, {
+            method: 'POST',
+            headers: getHeaders(),
+            body: JSON.stringify(body)
+          })
+          if (!res2.ok) throw new Error(`HTTP ${res2.status}`)
+          const reader2 = res2.body?.getReader()
+          if (!reader2) throw new Error('No response body')
+          const decoder2 = new TextDecoder()
+          let buffer2 = ''
+          while (true) {
+            const { done, value } = await reader2.read()
+            if (done) break
+            buffer2 += decoder2.decode(value, { stream: true })
+            for (const line of buffer2.split('\n')) {
+              if (line.startsWith('data: ')) {
+                try {
+                  const parsed = JSON.parse(line.slice(6))
+                  if (parsed.data?.content) {
+                    onProgress({ type: 'chunk', text: parsed.data.content })
+                  }
+                } catch {}
+              }
+            }
+          }
+          return { content: [{ type: 'text', text: '(streamed)' }] }
         }
 
         return {
