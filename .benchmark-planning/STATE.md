@@ -6,29 +6,30 @@ See: .benchmark-planning/PROJECT.md (updated 2026-04-22)
 
 **Core value:** 在 SEED-001 触发前完成所有可独立准备的 benchmark 适配工作
 
-**Current focus:** Phase 1 ready to plan
+**Current focus:** Phase 2 LOCOMO Evaluation (02-01 + 02-02 done, 02-03/02-04 pending)
 
 ## Current Position
 
-Phase: 1 of 4 (LOCOMO Infrastructure + BGE Fixes)
-Plan: 0 of 5 in current phase
-Status: Ready to execute
-Last activity: 2026-04-22 — Phase 1 context + plans created
+Phase: 2 of 4 (LOCOMO Evaluation + MTEB Protocol)
+Plan: 2 of 4 complete (02-01 RAG eval + 02-02 per-category done, 02-03/02-04 pending)
+Status: Phase 2 in progress
+Last activity: 2026-04-22 — LOCOMO10 Conv1 done (R@5=0.583, F1=0.213), per-cat breakdown complete
 
-Progress: [░░░░░░░░░░] 0%
+Progress: [████████░░] 30%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 0
-- Average duration: N/A
-- Total execution time: 0 hours
+- Total plans completed: 2 (02-01, 02-02)
+- Average duration: ~45 min each (endpoint debugging)
+- Total execution time: ~1.5 hours
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
-| - | - | - | - |
+| 1 | 5/5 | LOCOMO wrapper + BGE fixes | ~20 min |
+| 2 | 2/4 | LOCOMO eval + per-cat | ~45 min |
 
 **Recent Trend:**
 - Last 5 plans: No plans completed yet
