@@ -21,14 +21,24 @@ const compiledServer = join(pkgRoot, 'dist', 'server.js')
 const sourceServer = join(pkgRoot, 'src', 'server.ts')
 
 async function main() {
+  const args = process.argv.slice(2)
+  let transport = 'sse'
+
+  for (let i = 0; i < args.length; i++) {
+    if (args[i] === '--transport' && args[i + 1]) {
+      transport = args[i + 1]
+    } else if (args[i].startsWith('--transport=')) {
+      transport = args[i].split('=')[1]
+    }
+  }
+  process.env.MCP_TRANSPORT = transport
+
   if (existsSync(compiledServer)) {
     await import(compiledServer)
   } else if (existsSync(sourceServer)) {
-    // Direct TS execution via bun runtime (works under `bunx`, not plain `npx node`)
     await import(sourceServer)
   } else {
     console.error('research-vault-mcp: neither dist/server.js nor src/server.ts found')
-    console.error('pkgRoot:', pkgRoot)
     process.exit(1)
   }
 }
