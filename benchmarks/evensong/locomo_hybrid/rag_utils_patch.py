@@ -192,9 +192,12 @@ def get_context_embeddings(
     Converts LOCOMO conversation format to dialog history strings,
     then generates embeddings.
 
+    LOCOMO format: data = {session_1: [turns], session_1_date_time: ..., ...}
+    Each turn: {speaker, dia_id, text, ...}
+
     Args:
         retriever: Retriever type
-        data: LOCOMO conversation dict with 'sessions' -> 'turns'
+        data: LOCOMO conversation dict with 'session_N' keys
         context_tokenizer: Tokenizer (ignored, uses global)
         context_encoder: Encoder (ignored, uses global)
         captions: Optional per-turn captions
@@ -210,32 +213,35 @@ def get_context_embeddings(
     formatted = []
     context_ids = []
 
-    sessions = data.get('sessions', [])
+    # LOCOMO format uses session_N keys
+    session_keys = sorted([k for k in data.keys() if k.startswith('session_') and not k.endswith('_date_time')],
+                          key=lambda x: int(x.split('_')[1]))
 
-    for session_idx, session in enumerate(sessions):
-        turns = session.get('turns', [])
+    for session_key in session_keys:
+        turns = data.get(session_key, [])
+        # Get session datetime if available
+        dt_key = session_key + '_date_time'
+        session_dt = data.get(dt_key, '')
 
-        for turn_idx, turn in enumerate(turns):
-            # Build dialog ID: session and turn indices (1-indexed)
-            dia_id = f"D{session_idx + 1}:{turn_idx + 1}"
-
+        for turn in turns:
             # Extract turn data
+            dia_id = turn.get('dia_id', 'Unknown')
             speaker = turn.get('speaker', 'Unknown')
             text = turn.get('text', '')
-            dt = turn.get('datetime', '')
 
             # Format as LOCOMO-style dialog line
             # Format: "(datetime) Speaker said, \"text\"\n"
             speaker_str = speaker if speaker else 'Unknown'
             text_str = text if text else ''
-            if dt:
-                formatted_text = f"({dt}) {speaker_str} said, \"{text_str}\"\n"
-            else:
-                formatted_text = f"Unknown said, \"{text_str}\"\n"
 
             # Skip empty text entries
             if not text_str.strip():
                 continue
+
+            if session_dt:
+                formatted_text = f"({session_dt}) {speaker_str} said, \"{text_str}\"\n"
+            else:
+                formatted_text = f"Unknown said, \"{text_str}\"\n"
 
             formatted.append(formatted_text)
             context_ids.append(dia_id)
