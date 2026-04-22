@@ -20,16 +20,16 @@ Progress: [██████████] 100%
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 2 (02-01, 02-02)
-- Average duration: ~45 min each (endpoint debugging)
-- Total execution time: ~1.5 hours
+- Total plans completed: 6 (Phase 1: 5/5, Phase 2: 4/4)
+- Average duration: ~20 min Phase 1, ~45 min Phase 2 (endpoint debugging)
+- Total execution time: ~3 hours
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
 | 1 | 5/5 | LOCOMO wrapper + BGE fixes | ~20 min |
-| 2 | 2/4 | LOCOMO eval + per-cat | ~45 min |
+| 2 | 4/4 | LOCOMO eval + per-cat + SearchProtocol + FAISS | ~45 min |
 
 **Recent Trend:**
 - Last 5 plans: No plans completed yet
