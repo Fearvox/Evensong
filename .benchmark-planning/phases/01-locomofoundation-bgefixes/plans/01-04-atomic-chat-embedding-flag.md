@@ -43,4 +43,4 @@ BGE-M3 endpoint accepts `--embedding` flag (Atomic Chat v1.1.44 bug fixed)
 
 ## Status
 
-- [ ] Not started
+- [x] Done (2026-04-22) — Endpoint verified working at `http://100.65.234.77:8080/embedding`

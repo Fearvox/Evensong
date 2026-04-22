@@ -93,4 +93,4 @@ Test that the wrapper can be imported and produces correct output shapes.
 
 ## Status
 
-- [ ] Not started
+- [x] Done (2026-04-22) — Implemented at `benchmarks/evensong/locomo_hybrid/rag_utils_patch.py`

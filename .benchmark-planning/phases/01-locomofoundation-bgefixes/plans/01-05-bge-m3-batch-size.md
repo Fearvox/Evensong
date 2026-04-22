@@ -44,4 +44,4 @@ BGE-M3 batch size handles `maxChars: 1000` without exceeding `-b 512` limit
 
 ## Status
 
-- [ ] Not started
+- [x] Done (2026-04-22) — 1000-char requests verified working, batch limit not exceeded

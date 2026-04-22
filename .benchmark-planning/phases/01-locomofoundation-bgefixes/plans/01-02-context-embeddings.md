@@ -43,4 +43,4 @@ Load one LOCOMO conversation JSON and verify output format matches LOCOMO expect
 
 ## Status
 
-- [ ] Not started
+- [x] Done (2026-04-22) — LOCOMO format: `"(<datetime>) <speaker> said, \"<text>\"\n"` with D{s}:{t} IDs

@@ -47,4 +47,4 @@ Dragon embedding normalization is consistent (both get_embeddings and get_contex
 
 ## Status
 
-- [ ] Not started
+- [x] Done (2026-04-22) — Both get_embeddings and get_context_embeddings consistently L2-normalize for hybrid mode
