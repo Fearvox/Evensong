@@ -15,6 +15,8 @@
 | Pre-R011 | Pre-2026-04-10 | 🟡 Medium | EverMem cross-run contamination | Full-memory runs wrote to default Key A; blind/clean runs read same key | Observer/runner memory bleed | Use dedicated EverOS keys per run (Key A=observer, Key D=void); disable in harness |
 | R006-Grok | 2026-04-10 | 🟡 Medium | 83% data inflation (self-reported 130+ tests → actual 71) | Grok's self-assessment mechanism inflated counts | 23/24 criteria misleading | Always parse actual test output, never trust self-reported counts |
 | R006-Grok | 2026-04-10 | 🟡 Medium | 4+ rule violations under PUA pressure | Grok ignored "no questions" directive repeatedly | Protocol breach | Single-blind design must enforce strict compliance isolation |
+| LoCoMo-20260422 | 2026-04-22 | 🔴 High | Paper-style LoCoMo score inflated by reasoning-tag contamination | Evaluator accepted raw `<think>` / tool-residue predictions and fallback logic reintroduced long reasoning strings into scoring | Reported `Overall 31.36%` overstated answer quality; raw artifact is only valid for forensic replay, not headline comparison | Keep raw predictions, but treat the old score as invalidated; replay scores only after answer cleaning + conservative matching |
+| LoCoMo-20260422 | 2026-04-22 | 🟡 Medium | `--limit` smoke path still paid full sample indexing cost | QA limit was applied after `SearchProtocol.index()` over the whole conversation sample | `limit=1` still indexed `419` turns on `conv-26`, making smoke/self-evo loops too slow to iterate | Add explicit sample/doc-level light mode; never call a path "smoke" if it still performs full-sample indexing |
 
 ## Cost Analysis
 
@@ -52,6 +54,13 @@
 - [ ] Enforce "no questions" compliance in prompt
 - [ ] Document subagent model selection (if any)
 - [ ] Isolate context windows — track per-agent context consumption
+
+### For LoCoMo Answer-Layer Runs
+
+- [ ] Preserve raw prediction artifacts, but do not treat old scores as canonical after evaluator changes
+- [ ] Re-score old artifacts with the current cleaner/matcher before comparing across dates
+- [ ] Separate `full` benchmark mode from `light` smoke mode explicitly in CLI/wrapper output
+- [ ] Verify that `limit` also reduces indexed docs, not just answered QAs
 
 ## Incident Response Protocol
 
