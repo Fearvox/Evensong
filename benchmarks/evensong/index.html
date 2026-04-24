@@ -471,6 +471,30 @@
       transform: scale(1.035);
     }
 
+    .video-card {
+      justify-content: start;
+      gap: 18px;
+    }
+
+    .video-frame {
+      position: relative;
+      z-index: 1;
+      margin: 2px 0 4px;
+      overflow: hidden;
+      border: 1px solid oklch(0.9 0.03 84 / 0.18);
+      border-radius: 6px;
+      background: oklch(0.04 0.01 160);
+      box-shadow: 0 20px 60px oklch(0 0 0 / 0.32);
+    }
+
+    .video-frame video {
+      display: block;
+      width: 100%;
+      aspect-ratio: 16 / 9;
+      object-fit: cover;
+      background: oklch(0.04 0.01 160);
+    }
+
     .module-card > * {
       position: relative;
       z-index: 1;
@@ -849,7 +873,8 @@
       <a href="#evensong">Evensong</a>
       <a href="/handoff">Handoff</a>
       <a href="/handoff/dashboard">Dashboard</a>
-      <a href="#research-vault">Vault MCP</a>
+      <a href="/promo">Film</a>
+      <a href="#research-vault">MCP</a>
       <a href="https://github.com/Fearvox/Evensong" target="_blank" rel="noreferrer">GitHub</a>
     </nav>
   </header>
@@ -899,7 +924,7 @@
 
     <section class="section" aria-labelledby="modules-title">
       <div class="section-head" data-reveal>
-        <h2 id="modules-title">One hub, four public modules.</h2>
+        <h2 id="modules-title">One hub, public modules.</h2>
         <p>
           Evensong is the system layer, Research Vault is one dependency, and the
           evidence pages are the public proof layer for completed benchmark work.
@@ -907,7 +932,29 @@
       </div>
 
       <div class="module-grid">
-        <a class="module-card wide" href="https://github.com/Fearvox/Evensong" target="_blank" rel="noreferrer" data-reveal>
+        <article class="module-card wide video-card" data-reveal>
+          <div>
+            <div class="module-kicker">
+              <span>FILM</span>
+              <span>145 seconds</span>
+            </div>
+          </div>
+          <div class="video-frame">
+            <video controls playsinline preload="metadata" poster="/research-vault-promo-poster.jpg">
+              <source src="/research-vault-promo-leo.mp4" type="video/mp4" />
+            </video>
+          </div>
+          <div>
+            <h3 class="module-title">Research Vault - Promotional Film.</h3>
+            <p class="module-body">
+              A three-act film about memory, retrieval, and why Evensong treats
+              Research Vault as an agent-operable dependency instead of a static archive.
+            </p>
+          </div>
+          <a class="module-link" href="/promo">Open film page</a>
+        </article>
+
+        <a class="module-card medium dark" href="https://github.com/Fearvox/Evensong" target="_blank" rel="noreferrer" data-reveal>
           <div>
             <div class="module-kicker">
               <span>CORE</span>
@@ -922,7 +969,7 @@
           <span class="module-link">Open repository</span>
         </a>
 
-        <a class="module-card medium dark" href="/handoff/dashboard" data-reveal>
+        <a class="module-card small dark" href="/handoff/dashboard" data-reveal>
           <div>
             <div class="module-kicker">
               <span>EVIDENCE</span>
@@ -933,16 +980,6 @@
               Dense RAR, Dense Adaptive, Stage1TopK50, q113 diagnostics, and run
               boundary notes in one operator-readable surface.
             </p>
-            <div class="module-stats">
-              <div>
-                <span class="metric-value">24/24</span>
-                <span class="metric-label">Dense RAR</span>
-              </div>
-              <div>
-                <span class="metric-value">24/24</span>
-                <span class="metric-label">Adaptive</span>
-              </div>
-            </div>
           </div>
           <span class="module-link">Open dashboard</span>
         </a>
