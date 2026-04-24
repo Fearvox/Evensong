@@ -39,6 +39,16 @@ export interface BgeEmbeddingProviderOptions {
    * Key format: manifestHash (see hashManifest).
    */
   cache?: Map<string, number[][]>
+  /**
+   * Embed the manifest corpus in chunks of this size. Default 50.
+   *
+   * Wave 3+I incident (2026-04-22): the benchmark manifest is 200 docs and
+   * the droplet BGE endpoint times out when the full corpus is sent in a
+   * single request under the default 60s client timeout. Chunking keeps each
+   * POST under the observed safe envelope while preserving a single logical
+   * corpus cache per manifest.
+   */
+  corpusBatchSize?: number
 }
 
 /**
@@ -99,6 +109,8 @@ export function createBgeEmbeddingProvider(
   // or larger.
   const maxChars = options.maxChars ?? 500
   const cache = options.cache ?? new Map<string, number[][]>()
+  const corpusBatchSize = Math.max(1, options.corpusBatchSize ?? 50)
+  const cacheInFlight = new Map<string, Promise<number[][]>>()
 
   return {
     name: providerName,
@@ -119,9 +131,26 @@ export function createBgeEmbeddingProvider(
       let corpusEmbeddings = cache.get(key)
 
       if (!corpusEmbeddings) {
-        const texts = req.manifest.map((e) => manifestEntryToText(e, withBody, maxChars))
-        corpusEmbeddings = await embedBge(client, texts)
-        cache.set(key, corpusEmbeddings)
+        let pending = cacheInFlight.get(key)
+        if (!pending) {
+          pending = (async () => {
+            const texts = req.manifest.map((e) => manifestEntryToText(e, withBody, maxChars))
+            const vectors: number[][] = []
+            for (let i = 0; i < texts.length; i += corpusBatchSize) {
+              const chunk = texts.slice(i, i + corpusBatchSize)
+              const chunkVectors = await embedBge(client, chunk)
+              vectors.push(...chunkVectors)
+            }
+            cache.set(key, vectors)
+            return vectors
+          })()
+          cacheInFlight.set(key, pending)
+        }
+        try {
+          corpusEmbeddings = await pending
+        } finally {
+          cacheInFlight.delete(key)
+        }
       }
 
       const [queryEmbedding] = await embedBge(client, [req.query])

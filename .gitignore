@@ -41,6 +41,14 @@ tmp/
 # Editor / OS
 .history/
 Thumbs.db
+._*
+**/._*
+Users/
+
+# Local/generated benchmark artifacts are preserved on disk but not tracked.
+benchmarks/runs/
+benchmarks/evensong/locomo_hybrid/
+
 
 # Session transcripts (private conversation data)
 .claude/session-transcript.jsonl

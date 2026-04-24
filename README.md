@@ -2,7 +2,7 @@
 
 <p align="center">
   <em>Reverse-engineered Claude Code. Hybrid memory retrieval that actually scales.<br/>
-  <strong>Two formal artifacts (648 + 972 trials). Cross-LLM design. All raw data committed.</strong></em>
+  <strong>Four formal retrieval artifacts (648 + 972 + 72 + 72 calls). Cross-LLM + hard-suite design. Raw formal evidence committed.</strong></em>
 </p>
 
 <p align="center">
@@ -19,7 +19,7 @@
 <p align="center">
   <a href="https://bun.sh"><img src="https://img.shields.io/badge/Runtime-Bun-F472B6?style=for-the-badge&logo=bun&logoColor=white" alt="Bun"/></a>
   <a href="https://www.typescriptlang.org/"><img src="https://img.shields.io/badge/TypeScript-100%25-3178C6?style=for-the-badge&logo=typescript&logoColor=white" alt="TypeScript"/></a>
-  <a href="./benchmarks/runs"><img src="https://img.shields.io/badge/Benchmark-972%2B648_trials-F59E0B?style=for-the-badge&logo=lightning&logoColor=white" alt="972+648-trial benchmark"/></a>
+  <a href="./benchmarks/runs"><img src="https://img.shields.io/badge/Benchmark-972%2B648%2B72%2B72_calls-F59E0B?style=for-the-badge&logo=lightning&logoColor=white" alt="972+648+72+72-call benchmark"/></a>
   <a href="https://github.com/EverMind-AI/EverOS"><img src="https://img.shields.io/badge/Dialogs_with-EverOS-00D4AA?style=for-the-badge&logo=brain&logoColor=white" alt="Dialogs with EverOS"/></a>
 </p>
 
@@ -68,7 +68,7 @@ This repository exists to:
 
 ## 📊 The headline result
 
-**Two independent formal artifacts**, same harness + same 108-query cross-LLM design (generator = `grok-3`, judge = `deepseek/deepseek-v3.2`) + same 200-entry manifest (18 real `_vault` entries + 182 synthetic junk). Both committed raw under [`benchmarks/runs/`](./benchmarks/runs). Run against the Atomic Chat gateway in different load windows.
+**Four formal retrieval artifacts** are committed under [`benchmarks/runs/`](./benchmarks/runs): Wave 3+F/G cover the original 108-query cross-LLM design; Wave 3+I is the newer 24-query adversarial hard suite for dense stage-1 + RAR. The Wave 3+I claim is scoped to that hard suite and does **not** replace the broader 108-query F/G comparisons.
 
 ### Wave 3+F — 648-call two-pipeline run ✅
 
@@ -135,9 +135,17 @@ The always-rerank Hybrid pays 1 LLM call per query. For a large fraction of quer
 
 See [`src/services/retrieval/providers/adaptiveHybridProvider.ts`](./src/services/retrieval/providers/adaptiveHybridProvider.ts) and the 7 unit tests in `adaptiveHybridProvider.test.ts`. Shipped at [`86bb4ee`](https://github.com/Fearvox/Evensong/commit/86bb4ee). **66/66 retrieval-domain tests pass.**
 
-### Wave 3+H preview — dense stage 1 + RRF fusion (preliminary, not summarized) 🟡
+### Wave 3+I — Dense RAR hard-suite formal run ✅
 
-A dense-retrieval lane using BGE-M3 (via ccr-droplet over Tailscale) and a Reciprocal Rank Fusion provider (k=10) is committed but **not** summarized in the headline above. Code shipped at [`5f2a646`](https://github.com/Fearvox/Evensong/commit/5f2a646); Codex-adversarial-review fixes (availability probe, RRF timeout/skip, harness contention) shipped as a follow-up. Early signal on a 20q × 206-entry smoke (handwritten reference set): BGE alone 20/20 (100%), BM25 alone 18/20 (90%), RRF(BM25, BGE) 19/20 (95%). Preliminary artifact: [`benchmarks/runs/wave3h-smoke-bge-rrf-*.md`](./benchmarks/runs). **Do not cite these numbers as production evidence** — the full 108q × 3-run cross-LLM re-run + RRF k-sweep (Phase 4/5) is pending.
+Clean formal evidence now exists for the dense stage-1 + RAR path on a 24-query adversarial suite (200-entry manifest: 18 real vault docs + 182 adversarial junk). Stage 1 is BGE-M3 Q4_K_M on `100.65.234.77:8080`; stage 2 judge is `deepseek-v4-flash` with thinking disabled. The current formal run uses Stage-1 TopK 50 and records clean commit `9148853`.
+
+| Pipeline | Top-1 | Top-5 | Valid | Errors | p50 latency | Avg latency |
+|----------|-------|-------|-------|--------|-------------|-------------|
+| Dense BGE-M3 only | 17/24 (70.8%) | 18/24 (75.0%) | 24/24 | 0 | 526 ms | 5532 ms |
+| **Dense RAR** | **24/24 (100.0%)** | **24/24 (100.0%)** | **24/24** | **0** | **1703 ms** | **1724 ms** |
+| **Dense Adaptive RAR** | **24/24 (100.0%)** | **24/24 (100.0%)** | **24/24** | **0** | **1615 ms** | **1678 ms** |
+
+Raw: [`benchmarks/runs/wave3i-dense-rar-2026-04-24T0854.md`](./benchmarks/runs/wave3i-dense-rar-2026-04-24T0854.md). Metadata: [`benchmarks/runs/wave3i-dense-rar-2026-04-24T0854.meta.json`](./benchmarks/runs/wave3i-dense-rar-2026-04-24T0854.meta.json). Prior formal baseline `dense-rar-2026-04-24T0801` (Stage-1 TopK 20) remains tracked: dense-rar/adaptive were 23/24 and the q113 miss was candidate-recall, not reranker failure. The earlier `dense-rar-2026-04-24T0644` run remains **internal probe only** because it was `mode=probe` on a dirty git state. ccr-droplet SSH/systemd verification was operator-side pending due Tailscale interactive auth; HTTP `/v1/models` and `/v1/embeddings` checks passed, and 8081/8082/8083 had no HTTP response.
 
 <p align="right"><a href="#目录">↑ back to top</a></p>
 

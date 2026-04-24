@@ -24,12 +24,15 @@ LOCOMO_LIGHT_NEIGHBOR_RADIUS="${LOCOMO_LIGHT_NEIGHBOR_RADIUS:-1}"
 LOCOMO_TIMEOUT="${LOCOMO_TIMEOUT:-60}"
 LOCOMO_METHOD_NAME="${LOCOMO_METHOD_NAME:-CCR DenseRAG}"
 LOCOMO_PYTHON="${LOCOMO_PYTHON:-python3}"
+LOCOMO_MODE="${LOCOMO_MODE:-smoke}"
+LOCOMO_MATCH_POLICY="${LOCOMO_MATCH_POLICY:-loose}"
 export PYTHONUNBUFFERED="${PYTHONUNBUFFERED:-1}"
 
 cd "$REPO_ROOT"
 
 args=(
   "$REPO_ROOT/benchmarks/evensong/locomo_hybrid/eval_locomo_paper.py"
+  --mode="$LOCOMO_MODE" \
   --model="$LOCOMO_MODEL" \
   --base-url="$LOCOMO_BASE_URL" \
   --api-key-env="$LOCOMO_API_KEY_ENV" \
@@ -39,6 +42,7 @@ args=(
   --light-doc-limit="$LOCOMO_LIGHT_DOC_LIMIT" \
   --light-neighbor-radius="$LOCOMO_LIGHT_NEIGHBOR_RADIUS" \
   --timeout="$LOCOMO_TIMEOUT" \
+  --match-policy="$LOCOMO_MATCH_POLICY" \
   --method-name="$LOCOMO_METHOD_NAME"
 )
 

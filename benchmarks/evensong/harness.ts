@@ -7,9 +7,10 @@
  */
 
 import { spawn } from 'child_process'
-import { mkdirSync, appendFileSync, readFileSync, existsSync, cpSync, writeFileSync, readdirSync, statSync, symlinkSync } from 'fs'
+import { mkdirSync, appendFileSync, readFileSync, existsSync, cpSync, writeFileSync, readdirSync, symlinkSync, rmSync, mkdtempSync } from 'fs'
 import { createHash } from 'crypto'
 import { join, resolve } from 'path'
+import { tmpdir } from 'os'
 import { TranscriptLogger } from './transcript.js'
 import { buildPrompt, getPressureLabel, getMemoryLabel } from './prompts.js'
 import type { RunConfig, RunResult, ProviderPreset } from './types.js'
@@ -25,6 +26,63 @@ export function detectRateLimit(output: string): boolean {
     /usage.?limit/i,
   ]
   return patterns.some(p => p.test(output))
+}
+
+function requireEnv(name: string, purpose: string): string {
+  const value = process.env[name]?.trim()
+  if (!value) {
+    throw new Error(`${name} is required for ${purpose}; no benchmark fallback key is bundled`)
+  }
+  return value
+}
+
+export interface BunTestMetrics {
+  tests: number
+  failures: number
+  assertions: number | null
+  valid: boolean
+}
+
+export function parseBunTestOutput(output: string): BunTestMetrics {
+  const ranMatch = output.match(/^\s*Ran\s+(\d+)\s+tests?\s+across\b/im)
+  const passMatch = output.match(/^\s*(\d+)\s+pass(?:ed)?\b/im)
+  const failMatch = output.match(/^\s*(\d+)\s+fail(?:ed)?\b/im)
+  const expectMatch =
+    output.match(/^\s*(\d+)\s+expect\(\)\s+calls?\b/im) ??
+    output.match(/^\s*(\d+)\s+(?:assertions?|expects?)\b/im)
+
+  if (!ranMatch && !passMatch && !failMatch) {
+    return { tests: 0, failures: 0, assertions: null, valid: false }
+  }
+
+  const pass = passMatch ? parseInt(passMatch[1]!, 10) : 0
+  const fail = failMatch ? parseInt(failMatch[1]!, 10) : 0
+  const tests = ranMatch ? parseInt(ranMatch[1]!, 10) : pass + fail
+
+  return {
+    tests,
+    failures: fail,
+    assertions: expectMatch ? parseInt(expectMatch[1]!, 10) : null,
+    valid: Number.isFinite(tests) && tests >= 0,
+  }
+}
+
+export function calculateEffectiveTestMetrics(params: {
+  hasPreExisting: boolean
+  postRunTests: number
+  preRunTests: number
+  newTestCount: number
+  failures: number
+}): { effectiveTests: number; effectiveFailures: number; testsPre: number; testsNew: number } {
+  const effectiveTests = params.hasPreExisting
+    ? Math.max(0, params.postRunTests - params.preRunTests)
+    : params.postRunTests
+  return {
+    effectiveTests,
+    effectiveFailures: Math.max(0, params.failures),
+    testsPre: params.hasPreExisting ? params.preRunTests : 0,
+    testsNew: params.newTestCount,
+  }
 }
 
 const PROJECT_ROOT = resolve(import.meta.dir, '../..')
@@ -72,6 +130,7 @@ export async function runBenchmark(config: RunConfig): Promise<RunResult> {
   // 3. Setup workspace based on memory state
   const workspace = await setupWorkspace(config, logger)
   logger.log('system', `Workspace ready: ${workspace.path} (memory: ${config.memory})`)
+  try {
 
   // 4. Build benchmark prompt
   const prompt = buildPrompt(config.pressure, config.services)
@@ -100,9 +159,20 @@ export async function runBenchmark(config: RunConfig): Promise<RunResult> {
       env: { ...process.env, FORCE_COLOR: '0', BUN_TEST_TIMEOUT: '60000' },
     })
     const preTestOutput = (preTestProc.stdout?.toString() ?? '') + (preTestProc.stderr?.toString() ?? '')
-    const prePassMatch = preTestOutput.match(/(\d+)\s+pass/i)
-    preRunTestCount = prePassMatch ? parseInt(prePassMatch[1], 10) : 0
-    logger.log('system', `Pre-run baseline: ${preRunTestCount} tests`, { exitCode: preTestProc.exitCode })
+    const parsedPre = parseBunTestOutput(preTestOutput)
+    if (!parsedPre.valid) {
+      logger.log('error', 'Pre-run bun test output was not parseable; refusing to compute full-memory delta', {
+        exitCode: preTestProc.exitCode,
+        preview: preTestOutput.slice(0, 800),
+      })
+      throw new Error('Pre-run bun test output was not parseable; benchmark delta would be unsafe')
+    }
+    preRunTestCount = parsedPre.tests
+    logger.log('system', `Pre-run baseline: ${preRunTestCount} tests`, {
+      exitCode: preTestProc.exitCode,
+      failures: parsedPre.failures,
+      assertions: parsedPre.assertions,
+    })
   }
   logger.log('system', `Pre-snapshot: ${preSnapshot.size} test files`, {
     files: [...preSnapshot.keys()],
@@ -146,17 +216,20 @@ export async function runBenchmark(config: RunConfig): Promise<RunResult> {
   const hasPreExisting = preSnapshot.size > 0
   // For full-memory: effective = post_bun_test - pre_bun_test (delta of actual test counts)
   // For clean-room: effective = metrics.tests (all tests are new)
-  const effectiveTests = hasPreExisting
-    ? Math.max(0, metrics.tests - preRunTestCount)
-    : metrics.tests
-  const effectiveFailures = hasPreExisting ? Math.max(0, metrics.failures) : metrics.failures
+  const effective = calculateEffectiveTestMetrics({
+    hasPreExisting,
+    postRunTests: metrics.tests,
+    preRunTests: preRunTestCount,
+    newTestCount,
+    failures: metrics.failures,
+  })
 
   logger.log('metric', 'Test count decision', {
     hasPreExisting,
     preSnapshotSize: preSnapshot.size,
     bunTestTotal: metrics.tests,
     diffNewTests: newTestCount,
-    effectiveTests,
+    effectiveTests: effective.effectiveTests,
     rateLimited,
   })
 
@@ -167,20 +240,27 @@ export async function runBenchmark(config: RunConfig): Promise<RunResult> {
     model: provider.displayName,
     mode: `${getPressureLabel(config.pressure)} / ${getMemoryLabel(config.memory)}`,
     services: metrics.services ?? config.services,
-    tests: effectiveTests,
-    tests_pre: hasPreExisting ? metrics.tests - newTestCount : 0,
-    tests_new: newTestCount,
-    failures: effectiveFailures,
+    tests: effective.effectiveTests,
+    tests_pre: effective.testsPre,
+    tests_new: effective.testsNew,
+    failures: effective.effectiveFailures,
     assertions: metrics.assertions,
     time_min: logger.elapsedMin,
     criteria: metrics.criteria ?? `${metrics.services ?? config.services}/${config.services}`,
     grade: null,  // assigned manually or by emotion extraction
     notes: `${provider.name} ${config.pressure} ${config.memory}, ${logger.count} transcript entries`,
+    registry_schema: 'evensong-harness-v2',
     transcript_path: transcriptPath,
     // Only mark invalid if rate-limited AND no meaningful work was done
     // (model may hit limit at very end after producing valid output)
-    invalid: (rateLimited && effectiveTests === 0) || undefined,
-    invalid_reason: (rateLimited && effectiveTests === 0) ? 'Rate limit hit during execution' : undefined,
+    invalid: ((rateLimited && effective.effectiveTests === 0) || !metrics.valid) || undefined,
+    invalid_reason: (rateLimited && effective.effectiveTests === 0)
+      ? 'Rate limit hit during execution'
+      : !metrics.valid
+        ? 'Unable to verify test metrics from bun test output'
+        : undefined,
+    metric_source: metrics.metricSource,
+    harness_status: metrics.valid ? 'ok' : 'invalid',
   }
 
   // 9. Save result
@@ -192,6 +272,9 @@ export async function runBenchmark(config: RunConfig): Promise<RunResult> {
   console.log(`\n  ✅ ${config.runId} complete: ${result.tests} tests, ${result.failures} failures, ${result.time_min}min`)
 
   return result
+  } finally {
+    cleanupWorkspace(workspace, logger)
+  }
 }
 
 /**
@@ -209,9 +292,9 @@ async function setupWorkspace(config: RunConfig, logger: TranscriptLogger): Prom
     return { path: PROJECT_ROOT, memoryPath: null }
   }
 
-  // Create isolated workspace — clean room gets EMPTY scaffold, not full project clone
-  const wsPath = `/tmp/evensong-${config.runId}`
-  mkdirSync(wsPath, { recursive: true })
+  // Create isolated one-shot workspace. Fixed /tmp/evensong-${runId}
+  // paths let failed/stale runs contaminate repeated benchmark attempts.
+  const wsPath = mkdtempSync(join(tmpdir(), `evensong-${config.runId}-`))
 
   const cloneTarget = join(wsPath, 'repo')
   if (!existsSync(cloneTarget)) {
@@ -281,7 +364,7 @@ async function setupWorkspace(config: RunConfig, logger: TranscriptLogger): Prom
     return {
       path: cloneTarget,
       memoryPath: join(wsPath, 'empty-memory'),
-      cleanup: () => { try { require('fs').rmSync(wsPath, { recursive: true }) } catch {} },
+      cleanup: () => { rmSync(wsPath, { recursive: true, force: true }) },
     }
   }
 
@@ -310,11 +393,30 @@ async function setupWorkspace(config: RunConfig, logger: TranscriptLogger): Prom
     return {
       path: cloneTarget,
       memoryPath: blindMem,
-      cleanup: () => { try { require('fs').rmSync(wsPath, { recursive: true }) } catch {} },
+      cleanup: () => { rmSync(wsPath, { recursive: true, force: true }) },
     }
   }
 
   return { path: PROJECT_ROOT, memoryPath: null }
+}
+
+function cleanupWorkspace(workspace: Workspace, logger: TranscriptLogger): void {
+  if (!workspace.cleanup) return
+  if (process.env.EVENSONG_RETAIN_WORKSPACE === '1') {
+    logger.log('system', 'Workspace retained by EVENSONG_RETAIN_WORKSPACE=1', {
+      path: workspace.path,
+    })
+    return
+  }
+  try {
+    workspace.cleanup()
+    logger.log('system', 'Temporary workspace cleaned', { path: workspace.path })
+  } catch (err) {
+    logger.log('error', 'Temporary workspace cleanup failed', {
+      path: workspace.path,
+      error: err instanceof Error ? err.message : String(err),
+    })
+  }
 }
 
 /**
@@ -339,11 +441,18 @@ function buildEnv(provider: ProviderPreset, config: RunConfig, workspace: Worksp
     delete env.ANTHROPIC_BASE_URL
     delete env.ANTHROPIC_API_KEY
   } else if (provider.provider === 'minimax-direct') {
-    env.ANTHROPIC_API_KEY = process.env[provider.apiKeyEnvVar ?? 'MINIMAX_API_KEY'] ?? ''
+    const keyEnv = provider.apiKeyEnvVar ?? 'MINIMAX_API_KEY'
+    env.ANTHROPIC_API_KEY = requireEnv(keyEnv, `${provider.name} benchmark provider`)
     env.ANTHROPIC_BASE_URL = provider.baseUrl ?? 'https://api.minimax.io/anthropic'
   } else {
     // OpenRouter routing (default for all or-* models)
-    env.ANTHROPIC_API_KEY = process.env.OPENROUTER_API_KEY ?? process.env.ANTHROPIC_API_KEY ?? ''
+    env.ANTHROPIC_API_KEY =
+      process.env.OPENROUTER_API_KEY?.trim() ||
+      process.env.ANTHROPIC_API_KEY?.trim() ||
+      ''
+    if (!env.ANTHROPIC_API_KEY) {
+      throw new Error('OPENROUTER_API_KEY or ANTHROPIC_API_KEY is required for OpenRouter benchmark providers')
+    }
     env.ANTHROPIC_BASE_URL = 'https://openrouter.ai/api/v1'
   }
 
@@ -359,11 +468,11 @@ function buildEnv(provider: ProviderPreset, config: RunConfig, workspace: Worksp
   }
   if (config.memory === 'clean') {
     // Void space — empty/disposable, no memories persist
-    env.EVERMEM_API_KEY = '309390b7-2468-4a4f-b800-f593fea15ba4'
+    env.EVERMEM_API_KEY = requireEnv('EVENSONG_EVERMEM_VOID_API_KEY', 'clean-memory Evensong runs')
     env.CLAUDE_CODE_DISABLE_AUTO_MEMORY = '1'
   } else if (config.memory === 'blind') {
     // Allaround space — general-purpose runner memories only
-    env.EVERMEM_API_KEY = 'a2981e4d-6374-4c40-ab50-9c8ae052a7c4'
+    env.EVERMEM_API_KEY = requireEnv('EVENSONG_EVERMEM_BLIND_API_KEY', 'blind-memory Evensong runs')
   }
   // 'full' — don't override EVERMEM_API_KEY, uses default Key A from plugin .env
 
@@ -428,8 +537,10 @@ function spawnCLI(
       child.stdin.end()
     }
 
+    let timedOut = false
     // Timeout
     const timer = setTimeout(() => {
+      timedOut = true
       logger.log('error', `Timeout after ${timeoutMin} minutes`)
       child.kill('SIGTERM')
       setTimeout(() => child.kill('SIGKILL'), 5000)
@@ -439,6 +550,14 @@ function spawnCLI(
       clearTimeout(timer)
       logger.log('system', `Process exited with code ${code}`, { exitCode: code })
       if (stderr.trim()) logger.log('error', `stderr: ${stderr.slice(0, 5000)}`)
+      if (timedOut) {
+        reject(new Error(`Benchmark subprocess timed out after ${timeoutMin} minutes`))
+        return
+      }
+      if (code !== 0) {
+        reject(new Error(`Benchmark subprocess exited with code ${code}: ${stderr.slice(0, 500)}`))
+        return
+      }
       resolve(stdout)
     })
 
@@ -459,10 +578,20 @@ interface ParsedMetrics {
   assertions: number | null
   services: number | null
   criteria: string | null
+  metricSource: RunResult['metric_source']
+  valid: boolean
 }
 
 function parseResults(output: string, logger: TranscriptLogger, workspacePath?: string): ParsedMetrics {
-  const metrics: ParsedMetrics = { tests: 0, failures: 0, assertions: null, services: null, criteria: null }
+  const metrics: ParsedMetrics = {
+    tests: 0,
+    failures: 0,
+    assertions: null,
+    services: null,
+    criteria: null,
+    metricSource: 'not-run',
+    valid: false,
+  }
 
   // STEP 1: Count actual service directories (real execution metric)
   if (workspacePath) {
@@ -487,23 +616,14 @@ function parseResults(output: string, logger: TranscriptLogger, workspacePath?: 
         preview: testOutput.slice(0, 800) + (testOutput.length > 800 ? '...' : '')
       })
 
-      // ROBUST parsing for bun test output (handles multiple formats)
-      const testOutputLower = testOutput.toLowerCase()
-      const totalMatch = testOutput.match(/(\d+)\s+(?:test|tests?)(?!\s*(?:fail|error))/i) || 
-                        testOutput.match(/ran\s+(\d+)\s+tests?/i) ||
-                        testOutput.match(/(\d+)\s+total/i);
-      const passMatch = testOutput.match(/(\d+)\s+(?:pass|passed|ok|success|green)/i);
-      const failMatch = testOutput.match(/(\d+)\s+(?:fail|failed|error|red)/i);
-      const expectMatch = testOutput.match(/(\d+)\s+(?:expect|assertion|assert)/i);
-
-      if (passMatch || failMatch || totalMatch) {
-        const pass = passMatch ? parseInt(passMatch[1], 10) : 0;
-        const fail = failMatch ? parseInt(failMatch[1], 10) : 0;
-        const total = totalMatch ? parseInt(totalMatch[1], 10) : (pass + fail);
-        metrics.tests = total || (pass + fail);
-        metrics.failures = fail;
-        if (expectMatch) metrics.assertions = parseInt(expectMatch[1], 10);
+      const parsed = parseBunTestOutput(testOutput)
+      if (parsed.valid) {
+        metrics.tests = parsed.tests
+        metrics.failures = parsed.failures
+        metrics.assertions = parsed.assertions
         metrics.criteria = `${metrics.services || 8}/${metrics.services || 8}`;
+        metrics.metricSource = 'bun-test'
+        metrics.valid = true
         logger.log('metric', 'VERIFIED metrics from ACTUAL bun test execution', { 
           metrics, 
           usedRealExecution: true,
@@ -515,52 +635,27 @@ function parseResults(output: string, logger: TranscriptLogger, workspacePath?: 
     }
   }
 
-  // SECONDARY FALLBACK: only if no workspace/tests (still avoid model prose where possible)
-  // Count test files instead of trusting model output
-  logger.log('metric', 'Using file-based fallback (no model prose regex)', { note: 'Critical bug fixed - no longer extracts from prose' });
-  if (workspacePath) {
-    try {
-      const testFiles = [];
-      // Recursively find test files for better count
-      const findTests = (dir: string) => {
-        if (!existsSync(dir)) return;
-        const entries = readdirSync(dir, { withFileTypes: true });
-        for (const entry of entries) {
-          const fullPath = join(dir, entry.name);
-          if (entry.isDirectory()) {
-            if (!entry.name.includes('node_modules')) findTests(fullPath);
-          } else if (entry.name.includes('.test.') || entry.name.includes('.spec.')) {
-            testFiles.push(fullPath);
-          }
-        }
-      };
-      findTests(join(workspacePath, 'services'));
-      if (testFiles.length > 0) {
-        metrics.tests = testFiles.length * 40;  // heuristic: ~40 tests per service file typical in evensong runs
-        metrics.services = Math.max(metrics.services || 0, Math.ceil(testFiles.length / 2));
-        metrics.criteria = `${metrics.services}/${metrics.services}`;
-        logger.log('metric', 'Derived metrics from test file count', { testFilesFound: testFiles.length, metrics });
-        return metrics;
-      }
-    } catch (e) {
-      logger.log('error', 'File fallback failed', { error: (e as Error).message });
-    }
-  }
-
-  // LAST RESORT: minimal defaults (prevent invalid data from prose)
+  // LAST RESORT: minimal invalid defaults (prevent invalid data from prose or file-count heuristics)
   metrics.tests = 0;
   metrics.failures = 0;
   metrics.services = metrics.services || 0;
   metrics.criteria = `${metrics.services}/8`;
-  logger.log('metric', 'Using safe defaults (real execution prioritized, no prose parsing)', { metrics });
+  metrics.metricSource = 'unparseable'
+  metrics.valid = false
+  logger.log('metric', 'Using invalid safe defaults (real execution prioritized, no prose or file-count parsing)', { metrics });
   return metrics;
 }
 
+export interface TestFileSnapshot {
+  hash: string
+  testCount: number
+}
+
 /**
- * Snapshot all test files in a workspace — returns Map<relativePath, contentHash>
+ * Snapshot all test files in a workspace.
  */
-function snapshotTestFiles(workspacePath: string): Map<string, string> {
-  const snapshot = new Map<string, string>()
+function snapshotTestFiles(workspacePath: string): Map<string, TestFileSnapshot> {
+  const snapshot = new Map<string, TestFileSnapshot>()
   const walk = (dir: string, prefix: string) => {
     if (!existsSync(dir)) return
     for (const entry of readdirSync(dir, { withFileTypes: true })) {
@@ -571,7 +666,10 @@ function snapshotTestFiles(workspacePath: string): Map<string, string> {
         walk(full, rel)
       } else if (entry.name.includes('.test.') || entry.name.includes('.spec.')) {
         const content = readFileSync(full, 'utf-8')
-        snapshot.set(rel, createHash('sha256').update(content).digest('hex'))
+        snapshot.set(rel, {
+          hash: createHash('sha256').update(content).digest('hex'),
+          testCount: countTestCasesFromContent(content),
+        })
       }
     }
   }
@@ -582,28 +680,23 @@ function snapshotTestFiles(workspacePath: string): Map<string, string> {
 /**
  * Diff pre/post snapshots — count new test cases in new/modified files
  */
-function diffSnapshots(
-  pre: Map<string, string>,
-  post: Map<string, string>,
+export function diffSnapshots(
+  pre: Map<string, TestFileSnapshot>,
+  post: Map<string, TestFileSnapshot>,
   workspacePath: string,
 ): { newFiles: string[]; modifiedFiles: string[]; newTestCount: number } {
   const newFiles: string[] = []
   const modifiedFiles: string[] = []
   let newTestCount = 0
 
-  for (const [path, hash] of post) {
-    if (!pre.has(path)) {
+  for (const [path, postEntry] of post) {
+    const preEntry = pre.get(path)
+    if (!preEntry) {
       newFiles.push(path)
-      // All tests in new files are new
-      newTestCount += countTestCases(join(workspacePath, path))
-    } else if (pre.get(path) !== hash) {
+      newTestCount += postEntry.testCount
+    } else if (preEntry.hash !== postEntry.hash) {
       modifiedFiles.push(path)
-      // For modified files, count the difference in test cases
-      const postCount = countTestCases(join(workspacePath, path))
-      // Pre-count not available (content changed), estimate conservatively:
-      // assume pre had roughly the same structure, count only net new
-      // This is imperfect but better than counting all tests as new
-      newTestCount += Math.max(0, postCount - estimatePreTestCount(pre, path))
+      newTestCount += Math.max(0, postEntry.testCount - preEntry.testCount)
     }
   }
 
@@ -616,18 +709,12 @@ function diffSnapshots(
 function countTestCases(filePath: string): number {
   if (!existsSync(filePath)) return 0
   const content = readFileSync(filePath, 'utf-8')
-  const matches = content.match(/\b(?:it|test)\s*\(/g)
-  return matches?.length ?? 0
+  return countTestCasesFromContent(content)
 }
 
-/**
- * Estimate pre-run test count for a modified file.
- * Since we only stored hashes (not content), use a heuristic:
- * if the file existed pre-run, assume it had ~40 tests (evensong baseline).
- * For clean-room runs (no pre files), returns 0.
- */
-function estimatePreTestCount(pre: Map<string, string>, path: string): number {
-  return pre.has(path) ? 40 : 0
+function countTestCasesFromContent(content: string): number {
+  const matches = content.match(/\b(?:it|test)\s*\(/g)
+  return matches?.length ?? 0
 }
 
 /**
@@ -676,7 +763,23 @@ export function listRuns(): RunResult[] {
     .trim()
     .split('\n')
     .filter(Boolean)
-    .map(line => JSON.parse(line))
+    .map((line) => {
+      try {
+        return JSON.parse(line)
+      } catch {
+        return null
+      }
+    })
+    .filter((entry): entry is RunResult => isRunResult(entry))
+}
+
+function isRunResult(entry: unknown): entry is RunResult {
+  if (!entry || typeof entry !== 'object') return false
+  const value = entry as Partial<RunResult>
+  return typeof value.run === 'string' &&
+    typeof value.codename === 'string' &&
+    typeof value.model === 'string' &&
+    typeof value.tests === 'number'
 }
 
 /**

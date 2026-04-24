@@ -1,0 +1,51 @@
+{
+  "schemaVersion": "dense-rar-v3",
+  "runId": "dense-rar-2026-04-24T0801",
+  "runMode": "formal",
+  "createdAt": "2026-04-24T08:01:27.766Z",
+  "liveAllowed": true,
+  "git": {
+    "commit": "3c274d1",
+    "dirty": false,
+    "dirtyFiles": []
+  },
+  "inputs": {
+    "vaultRoot": "/root/research-vault",
+    "queriesFile": "/root/ccr/benchmarks/wave3-adversarial-queries.json",
+    "querySuite": {
+      "name": "wave3-adversarial-retrieval",
+      "version": "1.0.0",
+      "difficulty": "adversarial",
+      "categories": [
+        "near_neighbor_memory",
+        "lexical_trap",
+        "cross_lingual",
+        "negative_exclusion",
+        "methodology_philosophy",
+        "engineering_specific"
+      ]
+    },
+    "queriesHash": "bcce230b845b722601db69d54a45d2bfe769e2d7a54ff01c1ec116e04727d587",
+    "manifestHash": "bd9afb901dadd1999c7accdcfe22256167c27f29916ee1ddfe91405f9243318c",
+    "manifestReal": 18,
+    "manifestJunk": 182,
+    "junkMode": "adversarial",
+    "withBody": false,
+    "finalTopK": 5,
+    "stage1TopK": 20,
+    "rrfK": 10,
+    "rrfPool": 20,
+    "rrfChildTimeoutMs": 600000
+  },
+  "providers": {
+    "stage1Label": "BGE-M3-Q4_K_M-8080",
+    "bgeBaseURL": "http://100.65.234.77:8080/v1",
+    "bgeModel": "bge-m3",
+    "bgeTimeoutMs": 180000,
+    "bgeCorpusBatchSize": 50,
+    "judgeModel": "deepseek-v4-flash",
+    "judgeBaseURL": "https://api.deepseek.com",
+    "judgeApiKeyEnv": "DEEPSEEK_API_KEY",
+    "judgeThinking": "disabled"
+  }
+}

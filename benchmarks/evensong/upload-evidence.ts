@@ -16,7 +16,7 @@
  */
 
 const EVEROS_STORAGE_ENDPOINT = 'https://api.evermind.ai/api/v1/storage/upload'
-const OBSERVER_KEY = '9db9eb89-aeea-4fa2-9da8-f70590394614'
+const OBSERVER_KEY_ENV = 'EVERMEM_OBS_KEY'
 
 const CONTENT_TYPE_MAP: Record<string, string> = {
   '.png':  'image/png',
@@ -28,6 +28,14 @@ const CONTENT_TYPE_MAP: Record<string, string> = {
 function detectContentType(filePath: string): string | null {
   const ext = filePath.slice(filePath.lastIndexOf('.')).toLowerCase()
   return CONTENT_TYPE_MAP[ext] ?? null
+}
+
+function getObserverKey(): string {
+  const key = process.env[OBSERVER_KEY_ENV]?.trim()
+  if (!key) {
+    throw new Error(`${OBSERVER_KEY_ENV} is required; no bundled EverOS fallback key is available`)
+  }
+  return key
 }
 
 export interface UploadResult {
@@ -67,7 +75,7 @@ export async function uploadEvidence(filePath: string, runId: string): Promise<U
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      'Authorization': `Bearer ${OBSERVER_KEY}`,
+      'Authorization': `Bearer ${getObserverKey()}`,
     },
     body: JSON.stringify({
       file_name: fileName,

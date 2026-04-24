@@ -1,0 +1,11 @@
+[Unit]
+Description=Run Dense RAR benchmark every 6 hours
+
+[Timer]
+OnBootSec=15min
+OnUnitActiveSec=6h
+Persistent=true
+Unit=dense-rar-benchmark.service
+
+[Install]
+WantedBy=timers.target

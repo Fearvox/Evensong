@@ -112,6 +112,12 @@ export function createAdaptiveHybridProvider(
           scores: scoresSlice,
           provider: providerName,
           latencyMs: Math.round(performance.now() - start),
+          diagnostics: {
+            stage1Provider: stage1Result.provider,
+            stage2Skipped: true,
+            gapRatio,
+            gapRatioThreshold,
+          },
         }
       }
 
@@ -133,6 +139,15 @@ export function createAdaptiveHybridProvider(
         rankedPaths: stage2Result.rankedPaths,
         provider: providerName,
         latencyMs: Math.round(performance.now() - start),
+        diagnostics: {
+          stage1Provider: stage1Result.provider,
+          stage1RankedPaths: stage1Result.rankedPaths,
+          stage2Skipped: false,
+          gapRatio,
+          gapRatioThreshold,
+          stage2Provider: stage2Result.provider,
+          stage2Diagnostics: stage2Result.diagnostics,
+        },
       }
     },
   }

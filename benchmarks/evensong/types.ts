@@ -11,6 +11,7 @@ export interface RunConfig {
 
 // RunResult — what comes back after a benchmark completes
 export interface RunResult {
+  registry_schema?: 'evensong-harness-v2'
   run: string
   codename: string
   date: string               // ISO date
@@ -30,6 +31,10 @@ export interface RunResult {
   invalid?: boolean
   /** Reason for invalidation */
   invalid_reason?: string
+  /** Source of test metrics; formal analysis should trust only bun-test. */
+  metric_source?: 'bun-test' | 'unparseable' | 'not-run'
+  /** Harness-level status separate from model quality. */
+  harness_status?: 'ok' | 'invalid'
   transcript_path?: string   // optional — old registry entries don't have it
   emotion?: import('./emotion-schema.js').EmotionProfile  // optional — added by emotion extraction pipeline
 }

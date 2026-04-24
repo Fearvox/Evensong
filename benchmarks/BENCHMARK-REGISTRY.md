@@ -1,5 +1,14 @@
 # CCB Benchmark Registry
 
+## Retrieval benchmark evidence
+
+Dense/RAR retrieval evidence now has a dedicated ledger:
+
+- `benchmarks/DENSE-RAR-FORMAL-LEDGER.md`
+- Latest formal run: `dense-rar-2026-04-24T0854`, clean commit `9148853`, formal eligible, BGE-M3 on `100.65.234.77:8080`, judge `deepseek-v4-flash`, Stage1TopK 50.
+- Result: dense-rar 24/24 Top-1 and 24/24 Top-5; dense-adaptive 24/24 Top-1 and 24/24 Top-5; errors 0.
+- Prior `dense-rar-2026-04-24T0801` remains the Stage1TopK 20 formal baseline (23/24). Prior `dense-rar-2026-04-24T0644` remains internal/probe only because it was `mode=probe` on dirty git.
+
 ## Run Index
 
 | Run | Date | Model | Mode | Tests | Pass Rate | Time | Token | Files |

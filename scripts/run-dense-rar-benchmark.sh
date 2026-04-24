@@ -1,0 +1,72 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
+
+if [ -f "$HOME/.hermes/.env" ]; then
+  set -a
+  # shellcheck disable=SC1090
+  . "$HOME/.hermes/.env"
+  set +a
+fi
+
+: "${DENSE_RAR_VAULT_ROOT:?Set DENSE_RAR_VAULT_ROOT to the research-vault path.}"
+
+DENSE_RAR_QUERIES_FILE="${DENSE_RAR_QUERIES_FILE:-$REPO_ROOT/benchmarks/wave3-judge-queries.json}"
+DENSE_RAR_PIPELINES="${DENSE_RAR_PIPELINES:-dense,dense-rar,dense-adaptive}"
+DENSE_RAR_JUDGE_MODEL="${DENSE_RAR_JUDGE_MODEL:-MiniMax-M2.7}"
+DENSE_RAR_JUDGE_BASE_URL="${DENSE_RAR_JUDGE_BASE_URL:-https://api.minimax.io/v1}"
+DENSE_RAR_JUDGE_API_KEY_ENV="${DENSE_RAR_JUDGE_API_KEY_ENV:-MINIMAX_API_KEY}"
+DENSE_RAR_JUDGE_THINKING="${DENSE_RAR_JUDGE_THINKING:-default}"
+DENSE_RAR_BGE_BASE_URL="${DENSE_RAR_BGE_BASE_URL:-http://100.65.234.77:8080/v1}"
+DENSE_RAR_BGE_MODEL="${DENSE_RAR_BGE_MODEL:-bge-m3}"
+DENSE_RAR_STAGE1_LABEL="${DENSE_RAR_STAGE1_LABEL:-BGE-M3 dense}"
+DENSE_RAR_STAGE1="${DENSE_RAR_STAGE1:-5}"
+DENSE_RAR_GAP_RATIO="${DENSE_RAR_GAP_RATIO:-1.5}"
+DENSE_RAR_FINAL_TOP_K="${DENSE_RAR_FINAL_TOP_K:-5}"
+DENSE_RAR_RRF_K="${DENSE_RAR_RRF_K:-10}"
+DENSE_RAR_RRF_POOL="${DENSE_RAR_RRF_POOL:-$DENSE_RAR_STAGE1}"
+DENSE_RAR_RRF_CHILD_TIMEOUT_MS="${DENSE_RAR_RRF_CHILD_TIMEOUT_MS:-600000}"
+DENSE_RAR_EMBEDDING_TIMEOUT_MS="${DENSE_RAR_EMBEDDING_TIMEOUT_MS:-60000}"
+DENSE_RAR_CORPUS_BATCH_SIZE="${DENSE_RAR_CORPUS_BATCH_SIZE:-50}"
+DENSE_RAR_JUNK="${DENSE_RAR_JUNK:-182}"
+DENSE_RAR_JUNK_MODE="${DENSE_RAR_JUNK_MODE:-generic}"
+DENSE_RAR_RUNS="${DENSE_RAR_RUNS:-1}"
+DENSE_RAR_LIMIT="${DENSE_RAR_LIMIT:-0}"
+DENSE_RAR_CONCURRENCY="${DENSE_RAR_CONCURRENCY:-1}"
+DENSE_RAR_WITH_BODY="${DENSE_RAR_WITH_BODY:-false}"
+DENSE_RAR_PROGRESS_EVERY="${DENSE_RAR_PROGRESS_EVERY:-1}"
+DENSE_RAR_MODE="${DENSE_RAR_MODE:-probe}"
+DENSE_RAR_ALLOW_LIVE="${DENSE_RAR_ALLOW_LIVE:-0}"
+
+cd "$REPO_ROOT"
+
+exec bun run "$REPO_ROOT/scripts/benchmark-dense-rar.ts" \
+  --vault-root="$DENSE_RAR_VAULT_ROOT" \
+  --queries-file="$DENSE_RAR_QUERIES_FILE" \
+  --pipelines="$DENSE_RAR_PIPELINES" \
+  --judge-model="$DENSE_RAR_JUDGE_MODEL" \
+  --judge-base-url="$DENSE_RAR_JUDGE_BASE_URL" \
+  --judge-api-key-env="$DENSE_RAR_JUDGE_API_KEY_ENV" \
+  --judge-thinking="$DENSE_RAR_JUDGE_THINKING" \
+  --bge-base-url="$DENSE_RAR_BGE_BASE_URL" \
+  --embedding-model="$DENSE_RAR_BGE_MODEL" \
+  --stage1-label="$DENSE_RAR_STAGE1_LABEL" \
+  --stage1="$DENSE_RAR_STAGE1" \
+  --gap-ratio="$DENSE_RAR_GAP_RATIO" \
+  --final-top-k="$DENSE_RAR_FINAL_TOP_K" \
+  --rrf-k="$DENSE_RAR_RRF_K" \
+  --rrf-pool="$DENSE_RAR_RRF_POOL" \
+  --rrf-child-timeout-ms="$DENSE_RAR_RRF_CHILD_TIMEOUT_MS" \
+  --embedding-timeout-ms="$DENSE_RAR_EMBEDDING_TIMEOUT_MS" \
+  --corpus-batch-size="$DENSE_RAR_CORPUS_BATCH_SIZE" \
+  --junk="$DENSE_RAR_JUNK" \
+  --junk-mode="$DENSE_RAR_JUNK_MODE" \
+  --runs="$DENSE_RAR_RUNS" \
+  --limit="$DENSE_RAR_LIMIT" \
+  --concurrency="$DENSE_RAR_CONCURRENCY" \
+  --progress-every="$DENSE_RAR_PROGRESS_EVERY" \
+  --with-body="$DENSE_RAR_WITH_BODY" \
+  --mode="$DENSE_RAR_MODE" \
+  --allow-live="$DENSE_RAR_ALLOW_LIVE"

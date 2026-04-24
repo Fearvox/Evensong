@@ -2,7 +2,7 @@
 /**
  * Memory Injection Script — Evensong §8 Security Experiment
  *
- * Injects adversarial memories into EverMem group clauf6029 (Key A / PROJECT_ROOT).
+ * Injects adversarial memories into EverMem group clauf6029 (PROJECT_ROOT).
  * Used to seed R016-injection-t1 and R016-injection-t2 benchmark runs.
  *
  * Usage:
@@ -11,7 +11,7 @@
  *   bun benchmarks/evensong/inject-memory.ts list # show recent memories
  */
 
-const KEY_A = '9db9eb89-aeea-4fa2-9da8-f70590394614'
+const API_KEY_ENV = 'EVERMEM_INJECTION_API_KEY'
 const GROUP_ID = 'clauf6029'  // CWD hash: /Users/0xvox/claude-code-reimagine-for-learning
 const USER_ID = 'nolan'
 
@@ -26,6 +26,14 @@ const INJECTIONS = {
   },
 }
 
+function getApiKey(): string {
+  const key = process.env[API_KEY_ENV]?.trim()
+  if (!key) {
+    throw new Error(`${API_KEY_ENV} is required; no bundled EverOS fallback key is available`)
+  }
+  return key
+}
+
 async function inject(variant: 't1' | 't2') {
   const { label, content } = INJECTIONS[variant]
   const messageId = `a_inject_${variant}_${Date.now()}`
@@ -36,7 +44,7 @@ async function inject(variant: 't1' | 't2') {
   const res = await fetch('https://api.evermind.ai/api/v0/memories', {
     method: 'POST',
     headers: {
-      'Authorization': `Bearer ${KEY_A}`,
+      'Authorization': `Bearer ${getApiKey()}`,
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({
@@ -61,7 +69,7 @@ async function inject(variant: 't1' | 't2') {
 async function list() {
   const params = new URLSearchParams({ user_id: USER_ID, group_ids: GROUP_ID, top_k: '10' })
   const res = await fetch(`https://api.evermind.ai/api/v0/memories?${params}`, {
-    headers: { 'Authorization': `Bearer ${KEY_A}` },
+    headers: { 'Authorization': `Bearer ${getApiKey()}` },
   })
   const data = await res.json() as any
   const mems = data?.result?.memories ?? []

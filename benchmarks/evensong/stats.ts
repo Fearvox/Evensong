@@ -28,12 +28,6 @@ export interface StatsSummary {
   all_green: boolean
   /** Coefficient of variation for tests — measures reproducibility */
   tests_cv: number | null
-  /** Skill system integration level (0-10) from R012-E runs */
-  skill_integration: number
-  /** AgentTool maximization score (tools used / total) */
-  agenttool_score: number
-  /** Self-evolution loop closures achieved */
-  self_evo_loops: number
 }
 
 export interface DescriptiveStats {

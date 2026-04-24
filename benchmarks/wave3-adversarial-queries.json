@@ -1,0 +1,213 @@
+{
+  "_meta": {
+    "name": "wave3-adversarial-retrieval",
+    "version": "1.0.0",
+    "created": "2026-04-24",
+    "difficulty": "adversarial",
+    "description": "Harder Dense RAR query suite for embedding model promotion. Queries intentionally use paraphrase, near-neighbor concepts, cross-lingual wording, and lexical traps instead of title-copy lookup.",
+    "manifestSource": "research-vault",
+    "idealPolicy": "top-1 preferred; top-5 accepted only as diagnostic",
+    "categories": [
+      "near_neighbor_memory",
+      "lexical_trap",
+      "cross_lingual",
+      "negative_exclusion",
+      "methodology_philosophy",
+      "engineering_specific"
+    ]
+  },
+  "queries": [
+    {
+      "id": 101,
+      "category": "near_neighbor_memory",
+      "difficulty": "hard",
+      "trap": "Confuses memory-sparse attention with hypergraph memory or generic MemGPT paging.",
+      "q": "Which memory-system paper is about sparse attention patterns for extremely long context scaling, not graph-structured episodic recall?",
+      "ideal": "knowledge/ai-agents/memory-systems/20260411-msa-memory-sparse-attention.md"
+    },
+    {
+      "id": 102,
+      "category": "near_neighbor_memory",
+      "difficulty": "hard",
+      "trap": "Contains memory-system terms shared by MemGPT and MSA.",
+      "q": "I need the agent-memory design that models remembered conversation facts as hyperedges connecting multiple entities and events.",
+      "ideal": "knowledge/ai-agents/memory-systems/20260411-2604-08256-hypermem.md"
+    },
+    {
+      "id": 103,
+      "category": "near_neighbor_memory",
+      "difficulty": "hard",
+      "trap": "Avoids title phrase and asks for OS-like virtual context management.",
+      "q": "Find the work where an LLM manages limited context like virtual memory, deciding what to page in and out during a conversation.",
+      "ideal": "knowledge/ai-agents/memory-systems/20260411-2310-08560-memgpt.md"
+    },
+    {
+      "id": 104,
+      "category": "near_neighbor_memory",
+      "difficulty": "medium",
+      "trap": "Could match many memory docs unless competitive landscape terms are understood.",
+      "q": "Which note compares current AI memory products and market trends rather than proposing a single retrieval architecture?",
+      "ideal": "knowledge/ai-agents/memory-systems/20260411-competitor-landscape.md"
+    },
+    {
+      "id": 105,
+      "category": "lexical_trap",
+      "difficulty": "hard",
+      "trap": "Contains attention and transformer words but asks for the original architecture paper.",
+      "q": "The source for encoder decoder self-attention becoming the standard transformer architecture, not sparse-memory extensions.",
+      "ideal": "knowledge/llm-architecture/attention/20260411--1706-03762-attention-is-all-you-need.md"
+    },
+    {
+      "id": 106,
+      "category": "lexical_trap",
+      "difficulty": "hard",
+      "trap": "Sparse/training terms can pull MSA; ideal is pruning trainable subnetworks.",
+      "q": "Which training paper argues that inside a dense neural network there are smaller subnetworks that can train effectively from scratch?",
+      "ideal": "knowledge/llm-architecture/training/20260411-1803-03635-lottery-ticket-hypothesis.md"
+    },
+    {
+      "id": 107,
+      "category": "lexical_trap",
+      "difficulty": "hard",
+      "trap": "Emotion and reinforcement can pull Reflexion; ideal is prompt-level emotional stimuli.",
+      "q": "Find the paper about adding emotional wording to prompts to change LLM task performance, not agent self-reflection loops.",
+      "ideal": "knowledge/ai-agents/self-evolution/20260411-2307-11760-emotionprompt.md"
+    },
+    {
+      "id": 108,
+      "category": "lexical_trap",
+      "difficulty": "hard",
+      "trap": "Self-improvement words can pull Evensong or Hermes; ideal is verbal reinforcement Reflexion.",
+      "q": "Which agent method learns from verbal feedback after mistakes and stores lessons for later trials?",
+      "ideal": "knowledge/ai-agents/self-evolution/20260411-2303-11366-reflexion.md"
+    },
+    {
+      "id": 109,
+      "category": "cross_lingual",
+      "difficulty": "hard",
+      "trap": "Chinese paraphrase for English memory sparse attention paper.",
+      "q": "哪篇论文讲的是用稀疏注意力机制让模型处理超长上下文，而不是把记忆做成知识图谱？",
+      "ideal": "knowledge/ai-agents/memory-systems/20260411-msa-memory-sparse-attention.md"
+    },
+    {
+      "id": 110,
+      "category": "cross_lingual",
+      "difficulty": "hard",
+      "trap": "Chinese query for English MemGPT concept.",
+      "q": "我想找把大模型上下文当作操作系统内存来管理、会换入换出资料的那篇工作。",
+      "ideal": "knowledge/ai-agents/memory-systems/20260411-2310-08560-memgpt.md"
+    },
+    {
+      "id": 111,
+      "category": "cross_lingual",
+      "difficulty": "hard",
+      "trap": "Bilingual wording can match philosophy notes; ideal is Evensong Chinese paper.",
+      "q": "Evensong 里持续记忆如何 causally 改变智能体行为的中文论述在哪里？",
+      "ideal": "knowledge/ai-agents/self-evolution/20260411-evensong-paper-zh.md"
+    },
+    {
+      "id": 112,
+      "category": "cross_lingual",
+      "difficulty": "hard",
+      "trap": "Chinese methodology phrase with no title copy.",
+      "q": "哪份材料用系统一和系统二解释人类决策偏差与认知捷径？",
+      "ideal": "knowledge/research-methods/methodology/20260411-thinking-fast-and-slow.md"
+    },
+    {
+      "id": 113,
+      "category": "negative_exclusion",
+      "difficulty": "hard",
+      "trap": "Says not blackmail benchmark; ideal is extended mind philosophy.",
+      "q": "I do not want an AI safety blackmail benchmark; I want the philosophy argument that cognition can extend into external tools and environment.",
+      "ideal": "knowledge/ai-agents/ethics-and-agency/20260411-clark-chalmers-extended-mind.md"
+    },
+    {
+      "id": 114,
+      "category": "negative_exclusion",
+      "difficulty": "hard",
+      "trap": "Mentions context scaling but excludes attention; ideal is HyperMem.",
+      "q": "Not sparse attention or longer context windows: show me the memory architecture that goes beyond pairwise retrieval by linking facts relationally.",
+      "ideal": "knowledge/ai-agents/memory-systems/20260411-2604-08256-hypermem.md"
+    },
+    {
+      "id": 115,
+      "category": "negative_exclusion",
+      "difficulty": "hard",
+      "trap": "Mentions emotions but excludes prompt emotion; ideal is Reflexion.",
+      "q": "Not emotional prompt wording: I need the agent that critiques its own failed trajectory and uses that reflection next time.",
+      "ideal": "knowledge/ai-agents/self-evolution/20260411-2303-11366-reflexion.md"
+    },
+    {
+      "id": 116,
+      "category": "negative_exclusion",
+      "difficulty": "hard",
+      "trap": "Contains intelligence and memory but asks for benchmark/safety misalignment.",
+      "q": "Find the benchmark about LLM insider-threat style blackmail behavior, not memory architecture or self-evolution.",
+      "ideal": "knowledge/ai-agents/benchmarking/20260411-2510-05179v2.md"
+    },
+    {
+      "id": 117,
+      "category": "methodology_philosophy",
+      "difficulty": "medium",
+      "trap": "Could match first-principles audit; ideal is Musk methodology biography.",
+      "q": "Which methodology note uses Elon Musk as the example for decomposing problems from first principles?",
+      "ideal": "knowledge/research-methods/methodology/20260411-elon-musk-biography.md"
+    },
+    {
+      "id": 118,
+      "category": "methodology_philosophy",
+      "difficulty": "hard",
+      "trap": "Evensong plus philosophy could match the first-principles audit.",
+      "q": "I need the note that positions Evensong against philosophical frontiers and supervisor expectations.",
+      "ideal": "knowledge/research-methods/methodology/20260411-philosophy-supervisor-evensong.md"
+    },
+    {
+      "id": 119,
+      "category": "methodology_philosophy",
+      "difficulty": "hard",
+      "trap": "Could match Musk first principles but asks for Evensong audit gaps.",
+      "q": "Which Evensong document audits assumptions, gaps, and first-principles weaknesses in the research itself?",
+      "ideal": "knowledge/research-methods/methodology/20260411-evensong-first-principles-audit.md"
+    },
+    {
+      "id": 120,
+      "category": "methodology_philosophy",
+      "difficulty": "hard",
+      "trap": "Could match agent ethics; ideal is extended mind.",
+      "q": "The philosophical source saying notebooks, devices, and surroundings can be part of cognition when functionally coupled.",
+      "ideal": "knowledge/ai-agents/ethics-and-agency/20260411-clark-chalmers-extended-mind.md"
+    },
+    {
+      "id": 121,
+      "category": "engineering_specific",
+      "difficulty": "hard",
+      "trap": "Agent harness wording can match Evensong benchmark docs.",
+      "q": "Which engineering memo frames an agent scaling harness around three dimensions instead of only benchmark scores?",
+      "ideal": "knowledge/software-engineering/architecture/20260411-leo-harness-engineering-3d.md"
+    },
+    {
+      "id": 122,
+      "category": "engineering_specific",
+      "difficulty": "hard",
+      "trap": "Hermes and Evensong can match several docs; ideal is synthesis/public conversation.",
+      "q": "Find the synthesis note that ties Hermes and Evensong into a public communication narrative.",
+      "ideal": "knowledge/ai-agents/self-evolution/20260411-hermes-evensong-synthesis.md"
+    },
+    {
+      "id": 123,
+      "category": "engineering_specific",
+      "difficulty": "hard",
+      "trap": "Competitor wording can match market landscape; ideal asks benchmark adversarial agent behavior.",
+      "q": "Which document is about adversarial evaluation of agent behavior under insider-threat pressure rather than product competitors?",
+      "ideal": "knowledge/ai-agents/benchmarking/20260411-2510-05179v2.md"
+    },
+    {
+      "id": 124,
+      "category": "engineering_specific",
+      "difficulty": "hard",
+      "trap": "Memory and evolution terms can match Evensong paper; ideal is Hermes synthesis.",
+      "q": "Where is the note that integrates Hermes with Evensong as a communication artifact, not the Chinese paper itself?",
+      "ideal": "knowledge/ai-agents/self-evolution/20260411-hermes-evensong-synthesis.md"
+    }
+  ]
+}

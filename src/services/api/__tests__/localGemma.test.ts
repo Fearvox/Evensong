@@ -24,6 +24,16 @@ describe('createLocalGemmaClient', () => {
     expect(client.model).toBe('other-model.gguf')
   })
 
+  test('accepts apiKey override via options', () => {
+    const client = createLocalGemmaClient({ apiKey: 'sk-test' })
+    expect(client.apiKey).toBe('sk-test')
+  })
+
+  test('accepts extra OpenAI-compatible request body fields via options', () => {
+    const client = createLocalGemmaClient({ extraBody: { thinking: { type: 'disabled' } } })
+    expect(client.extraBody).toEqual({ thinking: { type: 'disabled' } })
+  })
+
   test('accepts ATOMIC_MODELS.FAST as model override (grok-4-fast-reasoning)', () => {
     const client = createLocalGemmaClient({ model: ATOMIC_MODELS.FAST })
     expect(client.model).toBe('grok-4-fast-reasoning')
@@ -80,6 +90,37 @@ describe('isLocalGemmaAvailable', () => {
       expect(await isLocalGemmaAvailable(createLocalGemmaClient())).toBe(false)
     } finally { globalThis.fetch = saved }
   })
+  test('falls back to chat/completions when /models is unsupported', async () => {
+    const saved = globalThis.fetch
+    const calls: string[] = []
+    globalThis.fetch = (async (url: Parameters<typeof fetch>[0], _init?: Parameters<typeof fetch>[1]) => {
+      const href = String(url)
+      calls.push(href)
+      if (href.endsWith('/models')) return new Response('not found', { status: 404 })
+      if (href.endsWith('/chat/completions')) {
+        return new Response('{"choices":[{"message":{"content":"ok"}}]}', { status: 200 })
+      }
+      return new Response('', { status: 500 })
+    }) as typeof fetch
+    try {
+      expect(await isLocalGemmaAvailable(createLocalGemmaClient())).toBe(true)
+      expect(calls).toEqual([
+        'http://127.0.0.1:1337/v1/models',
+        'http://127.0.0.1:1337/v1/chat/completions',
+      ])
+    } finally { globalThis.fetch = saved }
+  })
+  test('returns false when chat/completions fallback also fails', async () => {
+    const saved = globalThis.fetch
+    globalThis.fetch = (async (url: Parameters<typeof fetch>[0], _init?: Parameters<typeof fetch>[1]) => {
+      const href = String(url)
+      if (href.endsWith('/models')) return new Response('not found', { status: 404 })
+      return new Response('boom', { status: 503 })
+    }) as typeof fetch
+    try {
+      expect(await isLocalGemmaAvailable(createLocalGemmaClient())).toBe(false)
+    } finally { globalThis.fetch = saved }
+  })
   test('returns false on timeout', async () => {
     const saved = globalThis.fetch
     globalThis.fetch = (async () => {
@@ -88,6 +129,29 @@ describe('isLocalGemmaAvailable', () => {
     }) as typeof fetch
     try {
       expect(await isLocalGemmaAvailable(createLocalGemmaClient(), 100)).toBe(false)
+    } finally { globalThis.fetch = saved }
+  })
+
+  test('sends bearer auth header when apiKey is configured', async () => {
+    const saved = globalThis.fetch
+    globalThis.fetch = (async (_url: Parameters<typeof fetch>[0], init?: Parameters<typeof fetch>[1]) => {
+      expect((init?.headers as Record<string, string>).Authorization).toBe('Bearer sk-minimax')
+      return new Response('{"data":[]}', { status: 200 })
+    }) as typeof fetch
+    try {
+      expect(await isLocalGemmaAvailable(createLocalGemmaClient({ apiKey: 'sk-minimax' }))).toBe(true)
+    } finally { globalThis.fetch = saved }
+  })
+  test('sends bearer auth header on chat/completions fallback too', async () => {
+    const saved = globalThis.fetch
+    globalThis.fetch = (async (url: Parameters<typeof fetch>[0], init?: Parameters<typeof fetch>[1]) => {
+      expect((init?.headers as Record<string, string>).Authorization).toBe('Bearer sk-minimax')
+      const href = String(url)
+      if (href.endsWith('/models')) return new Response('not found', { status: 404 })
+      return new Response('{"choices":[{"message":{"content":"ok"}}]}', { status: 200 })
+    }) as typeof fetch
+    try {
+      expect(await isLocalGemmaAvailable(createLocalGemmaClient({ apiKey: 'sk-minimax' }))).toBe(true)
     } finally { globalThis.fetch = saved }
   })
 })
@@ -121,6 +185,44 @@ describe('chatCompletionLocalGemma', () => {
       await expect(
         chatCompletionLocalGemma(createLocalGemmaClient(), { messages: [{ role: 'user', content: 'hi' }] })
       ).rejects.toBeInstanceOf(LocalGemmaConnectionError)
+    } finally { globalThis.fetch = saved }
+  })
+
+  test('sends bearer auth header when apiKey is configured', async () => {
+    const saved = globalThis.fetch
+    globalThis.fetch = (async (_url: Parameters<typeof fetch>[0], init?: Parameters<typeof fetch>[1]) => {
+      expect((init?.headers as Record<string, string>).Authorization).toBe('Bearer sk-minimax')
+      return new Response(JSON.stringify({
+        choices: [{ message: { content: 'ok' } }],
+      }), { status: 200 })
+    }) as typeof fetch
+    try {
+      const r = await chatCompletionLocalGemma(createLocalGemmaClient({ apiKey: 'sk-minimax' }), {
+        messages: [{ role: 'user', content: 'hi' }],
+      })
+      expect(r.content).toBe('ok')
+    } finally { globalThis.fetch = saved }
+  })
+
+  test('merges provider-specific extra request body fields', async () => {
+    const saved = globalThis.fetch
+    globalThis.fetch = (async (_url: Parameters<typeof fetch>[0], init?: Parameters<typeof fetch>[1]) => {
+      const body = JSON.parse(String(init?.body))
+      expect(body.thinking).toEqual({ type: 'disabled' })
+      expect(body.model).toBe('deepseek-v4-flash')
+      return new Response(JSON.stringify({
+        choices: [{ message: { content: 'ok' } }],
+      }), { status: 200 })
+    }) as typeof fetch
+    try {
+      const r = await chatCompletionLocalGemma(
+        createLocalGemmaClient({
+          model: 'deepseek-v4-flash',
+          extraBody: { thinking: { type: 'disabled' } },
+        }),
+        { messages: [{ role: 'user', content: 'hi' }] },
+      )
+      expect(r.content).toBe('ok')
     } finally { globalThis.fetch = saved }
   })
 })

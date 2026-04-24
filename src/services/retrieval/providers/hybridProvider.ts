@@ -89,6 +89,12 @@ export function createHybridProvider(options: HybridProviderOptions): VaultRetri
         rankedPaths: stage2Result.rankedPaths,
         provider: providerName,
         latencyMs: Math.round(performance.now() - start),
+        diagnostics: {
+          stage1Provider: stage1Result.provider,
+          stage1RankedPaths: stage1Result.rankedPaths,
+          stage2Provider: stage2Result.provider,
+          stage2Diagnostics: stage2Result.diagnostics,
+        },
       }
     },
   }

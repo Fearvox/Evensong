@@ -79,30 +79,68 @@ describe('EverOSClient', () => {
 
 describe('Factory functions', () => {
   test('createObserverClient returns a client', () => {
-    const client = createObserverClient()
-    expect(client).toBeInstanceOf(EverOSClient)
-    expect(client.settings).toBeDefined()
+    const old = process.env.EVERMEM_OBS_KEY
+    process.env.EVERMEM_OBS_KEY = 'test-observer-key'
+    try {
+      const client = createObserverClient()
+      expect(client).toBeInstanceOf(EverOSClient)
+      expect(client.settings).toBeDefined()
+    } finally {
+      if (old === undefined) delete process.env.EVERMEM_OBS_KEY
+      else process.env.EVERMEM_OBS_KEY = old
+    }
   })
 
   test('createRunnerClient returns a client', () => {
-    const client = createRunnerClient()
-    expect(client).toBeInstanceOf(EverOSClient)
-    expect(client.settings).toBeDefined()
+    const old = process.env.EVERMEM_RNR_KEY
+    process.env.EVERMEM_RNR_KEY = 'test-runner-key'
+    try {
+      const client = createRunnerClient()
+      expect(client).toBeInstanceOf(EverOSClient)
+      expect(client.settings).toBeDefined()
+    } finally {
+      if (old === undefined) delete process.env.EVERMEM_RNR_KEY
+      else process.env.EVERMEM_RNR_KEY = old
+    }
   })
 
   test('createVoidClient returns a client', () => {
-    const client = createVoidClient()
-    expect(client).toBeInstanceOf(EverOSClient)
-    expect(client.settings).toBeDefined()
+    const old = process.env.EVERMEM_VOID_KEY
+    process.env.EVERMEM_VOID_KEY = 'test-void-key'
+    try {
+      const client = createVoidClient()
+      expect(client).toBeInstanceOf(EverOSClient)
+      expect(client.settings).toBeDefined()
+    } finally {
+      if (old === undefined) delete process.env.EVERMEM_VOID_KEY
+      else process.env.EVERMEM_VOID_KEY = old
+    }
+  })
+
+  test('factory functions require explicit env keys', () => {
+    const old = process.env.EVERMEM_OBS_KEY
+    delete process.env.EVERMEM_OBS_KEY
+    try {
+      expect(() => createObserverClient()).toThrow(/EVERMEM_OBS_KEY is required/)
+    } finally {
+      if (old !== undefined) process.env.EVERMEM_OBS_KEY = old
+    }
   })
 })
 
 describe('Settings.get integration', () => {
-  const obsKey = process.env.EVERMEM_OBS_KEY ?? '9db9eb89-aeea-4fa2-9da8-f70590394614'
-  const skipReason = process.env.CI ? 'CI environment — skip real API calls' : null
+  const obsKey = process.env.EVERMEM_OBS_KEY
+  const liveOptIn = process.env.EVENSONG_RUN_LIVE_TESTS === '1'
+  const skipReason = process.env.CI
+    ? 'CI environment — skip real API calls'
+    : !liveOptIn
+      ? 'EVENSONG_RUN_LIVE_TESTS=1 not set — skip real API calls'
+    : obsKey
+      ? null
+      : 'EVERMEM_OBS_KEY not set — skip real API calls'
 
   test.skipIf(!!skipReason)('Settings.get returns data with observer key', async () => {
-    const client = new EverOSClient(obsKey)
+    const client = new EverOSClient(obsKey!)
     try {
       const result = await client.settings.get()
       // The API should return something — either data or a response object
@@ -110,7 +148,12 @@ describe('Settings.get integration', () => {
     } catch (err) {
       // If the API is unreachable, that's acceptable in local dev
       const msg = err instanceof Error ? err.message : String(err)
-      if (msg.includes('fetch failed') || msg.includes('ECONNREFUSED')) {
+      if (
+        msg.includes('fetch failed') ||
+        msg.includes('ECONNREFUSED') ||
+        msg.includes('ConnectionRefused') ||
+        msg.includes('Unable to connect')
+      ) {
         console.warn('[everos.test] API unreachable, skipping: ' + msg)
         return
       }

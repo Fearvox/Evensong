@@ -60,12 +60,18 @@ export interface LocalGemmaClientOptions {
   baseURL?: string
   model?: string
   timeoutMs?: number
+  apiKey?: string
+  headers?: Record<string, string>
+  extraBody?: Record<string, unknown>
 }
 
 export interface LocalGemmaClient {
   baseURL: string
   model: string
   timeoutMs: number
+  apiKey?: string
+  headers?: Record<string, string>
+  extraBody?: Record<string, unknown>
 }
 
 export function createLocalGemmaClient(options: LocalGemmaClientOptions = {}): LocalGemmaClient {
@@ -73,6 +79,45 @@ export function createLocalGemmaClient(options: LocalGemmaClientOptions = {}): L
     baseURL: options.baseURL ?? LOCAL_GEMMA_DEFAULT_BASE_URL,
     model: options.model ?? LOCAL_GEMMA_DEFAULT_MODEL,
     timeoutMs: options.timeoutMs ?? 30000,
+    apiKey: options.apiKey,
+    headers: options.headers,
+    extraBody: options.extraBody,
+  }
+}
+
+function buildHeaders(client: LocalGemmaClient): Record<string, string> {
+  const headers: Record<string, string> = {
+    'Content-Type': 'application/json',
+    ...(client.headers ?? {}),
+  }
+  if (client.apiKey) headers.Authorization = `Bearer ${client.apiKey}`
+  return headers
+}
+
+async function fetchWithTimeout(
+  url: string,
+  init: RequestInit,
+  timeoutMs: number,
+): Promise<Response | 'timeout'> {
+  const controller = new AbortController()
+  let timer: ReturnType<typeof setTimeout> | undefined
+  const timeoutPromise = new Promise<'timeout'>((resolve) => {
+    timer = setTimeout(() => {
+      controller.abort()
+      resolve('timeout')
+    }, timeoutMs)
+  })
+
+  try {
+    return await Promise.race([
+      fetch(url, {
+        ...init,
+        signal: controller.signal,
+      }),
+      timeoutPromise,
+    ])
+  } finally {
+    if (timer !== undefined) clearTimeout(timer)
   }
 }
 
@@ -106,12 +151,13 @@ export async function chatCompletionLocalGemma(
   try {
     response = await fetch(`${client.baseURL}/chat/completions`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: buildHeaders(client),
       body: JSON.stringify({
         model: client.model,
         messages: request.messages,
         temperature: request.temperature ?? 0.2,
         max_tokens: request.maxTokens ?? 1024,
+        ...(client.extraBody ?? {}),
       }),
       signal: controller.signal,
     })
@@ -138,26 +184,41 @@ export async function chatCompletionLocalGemma(
 
 export async function isLocalGemmaAvailable(
   client: LocalGemmaClient,
-  probeTimeoutMs = 2000,
+  probeTimeoutMs = 5000,
 ): Promise<boolean> {
-  const controller = new AbortController()
-  let timer: ReturnType<typeof setTimeout> | undefined
-  const timeoutPromise = new Promise<'timeout'>((resolve) => {
-    timer = setTimeout(() => {
-      controller.abort()
-      resolve('timeout')
-    }, probeTimeoutMs)
-  })
   try {
-    const result = await Promise.race([
-      fetch(`${client.baseURL}/models`, { method: 'GET', signal: controller.signal }),
-      timeoutPromise,
-    ])
-    if (result === 'timeout') return false
-    return result.status === 200
+    const modelsProbe = await fetchWithTimeout(
+      `${client.baseURL}/models`,
+      {
+        method: 'GET',
+        headers: buildHeaders(client),
+      },
+      probeTimeoutMs,
+    )
+    if (modelsProbe === 'timeout') return false
+    if (modelsProbe.status === 200) return true
+
+    // Some OpenAI-compatible providers (MiniMax as of 2026-04-22) implement
+    // chat completions but not GET /models. Fall back to the cheapest possible
+    // chat probe before declaring the provider unavailable.
+    if (![404, 405, 501].includes(modelsProbe.status)) return false
+
+    const chatProbe = await fetchWithTimeout(
+      `${client.baseURL}/chat/completions`,
+      {
+        method: 'POST',
+        headers: buildHeaders(client),
+        body: JSON.stringify({
+          model: client.model,
+          messages: [{ role: 'user', content: 'ping' }],
+          temperature: 0,
+          max_tokens: 1,
+        }),
+      },
+      probeTimeoutMs,
+    )
+    return chatProbe !== 'timeout' && chatProbe.status === 200
   } catch {
     return false
-  } finally {
-    if (timer !== undefined) clearTimeout(timer)
   }
 }

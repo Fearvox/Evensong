@@ -1,6 +1,8 @@
 import { chatCompletionLocalGemma, isLocalGemmaAvailable, type LocalGemmaClient } from '../../api/localGemma.js'
 import type { VaultRetrievalProvider, VaultRetrievalRequest, VaultRetrievalResult } from '../types.js'
 
+const HEALTHY_TTL_MS = 60_000
+
 const SYSTEM_PROMPT = `You are a document retrieval judge. Given a query and a manifest of vault files (each with path, title, retention, access count, summary level), return a JSON array of the file paths most relevant to the query, ordered by relevance.
 
 Rules:
@@ -23,7 +25,17 @@ export function buildJudgePrompt(req: VaultRetrievalRequest): string {
   return `Query: ${req.query}\n\ntopK: ${topK}\n\nManifest:\n${JSON.stringify(manifestJson, null, 2)}\n\nReturn JSON array of up to ${topK} relevant paths.`
 }
 
-export function parseJudgeOutput(content: string, manifest: VaultRetrievalRequest['manifest']): string[] {
+export interface JudgeParseResult {
+  rankedPaths: string[]
+  parseMode: 'json' | 'regex' | 'empty'
+  discardedPaths: string[]
+  rawResponse: string
+}
+
+export function parseJudgeOutputDetailed(
+  content: string,
+  manifest: VaultRetrievalRequest['manifest'],
+): JudgeParseResult {
   const knownPaths = new Set(manifest.map((m) => m.path))
   const trimmed = content.trim()
   try {
@@ -33,7 +45,9 @@ export function parseJudgeOutput(content: string, manifest: VaultRetrievalReques
       // invented that isn't in the manifest. Observed 2026-04-19 E2E with
       // deepseek-v3.2 which occasionally returned a plausible-sounding path
       // that didn't exist.
-      return (parsed as string[]).filter((p) => knownPaths.has(p))
+      const rankedPaths = (parsed as string[]).filter((p) => knownPaths.has(p))
+      const discardedPaths = (parsed as string[]).filter((p) => !knownPaths.has(p))
+      return { rankedPaths, parseMode: 'json', discardedPaths, rawResponse: content }
     }
   } catch {
     // fall through to heuristic parse
@@ -46,7 +60,16 @@ export function parseJudgeOutput(content: string, manifest: VaultRetrievalReques
       found.push(candidate)
     }
   }
-  return found
+  return {
+    rankedPaths: found,
+    parseMode: found.length > 0 ? 'regex' : 'empty',
+    discardedPaths: matches.filter((p) => !knownPaths.has(p)),
+    rawResponse: content,
+  }
+}
+
+export function parseJudgeOutput(content: string, manifest: VaultRetrievalRequest['manifest']): string[] {
+  return parseJudgeOutputDetailed(content, manifest).rankedPaths
 }
 
 export interface AtomicProviderOptions {
@@ -74,9 +97,26 @@ export function createAtomicProvider(
   options: AtomicProviderOptions = {},
 ): VaultRetrievalProvider {
   const providerName = options.providerName ?? `atomic:${client.model}`
+  let lastHealthyAt = 0
+  let availabilityProbe: Promise<boolean> | null = null
   return {
     name: providerName,
-    available: () => isLocalGemmaAvailable(client),
+    available: async () => {
+      if (lastHealthyAt > 0 && Date.now() - lastHealthyAt < HEALTHY_TTL_MS) {
+        return true
+      }
+      if (!availabilityProbe) {
+        availabilityProbe = isLocalGemmaAvailable(client)
+          .then((ok) => {
+            if (ok) lastHealthyAt = Date.now()
+            return ok
+          })
+          .finally(() => {
+            availabilityProbe = null
+          })
+      }
+      return availabilityProbe
+    },
     retrieve: async (req: VaultRetrievalRequest): Promise<VaultRetrievalResult> => {
       const start = Date.now()
       const response = await chatCompletionLocalGemma(client, {
@@ -87,8 +127,18 @@ export function createAtomicProvider(
         temperature: options.temperature ?? 0.1,
         maxTokens: options.maxTokens ?? 1024,
       })
-      const rankedPaths = parseJudgeOutput(response.content, req.manifest)
-      return { rankedPaths, provider: providerName, latencyMs: Date.now() - start }
+      lastHealthyAt = Date.now()
+      const parsed = parseJudgeOutputDetailed(response.content, req.manifest)
+      return {
+        rankedPaths: parsed.rankedPaths,
+        provider: providerName,
+        latencyMs: Date.now() - start,
+        diagnostics: {
+          judgeParseMode: parsed.parseMode,
+          judgeDiscardedPaths: parsed.discardedPaths,
+          rawJudgeResponse: parsed.rawResponse,
+        },
+      }
     },
   }
 }

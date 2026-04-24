@@ -36,6 +36,13 @@ export interface VaultRetrievalResult {
    * LLM rerankers) may omit this field.
    */
   scores?: number[]
+  /**
+   * Optional provider-specific audit data. Benchmark callers use this to
+   * distinguish a real structured ranking from parser fallback, skipped stage
+   * decisions, or other infrastructure behavior without changing the primary
+   * retrieval contract.
+   */
+  diagnostics?: Record<string, unknown>
 }
 
 export interface VaultRetrievalProvider {
