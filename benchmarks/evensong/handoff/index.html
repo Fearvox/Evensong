@@ -1,0 +1,246 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<meta name="robots" content="noindex, nofollow, noarchive" />
+<meta name="referrer" content="no-referrer" />
+<meta name="color-scheme" content="light" />
+<title>Evensong Handoff | Dense RAR Formal Evidence</title>
+<meta name="description" content="Canonical Evensong handoff for the Dense RAR formal retrieval evidence, including the 24/24 Wave 3+I hard-suite result and evidence boundaries." />
+<link rel="canonical" href="https://evensong.zonicdesign.art/handoff" />
+<link rel="icon" type="image/svg+xml" href="/dash-favicon.svg" />
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
+<link href="https://cdn.jsdelivr.net/npm/geist@1.3.1/dist/fonts/geist-sans/style.min.css" rel="stylesheet" />
+<link href="https://cdn.jsdelivr.net/npm/geist@1.3.1/dist/fonts/geist-mono/style.min.css" rel="stylesheet" />
+<link rel="stylesheet" href="/handoff/handoff.css" />
+</head>
+<body>
+  <div class="paper-field" aria-hidden="true"></div>
+
+  <header class="site-shell">
+    <a class="brand-lockup" href="/" aria-label="Evensong home">
+      <span class="dash-symbol" aria-hidden="true"></span>
+      <span class="brand-copy">
+        <strong>DASH</strong>
+        <span>Evensong evidence system</span>
+      </span>
+    </a>
+    <nav class="top-nav" aria-label="Handoff navigation">
+      <a aria-current="page" href="/handoff">Handoff</a>
+      <a href="/handoff/dashboard">Dashboard</a>
+      <a href="/">Evensong</a>
+    </nav>
+  </header>
+
+  <main>
+    <section class="hero-shell">
+      <div class="hero-copy">
+        <p class="eyebrow">Wave 3+I / formal handoff / 2026-04-24</p>
+        <h1>Dense RAR is now canonical formal evidence.</h1>
+        <p class="lead">
+          The old handoff was still written as a target-state plan. This version is the
+          operator handoff for the completed formal run: BGE-M3 Stage 1 at TopK 50,
+          DeepSeek V4 Flash as reranker, clean metadata, zero errors, and a scoped
+          24/24 hard-suite result.
+        </p>
+        <div class="hero-actions" aria-label="Primary actions">
+          <a class="button primary" href="/handoff/dashboard">Open dashboard</a>
+          <a class="button secondary" href="/evidence/wave3i-dense-rar-2026-04-24T0854.md">Formal artifact</a>
+        </div>
+      </div>
+
+      <aside class="result-frame" aria-label="Canonical result">
+        <div class="frame-topline">
+          <span>canonical run</span>
+          <strong>0854</strong>
+        </div>
+        <div class="score-stack">
+          <div>
+            <span class="score">24/24</span>
+            <span class="score-label">Dense RAR Top-1</span>
+          </div>
+          <div>
+            <span class="score">24/24</span>
+            <span class="score-label">Dense Adaptive Top-1</span>
+          </div>
+        </div>
+        <dl class="metric-list">
+          <div><dt>Rows</dt><dd>72</dd></div>
+          <div><dt>Errors</dt><dd>0</dd></div>
+          <div><dt>Mode</dt><dd>formal</dd></div>
+          <div><dt>Dirty</dt><dd>false</dd></div>
+        </dl>
+      </aside>
+    </section>
+
+    <section class="signal-band" aria-label="Key signals">
+      <div class="signal">
+        <span class="signal-k">Suite</span>
+        <strong>24 adversarial queries</strong>
+        <span>6 categories, 200-entry manifest</span>
+      </div>
+      <div class="signal">
+        <span class="signal-k">Stage 1</span>
+        <strong>BGE-M3 Q4_K_M</strong>
+        <span>TopK 50 fixed q113 recall</span>
+      </div>
+      <div class="signal">
+        <span class="signal-k">Stage 2</span>
+        <strong>deepseek-v4-flash</strong>
+        <span>Thinking disabled, rerank exposure 50</span>
+      </div>
+      <div class="signal">
+        <span class="signal-k">Boundary</span>
+        <strong>Hard-suite only</strong>
+        <span>Does not replace 108-query F/G runs</span>
+      </div>
+    </section>
+
+    <section class="section-grid two-col">
+      <div>
+        <p class="eyebrow">What changed</p>
+        <h2>From promising plan to verified run.</h2>
+        <p class="body">
+          The previous handoff described a dense-first RAR architecture as a next
+          move. Hermes turned that into a clean formal execution, then a follow-up
+          diagnostic isolated the only failure: q113 was not in the Stage-1 TopK 20
+          candidate pool. Raising Stage 1 to TopK 50 recovered the ideal at rank 27;
+          once present, the reranker selected it as Top-1.
+        </p>
+      </div>
+      <div class="timeline" aria-label="Evidence timeline">
+        <article>
+          <span>0644</span>
+          <strong>Probe only</strong>
+          <p>Dirty/probe evidence. Useful as a lead, not formal.</p>
+        </article>
+        <article>
+          <span>0801</span>
+          <strong>Formal TopK 20 baseline</strong>
+          <p>23/24, clean. q113 ideal absent from Stage-1 candidates.</p>
+        </article>
+        <article>
+          <span>0841</span>
+          <strong>q113 diagnostic</strong>
+          <p>Canary proved TopK 50 recovers the missing candidate.</p>
+        </article>
+        <article class="hot">
+          <span>0854</span>
+          <strong>Canonical formal run</strong>
+          <p>24/24 for dense-rar and dense-adaptive, 0 errors.</p>
+        </article>
+      </div>
+    </section>
+
+    <section class="section-grid">
+      <div>
+        <p class="eyebrow">Architecture</p>
+        <h2>The fix is candidate recall, not fusion.</h2>
+        <p class="body">
+          q113 did not need BM25/RRF as the smallest reliable fix. Dense TopK 50 was
+          enough to surface the ideal document; RAR then did the decision work.
+          That matters because it keeps the formal path simple: one dense recall
+          layer, one judge layer, one explicit evidence boundary.
+        </p>
+      </div>
+      <div class="pipeline-strip" aria-label="Dense RAR pipeline">
+        <div class="pipe-node">
+          <span>01</span>
+          <strong>BGE-M3</strong>
+          <p>Dense Stage 1</p>
+        </div>
+        <div class="pipe-arrow" aria-hidden="true"></div>
+        <div class="pipe-node">
+          <span>02</span>
+          <strong>TopK 50</strong>
+          <p>Candidate recall</p>
+        </div>
+        <div class="pipe-arrow" aria-hidden="true"></div>
+        <div class="pipe-node">
+          <span>03</span>
+          <strong>V4 Flash</strong>
+          <p>RAR rerank</p>
+        </div>
+        <div class="pipe-arrow" aria-hidden="true"></div>
+        <div class="pipe-node success">
+          <span>04</span>
+          <strong>24/24</strong>
+          <p>Formal hard suite</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="evidence-wall" aria-label="Evidence pack">
+      <div class="section-heading">
+        <p class="eyebrow">Evidence pack</p>
+        <h2>One canonical story, no inflated claims.</h2>
+      </div>
+      <div class="evidence-grid">
+        <a class="evidence-card" href="/evidence/wave3i-dense-rar-2026-04-24T0854.md">
+          <span>summary</span>
+          <strong>0854 formal run</strong>
+          <p>Human-readable benchmark report with aggregate and category tables.</p>
+        </a>
+        <a class="evidence-card" href="/evidence/wave3i-dense-rar-2026-04-24T0854.meta.json">
+          <span>metadata</span>
+          <strong>Clean run contract</strong>
+          <p>Run mode, commit, hashes, providers, TopK, and judge configuration.</p>
+        </a>
+        <a class="evidence-card" href="/evidence/DENSE-RAR-FORMAL-LEDGER.md">
+          <span>ledger</span>
+          <strong>Formal boundary</strong>
+          <p>Canonical, prior formal baseline, probe-only evidence, and caveats.</p>
+        </a>
+        <a class="evidence-card" href="/evidence/wave3i-dense-rar-2026-04-24T0801.md">
+          <span>baseline</span>
+          <strong>0801 TopK 20</strong>
+          <p>The prior clean formal baseline that explains the q113 candidate-recall miss.</p>
+        </a>
+        <div class="evidence-card">
+          <span>privacy</span>
+          <strong>Raw trace retained in repo</strong>
+          <p>Public evidence mirrors redact private endpoints and path-level JSONL diagnostics.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="section-grid two-col">
+      <div>
+        <p class="eyebrow">Operator notes</p>
+        <h2>Use 0854 downstream. Keep the boundary visible.</h2>
+      </div>
+      <div class="note-stack">
+        <article>
+          <strong>Publishable statement</strong>
+          <p>Dense RAR reached 24/24 Top-1 and Top-5 on the verified Wave 3+I 24-query adversarial hard suite.</p>
+        </article>
+        <article>
+          <strong>Do not overclaim</strong>
+          <p>This does not replace the broader 108-query Wave 3+F/G comparisons and should not be cited as general retrieval supremacy.</p>
+        </article>
+        <article>
+          <strong>Remaining tradeoff</strong>
+          <p>Stage1TopK 50 increases rerank exposure and latency versus the 0801 TopK 20 baseline.</p>
+        </article>
+      </div>
+    </section>
+
+    <section class="figure-band" aria-label="Evensong context figures">
+      <figure>
+        <img src="/fig3-memory-causation.png" alt="Evensong memory causation figure" loading="lazy" />
+        <figcaption>Prior Evensong memory causation context remains separate from Dense RAR retrieval evidence.</figcaption>
+      </figure>
+      <figure>
+        <img src="/fig4-l2-pressure-timeline.png" alt="Evensong L2 pressure timeline figure" loading="lazy" />
+        <figcaption>Self-evolution benchmark context is preserved without mixing it into the retrieval claim.</figcaption>
+      </figure>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <span>Evensong handoff / Dense RAR canonical formal evidence / 2026-04-24</span>
+    <a href="/handoff/dashboard">Dashboard</a>
+  </footer>
+</body>
+</html>

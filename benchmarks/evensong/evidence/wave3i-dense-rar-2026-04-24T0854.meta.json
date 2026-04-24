@@ -1,0 +1,71 @@
+{
+  "schemaVersion": "dense-rar-v3",
+  "runId": "dense-rar-2026-04-24T0854",
+  "runMode": "formal",
+  "createdAt": "2026-04-24T08:54:19.878Z",
+  "publicMirror": true,
+  "redactions": [
+    "private vault root path",
+    "private query file path",
+    "private embedding endpoint",
+    "API key environment variable name",
+    "raw per-query JSONL diagnostics"
+  ],
+  "git": {
+    "commit": "9148853",
+    "dirty": false
+  },
+  "inputs": {
+    "querySuite": {
+      "name": "wave3-adversarial-retrieval",
+      "version": "1.0.0",
+      "difficulty": "adversarial",
+      "categories": [
+        "near_neighbor_memory",
+        "lexical_trap",
+        "cross_lingual",
+        "negative_exclusion",
+        "methodology_philosophy",
+        "engineering_specific"
+      ]
+    },
+    "queriesHash": "bcce230b845b722601db69d54a45d2bfe769e2d7a54ff01c1ec116e04727d587",
+    "manifestHash": "bd9afb901dadd1999c7accdcfe22256167c27f29916ee1ddfe91405f9243318c",
+    "manifestReal": 18,
+    "manifestJunk": 182,
+    "junkMode": "adversarial",
+    "withBody": false,
+    "finalTopK": 5,
+    "stage1TopK": 50,
+    "rrfK": 10,
+    "rrfPool": 50
+  },
+  "providers": {
+    "stage1Label": "BGE-M3-Q4_K_M-8080-TopK50",
+    "bgeModel": "bge-m3",
+    "bgeEndpoint": "internal embedding endpoint",
+    "judgeModel": "deepseek-v4-flash",
+    "judgeBaseURL": "https://api.deepseek.com",
+    "judgeThinking": "disabled"
+  },
+  "results": {
+    "dense": {
+      "top1": "17/24",
+      "top5": "18/24",
+      "valid": "24/24",
+      "errors": 0
+    },
+    "dense-rar": {
+      "top1": "24/24",
+      "top5": "24/24",
+      "valid": "24/24",
+      "errors": 0
+    },
+    "dense-adaptive": {
+      "top1": "24/24",
+      "top5": "24/24",
+      "valid": "24/24",
+      "errors": 0
+    }
+  }
+}

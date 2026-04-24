@@ -105,9 +105,9 @@ body {
 .hero-emoji { font-size: 14px; }
 
 .hero h1 {
-  font-size: clamp(2.8rem, 7vw, 4.5rem);
+  font-size: 4.5rem;
   font-weight: 700;
-  letter-spacing: -0.03em;
+  letter-spacing: 0;
   line-height: 1.05;
   color: var(--ink-primary);
   margin-bottom: 1.25rem;
@@ -189,7 +189,7 @@ body {
   transition: transform 280ms var(--ease-bounce), border-color 150ms ease;
 }
 .stat-card:hover { transform: scale(1.02); border-color: var(--sun-gold); }
-.stat-number { font-size: 2rem; font-weight: 700; letter-spacing: -0.02em; color: var(--ink-primary); font-family: var(--font-mono); }
+.stat-number { font-size: 2rem; font-weight: 700; letter-spacing: 0; color: var(--ink-primary); font-family: var(--font-mono); }
 .stat-label { font-size: 11px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.04em; color: var(--ink-muted); margin-top: 0.25rem; }
 
 /* ===== SECTIONS ===== */
@@ -200,9 +200,9 @@ body {
   animation: fadeUp 0.7s var(--ease-entrance) 0.5s forwards;
 }
 .section-title {
-  font-size: clamp(1.5rem, 3vw, 2rem);
+  font-size: 2rem;
   font-weight: 700;
-  letter-spacing: -0.02em;
+  letter-spacing: 0;
   margin-bottom: 0.5rem;
   color: var(--ink-primary);
 }
@@ -421,6 +421,15 @@ body {
   font-family: var(--font-mono);
 }
 
+@media (max-width: 760px) {
+  .hero h1 { font-size: 3rem; }
+  .section-title { font-size: 1.5rem; }
+}
+
+@media (max-width: 480px) {
+  .hero h1 { font-size: 2.5rem; }
+}
+
 /* ===== ANIMATIONS ===== */
 @keyframes fadeUp {
   to { opacity: 1; transform: translateY(0); }
@@ -453,7 +462,7 @@ body {
 }
 
 .gate-lock { font-size: 48px; margin-bottom: 1rem; }
-.gate-title { font-size: 1.4rem; font-weight: 700; letter-spacing: -0.02em; margin-bottom: 0.5rem; }
+.gate-title { font-size: 1.4rem; font-weight: 700; letter-spacing: 0; margin-bottom: 0.5rem; }
 .gate-sub { font-size: 13px; color: var(--ink-muted); margin-bottom: 1.5rem; }
 
 .gate-puzzle {
@@ -653,7 +662,7 @@ body {
       <a href="https://github.com/Fearvox/dash-research-vault" class="btn-primary" target="_blank">
         🧠 <span class="en-only">GitHub Repo</span><span class="zh-only">GitHub 仓库</span>
       </a>
-      <a href="https://bench.zonicdesign.art" class="btn-secondary">
+      <a href="./handoff/" class="btn-secondary">
         ← <span class="en-only">Benchmark Hub</span><span class="zh-only">基准测试中心</span>
       </a>
     </div>
@@ -1088,11 +1097,11 @@ body {
     <div style="margin-top:0.5rem">
       <a href="https://github.com/Fearvox/dash-research-vault" style="color:var(--ink-muted);text-decoration:none">GitHub</a>
       ·
-      <a href="https://bench.zonicdesign.art" style="color:var(--ink-muted);text-decoration:none">
+      <a href="./handoff/" style="color:var(--ink-muted);text-decoration:none">
         <span class="en-only">Benchmark Hub</span><span class="zh-only">基准测试中心</span>
       </a>
       ·
-      <a href="https://bench.zonicdesign.art/research.html" style="color:var(--ink-muted);text-decoration:none">Research</a>
+      <a href="./" style="color:var(--ink-muted);text-decoration:none">Research</a>
     </div>
   </footer>
 </div>

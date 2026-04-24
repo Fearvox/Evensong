@@ -1,0 +1,272 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<meta name="robots" content="noindex, nofollow, noarchive" />
+<meta name="referrer" content="no-referrer" />
+<meta name="color-scheme" content="light" />
+<title>Evensong Dense RAR Dashboard</title>
+<meta name="description" content="Dense RAR formal evidence dashboard for the Evensong Wave 3+I hard-suite benchmark." />
+<link rel="canonical" href="https://evensong.zonicdesign.art/handoff/dashboard" />
+<link rel="icon" type="image/svg+xml" href="/dash-favicon.svg" />
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
+<link href="https://cdn.jsdelivr.net/npm/geist@1.3.1/dist/fonts/geist-sans/style.min.css" rel="stylesheet" />
+<link href="https://cdn.jsdelivr.net/npm/geist@1.3.1/dist/fonts/geist-mono/style.min.css" rel="stylesheet" />
+<link rel="stylesheet" href="/handoff/handoff.css" />
+</head>
+<body>
+  <div class="paper-field" aria-hidden="true"></div>
+
+  <header class="site-shell">
+    <a class="brand-lockup" href="/" aria-label="Evensong home">
+      <span class="dash-symbol" aria-hidden="true"></span>
+      <span class="brand-copy">
+        <strong>DASH</strong>
+        <span>Evensong evidence system</span>
+      </span>
+    </a>
+    <nav class="top-nav" aria-label="Handoff navigation">
+      <a href="/handoff">Handoff</a>
+      <a aria-current="page" href="/handoff/dashboard">Dashboard</a>
+      <a href="/">Evensong</a>
+    </nav>
+  </header>
+
+  <main class="dashboard-main">
+    <section class="dashboard-hero">
+      <div>
+        <p class="eyebrow">Dense RAR formal dashboard</p>
+        <h1>24/24 with the boundary intact.</h1>
+        <p class="lead">
+          This board answers the operator questions that matter: is the run formal,
+          what changed versus the prior baseline, where did q113 fail, and what is
+          safe to publish downstream?
+        </p>
+      </div>
+      <aside class="run-badge">
+        <span>canonical run id</span>
+        <strong>dense-rar-2026-04-24T0854</strong>
+      </aside>
+    </section>
+
+    <section class="kpi-grid" aria-label="Topline metrics">
+      <article class="kpi-card good">
+        <span class="stat-label">Dense RAR Top-1</span>
+        <strong>24/24</strong>
+        <p>Formal hard-suite result.</p>
+      </article>
+      <article class="kpi-card good">
+        <span class="stat-label">Adaptive Top-1</span>
+        <strong>24/24</strong>
+        <p>Same result with adaptive path.</p>
+      </article>
+      <article class="kpi-card">
+        <span class="stat-label">Dense only Top-1</span>
+        <strong>17/24</strong>
+        <p>Stage-1 alone is recall, not final quality.</p>
+      </article>
+      <article class="kpi-card warn">
+        <span class="stat-label">Errors</span>
+        <strong>0</strong>
+        <p>72 valid rows across 3 pipelines.</p>
+      </article>
+    </section>
+
+    <section class="data-section">
+      <div class="section-heading">
+        <div>
+          <p class="eyebrow">Pipeline comparison</p>
+          <h2>RAR closes the gap that dense leaves open.</h2>
+        </div>
+      </div>
+      <div class="data-grid">
+        <article class="data-card">
+          <span class="panel-k">dense</span>
+          <span class="big">70.8%</span>
+          <p>17/24 Top-1, 18/24 Top-5. Candidate hit was present for every category, but dense rank alone failed 7 queries.</p>
+          <div class="mini-bars">
+            <div class="mini-bar"><span>Top-1</span><div class="track"><div class="fill base" style="--w:70.8%"></div></div><span>17/24</span></div>
+            <div class="mini-bar"><span>Top-5</span><div class="track"><div class="fill base" style="--w:75%"></div></div><span>18/24</span></div>
+          </div>
+        </article>
+        <article class="data-card">
+          <span class="panel-k">dense-rar</span>
+          <span class="big">100%</span>
+          <p>24/24 Top-1 and Top-5. Judge exposure 50. This is the canonical publishable path.</p>
+          <div class="mini-bars">
+            <div class="mini-bar"><span>Top-1</span><div class="track"><div class="fill" style="--w:100%"></div></div><span>24/24</span></div>
+            <div class="mini-bar"><span>Top-5</span><div class="track"><div class="fill" style="--w:100%"></div></div><span>24/24</span></div>
+          </div>
+        </article>
+        <article class="data-card">
+          <span class="panel-k">dense-adaptive</span>
+          <span class="big">100%</span>
+          <p>24/24 Top-1 and Top-5. Adaptive gate invoked on every query in this suite, so the skip rate is 0/24.</p>
+          <div class="mini-bars">
+            <div class="mini-bar"><span>Top-1</span><div class="track"><div class="fill" style="--w:100%"></div></div><span>24/24</span></div>
+            <div class="mini-bar"><span>Top-5</span><div class="track"><div class="fill" style="--w:100%"></div></div><span>24/24</span></div>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <section class="data-section">
+      <div class="section-heading">
+        <div>
+          <p class="eyebrow">Formal run table</p>
+          <h2>All rows valid, zero errors.</h2>
+        </div>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Pipeline</th>
+              <th>Status</th>
+              <th>Valid</th>
+              <th>Errors</th>
+              <th>Top-1</th>
+              <th>Top-5</th>
+              <th>p50</th>
+              <th>p90</th>
+              <th>Judge exposure</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>dense</strong></td>
+              <td class="status-ok">ok</td>
+              <td>24/24</td>
+              <td>0</td>
+              <td>17/24</td>
+              <td>18/24</td>
+              <td>526 ms</td>
+              <td>576 ms</td>
+              <td class="status-dim">0</td>
+            </tr>
+            <tr>
+              <td><strong>dense-rar</strong></td>
+              <td class="status-ok">ok</td>
+              <td>24/24</td>
+              <td>0</td>
+              <td>24/24</td>
+              <td>24/24</td>
+              <td>1703 ms</td>
+              <td>1842 ms</td>
+              <td>50</td>
+            </tr>
+            <tr>
+              <td><strong>dense-adaptive</strong></td>
+              <td class="status-ok">ok</td>
+              <td>24/24</td>
+              <td>0</td>
+              <td>24/24</td>
+              <td>24/24</td>
+              <td>1615 ms</td>
+              <td>1854 ms</td>
+              <td>50 on 100%</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="data-section">
+      <div class="section-heading">
+        <div>
+          <p class="eyebrow">TopK decision</p>
+          <h2>TopK 50 is the smallest proven formal fix.</h2>
+        </div>
+      </div>
+      <div class="compare-stack">
+        <div class="compare-row">
+          <span class="delta-label">0801 / TopK 20</span>
+          <div class="track"><div class="fill base" style="--w:95.8%"></div></div>
+          <strong>23/24</strong>
+        </div>
+        <div class="compare-row">
+          <span class="delta-label">0854 / TopK 50</span>
+          <div class="track"><div class="fill" style="--w:100%"></div></div>
+          <strong>24/24</strong>
+        </div>
+      </div>
+    </section>
+
+    <section class="data-section">
+      <div class="section-heading">
+        <div>
+          <p class="eyebrow">Category matrix</p>
+          <h2>Dense weakness is concentrated, RAR normalizes it.</h2>
+        </div>
+      </div>
+      <div class="matrix">
+        <div class="matrix-row matrix-head">
+          <div>Category</div><div>dense</div><div>dense-rar</div><div>adaptive</div>
+        </div>
+        <div class="matrix-row">
+          <strong>cross_lingual</strong><span class="hit">4/4</span><span class="hit">4/4</span><span class="hit">4/4</span>
+        </div>
+        <div class="matrix-row">
+          <strong>engineering_specific</strong><span class="miss">1/4</span><span class="hit">4/4</span><span class="hit">4/4</span>
+        </div>
+        <div class="matrix-row">
+          <strong>lexical_trap</strong><span class="hit">4/4</span><span class="hit">4/4</span><span class="hit">4/4</span>
+        </div>
+        <div class="matrix-row">
+          <strong>methodology_philosophy</strong><span class="hit">3/4</span><span class="hit">4/4</span><span class="hit">4/4</span>
+        </div>
+        <div class="matrix-row">
+          <strong>near_neighbor_memory</strong><span class="hit">4/4</span><span class="hit">4/4</span><span class="hit">4/4</span>
+        </div>
+        <div class="matrix-row">
+          <strong>negative_exclusion</strong><span class="miss">1/4</span><span class="hit">4/4</span><span class="hit">4/4</span>
+        </div>
+      </div>
+    </section>
+
+    <section class="data-section">
+      <div class="section-heading">
+        <div>
+          <p class="eyebrow">q113 root cause</p>
+          <h2>The blind spot was before reranking.</h2>
+        </div>
+      </div>
+      <div class="axis-grid">
+        <article class="axis-card">
+          <span class="axis-label">Failure mode</span>
+          <strong>Candidate absent at TopK 20</strong>
+          <p>The reranker could not select the ideal answer because the dense stage never handed it over.</p>
+        </article>
+        <article class="axis-card">
+          <span class="axis-label">Verified fix</span>
+          <strong>Ideal recovered at rank 27</strong>
+          <p>With TopK 50, dense-rar and dense-adaptive both select q113 as Top-1.</p>
+        </article>
+      </div>
+    </section>
+
+    <section class="data-section">
+      <div class="section-heading">
+        <div>
+          <p class="eyebrow">Artifacts</p>
+          <h2>Evidence mirrors deployed with the page.</h2>
+        </div>
+      </div>
+      <div class="artifact-list">
+        <a class="artifact-row" href="/evidence/wave3i-dense-rar-2026-04-24T0854.md"><strong>Summary report</strong><span>0854.md</span></a>
+        <a class="artifact-row" href="/evidence/wave3i-dense-rar-2026-04-24T0854.meta.json"><strong>Metadata contract</strong><span>0854.meta.json</span></a>
+        <a class="artifact-row" href="/evidence/DENSE-RAR-FORMAL-LEDGER.md"><strong>Formal ledger</strong><span>DENSE-RAR-FORMAL-LEDGER.md</span></a>
+        <a class="artifact-row" href="/evidence/wave3i-dense-rar-2026-04-24T0801.md"><strong>Prior formal baseline</strong><span>0801.md</span></a>
+        <a class="artifact-row" href="/evidence/wave3i-dense-rar-2026-04-24T0801.meta.json"><strong>Baseline metadata</strong><span>0801.meta.json</span></a>
+        <div class="artifact-row"><strong>Raw JSONL trace</strong><span>canonical repo only</span></div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <span>Evensong Dense RAR dashboard / canonical formal run 0854</span>
+    <a href="/handoff">Back to handoff</a>
+  </footer>
+</body>
+</html>
