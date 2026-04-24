@@ -135,17 +135,21 @@ The always-rerank Hybrid pays 1 LLM call per query. For a large fraction of quer
 
 See [`src/services/retrieval/providers/adaptiveHybridProvider.ts`](./src/services/retrieval/providers/adaptiveHybridProvider.ts) and the 7 unit tests in `adaptiveHybridProvider.test.ts`. Shipped at [`86bb4ee`](https://github.com/Fearvox/Evensong/commit/86bb4ee). **66/66 retrieval-domain tests pass.**
 
-### Wave 3+I — Dense RAR hard-suite formal run ✅
+### Wave 3+I — Dense RAR hard-suite formal evidence ✅
 
-Clean formal evidence now exists for the dense stage-1 + RAR path on a 24-query adversarial suite (200-entry manifest: 18 real vault docs + 182 adversarial junk). Stage 1 is BGE-M3 Q4_K_M on `100.65.234.77:8080`; stage 2 judge is `deepseek-v4-flash` with thinking disabled. The current formal run uses Stage-1 TopK 50 and records clean commit `9148853`.
+The Dense RAR path now has a clean, formal retrieval result: **24/24 Top-1 and 24/24 Top-5** on a 24-query adversarial hard suite. The suite uses a 200-entry manifest (18 real vault documents + 182 adversarial junk distractors), BGE-M3 for dense Stage 1, and `deepseek-v4-flash` as the Stage 2 judge with thinking disabled.
 
-| Pipeline | Top-1 | Top-5 | Valid | Errors | p50 latency | Avg latency |
-|----------|-------|-------|-------|--------|-------------|-------------|
-| Dense BGE-M3 only | 17/24 (70.8%) | 18/24 (75.0%) | 24/24 | 0 | 526 ms | 5532 ms |
-| **Dense RAR** | **24/24 (100.0%)** | **24/24 (100.0%)** | **24/24** | **0** | **1703 ms** | **1724 ms** |
-| **Dense Adaptive RAR** | **24/24 (100.0%)** | **24/24 (100.0%)** | **24/24** | **0** | **1615 ms** | **1678 ms** |
+Canonical run: `dense-rar-2026-04-24T0854` · mode `formal` · clean metadata commit `9148853` · Stage-1 TopK `50`.
 
-Raw: [`benchmarks/runs/wave3i-dense-rar-2026-04-24T0854.md`](./benchmarks/runs/wave3i-dense-rar-2026-04-24T0854.md). Metadata: [`benchmarks/runs/wave3i-dense-rar-2026-04-24T0854.meta.json`](./benchmarks/runs/wave3i-dense-rar-2026-04-24T0854.meta.json). Prior formal baseline `dense-rar-2026-04-24T0801` (Stage-1 TopK 20) remains tracked: dense-rar/adaptive were 23/24 and the q113 miss was candidate-recall, not reranker failure. The earlier `dense-rar-2026-04-24T0644` run remains **internal probe only** because it was `mode=probe` on a dirty git state. ccr-droplet SSH/systemd verification was operator-side pending due Tailscale interactive auth; HTTP `/v1/models` and `/v1/embeddings` checks passed, and 8081/8082/8083 had no HTTP response.
+| Pipeline | Top-1 | Top-5 | Valid | Errors | p50 | p90 |
+|----------|-------|-------|-------|--------|-----|-----|
+| Dense BGE-M3 only | 17/24 (70.8%) | 18/24 (75.0%) | 24/24 | 0 | 526 ms | 576 ms |
+| **Dense RAR** | **24/24 (100.0%)** | **24/24 (100.0%)** | **24/24** | **0** | **1703 ms** | **1842 ms** |
+| **Dense Adaptive RAR** | **24/24 (100.0%)** | **24/24 (100.0%)** | **24/24** | **0** | **1615 ms** | **1854 ms** |
+
+Evidence: [summary](./benchmarks/runs/wave3i-dense-rar-2026-04-24T0854.md), [metadata](./benchmarks/runs/wave3i-dense-rar-2026-04-24T0854.meta.json), [raw JSONL](./benchmarks/runs/wave3i-dense-rar-2026-04-24T0854.jsonl), and the [formal ledger](./benchmarks/DENSE-RAR-FORMAL-LEDGER.md).
+
+Boundary: `dense-rar-2026-04-24T0801` remains the Stage-1 TopK 20 formal baseline at 23/24; its q113 miss was candidate recall, not reranker failure. `dense-rar-2026-04-24T0644` remains internal/probe-only evidence. Stage-1 TopK 50 fixes that blind spot, but it also increases rerank candidate exposure, so the 24/24 claim is limited to this verified hard suite.
 
 <p align="right"><a href="#目录">↑ back to top</a></p>
 
