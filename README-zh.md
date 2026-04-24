@@ -141,6 +141,8 @@ Dense RAR 路径现在有 clean formal retrieval result：在 24 道 adversarial
 
 Canonical run：`dense-rar-2026-04-24T0854` · mode `formal` · clean metadata commit `9148853` · Stage-1 TopK `50`。
 
+公开交接页：[`evensong.zonicdesign.art/handoff`](https://evensong.zonicdesign.art/handoff) · 数据面板：[`/handoff/dashboard`](https://evensong.zonicdesign.art/handoff/dashboard)。
+
 | 流水线 | Top-1 | Top-5 | Valid | Errors | p50 | p90 |
 |--------|-------|-------|-------|--------|-----|-----|
 | Dense BGE-M3 only | 17/24 (70.8%) | 18/24 (75.0%) | 24/24 | 0 | 526 ms | 576 ms |

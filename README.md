@@ -141,6 +141,8 @@ The Dense RAR path now has a clean, formal retrieval result: **24/24 Top-1 and 2
 
 Canonical run: `dense-rar-2026-04-24T0854` · mode `formal` · clean metadata commit `9148853` · Stage-1 TopK `50`.
 
+Operator handoff: [`evensong.zonicdesign.art/handoff`](https://evensong.zonicdesign.art/handoff) · dashboard: [`/handoff/dashboard`](https://evensong.zonicdesign.art/handoff/dashboard).
+
 | Pipeline | Top-1 | Top-5 | Valid | Errors | p50 | p90 |
 |----------|-------|-------|-------|--------|-----|-----|
 | Dense BGE-M3 only | 17/24 (70.8%) | 18/24 (75.0%) | 24/24 | 0 | 526 ms | 576 ms |
