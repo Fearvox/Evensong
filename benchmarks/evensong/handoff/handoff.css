@@ -13,6 +13,11 @@
   --blue-quiet: oklch(0.45 0.09 240);
   --rule-default: oklch(0.22 0.02 60 / 0.18);
   --rule-soft: oklch(0.22 0.02 60 / 0.10);
+  --rule-hairline: oklch(0.22 0.02 60 / 0.06);
+  --surface-wash: oklch(0.965 0.012 84 / 0.76);
+  --surface-strong: oklch(0.975 0.01 86 / 0.92);
+  --shadow-soft: 0 22px 70px oklch(0.22 0.02 60 / 0.10);
+  --shadow-lift: 0 28px 92px oklch(0.22 0.02 60 / 0.14);
   --font-sans: "Geist Sans", "Geist", system-ui, -apple-system, sans-serif;
   --font-mono: "Geist Mono", ui-monospace, "SF Mono", Menlo, monospace;
   --container: 1180px;
@@ -36,6 +41,7 @@ html {
 body {
   margin: 0;
   min-height: 100vh;
+  overflow-x: hidden;
   background:
     linear-gradient(180deg, oklch(0.955 0.012 85), var(--paper-base) 42%, oklch(0.94 0.014 82)),
     var(--paper-base);
@@ -58,11 +64,30 @@ a {
   z-index: -1;
   pointer-events: none;
   background:
-    radial-gradient(ellipse at 12% 18%, oklch(0.83 0.08 150 / 0.16), transparent 34%),
-    radial-gradient(ellipse at 88% 4%, oklch(0.82 0.12 85 / 0.20), transparent 34%),
-    radial-gradient(ellipse at 70% 86%, oklch(0.55 0.10 145 / 0.10), transparent 42%),
-    linear-gradient(var(--rule-soft) 1px, transparent 1px);
-  background-size: auto, auto, auto, 100% 8px;
+    radial-gradient(ellipse at 10% 16%, oklch(0.83 0.08 150 / 0.17), transparent 36%),
+    radial-gradient(ellipse at 86% 2%, oklch(0.82 0.12 85 / 0.18), transparent 34%),
+    radial-gradient(ellipse at 72% 88%, oklch(0.48 0.09 220 / 0.10), transparent 40%),
+    linear-gradient(180deg, oklch(0.965 0.012 86 / 0.92), oklch(0.94 0.014 82 / 0.86));
+}
+
+.paper-field::before,
+.paper-field::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+}
+
+.paper-field::before {
+  opacity: 0.17;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 180 180' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.72' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23n)' opacity='.58'/%3E%3C/svg%3E");
+  background-size: 180px 180px;
+  mix-blend-mode: multiply;
+}
+
+.paper-field::after {
+  background:
+    linear-gradient(112deg, transparent 0 58%, oklch(0.35 0.08 160 / 0.08) 58% 59%, transparent 59%),
+    radial-gradient(ellipse at 50% 0%, oklch(1 0 0 / 0.36), transparent 54%);
 }
 
 .site-shell,
@@ -168,6 +193,14 @@ main,
   background: oklch(0.93 0.015 80 / 0.65);
 }
 
+.button:focus-visible,
+.top-nav a:focus-visible,
+.evidence-card:focus-visible,
+.artifact-row:focus-visible {
+  outline: 2px solid oklch(0.35 0.08 160 / 0.55);
+  outline-offset: 3px;
+}
+
 .hero-shell {
   min-height: min(720px, calc(100vh - 88px));
   display: grid;
@@ -187,7 +220,7 @@ main,
 .axis-card,
 .artifact-row,
 .kpi-card {
-  animation: rise 580ms var(--ease) both;
+  will-change: transform, opacity;
 }
 
 @keyframes rise {
@@ -282,9 +315,10 @@ h3 {
   border-radius: var(--r-lg);
   background:
     linear-gradient(135deg, oklch(0.35 0.08 160 / 0.10), transparent 48%),
-    var(--paper-card);
+    var(--surface-strong);
   border: 1px solid var(--rule-default);
-  box-shadow: 0 28px 80px oklch(0.22 0.02 60 / 0.10);
+  box-shadow: var(--shadow-lift);
+  backdrop-filter: blur(18px);
 }
 
 .frame-topline {
@@ -320,19 +354,19 @@ h3 {
 .metric-list {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: 1px;
+  gap: 10px;
   margin: 0;
-  background: var(--rule-soft);
-  border: 1px solid var(--rule-soft);
-  border-radius: var(--r-md);
-  overflow: hidden;
+  background: transparent;
+  border: 0;
 }
 
 .metric-list div {
   justify-content: space-between;
   gap: 12px;
   padding: 12px;
-  background: oklch(0.965 0.01 85);
+  background: oklch(0.965 0.01 85 / 0.78);
+  border: 1px solid var(--rule-hairline);
+  border-radius: var(--r-md);
 }
 
 .metric-list dt {
@@ -348,11 +382,7 @@ h3 {
 .signal-band {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 1px;
-  border: 1px solid var(--rule-soft);
-  background: var(--rule-soft);
-  border-radius: var(--r-lg);
-  overflow: hidden;
+  gap: 14px;
 }
 
 .signal {
@@ -360,7 +390,12 @@ h3 {
   display: grid;
   align-content: space-between;
   padding: 20px;
-  background: oklch(0.955 0.012 84 / 0.92);
+  border: 1px solid var(--rule-hairline);
+  border-radius: var(--r-lg);
+  background:
+    linear-gradient(180deg, var(--surface-strong), var(--surface-wash)),
+    var(--paper-card);
+  box-shadow: 0 16px 44px oklch(0.22 0.02 60 / 0.06);
 }
 
 .signal-k {
@@ -406,9 +441,12 @@ h3 {
 .data-card,
 .axis-card,
 .kpi-card {
-  border: 1px solid var(--rule-soft);
+  border: 1px solid var(--rule-hairline);
   border-radius: var(--r-lg);
-  background: oklch(0.955 0.012 84 / 0.88);
+  background:
+    linear-gradient(180deg, var(--surface-strong), var(--surface-wash)),
+    var(--paper-card);
+  box-shadow: 0 18px 56px oklch(0.22 0.02 60 / 0.06);
 }
 
 .timeline article {
@@ -440,7 +478,9 @@ h3 {
 
 .timeline .hot {
   border-color: oklch(0.35 0.08 160 / 0.36);
-  background: linear-gradient(90deg, oklch(0.35 0.08 160 / 0.10), oklch(0.955 0.012 84 / 0.92));
+  background:
+    linear-gradient(90deg, oklch(0.35 0.08 160 / 0.12), transparent 58%),
+    var(--surface-strong);
 }
 
 .pipeline-strip {
@@ -448,19 +488,20 @@ h3 {
   min-height: 228px;
   padding: 26px;
   border-radius: var(--r-lg);
-  border: 1px solid var(--rule-soft);
+  border: 1px solid var(--rule-hairline);
   background:
     linear-gradient(135deg, oklch(0.82 0.12 85 / 0.18), transparent 42%),
-    oklch(0.95 0.012 84 / 0.92);
+    var(--surface-strong);
+  box-shadow: var(--shadow-soft);
 }
 
 .pipe-node {
   min-width: 132px;
   flex: 1;
   padding: 18px;
-  border: 1px solid var(--rule-soft);
+  border: 1px solid var(--rule-hairline);
   border-radius: var(--r-lg);
-  background: var(--paper-base);
+  background: oklch(0.975 0.01 86 / 0.72);
 }
 
 .pipe-node span {
@@ -627,11 +668,14 @@ h3 {
 }
 
 .run-badge {
-  border: 1px solid var(--rule-default);
+  border: 1px solid var(--rule-hairline);
   border-radius: var(--r-lg);
-  background: var(--paper-card);
+  background:
+    linear-gradient(135deg, oklch(0.82 0.12 85 / 0.18), transparent 54%),
+    var(--surface-strong);
   padding: 16px;
   min-width: 280px;
+  box-shadow: 0 18px 56px oklch(0.22 0.02 60 / 0.07);
 }
 
 .run-badge span {
@@ -689,6 +733,26 @@ h3 {
   min-height: 210px;
 }
 
+.kpi-card,
+.data-card,
+.axis-card,
+.artifact-row,
+.evidence-card,
+.signal {
+  transition: transform 180ms var(--ease), border-color 180ms var(--ease), box-shadow 180ms var(--ease), background-color 180ms var(--ease);
+}
+
+.kpi-card:hover,
+.data-card:hover,
+.axis-card:hover,
+.artifact-row:hover,
+.evidence-card:hover,
+.signal:hover {
+  transform: translateY(-2px);
+  border-color: oklch(0.35 0.08 160 / 0.24);
+  box-shadow: 0 24px 74px oklch(0.22 0.02 60 / 0.11);
+}
+
 .panel-k,
 .stat-label,
 .delta-label {
@@ -740,6 +804,129 @@ h3 {
 
 .fill.gold {
   background: var(--sun-gold);
+}
+
+.chart-shell {
+  min-height: 420px;
+  border: 1px solid var(--rule-hairline);
+  border-radius: var(--r-lg);
+  background:
+    radial-gradient(ellipse at 18% 0%, oklch(0.82 0.12 85 / 0.16), transparent 42%),
+    linear-gradient(180deg, var(--surface-strong), var(--surface-wash));
+  box-shadow: var(--shadow-soft);
+  overflow: hidden;
+}
+
+.chart-fallback,
+.chart-enhanced {
+  min-height: 420px;
+  padding: 24px;
+}
+
+.chart-fallback {
+  display: grid;
+  align-content: center;
+  gap: 18px;
+}
+
+.fallback-bars {
+  display: grid;
+  gap: 12px;
+}
+
+.fallback-bar {
+  display: grid;
+  grid-template-columns: 112px 1fr 60px;
+  gap: 12px;
+  align-items: center;
+}
+
+.fallback-bar span {
+  color: var(--ink-secondary);
+  font-family: var(--font-mono);
+  font-size: 12px;
+}
+
+.chart-enhanced {
+  display: grid;
+  grid-template-columns: minmax(0, 1.15fr) minmax(260px, 0.85fr);
+  gap: 22px;
+  align-items: stretch;
+}
+
+.chart-panel {
+  min-height: 336px;
+  border: 1px solid var(--rule-hairline);
+  border-radius: var(--r-lg);
+  background: oklch(0.975 0.01 86 / 0.64);
+  padding: 18px 10px 10px;
+}
+
+.chart-side {
+  display: grid;
+  gap: 14px;
+}
+
+.chart-stat {
+  min-height: 102px;
+  display: grid;
+  align-content: space-between;
+  padding: 18px;
+  border: 1px solid var(--rule-hairline);
+  border-radius: var(--r-lg);
+  background: oklch(0.965 0.012 84 / 0.72);
+}
+
+.chart-stat span {
+  color: var(--ink-muted);
+  font-family: var(--font-mono);
+  font-size: 11px;
+}
+
+.chart-stat strong {
+  color: var(--palm-shadow);
+  font-family: var(--font-mono);
+  font-size: 26px;
+  line-height: 1;
+}
+
+.chart-tooltip {
+  padding: 10px 12px;
+  border: 1px solid var(--rule-default);
+  border-radius: var(--r-md);
+  background: oklch(0.975 0.01 86 / 0.96);
+  box-shadow: 0 12px 32px oklch(0.22 0.02 60 / 0.12);
+  color: var(--ink-secondary);
+  font-size: 12px;
+}
+
+.chart-tooltip strong {
+  display: block;
+  color: var(--ink-primary);
+  margin-bottom: 3px;
+}
+
+.chart-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 16px;
+  padding: 0 8px 10px;
+}
+
+.chart-legend span {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  color: var(--ink-secondary);
+  font-family: var(--font-mono);
+  font-size: 11px;
+}
+
+.chart-legend i {
+  width: 9px;
+  height: 9px;
+  border-radius: 999px;
+  background: var(--c);
 }
 
 .table-wrap {
@@ -903,7 +1090,8 @@ table {
   .section-grid,
   .section-grid.two-col,
   .figure-band,
-  .axis-grid {
+  .axis-grid,
+  .chart-enhanced {
     grid-template-columns: 1fr;
   }
 
@@ -1037,6 +1225,25 @@ table {
   .site-footer {
     display: grid;
     padding: 24px 0;
+  }
+
+  .chart-shell,
+  .chart-fallback,
+  .chart-enhanced {
+    min-height: auto;
+  }
+
+  .chart-enhanced,
+  .chart-fallback {
+    padding: 18px;
+  }
+
+  .chart-panel {
+    min-height: 300px;
+  }
+
+  .fallback-bar {
+    grid-template-columns: 1fr;
   }
 }
 
