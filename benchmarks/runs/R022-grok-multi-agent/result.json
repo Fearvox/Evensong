@@ -12,5 +12,5 @@
   "criteria": "8/8",
   "grade": null,
   "notes": "grok-multi-agent L0 full, 14 transcript entries",
-  "transcript_path": "/Users/0xvox/claude-code-reimagine-for-learning/benchmarks/runs/R022-grok-multi-agent/transcript.jsonl"
+  "transcript_path": "<REPO_ROOT>/benchmarks/runs/R022-grok-multi-agent/transcript.jsonl"
 }

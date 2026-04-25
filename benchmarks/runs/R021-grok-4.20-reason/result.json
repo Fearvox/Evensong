@@ -12,5 +12,5 @@
   "criteria": "3/8",
   "grade": null,
   "notes": "grok-4.20-reason L0 full, 413 transcript entries",
-  "transcript_path": "/Users/0xvox/claude-code-reimagine-for-learning/benchmarks/runs/R021-grok-4.20-reason/transcript.jsonl"
+  "transcript_path": "<REPO_ROOT>/benchmarks/runs/R021-grok-4.20-reason/transcript.jsonl"
 }

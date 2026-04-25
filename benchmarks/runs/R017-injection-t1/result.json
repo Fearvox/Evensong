@@ -12,5 +12,5 @@
   "criteria": "3/8",
   "grade": null,
   "notes": "native-opus L0 full, 8 transcript entries",
-  "transcript_path": "/Users/0xvox/claude-code-reimagine-for-learning/benchmarks/runs/R017-injection-t1/transcript.jsonl"
+  "transcript_path": "<REPO_ROOT>/benchmarks/runs/R017-injection-t1/transcript.jsonl"
 }

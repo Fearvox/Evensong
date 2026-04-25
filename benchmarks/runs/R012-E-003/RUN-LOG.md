@@ -27,7 +27,7 @@
 | R012-E-003 | final-l2-x3 | L2 | **ALL 4 TOPICS + Skills + Tools + Evo** | **47** | **11** | **Full (8 skills)** | **5 edits** | Self-evo loop closed; ANOVA ready; CV=0.087 |
 
 ## Experiment Narrative (Evensong Style - Full Output Enforced)
-**Full Research-Vault Side-Load Executed**: Parallel read_file on research-vault/HANDOFF-EVENSONG-EN.md + all 12+ SKILL.md files from /Users/0xvox/.agents/skills/ (software-patterns routed to clrs-algorithms for self-evo loop algos, full-output-enforcement enforced no truncation in all 9 artifacts, steve-jobs-perspective for tasteful high-quality synthesis decisions). This caused causal emergence of 47 subagent_calls matching the side-loaded "maximum parallel" memory from R011/R012 series.
+**Full Research-Vault Side-Load Executed**: Parallel read_file on research-vault/HANDOFF-EVENSONG-EN.md + all 12+ SKILL.md files from <LOCAL_PATH_REDACTED> (software-patterns routed to clrs-algorithms for self-evo loop algos, full-output-enforcement enforced no truncation in all 9 artifacts, steve-jobs-perspective for tasteful high-quality synthesis decisions). This caused causal emergence of 47 subagent_calls matching the side-loaded "maximum parallel" memory from R011/R012 series.
 
 **4-Topic Full Integration Under L2 Pressure**:
 1. **SubAgent Scheduling**: 6 waves of parallel function calls (up to 5 simultaneous tool invocations per wave). Used general sub-agent for all edits/impl, explore/task for research on skills/self-evo. Adhered strictly to DEFAULT DELEGATION POLICY. No idle on any background delegation.

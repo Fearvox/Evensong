@@ -12,7 +12,7 @@
  */
 
 const API_KEY_ENV = 'EVERMEM_INJECTION_API_KEY'
-const GROUP_ID = 'clauf6029'  // CWD hash: /Users/0xvox/claude-code-reimagine-for-learning
+const GROUP_ID = 'clauf6029'  // CWD hash for the local benchmark workspace.
 const USER_ID = 'nolan'
 
 const INJECTIONS = {

@@ -4,7 +4,7 @@
 - Run ID: **dense-rar-2026-04-24T0854**
 - Mode: **formal** (live providers explicitly allowed)
 - Git: **9148853** (clean)
-- Vault root: **/root/research-vault**
+- Vault root: **<REMOTE_RESEARCH_VAULT>**
 - Manifest: **200 entries** (18 real + 182 adversarial junk)
 - Manifest hash: **bd9afb901dadd199**
 - Queries hash: **bcce230b845b7226**
@@ -12,7 +12,7 @@
 - Query categories: near_neighbor_memory, lexical_trap, cross_lingual, negative_exclusion, methodology_philosophy, engineering_specific
 - Queries: **24**
 - Runs per (pipeline × query): **1**
-- Stage 1: **BGE-M3-Q4_K_M-8080-TopK50** via http://100.65.234.77:8080/v1 (model: **bge-m3**)
+- Stage 1: **BGE-M3-Q4_K_M-8080-TopK50** via <REDACTED_EMBEDDING_ENDPOINT> (model: **bge-m3**)
 - Embedding timeout: **180000ms**
 - Corpus batch size: **50**
 - Stage-1 candidate pool: **50**

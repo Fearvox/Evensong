@@ -12,5 +12,5 @@
   "criteria": "8/8",
   "grade": null,
   "notes": "native-opus L0 full, 9 transcript entries",
-  "transcript_path": "/Users/0xvox/claude-code-reimagine-for-learning/benchmarks/runs/R031-r011-b-rep1-runner-b-rep1/transcript.jsonl"
+  "transcript_path": "<REPO_ROOT>/benchmarks/runs/R031-r011-b-rep1-runner-b-rep1/transcript.jsonl"
 }

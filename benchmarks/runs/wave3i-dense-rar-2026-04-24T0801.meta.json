@@ -10,8 +10,8 @@
     "dirtyFiles": []
   },
   "inputs": {
-    "vaultRoot": "/root/research-vault",
-    "queriesFile": "/root/ccr/benchmarks/wave3-adversarial-queries.json",
+    "vaultRoot": "<REMOTE_RESEARCH_VAULT>",
+    "queriesFile": "<REMOTE_REPO>/benchmarks/wave3-adversarial-queries.json",
     "querySuite": {
       "name": "wave3-adversarial-retrieval",
       "version": "1.0.0",
@@ -39,7 +39,7 @@
   },
   "providers": {
     "stage1Label": "BGE-M3-Q4_K_M-8080",
-    "bgeBaseURL": "http://100.65.234.77:8080/v1",
+    "bgeBaseURL": "<REDACTED_EMBEDDING_ENDPOINT>",
     "bgeModel": "bge-m3",
     "bgeTimeoutMs": 180000,
     "bgeCorpusBatchSize": 50,

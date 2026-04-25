@@ -12,5 +12,5 @@
   "criteria": "2/8",
   "grade": null,
   "notes": "grok-native L0 full, 282 transcript entries",
-  "transcript_path": "/Users/0xvox/claude-code-reimagine-for-learning/benchmarks/runs/R020-grok-l0-control/transcript.jsonl"
+  "transcript_path": "<REPO_ROOT>/benchmarks/runs/R020-grok-l0-control/transcript.jsonl"
 }

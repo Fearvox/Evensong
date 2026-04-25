@@ -14,5 +14,5 @@
   "criteria": "10/10",
   "grade": null,
   "notes": "minimax-m27 L0 full, 19 transcript entries",
-  "transcript_path": "/Users/0xvox/claude-code-reimagine-for-learning/benchmarks/runs/R056-r011-b-rep2-runner-b-rep2/transcript.jsonl"
+  "transcript_path": "<REPO_ROOT>/benchmarks/runs/R056-r011-b-rep2-runner-b-rep2/transcript.jsonl"
 }
