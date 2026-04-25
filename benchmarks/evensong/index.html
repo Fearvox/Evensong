@@ -452,8 +452,8 @@
     }
 
     .module-card.small {
-      grid-column: span 4;
-      min-height: 230px;
+      grid-column: span 6;
+      min-height: 260px;
     }
 
     .module-card.wide::before {
@@ -782,9 +782,12 @@
       }
 
       .module-card.wide,
-      .module-card.medium,
-      .module-card.small {
+      .module-card.medium {
         grid-column: span 12;
+      }
+
+      .module-card.small {
+        grid-column: span 6;
       }
 
       .system-map {
@@ -819,6 +822,10 @@
         flex: 0 0 auto;
         padding: 6px 5px;
         font-size: 10px;
+      }
+
+      .module-card.small {
+        grid-column: span 12;
       }
 
       .hero {

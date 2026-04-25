@@ -172,37 +172,112 @@
       </div>
     </section>
 
-    <section class="evidence-wall" aria-label="Evidence pack">
+    <section class="route-section" id="route" aria-label="Dense RAR route graph">
       <div class="section-heading">
-        <p class="eyebrow">Evidence pack</p>
-        <h2>One canonical story, no inflated claims.</h2>
-      </div>
-      <div class="evidence-grid">
-        <a class="evidence-card" href="/evidence/wave3i-dense-rar-2026-04-24T0854.md">
-          <span>summary</span>
-          <strong>0854 formal run</strong>
-          <p>Human-readable benchmark report with aggregate and category tables.</p>
-        </a>
-        <a class="evidence-card" href="/evidence/wave3i-dense-rar-2026-04-24T0854.meta.json">
-          <span>metadata</span>
-          <strong>Clean run contract</strong>
-          <p>Run mode, commit, hashes, providers, TopK, and judge configuration.</p>
-        </a>
-        <a class="evidence-card" href="/evidence/DENSE-RAR-FORMAL-LEDGER.md">
-          <span>ledger</span>
-          <strong>Formal boundary</strong>
-          <p>Canonical, prior formal baseline, probe-only evidence, and caveats.</p>
-        </a>
-        <a class="evidence-card" href="/evidence/wave3i-dense-rar-2026-04-24T0801.md">
-          <span>baseline</span>
-          <strong>0801 TopK 20</strong>
-          <p>The prior clean formal baseline that explains the q113 candidate-recall miss.</p>
-        </a>
-        <div class="evidence-card">
-          <span>privacy</span>
-          <strong>Raw trace retained in repo</strong>
-          <p>Public evidence mirrors redact private endpoints and path-level JSONL diagnostics.</p>
+        <div>
+          <p class="eyebrow">Route graph</p>
+          <h2>The formal path is only four decisions wide.</h2>
         </div>
+        <p class="heading-copy">
+          Read it left to right: retrieve enough candidates, let the reranker decide,
+          then publish only the scoped hard-suite evidence. The graph keeps the proof
+          path visible without burying the operator in run logs.
+        </p>
+      </div>
+      <div class="route-layout">
+        <div id="handoff-route-root" class="route-chart-shell" data-route-graph="handoff" data-enhanced="false">
+          <div class="route-fallback" role="img" aria-label="Query flows to BGE-M3 TopK 50, then DeepSeek rerank, then 0854 formal evidence.">
+            <div class="route-track">
+              <div class="route-node">
+                <span>01</span>
+                <strong>Hard-suite query</strong>
+                <p>24 adversarial retrieval cases enter the same harness.</p>
+              </div>
+              <div class="route-edge" aria-hidden="true"></div>
+              <div class="route-node">
+                <span>02</span>
+                <strong>BGE-M3 TopK 50</strong>
+                <p>q113 ideal is recovered at rank 27 instead of being hidden.</p>
+              </div>
+              <div class="route-edge" aria-hidden="true"></div>
+              <div class="route-node">
+                <span>03</span>
+                <strong>V4 Flash RAR</strong>
+                <p>The reranker chooses the ideal once the candidate exists.</p>
+              </div>
+              <div class="route-edge" aria-hidden="true"></div>
+              <div class="route-node success">
+                <span>04</span>
+                <strong>0854 evidence</strong>
+                <p>Dense RAR and adaptive both land 24/24, with 0 errors.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="route-notes">
+          <article class="route-note">
+            <span>plain English</span>
+            <strong>The miss was not judgment quality.</strong>
+            <p>At TopK 20, the reranker never saw the right document for q113.</p>
+          </article>
+          <article class="route-note hot">
+            <span>operator rule</span>
+            <strong>Use 0854 downstream.</strong>
+            <p>The 0854 run is clean, formal, and scoped to this 24-query hard suite.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="evidence-wall" id="evidence" aria-label="Evidence pack">
+      <div class="section-heading">
+        <div>
+          <p class="eyebrow">Evidence pack</p>
+          <h2>One canonical story, no inflated claims.</h2>
+        </div>
+        <p class="heading-copy">
+          These are the four public modules an operator should inspect first. The
+          private JSONL trace stays in the repo; the page mirrors only the evidence
+          needed to understand the formal claim.
+        </p>
+      </div>
+      <div class="evidence-layout">
+        <div class="evidence-grid">
+          <a class="evidence-card primary" href="/evidence/wave3i-dense-rar-2026-04-24T0854.md">
+            <span>summary</span>
+            <strong>0854 formal run</strong>
+            <p>The readable report: what ran, what scored 24/24, and which caveats travel with it.</p>
+          </a>
+          <a class="evidence-card" href="/evidence/wave3i-dense-rar-2026-04-24T0854.meta.json">
+            <span>metadata</span>
+            <strong>Clean run contract</strong>
+            <p>The machine-checkable contract: formal mode, clean git, providers, TopK, and hashes.</p>
+          </a>
+          <a class="evidence-card" href="/evidence/DENSE-RAR-FORMAL-LEDGER.md">
+            <span>ledger</span>
+            <strong>Formal boundary</strong>
+            <p>The trust ledger that separates canonical evidence from old probe-only runs.</p>
+          </a>
+          <a class="evidence-card" href="/evidence/wave3i-dense-rar-2026-04-24T0801.md">
+            <span>baseline</span>
+            <strong>0801 TopK 20</strong>
+            <p>The clean baseline that proves q113 was a candidate-recall miss, not a reranker miss.</p>
+          </a>
+        </div>
+        <aside class="evidence-focus" aria-label="Evidence focus note">
+          <span>operator focus</span>
+          <h3>Use the 0854 report as the public entry point.</h3>
+          <p>
+            If someone wants the shortest honest version, send them to 0854 first,
+            then the metadata contract, then the ledger. Keep the raw trace private
+            unless the reviewer needs repository-level diagnostics.
+          </p>
+          <div class="focus-list">
+            <div><strong>Publish</strong><span>24/24 hard-suite Dense RAR result.</span></div>
+            <div><strong>Keep visible</strong><span>Stage1TopK50 latency and scope boundary.</span></div>
+            <div><strong>Do not mix</strong><span>Self-evolution figures are separate context.</span></div>
+          </div>
+        </aside>
       </div>
     </section>
 
@@ -259,6 +334,6 @@
       }
     }
   </script>
-  <script type="module" src="/handoff/handoff.motion.js?v=15.3"></script>
+  <script type="module" src="/handoff/handoff.motion.js?v=15.4"></script>
 </body>
 </html>

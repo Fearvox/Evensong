@@ -74,7 +74,63 @@
       </article>
     </section>
 
-    <section class="data-section chart-section" aria-label="Animated benchmark chart">
+    <section class="data-section route-section" id="route" aria-label="Retrieval route graph">
+      <div class="section-heading">
+        <div>
+          <p class="eyebrow">Retrieval route</p>
+          <h2>Where q113 stopped failing.</h2>
+        </div>
+        <p class="heading-copy">
+          The dashboard now shows the run as a horizontal route: dense retrieval
+          must first expose the ideal candidate, then RAR can make the final choice.
+        </p>
+      </div>
+      <div class="route-layout dashboard-route-layout">
+        <div id="dashboard-route-root" class="route-chart-shell" data-route-graph="dashboard" data-enhanced="false">
+          <div class="route-fallback" role="img" aria-label="TopK 20 misses q113, TopK 50 recovers rank 27, RAR selects Top-1, and the formal suite reaches 24 of 24.">
+            <div class="route-track">
+              <div class="route-node muted">
+                <span>0801</span>
+                <strong>TopK 20</strong>
+                <p>Clean baseline, but q113 ideal candidate is absent.</p>
+              </div>
+              <div class="route-edge" aria-hidden="true"></div>
+              <div class="route-node">
+                <span>0841</span>
+                <strong>Rank 27 found</strong>
+                <p>The diagnostic proves TopK 50 catches the missing document.</p>
+              </div>
+              <div class="route-edge" aria-hidden="true"></div>
+              <div class="route-node">
+                <span>RAR</span>
+                <strong>Judge selects</strong>
+                <p>DeepSeek V4 Flash picks the ideal once it enters the pool.</p>
+              </div>
+              <div class="route-edge" aria-hidden="true"></div>
+              <div class="route-node success">
+                <span>0854</span>
+                <strong>24/24 formal</strong>
+                <p>Dense RAR and adaptive close the hard-suite miss.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="route-notes compact">
+          <article class="route-note">
+            <span>why it matters</span>
+            <strong>Dense alone is not the product.</strong>
+            <p>The dense stage supplies candidates; the formal claim is the two-stage path.</p>
+          </article>
+          <article class="route-note hot">
+            <span>publishable</span>
+            <strong>24/24 is scoped, not universal.</strong>
+            <p>Use it for Wave 3+I hard-suite evidence, not for broad model supremacy claims.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="data-section chart-section" id="chart" aria-label="Animated benchmark chart">
       <div class="section-heading">
         <div>
           <p class="eyebrow">Animated evidence view</p>
@@ -96,14 +152,14 @@
       </div>
     </section>
 
-    <section class="data-section">
+    <section class="data-section" id="pipelines">
       <div class="section-heading">
         <div>
           <p class="eyebrow">Pipeline comparison</p>
           <h2>RAR closes the gap that dense leaves open.</h2>
         </div>
       </div>
-      <div class="data-grid">
+      <div class="data-grid pipeline-grid">
         <article class="data-card">
           <span class="panel-k">dense</span>
           <span class="big" data-count-to="70.8" data-count-suffix="%">70.8%</span>
@@ -129,6 +185,15 @@
           <div class="mini-bars">
             <div class="mini-bar"><span>Top-1</span><div class="track"><div class="fill" style="--w:100%"></div></div><span>24/24</span></div>
             <div class="mini-bar"><span>Top-5</span><div class="track"><div class="fill" style="--w:100%"></div></div><span>24/24</span></div>
+          </div>
+        </article>
+        <article class="data-card accent">
+          <span class="panel-k">q113 canary</span>
+          <span class="big">rank 27</span>
+          <p>At TopK 20, q113 was outside the reranker input. At TopK 50, the ideal candidate appears at rank 27 and RAR moves it to Top-1.</p>
+          <div class="mini-bars">
+            <div class="mini-bar"><span>TopK 20</span><div class="track"><div class="fill base" style="--w:40%"></div></div><span>miss</span></div>
+            <div class="mini-bar"><span>TopK 50</span><div class="track"><div class="fill gold" style="--w:100%"></div></div><span>hit</span></div>
           </div>
         </article>
       </div>
@@ -307,6 +372,6 @@
       }
     }
   </script>
-  <script type="module" src="/handoff/handoff.motion.js?v=15.3"></script>
+  <script type="module" src="/handoff/handoff.motion.js?v=15.4"></script>
 </body>
 </html>
