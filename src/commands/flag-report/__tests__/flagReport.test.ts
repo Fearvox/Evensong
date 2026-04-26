@@ -1,19 +1,28 @@
 import { describe, test, expect, beforeEach, afterEach, mock } from 'bun:test'
-import { existsSync, readFileSync, unlinkSync } from 'fs'
+import { existsSync, readFileSync, unlinkSync, mkdtempSync, writeFileSync, mkdirSync, rmSync } from 'fs'
 import { join } from 'path'
+import { tmpdir } from 'os'
 
 describe('flag-report command', () => {
   let savedEnv: NodeJS.ProcessEnv
+  let testHome: string
 
-  beforeEach(() => {
+  beforeEach(async () => {
     savedEnv = { ...process.env }
+    testHome = mkdtempSync(join(tmpdir(), 'hermes-test-'))
+    const claudeDir = join(testHome, '.claude')
+    mkdirSync(claudeDir, { recursive: true })
+    writeFileSync(join(testHome, 'feature-flags.json'), '{}')
+    writeFileSync(join(claudeDir, 'feature-flags.json'), '{}')
     // Clear CLAUDE_FEATURE_ env vars
     for (const key of Object.keys(process.env)) {
       if (key.startsWith('CLAUDE_FEATURE_')) {
         delete process.env[key]
       }
     }
-    process.env.HOME = process.env.HOME || '/tmp/hermes-test-home'
+    process.env.HOME = testHome
+    const { _reloadFlagsForTesting } = await import('../../../utils/featureFlag.js')
+    _reloadFlagsForTesting()
   })
 
   afterEach(async () => {
@@ -39,6 +48,11 @@ describe('flag-report command', () => {
         // ignore
       }
     }
+    const { _reloadFlagsForTesting } = await import('../../../utils/featureFlag.js')
+    _reloadFlagsForTesting()
+    try {
+      rmSync(testHome, { recursive: true, force: true })
+    } catch {}
   })
 
   // Test 1: flagReport command is registered with correct name 'flag-report'
