@@ -20,41 +20,26 @@
  */
 
 /**
- * Default base URL — ccr-droplet via Tailscale. This is the only backend
- * currently known to serve `/v1/embeddings` correctly (Wave 2C shipped
- * 2026-04-19, llama-server launched with `--embedding`; 508ms cold
- * round-trip including ~180ms Tailscale transit).
- *
- * History: Pre-Codex-review (2026-04-19 afternoon), default pointed at
- * Atomic Chat 1337 on the assumption that the 1337 gateway would proxy
- * embedding requests to an internal llama-server. Atomic Chat v1.1.44
- * DOES load the bge-m3 gguf and expose `/v1/embeddings`, but it spawns
- * its llama-server without the `--embedding` CLI flag — so the proxy
- * target returns HTTP 501 on every embed call. Pointing the default at
- * 1337 lets `isBgeEmbeddingAvailable()` green-light a known-broken
- * backend (Codex finding, 2026-04-19). Until Atomic Chat upstream fixes
- * the spawn flag, default lives on the droplet.
- *
- * To pin explicitly to Atomic Chat 1337 (e.g. in tests, or after
- * upstream fix lands), use BGE_EMBEDDING_ATOMIC_BASE_URL.
- */
-export const BGE_EMBEDDING_DEFAULT_BASE_URL = 'http://100.65.234.77:8080/v1'
-
-/**
- * Tailscale address of ccr-droplet's dedicated BGE-M3 server. Equal to
- * BGE_EMBEDDING_DEFAULT_BASE_URL today — kept as a separate named
- * export so callers that care about the "droplet, not atomic" invariant
- * can declare intent, and so that flipping the default back to atomic
- * (after upstream fix) is a one-constant change.
- */
-export const BGE_EMBEDDING_DROPLET_BASE_URL = 'http://100.65.234.77:8080/v1'
-
-/**
- * Future-unified-gateway endpoint — Atomic Chat at 1337. Currently
- * returns HTTP 501 for `/v1/embeddings`; use only when explicitly
- * testing the upstream-fix migration path.
+ * Local OpenAI-compatible embedding gateway. Public repo defaults must not
+ * encode private operator infrastructure; live/non-local endpoints should be
+ * supplied explicitly via options or environment-specific runner scripts.
  */
 export const BGE_EMBEDDING_ATOMIC_BASE_URL = 'http://127.0.0.1:1337/v1'
+
+/**
+ * Optional private/remote BGE-M3 endpoint. Keep the value outside source
+ * control; set BGE_EMBEDDING_DROPLET_BASE_URL in the operator environment
+ * when a dedicated embedding server is available.
+ */
+export const BGE_EMBEDDING_DROPLET_BASE_URL =
+  process.env.BGE_EMBEDDING_DROPLET_BASE_URL ?? BGE_EMBEDDING_ATOMIC_BASE_URL
+
+/**
+ * Default base URL. Prefer an explicit BGE_EMBEDDING_BASE_URL for benchmark
+ * runs; otherwise use the local gateway so the public source stays portable.
+ */
+export const BGE_EMBEDDING_DEFAULT_BASE_URL =
+  process.env.BGE_EMBEDDING_BASE_URL ?? BGE_EMBEDDING_ATOMIC_BASE_URL
 
 /**
  * Model alias accepted by BOTH droplet and atomic-chat-future.
@@ -84,8 +69,8 @@ export function createBgeEmbeddingClient(
   return {
     baseURL: options.baseURL ?? BGE_EMBEDDING_DEFAULT_BASE_URL,
     model: options.model ?? BGE_EMBEDDING_DEFAULT_MODEL,
-    // Per-call timeout. Single-input warm embed is ~500-700ms (droplet CPU
-    // BGE-M3 Q4 via Tailscale). Batch of 18-200 items on `--parallel 1`
+    // Per-call timeout. Single-input warm embed is ~500-700ms on a CPU
+    // BGE-M3 Q4 backend. Batch of 18-200 items on `--parallel 1`
     // llama-server means sequential processing: 18 × ~600ms = ~11s cold,
     // 200 × ~600ms = ~2min. Default 60s covers the typical benchmark
     // manifest (18-200 entries); raise via options.timeoutMs for larger

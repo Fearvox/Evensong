@@ -9,7 +9,8 @@ User=root
 WorkingDirectory=/root/ccr
 Environment=DENSE_RAR_VAULT_ROOT=/root/research-vault
 Environment=DENSE_RAR_QUERIES_FILE=/root/ccr/benchmarks/wave3-adversarial-queries.json
-Environment=DENSE_RAR_BGE_BASE_URL=http://100.65.234.77:8080/v1
+EnvironmentFile=-/etc/evensong/dense-rar.env
+Environment=DENSE_RAR_BGE_BASE_URL=http://127.0.0.1:1337/v1
 Environment=DENSE_RAR_STAGE1_LABEL=BGE-M3-Q4_K_M
 Environment=DENSE_RAR_JUDGE_BASE_URL=https://api.minimax.io/v1
 Environment=DENSE_RAR_JUDGE_MODEL=MiniMax-M2.7

@@ -25,11 +25,11 @@ function restoreFetch() {
 }
 
 describe('createBgeEmbeddingClient', () => {
-  test('defaults point at ccr-droplet (not atomic 1337 — atomic upstream bug blocks embed)', () => {
+  test('defaults stay local and portable unless an operator supplies a remote endpoint', () => {
     const c = createBgeEmbeddingClient()
     expect(c.baseURL).toBe(BGE_EMBEDDING_DEFAULT_BASE_URL)
-    expect(c.baseURL).toBe('http://100.65.234.77:8080/v1')
-    expect(BGE_EMBEDDING_DEFAULT_BASE_URL).toBe(BGE_EMBEDDING_DROPLET_BASE_URL)
+    expect(c.baseURL).toBe(BGE_EMBEDDING_ATOMIC_BASE_URL)
+    expect(BGE_EMBEDDING_DROPLET_BASE_URL).toBe(BGE_EMBEDDING_ATOMIC_BASE_URL)
     expect(c.model).toBe(BGE_EMBEDDING_DEFAULT_MODEL)
     expect(c.model).toBe('bge-m3')
   })
@@ -44,11 +44,11 @@ describe('createBgeEmbeddingClient', () => {
 
   test('options override baseURL / model / timeout', () => {
     const c = createBgeEmbeddingClient({
-      baseURL: 'http://100.65.234.77:8080/v1',
+      baseURL: 'http://203.0.113.10:8080/v1',
       model: 'bge-m3-Q4_K_M',
       timeoutMs: 5000,
     })
-    expect(c.baseURL).toBe('http://100.65.234.77:8080/v1')
+    expect(c.baseURL).toBe('http://203.0.113.10:8080/v1')
     expect(c.model).toBe('bge-m3-Q4_K_M')
     expect(c.timeoutMs).toBe(5000)
   })

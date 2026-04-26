@@ -212,6 +212,10 @@ export function isLocalBaseUrl(raw: string): boolean {
   }
 }
 
+function publicProviderLabel(raw: string): string {
+  return isLocalBaseUrl(raw) ? raw : '<NON_LOCAL_PROVIDER_ENDPOINT>'
+}
+
 export function assertLiveAllowed(params: {
   bgeBaseURL: string
   judgeBaseURL: string
@@ -226,8 +230,8 @@ export function assertLiveAllowed(params: {
     throw new Error(
       [
         'Dense RAR would call non-local providers.',
-        `BGE=${params.bgeBaseURL}`,
-        `judge=${params.judgeBaseURL}`,
+        `BGE=${publicProviderLabel(params.bgeBaseURL)}`,
+        `judge=${publicProviderLabel(params.judgeBaseURL)}`,
         'Set --allow-live=true or DENSE_RAR_ALLOW_LIVE=1 to run this as an explicit live/provider benchmark.',
       ].join(' '),
     )
@@ -323,7 +327,7 @@ function buildRunMetadata(params: {
     },
     providers: {
       stage1Label: params.stage1Label,
-      bgeBaseURL: params.bgeBaseURL,
+      bgeBaseURL: publicProviderLabel(params.bgeBaseURL),
       bgeModel: params.bgeModel,
       bgeTimeoutMs: params.bgeTimeoutMs,
       bgeCorpusBatchSize: params.bgeCorpusBatchSize,
@@ -966,7 +970,7 @@ async function main() {
   })
 
   console.log(`[dense-rar] run: ${runId} (${runMode}, live=${allowLive ? 'explicit' : 'blocked'})`)
-  console.log(`[dense-rar] stage1: ${stage1Label} @ ${bgeBaseURL} (model=${bgeModel})`)
+  console.log(`[dense-rar] stage1: ${stage1Label} @ ${publicProviderLabel(bgeBaseURL)} (model=${bgeModel})`)
   console.log(
     `[dense-rar] query suite: ${metadata.inputs.querySuite.name} ` +
       `(${metadata.inputs.querySuite.version}, ${metadata.inputs.querySuite.difficulty})`,
@@ -1040,7 +1044,7 @@ async function main() {
   }
   lines.push(`- Queries: **${queries.length}**`)
   lines.push(`- Runs per (pipeline × query): **${runs}**`)
-  lines.push(`- Stage 1: **${stage1Label}** via ${bgeBaseURL} (model: **${bgeModel}**)`)
+  lines.push(`- Stage 1: **${stage1Label}** via ${publicProviderLabel(bgeBaseURL)} (model: **${bgeModel}**)`)
   lines.push(`- Embedding timeout: **${bgeTimeoutMs}ms**`)
   lines.push(`- Corpus batch size: **${bgeCorpusBatchSize}**`)
   lines.push(`- Stage-1 candidate pool: **${stage1TopK}**`)

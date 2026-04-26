@@ -47,6 +47,7 @@ Users/
 
 # Local/generated benchmark artifacts are preserved on disk but not tracked.
 benchmarks/runs/
+benchmarks/benchmarks/
 benchmarks/evensong/locomo_hybrid/
 
 

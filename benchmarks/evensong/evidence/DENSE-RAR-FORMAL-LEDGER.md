@@ -48,5 +48,5 @@ q113 (`negative_exclusion`) is resolved in this run. Stage 1 recovers the ideal 
 - The 24/24 claim applies to the verified 24-query Wave 3+I hard suite only.
 - Stage1TopK 50 increases rerank candidate exposure from 20 to 50. This is the accepted tradeoff for fixing q113 candidate recall.
 - BM25/RRF was not needed for the canonical fix; q113 diagnostics showed dense TopK 50 was the smallest reliable path.
-- Remote embedding service health was verified through HTTP `/v1/models` and `/v1/embeddings`. ccr-droplet SSH/systemd verification stayed operator-side pending because Tailscale SSH required interactive auth.
-- Full provider endpoint details are preserved in the metadata artifacts. Public summaries should prefer role labels over infrastructure coordinates.
+- Remote embedding service health was verified through HTTP `/v1/models` and `/v1/embeddings`. Host-level SSH/systemd verification stayed operator-side pending because private-network SSH required interactive auth.
+- Metadata stores provider role labels instead of private infrastructure coordinates; public summaries should keep using role labels.
