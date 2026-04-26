@@ -158,6 +158,8 @@ export const KEYBINDING_ACTIONS = [
   'select:previous',
   'select:accept',
   'select:cancel',
+  'select:previousValue',
+  'select:nextValue',
   // Plugin dialog actions
   'plugin:toggle',
   'plugin:install',

@@ -11,7 +11,7 @@ import { type GlobalConfig, saveGlobalConfig, getCurrentProjectConfig, type Outp
 import { normalizeApiKeyForConfig } from '../../utils/authPortable.js';
 import { getGlobalConfig, getAutoUpdaterDisabledReason, formatAutoUpdaterDisabledReason, getRemoteControlAtStartup } from '../../utils/config.js';
 import chalk from 'chalk';
-import { permissionModeTitle, permissionModeFromString, toExternalPermissionMode, isExternalPermissionMode, EXTERNAL_PERMISSION_MODES, PERMISSION_MODES, type ExternalPermissionMode, type PermissionMode } from '../../utils/permissions/PermissionMode.js';
+import { permissionModeShortTitle, permissionModeFromString, toExternalPermissionMode, isExternalPermissionMode, PERMISSION_MODES, type PermissionMode } from '../../utils/permissions/PermissionMode.js';
 import { getAutoModeEnabledState, hasAutoModeOptInAnySource, transitionPlanAutoMode } from '../../utils/permissions/permissionSetup.js';
 import { logError } from '../../utils/log.js';
 import { logEvent, type AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS } from 'src/services/analytics/index.js';
@@ -106,7 +106,7 @@ export function Config({
   const initialLanguage = React.useRef(currentLanguage);
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [scrollOffset, setScrollOffset] = useState(0);
-  const [isSearchMode, setIsSearchMode] = useState(true);
+  const [isSearchMode, setIsSearchMode] = useState(false);
   const isTerminalFocused = useTerminalFocus();
   const {
     rows
@@ -125,7 +125,8 @@ export function Config({
   // Show auto in the default-mode dropdown when the user has opted in OR the
   // config is fully 'enabled' — even if currently circuit-broken ('disabled'),
   // an opted-in user should still see it in settings (it's a temporary state).
-  const showAutoInDefaultModePicker = feature('TRANSCRIPT_CLASSIFIER') ? hasAutoModeOptInAnySource() || getAutoModeEnabledState() === 'enabled' : false;
+  const showAutoInDefaultModePicker = hasAutoModeOptInAnySource() || getAutoModeEnabledState() === 'enabled';
+  const currentDefaultPermissionMode = permissionModeFromString(settingsData?.permissions?.defaultMode ?? 'default');
   // Chat/Transcript view picker is visible to entitled users (pass the GB
   // gate) even if they haven't opted in this session — it IS the persistent
   // opt-in. 'chat' written here is read at next startup by main.tsx which
@@ -494,25 +495,25 @@ export function Config({
   }, {
     id: 'defaultPermissionMode',
     label: 'Default permission mode',
-    value: settingsData?.permissions?.defaultMode || 'default',
+    value: currentDefaultPermissionMode,
     options: (() => {
       const priorityOrder: PermissionMode[] = ['default', 'plan'];
-      const allModes: readonly PermissionMode[] = feature('TRANSCRIPT_CLASSIFIER') ? PERMISSION_MODES : EXTERNAL_PERMISSION_MODES;
       const excluded: PermissionMode[] = ['bypassPermissions'];
-      if (feature('TRANSCRIPT_CLASSIFIER') && !showAutoInDefaultModePicker) {
+      if (!showAutoInDefaultModePicker) {
         excluded.push('auto');
       }
-      return [...priorityOrder, ...allModes.filter(m => !priorityOrder.includes(m) && !excluded.includes(m))];
+      return [...priorityOrder, ...PERMISSION_MODES.filter(m => !priorityOrder.includes(m) && !excluded.includes(m))];
     })(),
     type: 'enum' as const,
     onChange(mode: string) {
       const parsedMode = permissionModeFromString(mode);
-      // Internal modes (e.g. auto) are stored directly
-      const validatedMode = isExternalPermissionMode(parsedMode) ? toExternalPermissionMode(parsedMode) : parsedMode;
+      // auto is an internal-only mode — store it directly, don't convert it to
+      // its external mapping ('default') or it disappears from settings.
+      const validatedMode = parsedMode === 'auto' ? parsedMode : isExternalPermissionMode(parsedMode) ? toExternalPermissionMode(parsedMode) : parsedMode;
       const result = updateSettingsForSource('userSettings', {
         permissions: {
           ...settingsData?.permissions,
-          defaultMode: validatedMode as ExternalPermissionMode
+          defaultMode: validatedMode as (typeof PERMISSION_MODES)[number]
         }
       });
       if (result.error) {
@@ -541,7 +542,7 @@ export function Config({
         value: mode as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS
       });
     }
-  }, ...(feature('TRANSCRIPT_CLASSIFIER') && showAutoInDefaultModePicker ? [{
+  }, ...(showAutoInDefaultModePicker ? [{
     id: 'useAutoModeDuringPlan',
     label: 'Use auto mode during plan',
     value: (settingsData as {
@@ -1392,6 +1393,8 @@ export function Config({
     'scroll:lineUp': () => moveSelection(-1),
     'scroll:lineDown': () => moveSelection(1),
     'select:accept': toggleSetting,
+    'select:previousValue': toggleSetting,
+    'select:nextValue': toggleSetting,
     'settings:search': () => {
       setIsSearchMode(true);
       setSearchQuery('');
@@ -1429,7 +1432,7 @@ export function Config({
     // List mode: left/right/tab cycle the selected option's value. These
     // keys used to switch tabs; now they only do so when the tab row is
     // explicitly focused (see headerFocused in Settings.tsx).
-    if (e.key === 'left' || e.key === 'right' || e.key === 'tab') {
+    if (e.key === 'tab') {
       e.preventDefault();
       toggleSetting();
       return;
@@ -1687,7 +1690,7 @@ export function Config({
                               </Text> : setting_2.id === 'notifChannel' ? <Text color={isSelected ? 'suggestion' : undefined}>
                                 <NotifChannelLabel value={setting_2.value.toString()} />
                               </Text> : setting_2.id === 'defaultPermissionMode' ? <Text color={isSelected ? 'suggestion' : undefined}>
-                                {permissionModeTitle(setting_2.value as PermissionMode)}
+                                {permissionModeShortTitle(setting_2.value as PermissionMode)}
                               </Text> : setting_2.id === 'autoUpdatesChannel' && autoUpdaterDisabledReason ? <Box flexDirection="column">
                                 <Text color={isSelected ? 'suggestion' : undefined}>
                                   disabled
