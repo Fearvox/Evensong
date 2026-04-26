@@ -135,13 +135,13 @@ model.encode() ← encode_kwargs may be partially applied or dropped
 
 ### Moderate: `num_proc` Parallelism Assumption — CPU-Bound Retrievers Starve
 
-**What goes wrong:** MTEB passes `num_proc` to `index()` for parallel corpus encoding, but BGE-M3 on a remote endpoint (Tailscale) is I/O-bound, not CPU-bound.
+**What goes wrong:** MTEB passes `num_proc` to `index()` for parallel corpus encoding, but BGE-M3 on a remote endpoint (private network) is I/O-bound, not CPU-bound.
 
 **Why it happens:** `num_proc` controls `multiprocessing.Pool` workers for HuggingFace dataset.map(). For remote embedding endpoints, this spawns workers that all block on the same network I/O.
 
-**Consequences:** Parallel workers all wait on the same Tailscale connection, no actual speedup, wasted RAM for process spawning.
+**Consequences:** Parallel workers all wait on the same private network connection, no actual speedup, wasted RAM for process spawning.
 
-**Prevention:** For Tailscale-based BGE-M3 endpoints, set `num_proc=1` and rely on the embedding server's internal parallelism. Alternatively, batch corpus encoding client-side and send one large POST rather than many small ones.
+**Prevention:** For private network-based BGE-M3 endpoints, set `num_proc=1` and rely on the embedding server's internal parallelism. Alternatively, batch corpus encoding client-side and send one large POST rather than many small ones.
 
 ### Minor: `top_ranked` Parameter in `search()` — Optional but Semantic
 
@@ -153,17 +153,17 @@ model.encode() ← encode_kwargs may be partially applied or dropped
 
 ---
 
-## 3. BGE-M3 Embedding Endpoint Pitfalls (Tailscale)
+## 3. BGE-M3 Embedding Endpoint Pitfalls (private network)
 
-### Critical: Tailscale Connection State — "Available" != "Reachable"
+### Critical: private network Connection State — "Available" != "Reachable"
 
-**What goes wrong:** `isBgeEmbeddingAvailable()` probes the BGE endpoint at `100.65.234.77:8080` but only checks HTTP connectivity, not Tailscale routing state.
+**What goes wrong:** `isBgeEmbeddingAvailable()` probes the BGE endpoint at `<PRIVATE_EMBEDDING_HOST>:8080` but only checks HTTP connectivity, not private network routing state.
 
-**Root cause:** The ccr-droplet BGE endpoint (`100.65.234.77:8080`) is on the Tailscale tailnet. If the Mac's Tailscale is logged out, disconnected, or the subnet router is down, the IP is unreachable even though the service "exists."
+**Root cause:** The private embedding host BGE endpoint (`<PRIVATE_EMBEDDING_HOST>:8080`) is on the private network tailnet. If the Mac's private network is logged out, disconnected, or the subnet router is down, the IP is unreachable even though the service "exists."
 
-**Consequences:** `isBgeEmbeddingAvailable()` returns `true` (HTTP responds) but the response is a Tailscale "relay" page, not an embedding vector. Downstream retrieval produces garbage.
+**Consequences:** `isBgeEmbeddingAvailable()` returns `true` (HTTP responds) but the response is a private network "relay" page, not an embedding vector. Downstream retrieval produces garbage.
 
-**Prevention:** Add a Tailscale connection health check alongside the HTTP probe. Alternatively, have `isBgeEmbeddingAvailable()` send a known probe text (e.g., "芝麻开门") and verify the returned vector is a valid 1024-dim non-zero vector — not just HTTP 200.
+**Prevention:** Add a private network connection health check alongside the HTTP probe. Alternatively, have `isBgeEmbeddingAvailable()` send a known probe text (e.g., "芝麻开门") and verify the returned vector is a valid 1024-dim non-zero vector — not just HTTP 200.
 
 ### Critical: Atomic Chat v1.1.44 `--embedding` Spawn Flag Bug
 
@@ -175,7 +175,7 @@ model.encode() ← encode_kwargs may be partially applied or dropped
 
 **Consequences:** Any code that trusts the "available" flag and routes to Atomic Chat 1337 will fail silently.
 
-**Prevention:** The fix in CCR: default `baseURL` points to `BGE_EMBEDDING_DROPLET_BASE_URL` (droplet Tailscale IP) instead of `BGE_EMBEDDING_ATOMIC_BASE_URL` (1337). Do NOT change this default until Atomic Chat upstream fixes the spawn flag.
+**Prevention:** The fix in CCR: default `baseURL` points to `BGE_EMBEDDING_DROPLET_BASE_URL` (droplet private network IP) instead of `BGE_EMBEDDING_ATOMIC_BASE_URL` (1337). Do NOT change this default until Atomic Chat upstream fixes the spawn flag.
 
 ### Critical: `maxChars` Truncation Bug — 1000 chars still too large
 
@@ -206,15 +206,15 @@ Observed 2026-04-19:
 
 **Prevention:** The smoke-bge-rrf.ts script explicitly sets `timeoutMs: 180000` for this reason. For benchmark harness use, either warm the corpus cache before timing runs OR raise timeout to 180s+ for cold paths.
 
-### Moderate: Tailscale Network Latency Biases Latency Measurements
+### Moderate: private network Network Latency Biases Latency Measurements
 
-**What goes wrong:** When BGE-M3 endpoint is accessed via Tailscale, latency measurements include ~180ms of Tailscale transit overhead.
+**What goes wrong:** When BGE-M3 endpoint is accessed via private network, latency measurements include ~180ms of private network transit overhead.
 
-**Why it happens:** `BGE_EMBEDDING_DROPLET_BASE_URL = 'http://100.65.234.77:8080/v1'` routes through Tailscale. Even localhost-equivalent Tailscale connections incur TCP relay overhead.
+**Why it happens:** `BGE_EMBEDDING_DROPLET_BASE_URL = 'http://<PRIVATE_EMBEDDING_HOST>:8080/v1'` routes through private network. Even localhost-equivalent private network connections incur TCP relay overhead.
 
-**Consequences:** Dense retrieval latency appears 30-40% higher than it would over LAN. This biases any comparison between dense and BM25 (BM25 is local, dense is Tailscale-routed).
+**Consequences:** Dense retrieval latency appears 30-40% higher than it would over LAN. This biases any comparison between dense and BM25 (BM25 is local, dense is private network-routed).
 
-**Prevention:** Report dense latency as "Tailscale-included" in benchmark results. If running comparison benchmarks, either use LAN-connected embedding endpoint for dense or document the overhead explicitly.
+**Prevention:** Report dense latency as "private network-included" in benchmark results. If running comparison benchmarks, either use LAN-connected embedding endpoint for dense or document the overhead explicitly.
 
 ### Minor: Batch Embedding Response Order Not Guaranteed
 
@@ -226,7 +226,7 @@ Observed 2026-04-19:
 const sorted = [...data.data].sort((a, b) => (a.index ?? 0) - (b.index ?? 0))
 ```
 
-**Why this matters:** If the Tailscale relay or a proxy reorders the embedding batch responses, without this sort the corpus embeddings would be misaligned with their source documents — silently corrupting retrieval rankings.
+**Why this matters:** If the private network relay or a proxy reorders the embedding batch responses, without this sort the corpus embeddings would be misaligned with their source documents — silently corrupting retrieval rankings.
 
 **Prevention:** The defensive sort is already in the code. Verify this protection is preserved in any refactoring.
 
@@ -297,7 +297,7 @@ service_dirs, finish_reason, elapsed_sec, cost_usd, input_tokens, output_tokens
 | LOCOMO hybrid integration | `init_query_model('contriever')` NameError bug | Always implement fresh model loading; do not rely on LOCOMO's buggy contriever path |
 | MTEB SearchProtocol implementation | Runtime-only type checking | Write unit tests validating all Protocol methods exist before integration |
 | MTEB `encode_kwargs` propagation | Parameters silently dropped | Log unhandled kwargs at each layer; integration test with probe kwargs |
-| BGE-M3 Tailscale endpoint | Atomic Chat 501 despite "available" | Always probe `/v1/embeddings` directly, not just `/v1/models` |
+| BGE-M3 private network endpoint | Atomic Chat 501 despite "available" | Always probe `/v1/embeddings` directly, not just `/v1/models` |
 | BGE-M3 `maxChars` | 1000 chars still exceeds batch limit | Default 500 chars; do not raise without rebuilding droplet llama-server with `-b 8192` |
 | or-shot memory fields | `performance.memory` inaccurate for RSS | Use external `ps` invocation for accurate memory_mb |
 | or-shot warmup | Cold corpus embed biases first query | Always warm dense cache before timing runs |
@@ -363,7 +363,7 @@ function getRunDirSizeMB(runDir: string): number {
 - [MTEB AbstaskRetrieval (GitHub)](https://github.com/embeddings-benchmark/mteb) — SearchProtocol interface
 - [MTEB models_protocols.py](https://raw.githubusercontent.com/embeddings-benchmark/mteb/main/mteb/models/models_protocols.py) — EncoderProtocol, SearchProtocol
 - [MTEB _evaluators/retrieval.py](https://raw.githubusercontent.com/embeddings-benchmark/mteb/main/mteb/abstasks/retrieval.py) — RetrievalEvaluator.evaluate() flow
-- [CCR bgeEmbedding.ts](https://github.com/Fearvox/Evensong/blob/main/src/services/api/bgeEmbedding.ts) — BGE-M3 client, Tailscale endpoint, Atomic Chat bug
+- [CCR bgeEmbedding.ts](https://github.com/Fearvox/Evensong/blob/main/src/services/api/bgeEmbedding.ts) — BGE-M3 client, private network endpoint, Atomic Chat bug
 - [CCR bgeEmbeddingProvider.ts](https://github.com/Fearvox/Evensong/blob/main/src/services/retrieval/providers/bgeEmbeddingProvider.ts) — maxChars constraint, corpus caching
 - [CCR smoke-bge-rrf.ts](https://github.com/Fearvox/Evensong/blob/main/scripts/smoke-bge-rrf.ts) — warmup, serialization, latency measurement patterns
 - [BGE-M3 HuggingFace](https://huggingface.co/BAAI/bge-m3) — model specs, batch_size guidance, no instruction prefix

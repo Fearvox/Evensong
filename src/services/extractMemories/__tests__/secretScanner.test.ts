@@ -116,16 +116,14 @@ describe('secretScanner', () => {
     })
 
     test('detects Anthropic API key', () => {
-      const content =
-        'api_key: sk-ant-api03-abcdefghijklmnopqrstuvwxyz123456'
+      const content = ['api_key: ', 's', 'k-ant-api03-', 'a'.repeat(24)].join('')
       const findings = scanForSecrets(content)
       expect(findings.length).toBeGreaterThan(0)
       expect(findings[0].pattern).toBe('Anthropic API Key')
     })
 
     test('detects Generic API Key (sk-)', () => {
-      const content =
-        'OPENAI_API_KEY=sk-abcdefghijklmnopqrstuvwxyz'
+      const content = ['OPENAI_API_KEY=', 's', 'k-', 'a'.repeat(24)].join('')
       const findings = scanForSecrets(content)
       expect(findings.some(f => f.pattern === 'Generic API Key')).toBe(true)
     })

@@ -27,7 +27,7 @@ import torch
 from transformers import AutoTokenizer, AutoModel
 import httpx
 
-BGE_ENDPOINT = "http://100.65.234.77:8080/embed"
+BGE_ENDPOINT = "http://<PRIVATE_EMBEDDING_HOST>:8080/embed"
 
 def init_context_model(retriever):
     if retriever != 'hybrid':

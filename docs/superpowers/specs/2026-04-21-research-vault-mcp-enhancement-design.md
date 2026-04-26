@@ -11,7 +11,7 @@
 Enhance `packages/research-vault-mcp` with three capability tiers:
 1. **Vault read/write tools** — `vault_raw_ingest`, `vault_note_save`, `vault_get`, `vault_delete`
 2. **amplify_chat dual-mode streaming** — `stream: true` yields incremental chunks via MCP SDK `onProgress`
-3. **Transport abstraction (Plan C)** — stdio child process primary, Tailscale SSE fallback
+3. **Transport abstraction (Plan C)** — stdio child process primary, private network SSE fallback
 
 ---
 
@@ -21,7 +21,7 @@ Enhance `packages/research-vault-mcp` with three capability tiers:
 CCR (cli.tsx)
   ├─ MCP client (transport: auto-detect)
   │   ├─ stdio: Bun.spawn research-vault-mcp, stdin/stdout
-  │   └─ fallback: Tailscale SSE http://100.127.140.74:8765/sse
+  │   └─ fallback: private network SSE http://<PRIVATE_NETWORK_HOST>:8765/sse
   └─ research-vault-mcp (Bun)
       ├─ vault tools (8 total)
       │   ├─ vault_search      [existing]
@@ -46,8 +46,8 @@ CCR (cli.tsx)
 // MCP_TRANSPORT env: "stdio" | "tailscale" | "auto" (default "auto")
 // Auto-detection order:
 //   1. If MCP_TRANSPORT=stdio, use child process
-//   2. If MCP_TRANSPORT=tailscale, use Tailscale SSE
-//   3. Auto: try stdio first; if spawn fails or MCP_TRANSPORT=auto&stdio exits, fall back to Tailscale
+//   2. If MCP_TRANSPORT=tailscale, use private network SSE
+//   3. Auto: try stdio first; if spawn fails or MCP_TRANSPORT=auto&stdio exits, fall back to private network
 ```
 
 **stdio mode:**
@@ -55,9 +55,9 @@ CCR (cli.tsx)
 - Communicates via MCP stdio (JSON-RPC over stdin/stdout)
 - Logs go to CCR stderr (easy debugging)
 
-**Tailscale mode (fallback):**
-- `GET http://100.127.140.74:8765/sse` → SSE stream
-- `POST http://100.127.140.74:8765/messages?sessionId=<uuid>` → JSON-RPC
+**private network mode (fallback):**
+- `GET http://<PRIVATE_NETWORK_HOST>:8765/sse` → SSE stream
+- `POST http://<PRIVATE_NETWORK_HOST>:8765/messages?sessionId=<uuid>` → JSON-RPC
 
 ---
 

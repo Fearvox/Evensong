@@ -13,6 +13,6 @@
   },
   "planning": {
     "project_path": ".benchmark-planning/PROJECT.md",
-    "project_root": "/Users/0xvox/claude-code-reimagine-for-learning"
+    "project_root": "."
   }
 }

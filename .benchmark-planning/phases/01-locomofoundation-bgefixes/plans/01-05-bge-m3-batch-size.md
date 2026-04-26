@@ -2,7 +2,7 @@
 
 ## What
 
-Fix the issue where `maxChars: 1000` exceeds the `-b 512` batch limit on ccr-droplet's llama-server, causing embedding requests to fail.
+Fix the issue where `maxChars: 1000` exceeds the `-b 512` batch limit on private embedding host's llama-server, causing embedding requests to fail.
 
 ## Why
 

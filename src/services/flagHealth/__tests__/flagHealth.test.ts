@@ -22,7 +22,7 @@ describe('flagHealth', () => {
       }
     }
     // Ensure HOME points to real location with feature-flags.json
-    process.env.HOME = process.env.HOME || '/Users/0xvox'
+    process.env.HOME = process.env.HOME || '/tmp/hermes-test-home'
   })
 
   afterEach(async () => {

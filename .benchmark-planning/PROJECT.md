@@ -56,7 +56,7 @@
 
 - **Runtime**: Bun（or-shot.ts 已是 bun script）
 - **API**: OpenRouter（or-shot 通过它调用各模型）
-- **Retrieval**: BGE-M3 dense endpoint via ccr-droplet Tailscale（已在 Wave 3 验证）
+- **Retrieval**: BGE-M3 dense endpoint via private embedding host private network（已在 Wave 3 验证）
 - **Timeline**: SEED-001 触发前完成所有准备，触发后直接开跑
 
 ## Key Decisions
