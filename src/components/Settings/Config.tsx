@@ -1279,7 +1279,7 @@ export function Config({
 
   // Settings navigation and toggle actions via configurable keybindings.
   // Only active when not in search mode and no submenu is open.
-  const toggleSetting = useCallback(() => {
+  const toggleSetting = useCallback((direction: -1 | 1 = 1) => {
     const setting_0 = filteredSettingsItems[selectedIndex];
     if (!setting_0 || !setting_0.onChange) {
       return;
@@ -1361,7 +1361,7 @@ export function Config({
     if (setting_0.type === 'enum') {
       isDirty.current = true;
       const currentIndex = setting_0.options.indexOf(setting_0.value);
-      const nextIndex = (currentIndex + 1) % setting_0.options.length;
+      const nextIndex = (currentIndex + direction + setting_0.options.length) % setting_0.options.length;
       setting_0.onChange(setting_0.options[nextIndex]!);
       return;
     }
@@ -1393,8 +1393,8 @@ export function Config({
     'scroll:lineUp': () => moveSelection(-1),
     'scroll:lineDown': () => moveSelection(1),
     'select:accept': toggleSetting,
-    'select:previousValue': toggleSetting,
-    'select:nextValue': toggleSetting,
+    'select:previousValue': () => toggleSetting(-1),
+    'select:nextValue': () => toggleSetting(1),
     'settings:search': () => {
       setIsSearchMode(true);
       setSearchQuery('');
