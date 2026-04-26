@@ -56,6 +56,10 @@ type RemoteHostInfo = {
   sessionCount: number
 }
 
+function shellSingleQuote(value: string): string {
+  return `'${value.replace(/'/g, `'\\''`)}'`
+}
+
 /* eslint-disable custom-rules/no-process-env-top-level */
 const getRunningRemoteHosts: () => Promise<string[]> =
   process.env.USER_TYPE === 'ant'
@@ -83,11 +87,12 @@ const getRunningRemoteHosts: () => Promise<string[]> =
 const getRemoteHostSessionCount: (hs: string) => Promise<number> =
   process.env.USER_TYPE === 'ant'
     ? async (homespace: string) => {
+        const remoteProjectsDir = process.env.CLAUDE_REMOTE_PROJECTS_DIR ?? '/var/lib/claude/projects'
         const { stdout, code } = await execFileNoThrow(
           'ssh',
           [
             `${homespace}.coder`,
-            'find /root/.claude/projects -name "*.jsonl" 2>/dev/null | wc -l',
+            `find ${shellSingleQuote(remoteProjectsDir)} -name "*.jsonl" 2>/dev/null | wc -l`,
           ],
           { timeout: 30000 },
         )
@@ -107,11 +112,12 @@ const collectFromRemoteHost: (
         // Create temp directory
         const tempDir = await mkdtemp(join(tmpdir(), 'claude-hs-'))
 
+        const remoteProjectsDir = process.env.CLAUDE_REMOTE_PROJECTS_DIR ?? '/var/lib/claude/projects'
         try {
           // SCP the projects folder
           const scpResult = await execFileNoThrow(
             'scp',
-            ['-rq', `${homespace}.coder:/root/.claude/projects/`, tempDir],
+            ['-rq', `${homespace}.coder:${remoteProjectsDir}/`, tempDir],
             { timeout: 300000 },
           )
           if (scpResult.code !== 0) {

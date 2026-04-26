@@ -68,13 +68,13 @@ vault=<RESEARCH_VAULT_ROOT>
 SSH:
 
 ```bash
-ssh root@<PRIVATE_REMOTE_HOST>
+ssh user@<PRIVATE_REMOTE_HOST>
 ```
 
 Remote repo:
 
 ```bash
-cd /root/ccr
+cd <REMOTE_REPO>
 ```
 
 Main remote self-evolution session:
@@ -124,13 +124,13 @@ tmux attach -t hermes-hudui-zonic
 Remote research-vault task prompt:
 
 ```bash
-/root/HERMES-SELF-EVOLUTION-RESEARCH-VAULT-2026-04-26.txt
+<REMOTE_PROMPT_FILE>
 ```
 
 Remote Research Vault MCP wrapper:
 
 ```bash
-/root/.local/bin/research-vault-mcp-hermes
+<REMOTE_MCP_WRAPPER>
 ```
 
 Important wrapper detail:
@@ -146,15 +146,15 @@ Remote MCP checks:
 ```bash
 hermes mcp list
 hermes mcp test research_vault
-grep -n "bunx" /root/.local/bin/research-vault-mcp-hermes
+grep -n "bunx" <REMOTE_MCP_WRAPPER>
 ```
 
 Remote logs:
 
 ```bash
-tail -120 /root/.hermes/logs/mcp-stderr.log
-tail -160 /root/.hermes/logs/errors.log
-tail -120 /root/.hermes/logs/agent.log
+tail -120 <REMOTE_HERMES_LOG_DIR>/mcp-stderr.log
+tail -160 <REMOTE_HERMES_LOG_DIR>/errors.log
+tail -120 <REMOTE_HERMES_LOG_DIR>/agent.log
 ```
 
 Remote service/process checks:
@@ -283,7 +283,7 @@ tmux capture-pane -pt hermes-harness:bench -S -120
 Add a keepalive shell to an existing session:
 
 ```bash
-tmux new-window -d -t hermes-evo-rv-20260426-mcp -n keepalive 'cd /root/ccr && exec bash -l'
+tmux new-window -d -t hermes-evo-rv-20260426-mcp -n keepalive 'cd <REMOTE_REPO> && exec bash -l'
 ```
 
 Kill a session only when you are sure:
@@ -297,7 +297,7 @@ tmux kill-session -t hermes-evo-rv-20260426-mcp
 Remote CCR has helper scripts:
 
 ```bash
-cd /root/ccr
+cd <REMOTE_REPO>
 ./scripts/open-hermes-evo-harness.sh
 ./scripts/open-hermes-operator-view.sh
 ```
@@ -323,7 +323,7 @@ tmux list-windows -t hermes-evo-rv-20260426-mcp
 If there is no `keepalive` window, add one before exiting Hermes:
 
 ```bash
-tmux new-window -d -t hermes-evo-rv-20260426-mcp -n keepalive 'cd /root/ccr && exec bash -l'
+tmux new-window -d -t hermes-evo-rv-20260426-mcp -n keepalive 'cd <REMOTE_REPO> && exec bash -l'
 ```
 
 Delegation subagents fail with endpoint errors:
@@ -336,8 +336,8 @@ Research Vault MCP fails in Hermes:
 
 ```bash
 hermes mcp test research_vault
-tail -120 /root/.hermes/logs/mcp-stderr.log
-grep -n "bunx" /root/.local/bin/research-vault-mcp-hermes
+tail -120 <REMOTE_HERMES_LOG_DIR>/mcp-stderr.log
+grep -n "bunx" <REMOTE_MCP_WRAPPER>
 ss -ltnp '( sport = :18765 or sport = :18766 )'
 ```
 
@@ -389,6 +389,20 @@ Clean-session rule:
 ```text
 One phase, one clean Hermes session when possible. Commit, record report, then start fresh.
 ```
+
+Remote Hermes runtime fix applied on 2026-04-26:
+
+```text
+<REMOTE_HERMES_AGENT> commit 34618069
+fix: preserve high context on vague overflow
+```
+
+Behavior after this fix:
+
+- If the provider returns a numeric context limit, Hermes still honors that limit.
+- If `openai-codex` / Codex OAuth returns a vague context overflow with no numeric limit, Hermes compresses history but preserves the configured high context window.
+- This prevents the bad `1,000,000 -> 128,000` drop when the user explicitly configured a 1M context window.
+- Existing already-running Hermes processes need a restart/new session to load the patch.
 
 ## Five Keys To Memorize
 

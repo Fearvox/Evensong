@@ -2,7 +2,7 @@
 set -euo pipefail
 
 SESSION_NAME="${HERMES_OPERATOR_SESSION:-hermes-operator}"
-REPO_ROOT="${HERMES_OPERATOR_REPO_ROOT:-/root/ccr}"
+REPO_ROOT="${HERMES_OPERATOR_REPO_ROOT:-/opt/evensong/ccr}"
 DETACH_MODE=0
 
 show_unit_status() {
