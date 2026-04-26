@@ -51,6 +51,7 @@ benchmarks/evensong/locomo_hybrid/
 
 
 # Session transcripts (private conversation data)
+.hermes/
 .claude/session-transcript.jsonl
 .claude/session-data/
 .claude/settings.local.json

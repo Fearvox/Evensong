@@ -7,6 +7,10 @@
       "dependencies": {
         "1": "^0.1.2",
         "@alcalzone/ansi-tokenize": "^0.3.0",
+        "@ant/claude-for-chrome-mcp": "workspace:*",
+        "@ant/computer-use-input": "workspace:*",
+        "@ant/computer-use-mcp": "workspace:*",
+        "@ant/computer-use-swift": "workspace:*",
         "@anthropic-ai/bedrock-sdk": "^0.26.4",
         "@anthropic-ai/claude-agent-sdk": "latest",
         "@anthropic-ai/foundry-sdk": "^0.2.3",
@@ -45,6 +49,7 @@
         "@smithy/node-http-handler": "latest",
         "ajv": "latest",
         "asciichart": "latest",
+        "audio-capture-napi": "workspace:*",
         "auto-bind": "latest",
         "axios": "latest",
         "bidi-js": "latest",
@@ -72,6 +77,7 @@
         "lodash-es": "latest",
         "lru-cache": "latest",
         "marked": "latest",
+        "modifiers-napi": "workspace:*",
         "openai": "^6.34.0",
         "p-map": "latest",
         "picomatch": "latest",
@@ -145,10 +151,14 @@
       "version": "1.0.0",
     },
     "packages/research-vault-mcp": {
-      "name": "research-vault-mcp",
-      "version": "1.0.0",
+      "name": "@syndash/research-vault-mcp",
+      "version": "1.1.1",
+      "bin": {
+        "research-vault-mcp": "./bin/research-vault-mcp.mjs",
+      },
       "dependencies": {
-        "@anthropic-ai/sdk": "^0.80.0",
+        "@anthropic-ai/sdk": "^0.88.0",
+        "markitdown": "latest",
       },
     },
     "packages/url-handler-napi": {
@@ -541,6 +551,8 @@
 
     "@smithy/uuid": ["@smithy/uuid@1.1.2", "", { "dependencies": { "tslib": "^2.6.2" } }, "sha512-O/IEdcCUKkubz60tFbGA7ceITTAJsty+lBjNoorP4Z6XRqaFb/OjQjZODophEcuq68nKm6/0r+6/lLQ+XVpk8g=="],
 
+    "@syndash/research-vault-mcp": ["@syndash/research-vault-mcp@workspace:packages/research-vault-mcp"],
+
     "@types/bun": ["@types/bun@1.3.12", "", { "dependencies": { "bun-types": "1.3.12" } }, "sha512-DBv81elK+/VSwXHDlnH3Qduw+KxkTIWi7TXkAeh24zpi5l0B2kUg9Ga3tb4nJaPcOFswflgi/yAvMVBPrxMB+A=="],
 
     "@types/cacache": ["@types/cacache@20.0.1", "", { "dependencies": { "@types/node": "*", "minipass": "*" } }, "sha512-QlKW3AFoFr/hvPHwFHMIVUH/ZCYeetBNou3PCmxu5LaNDvrtBlPJtIA6uhmU9JRt9oxj7IYoqoLcpxtzpPiTcw=="],
@@ -907,6 +919,8 @@
 
     "marked": ["marked@18.0.0", "", { "bin": { "marked": "bin/marked.js" } }, "sha512-2e7Qiv/HJSXj8rDEpgTvGKsP8yYtI9xXHKDnrftrmnrJPaFNM7VRb2YCzWaX4BP1iCJ/XPduzDJZMFoqTCcIMA=="],
 
+    "markitdown": ["markitdown@0.0.4", "", { "dependencies": { "mkdirp": "~0.3", "optimist": "~0.3" }, "bin": { "markitdown": "./bin/markitdown" } }, "sha512-qYt8LexoL97Cjxk5hMrI91WL/+gWrIGQMt4C4eDkAFIVZQh6Z7RUYUfpjchtDO/QbaNqaeZA8PfRUkpXe+ZJkw=="],
+
     "math-intrinsics": ["math-intrinsics@1.1.0", "", {}, "sha512-/IXtbwEk5HTPyEwyKX6hGkYXxM9nbj64B+ilVJnC/R6B0pH5G4V3b0pVbL7DBj4tkhBAppbQUlf6F6Xl9LHu1g=="],
 
     "mdns2": ["mdns2@2.1.4", "", {}, "sha512-aStBO1nRHcaTEU6+Ic9YS8+F6AhnG893VTBSS86P/H+jxsCWBk3//eQAejNOg8D9kFjF+dMA89w3jHtgaEGbuQ=="],
@@ -928,6 +942,8 @@
     "minipass-flush": ["minipass-flush@1.0.7", "", { "dependencies": { "minipass": "^3.0.0" } }, "sha512-TbqTz9cUwWyHS2Dy89P3ocAGUGxKjjLuR9z8w4WUTGAVgEj17/4nhgo2Du56i0Fm3Pm30g4iA8Lcqctc76jCzA=="],
 
     "minipass-pipeline": ["minipass-pipeline@1.2.4", "", { "dependencies": { "minipass": "^3.0.0" } }, "sha512-xuIq7cIOt09RPRJ19gdi4b+RiNvDFYe5JH+ggNvBqGqpQXcru3PcRmOZuHBKWK1Txf9+cQ+HMVN4d6z46LZP7A=="],
+
+    "mkdirp": ["mkdirp@0.3.5", "", {}, "sha512-8OCq0De/h9ZxseqzCH8Kw/Filf5pF/vMI6+BH7Lu0jXz2pqYCjTAQRolSxRIi+Ax+oCCjlxoJMP0YQ4XlrQNHg=="],
 
     "modifiers-napi": ["modifiers-napi@workspace:packages/modifiers-napi"],
 
@@ -962,6 +978,8 @@
     "open": ["open@10.2.0", "", { "dependencies": { "default-browser": "^5.2.1", "define-lazy-prop": "^3.0.0", "is-inside-container": "^1.0.0", "wsl-utils": "^0.1.0" } }, "sha512-YgBpdJHPyQ2UE5x+hlSXcnejzAvD0b22U2OuAP+8OnlJT+PjWPxtgmGqKKc+RgTM63U9gN0YzrYc71R2WT/hTA=="],
 
     "openai": ["openai@6.34.0", "", { "peerDependencies": { "ws": "^8.18.0", "zod": "^3.25 || ^4.0" }, "optionalPeers": ["ws", "zod"], "bin": { "openai": "bin/cli" } }, "sha512-yEr2jdGf4tVFYG6ohmr3pF6VJuveP0EA/sS8TBx+4Eq5NT10alu5zg2dmxMXMgqpihRDQlFGpRt2XwsGj+Fyxw=="],
+
+    "optimist": ["optimist@0.3.7", "", { "dependencies": { "wordwrap": "~0.0.2" } }, "sha512-TCx0dXQzVtSCg2OgY/bO9hjM9cV4XYx09TVK+s3+FhkjT6LovsLe+pPMzpWf+6yXK/hUizs2gUoTw3jHM0VaTQ=="],
 
     "os-tmpdir": ["os-tmpdir@1.0.2", "", {}, "sha512-D2FR03Vir7FIu45XBY20mTb+/ZSWB00sjU9jdQXt83gDrI4Ztz5Fs7/yy74g2N5SVQY4xY1qDr4rNddwYRVX0g=="],
 
@@ -1032,8 +1050,6 @@
     "require-from-string": ["require-from-string@2.0.2", "", {}, "sha512-Xf0nWe6RseziFMu+Ap9biiUbmplq6S9/p+7w7YXP/JBHhrUDDUhwa+vANyubuqfZWTveU//DYVGsDG7RKL/vEw=="],
 
     "require-main-filename": ["require-main-filename@2.0.0", "", {}, "sha512-NKN5kMDylKuldxYLSUfrbo5Tuzh4hd+2E8NPPX02mZtn1VuREQToYe/ZdlJy+J3uCpfaiGF05e7B8W0iXbQHmg=="],
-
-    "research-vault-mcp": ["research-vault-mcp@workspace:packages/research-vault-mcp"],
 
     "retry": ["retry@0.12.0", "", {}, "sha512-9LkiTwjUh6rT555DtE9rTX+BKByPfrMzEAtnlEtdEwr3Nkffwiihqe2bWADg+OQRjt9gl6ICdmB/ZFDCGAtSow=="],
 
@@ -1154,6 +1170,8 @@
     "which": ["which@2.0.2", "", { "dependencies": { "isexe": "^2.0.0" }, "bin": { "node-which": "./bin/node-which" } }, "sha512-BLI3Tl1TW3Pvl70l3yq3Y64i+awpwXqsGBYWkkqMtnbXgrMD+yj7rhW0kuEDxzJaYXGjEW5ogapKNMEKNMjibA=="],
 
     "which-module": ["which-module@2.0.1", "", {}, "sha512-iBdZ57RDvnOR9AGBhML2vFZf7h8vmBjhoaZqODJBFWHVtKkDmKuHai3cx5PgVMrX5YDNp27AofYbAwctSS+vhQ=="],
+
+    "wordwrap": ["wordwrap@0.0.3", "", {}, "sha512-1tMA907+V4QmxV7dbRvb4/8MaRALK6q9Abid3ndMYnbyo8piisCmeONVqVSXqQA3KaP4SLt5b7ud6E2sqP8TFw=="],
 
     "wrap-ansi": ["wrap-ansi@10.0.0", "", { "dependencies": { "ansi-styles": "^6.2.3", "string-width": "^8.2.0", "strip-ansi": "^7.1.2" } }, "sha512-SGcvg80f0wUy2/fXES19feHMz8E0JoXv2uNgHOu4Dgi2OrCy1lqwFYEJz1BLbDI0exjPMe/ZdzZ/YpGECBG/aQ=="],
 
@@ -1502,8 +1520,6 @@
     "proper-lockfile/signal-exit": ["signal-exit@3.0.7", "", {}, "sha512-wnD2ZE+l+SPC/uoS0vXeE9L1+0wuaMqKlfz9AMUo38JsyLSBWSFcHR1Rri62LZc12vLr1gb3jl7iwQhgwpAbGQ=="],
 
     "qrcode/yargs": ["yargs@15.4.1", "", { "dependencies": { "cliui": "^6.0.0", "decamelize": "^1.2.0", "find-up": "^4.1.0", "get-caller-file": "^2.0.1", "require-directory": "^2.1.1", "require-main-filename": "^2.0.0", "set-blocking": "^2.0.0", "string-width": "^4.2.0", "which-module": "^2.0.0", "y18n": "^4.0.0", "yargs-parser": "^18.1.2" } }, "sha512-aePbxDmcYW++PaqBsJ+HYUFwCdv4LVvdnhBy78E57PIor8/OVvhMrADFFEDh8DHDFRv/O9i3lPhsENjO7QX0+A=="],
-
-    "research-vault-mcp/@anthropic-ai/sdk": ["@anthropic-ai/sdk@0.80.0", "", { "dependencies": { "json-schema-to-ts": "^3.1.1" }, "peerDependencies": { "zod": "^3.25.0 || ^4.0.0" }, "optionalPeers": ["zod"], "bin": { "anthropic-ai-sdk": "bin/cli" } }, "sha512-WeXLn7zNVk3yjeshn+xZHvld6AoFUOR3Sep6pSoHho5YbSi6HwcirqgPA5ccFuW8QTVJAAU7N8uQQC6Wa9TG+g=="],
 
     "vscode-languageserver-protocol/vscode-jsonrpc": ["vscode-jsonrpc@8.2.0", "", {}, "sha512-C+r0eKJUIfiDIfwJhria30+TYWPtuHJXHtI7J0YlOmKAo7ogxP20T0zxB7HZQIFhIyvoBPwWskjxrvAtfjyZfA=="],
 

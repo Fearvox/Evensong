@@ -1,8 +1,8 @@
 <h1 align="center">Evensong</h1>
 
 <p align="center">
-  <em>Reverse-engineered Claude Code. Hybrid memory retrieval that actually scales.<br/>
-  <strong>Four formal retrieval artifacts (648 + 972 + 72 + 72 calls). Cross-LLM + hard-suite design. Raw formal evidence committed.</strong></em>
+  <em>Hackable agent-system hub built from a reverse-engineered Claude Code core.<br/>
+  <strong>Research Vault MCP module, public handoff dashboard, and four formal retrieval artifacts (648 + 972 + 72 + 72 calls).</strong></em>
 </p>
 
 <p align="center">
@@ -52,7 +52,7 @@
 
 ## What this is
 
-A **reverse-engineered, modifiable** implementation of Anthropic's Claude Code CLI, plus a **production-grade hybrid retrieval benchmark suite** for agent memory systems.
+A **reverse-engineered, modifiable** implementation of Anthropic's Claude Code CLI, plus the public Evensong hub around it: Research Vault MCP packaging, handoff pages, and a production-grade hybrid retrieval benchmark suite for agent memory systems.
 
 This repository exists to:
 
@@ -60,6 +60,7 @@ This repository exists to:
 |---|---|
 | **Study** | Read the Claude Code source without the closed binary |
 | **Extend** | Custom agent tools, retrieval pipelines, telemetry — none of the blocks are glued shut |
+| **Package** | Ship Research Vault MCP as an Evensong module/dependency instead of treating it as the whole product |
 | **Benchmark** | Retrieve-and-Rerank (RaR) architectures with reproducible evidence — the bar EverMemOS §3.4 set, measured with our numbers |
 
 <p align="right"><a href="#目录">↑ back to top</a></p>

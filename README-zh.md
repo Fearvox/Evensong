@@ -1,8 +1,8 @@
 <h1 align="center">Evensong</h1>
 
 <p align="center">
-  <em>逆向工程 Claude Code · 真能扩容的混合记忆检索<br/>
-  <strong>四份正式检索 artifact（648 + 972 + 72 + 72 次调用）· 跨 LLM + hard suite 设计 · formal evidence 已 committed</strong></em>
+  <em>基于逆向工程 Claude Code core 的可修改 agent-system hub<br/>
+  <strong>Research Vault MCP 模块、公开 handoff dashboard、四份正式检索 artifact（648 + 972 + 72 + 72 次调用）</strong></em>
 </p>
 
 <p align="center">
@@ -52,7 +52,7 @@
 
 ## 这是什么
 
-一个**逆向工程、可修改**的 Anthropic Claude Code CLI 实现，加上一套 **production 级混合检索基准套件**，用于 agent 记忆系统评估。
+一个**逆向工程、可修改**的 Anthropic Claude Code CLI 实现，加上围绕它建立的 Evensong 公共 hub：Research Vault MCP 包、handoff 页面，以及用于 agent 记忆系统评估的 **production 级混合检索基准套件**。
 
 本仓库存在的三个目的：
 
@@ -60,6 +60,7 @@
 |---|---|
 | **学习** | 在不依赖闭源二进制的前提下，从源码层面研究 Claude Code 的工作方式 |
 | **扩展** | 自定义 agent 工具、检索流水线、遥测——模块间不是胶水粘死的，可以换 |
+| **模块化** | 把 Research Vault MCP 作为 Evensong 的模块/依赖发布，而不是把它误说成整个产品 |
 | **基准测试** | 以可复现证据评估 Retrieve-and-Rerank (RaR) 架构——EverMemOS §3.4 立的 bar，用我们的数字度量 |
 
 <p align="right"><a href="#目录">↑ 回目录</a></p>
