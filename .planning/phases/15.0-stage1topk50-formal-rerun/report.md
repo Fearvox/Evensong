@@ -8,7 +8,7 @@
 - Git commit in meta: `9148853`
 - Git dirty in meta: `False`
 - Stage1TopK: `50` (`inputs.stage1TopK` in meta)
-- BGE endpoint/model: `http://100.65.234.77:8080/v1`, `bge-m3`
+- BGE endpoint/model: `http://<PRIVATE_EMBEDDING_HOST>:8080/v1`, `bge-m3`
 - Judge: `deepseek-v4-flash`, thinking disabled
 
 ## Verification summary

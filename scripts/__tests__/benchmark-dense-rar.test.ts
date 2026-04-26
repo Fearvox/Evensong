@@ -14,12 +14,12 @@ describe('benchmark-dense-rar live boundary', () => {
   test('recognizes local endpoints', () => {
     expect(isLocalBaseUrl('http://127.0.0.1:8080/v1')).toBe(true)
     expect(isLocalBaseUrl('http://localhost:1337/v1')).toBe(true)
-    expect(isLocalBaseUrl('http://100.65.234.77:8080/v1')).toBe(false)
+    expect(isLocalBaseUrl('http://203.0.113.10:8080/v1')).toBe(false)
   })
 
   test('requires explicit live opt-in for non-local providers', () => {
     expect(() => assertLiveAllowed({
-      bgeBaseURL: 'http://100.65.234.77:8080/v1',
+      bgeBaseURL: 'http://203.0.113.10:8080/v1',
       judgeBaseURL: 'https://api.minimax.io/v1',
       pipelines: ['dense', 'dense-rar'],
       allowLive: false,
@@ -28,7 +28,7 @@ describe('benchmark-dense-rar live boundary', () => {
 
   test('allows non-local providers when explicitly opted in', () => {
     expect(() => assertLiveAllowed({
-      bgeBaseURL: 'http://100.65.234.77:8080/v1',
+      bgeBaseURL: 'http://203.0.113.10:8080/v1',
       judgeBaseURL: 'https://api.minimax.io/v1',
       pipelines: ['dense', 'dense-rar'],
       allowLive: true,
@@ -37,7 +37,7 @@ describe('benchmark-dense-rar live boundary', () => {
 
   test('bm25-only pipeline does not require live opt-in', () => {
     expect(() => assertLiveAllowed({
-      bgeBaseURL: 'http://100.65.234.77:8080/v1',
+      bgeBaseURL: 'http://203.0.113.10:8080/v1',
       judgeBaseURL: 'https://api.minimax.io/v1',
       pipelines: ['bm25'],
       allowLive: false,

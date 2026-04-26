@@ -35,7 +35,7 @@ This skill implements a formal self- and co-evolution coordination layer for the
 
 ## Integration
 - **Full KAIROS integration**: Proactive sub-agent spawning and 30-second summary cycles.
-- **Vault side-loading**: Automatically indexes /Users/0xvox/Desktop/research-vault as long-term memory.
+- **Vault side-loading**: Automatically indexes <RESEARCH_VAULT_ROOT> as long-term memory.
 - **AgentTool spawning**: Can fork parallel observers (scheduling, memory, skill, evolution).
 - **No-paper rule**: Enforced via SyntheticOutputTool and permission gates.
 

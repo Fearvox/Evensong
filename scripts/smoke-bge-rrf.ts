@@ -23,7 +23,7 @@ import path from 'node:path'
 import { buildVaultManifest } from '../src/services/retrieval/manifestBuilder.js'
 import {
   createBgeEmbeddingClient,
-  BGE_EMBEDDING_DROPLET_BASE_URL,
+  BGE_EMBEDDING_DEFAULT_BASE_URL,
 } from '../src/services/api/bgeEmbedding.js'
 import { createBgeEmbeddingProvider } from '../src/services/retrieval/providers/bgeEmbeddingProvider.js'
 import { createBM25Provider } from '../src/services/retrieval/providers/bm25Provider.js'
@@ -112,7 +112,7 @@ async function main() {
 
   const bm25 = createBM25Provider()
   const bgeClient = createBgeEmbeddingClient({
-    baseURL: BGE_EMBEDDING_DROPLET_BASE_URL,
+    baseURL: BGE_EMBEDDING_DEFAULT_BASE_URL,
     timeoutMs: 180000,
   })
   const dense = createBgeEmbeddingProvider({ client: bgeClient })

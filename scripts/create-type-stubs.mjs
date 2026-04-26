@@ -7,7 +7,7 @@ import { execSync } from 'child_process';
 import { writeFileSync, existsSync, mkdirSync } from 'fs';
 import { dirname, join } from 'path';
 
-const ROOT = '/Users/konghayao/code/ai/claude-code';
+const ROOT = process.env.REPO_ROOT ?? process.cwd();
 
 // Run tsc and capture errors (tsc exits non-zero on type errors, that's expected)
 let errors;

@@ -31,7 +31,7 @@ import { KeyboardShortcutHint } from '../design-system/KeyboardShortcutHint.js';
 import { Byline } from '../design-system/Byline.js';
 import { useTerminalSize } from '../../hooks/useTerminalSize.js';
 import { useTasksV2 } from '../../hooks/useTasksV2.js';
-import { formatDuration } from '../../utils/format.js';
+import { formatDuration, formatFileSize } from '../../utils/format.js';
 import { VoiceWarmupHint } from './VoiceIndicator.js';
 import { useVoiceEnabled } from '../../hooks/useVoiceEnabled.js';
 import { useVoiceState } from '../../context/voice.js';
@@ -49,6 +49,32 @@ const proactiveModule = feature('PROACTIVE') || feature('KAIROS') ? require('../
 const NO_OP_SUBSCRIBE = (_cb: () => void) => () => {};
 const NULL = () => null;
 const MAX_VOICE_HINT_SHOWS = 3;
+const RSS_UPDATE_INTERVAL_MS = 5_000;
+
+type RssState = {
+  text: string;
+  level: 'normal' | 'warning' | 'error';
+};
+
+function useRssDisplay(): RssState | null {
+  const [state, setState] = useState<RssState | null>(null);
+  useEffect(() => {
+    function update(): void {
+      const bytes = process.memoryUsage().rss;
+      const mb = bytes / (1024 * 1024);
+      const level = mb >= 1024 ? 'error' : mb >= 512 ? 'warning' : 'normal';
+      const text = formatFileSize(bytes);
+      setState(prev => prev?.text === text && prev.level === level ? prev : {
+        text,
+        level
+      });
+    }
+    update();
+    const timer = setInterval(update, RSS_UPDATE_INTERVAL_MS);
+    return () => clearInterval(timer);
+  }, []);
+  return state;
+}
 type Props = {
   exitMessage: {
     show: boolean;
@@ -309,6 +335,7 @@ function ModeIndicator({
     }
   }, [voiceEnabled, voiceHintUnderCap]);
   const isKillAgentsConfirmShowing = useAppState(s_7 => s_7.notifications.current?.key === 'kill-agents-confirm');
+  const rssState = useRssDisplay();
 
   // Derive team info from teamContext (no filesystem I/O needed)
   // Match the same logic as TeamStatus to avoid trailing separator
@@ -365,7 +392,9 @@ function ModeIndicator({
   // its click-target Box isn't nested inside the <Text wrap="truncate">
   // wrapper (reconciler throws on Box-in-Text).
   // Tmux pill (ant-only) — appears right after tasks in nav order
-  ...(("external" as string) === 'ant' && hasTmuxSession ? [<TungstenPill key="tmux" selected={tmuxSelected} />] : []), ...(isAgentSwarmsEnabled() && hasTeams ? [<TeamStatus key="teams" teamsSelected={teamsSelected} showHint={showHint && !hasBackgroundTasks} />] : []), ...(shouldShowPrStatus ? [<PrBadge key="pr-status" number={prStatus.number!} url={prStatus.url!} reviewState={prStatus.reviewState!} />] : [])];
+  ...(("external" as string) === 'ant' && hasTmuxSession ? [<TungstenPill key="tmux" selected={tmuxSelected} />] : []), ...(isAgentSwarmsEnabled() && hasTeams ? [<TeamStatus key="teams" teamsSelected={teamsSelected} showHint={showHint && !hasBackgroundTasks} />] : []), ...(shouldShowPrStatus ? [<PrBadge key="pr-status" number={prStatus.number!} url={prStatus.url!} reviewState={prStatus.reviewState!} />] : []), ...(rssState ? [<Text key="rss" dimColor={rssState.level === 'normal'} color={rssState.level === 'error' ? 'error' : rssState.level === 'warning' ? 'warning' : undefined}>
+          {rssState.text}
+        </Text>] : [])];
 
   // Check if any in-process teammates exist (for hint text cycling)
   const hasAnyInProcessTeammates = Object.values(tasks).some(t_2 => t_2.type === 'in_process_teammate' && t_2.status === 'running');

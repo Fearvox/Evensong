@@ -4,7 +4,7 @@ import type { Message } from '../../types/message.js'
 import { getProjectRoot } from '../../bootstrap/state.js'
 import { logForDebugging } from '../../utils/debug.js'
 
-const HERMES_BIN = '/Users/0xvox/.local/bin/hermes'
+const HERMES_BIN = process.env.HERMES_BIN ?? 'hermes'
 
 export interface HermesSubagentOptions {
   prompt: string

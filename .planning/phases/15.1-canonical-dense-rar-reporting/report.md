@@ -10,10 +10,10 @@
 
 ## Artifacts
 
-- `/root/ccr/benchmarks/runs/wave3i-dense-rar-2026-04-24T0854.md`
-- `/root/ccr/benchmarks/runs/wave3i-dense-rar-2026-04-24T0854.meta.json`
-- `/root/ccr/benchmarks/runs/wave3i-dense-rar-2026-04-24T0854.jsonl`
-- `/root/ccr/.planning/phases/15.0-stage1topk50-formal-rerun/report.md`
+- `<REMOTE_REPO>/benchmarks/runs/wave3i-dense-rar-2026-04-24T0854.md`
+- `<REMOTE_REPO>/benchmarks/runs/wave3i-dense-rar-2026-04-24T0854.meta.json`
+- `<REMOTE_REPO>/benchmarks/runs/wave3i-dense-rar-2026-04-24T0854.jsonl`
+- `<REMOTE_REPO>/.planning/phases/15.0-stage1topk50-formal-rerun/report.md`
 
 ## Result table
 

@@ -13,7 +13,7 @@ describe('flag-report command', () => {
         delete process.env[key]
       }
     }
-    process.env.HOME = process.env.HOME || '/Users/0xvox'
+    process.env.HOME = process.env.HOME || '/tmp/hermes-test-home'
   })
 
   afterEach(async () => {

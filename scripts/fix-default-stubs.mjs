@@ -7,7 +7,7 @@ import { execSync } from 'child_process';
 import { readFileSync, writeFileSync, existsSync } from 'fs';
 import { dirname, join, relative, resolve } from 'path';
 
-const ROOT = '/Users/konghayao/code/ai/claude-code';
+const ROOT = process.env.REPO_ROOT ?? process.cwd();
 
 // Step 1: Find all stub files with only `export default {} as any`
 const stubFiles = new Set();

@@ -6,10 +6,11 @@ After=network-online.target
 [Service]
 Type=oneshot
 User=root
-WorkingDirectory=/root/ccr
-Environment=DENSE_RAR_VAULT_ROOT=/root/research-vault
-Environment=DENSE_RAR_QUERIES_FILE=/root/ccr/benchmarks/wave3-adversarial-queries.json
-Environment=DENSE_RAR_BGE_BASE_URL=http://100.65.234.77:8080/v1
+WorkingDirectory=/opt/evensong/ccr
+Environment=DENSE_RAR_VAULT_ROOT=/var/lib/evensong/research-vault
+Environment=DENSE_RAR_QUERIES_FILE=/opt/evensong/ccr/benchmarks/wave3-adversarial-queries.json
+EnvironmentFile=-/etc/evensong/dense-rar.env
+Environment=DENSE_RAR_BGE_BASE_URL=http://127.0.0.1:1337/v1
 Environment=DENSE_RAR_STAGE1_LABEL=BGE-M3-Q4_K_M
 Environment=DENSE_RAR_JUDGE_BASE_URL=https://api.minimax.io/v1
 Environment=DENSE_RAR_JUDGE_MODEL=MiniMax-M2.7
@@ -27,7 +28,7 @@ Environment=DENSE_RAR_CONCURRENCY=1
 Environment=DENSE_RAR_WITH_BODY=false
 Environment=DENSE_RAR_MODE=probe
 Environment=DENSE_RAR_ALLOW_LIVE=1
-ExecStart=/root/ccr/scripts/run-dense-rar-benchmark.sh
+ExecStart=/opt/evensong/ccr/scripts/run-dense-rar-benchmark.sh
 
 [Install]
 WantedBy=multi-user.target

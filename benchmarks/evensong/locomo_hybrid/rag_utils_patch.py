@@ -17,8 +17,8 @@ from typing import List, Tuple, Dict, Any, Optional
 import httpx
 import os
 
-# BGE-M3 endpoint (ccr-droplet Tailscale)
-BGE_ENDPOINT = os.environ.get("BGE_ENDPOINT", "http://100.65.234.77:8080/embedding")
+# BGE-M3 endpoint. Override BGE_ENDPOINT for remote/private hosts.
+BGE_ENDPOINT = os.environ.get("BGE_ENDPOINT", "http://127.0.0.1:1337/embedding")
 BGE_USE_LOCAL = os.environ.get("BGE_USE_LOCAL", "0") == "1"
 
 # Global model cache

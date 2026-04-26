@@ -39,7 +39,7 @@
   },
   "providers": {
     "stage1Label": "BGE-M3-Q4_K_M-8080-TopK50",
-    "bgeBaseURL": "<REDACTED_EMBEDDING_ENDPOINT>",
+    "bgeBaseURL": "<NON_LOCAL_PROVIDER_ENDPOINT>",
     "bgeModel": "bge-m3",
     "bgeTimeoutMs": 180000,
     "bgeCorpusBatchSize": 50,

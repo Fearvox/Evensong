@@ -3,7 +3,7 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
-HOME_DIR="${HOME:-/root}"
+HOME_DIR="${HOME:-/tmp}"
 
 if [ -f "$HOME_DIR/.hermes/.env" ]; then
   set -a

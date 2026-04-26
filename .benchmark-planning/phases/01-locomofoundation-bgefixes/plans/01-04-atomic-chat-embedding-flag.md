@@ -2,7 +2,7 @@
 
 ## What
 
-Fix the bug where Atomic Chat v1.1.44 on ccr-droplet spawns `llama-server` WITHOUT the `--embedding` flag, causing the endpoint to return 501.
+Fix the bug where Atomic Chat v1.1.44 on private embedding host spawns `llama-server` WITHOUT the `--embedding` flag, causing the endpoint to return 501.
 
 ## Why
 
@@ -12,7 +12,7 @@ Wave 3H research found that `isBgeEmbeddingAvailable()` was green-lighting a bro
 
 ### Step 1: Identify current startup command
 
-Check how Atomic Chat / llama-server is started on ccr-droplet.
+Check how Atomic Chat / llama-server is started on private embedding host.
 
 ### Step 2: Add --embedding flag
 
@@ -24,7 +24,7 @@ llama-server --embedding -m model.gguf -c 512 --host 0.0.0.0 --port 8080
 ### Step 3: Verify endpoint
 
 ```bash
-curl -X POST http://100.65.234.77:8080/embed \
+curl -X POST http://<PRIVATE_EMBEDDING_HOST>:8080/embed \
   -H "Content-Type: application/json" \
   -d '{"texts": ["test"]}'
 ```
@@ -43,4 +43,4 @@ BGE-M3 endpoint accepts `--embedding` flag (Atomic Chat v1.1.44 bug fixed)
 
 ## Status
 
-- [x] Done (2026-04-22) — Endpoint verified working at `http://100.65.234.77:8080/embedding`
+- [x] Done (2026-04-22) — Endpoint verified working at `http://<PRIVATE_EMBEDDING_HOST>:8080/embedding`

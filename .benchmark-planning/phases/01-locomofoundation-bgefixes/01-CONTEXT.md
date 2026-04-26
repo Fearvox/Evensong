@@ -27,7 +27,7 @@ Build LOCOMO-compatible BGE-M3 dense retriever wrapper and fix BGE-M3 endpoint b
 - **D-05:** LOCOMO repo cloned to `benchmarks/evensong/locomo/` — patch `task_eval/rag_utils.py` with `hybrid` retriever option, don't fork LOCOMO
 
 ### BGE-M3 Endpoint
-- **D-06:** BGE-M3 dense calls go to ccr-droplet Tailscale endpoint (already deployed at 100.65.234.77)
+- **D-06:** BGE-M3 dense calls go to private embedding host private network endpoint (already deployed at <PRIVATE_EMBEDDING_HOST>)
 - **D-07:** BM25 fallback activates when BGE-M3 endpoint returns error — graceful degradation, not hard failure
 
 ### Claude's Discretion
@@ -48,10 +48,10 @@ Build LOCOMO-compatible BGE-M3 dense retriever wrapper and fix BGE-M3 endpoint b
 
 ### LOCOMO Bugs to Fix
 - `.benchmark-planning/research/PITFALLS.md` §1 — Dragon embedding normalization inconsistency (get_embeddings NOT normalized, get_context_embeddings normalized) and LOCOMO's own mean_pooling NameError bug
-- `.benchmark-planning/research/PITFALLS.md` §2 — BGE-M3 Tailscale endpoint failure modes (Atomic Chat v1.1.44 --embedding flag missing, maxChars exceeds batch limit)
+- `.benchmark-planning/research/PITFALLS.md` §2 — BGE-M3 private network endpoint failure modes (Atomic Chat v1.1.44 --embedding flag missing, maxChars exceeds batch limit)
 
 ### BGE-M3 Integration
-- Wave 3H research (CCR codebase) — BGE-M3 dense via ccr-droplet Tailscale, already validated at 69.4% top-1 vs 61.1% RRF
+- Wave 3H research (CCR codebase) — BGE-M3 dense via private embedding host private network, already validated at 69.4% top-1 vs 61.1% RRF
 
 ### MTEB Protocol (Phase 2 dependency)
 - `.benchmark-planning/research/FEATURES.md` §2.1-2.2 — SearchProtocol interface with index() + search() methods
@@ -64,7 +64,7 @@ Build LOCOMO-compatible BGE-M3 dense retriever wrapper and fix BGE-M3 endpoint b
 ### Reusable Assets
 - `benchmarks/evensong/or-shot.ts` — benchmark harness pattern (Bun, JSONL output, run directory structure)
 - `benchmarks/evensong/types.ts` — BENCHMARK_MODELS array with 16 model presets
-- ccr-droplet Tailscale endpoint at 100.65.234.77 — already running BGE-M3 embedding service
+- private embedding host private network endpoint at <PRIVATE_EMBEDDING_HOST> — already running BGE-M3 embedding service
 
 ### Established Patterns
 - LOCOMO eval scripts use `rag_utils.py` with four-function retriever contract

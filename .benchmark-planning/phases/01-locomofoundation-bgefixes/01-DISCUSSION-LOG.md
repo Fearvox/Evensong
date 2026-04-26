@@ -16,7 +16,7 @@
 | BM25 implementation | `rank_bm25` package | rank_bm25 / custom / whoosh |
 | Normalization | BGE-M3 L2-norm both paths (consistent) | dragon-consistent (inconsistent) / BGE-M3-native (consistent) |
 | LOCOMO repo | Patch rag_utils.py, don't fork | patch / fork / submodule |
-| BGE-M3 endpoint | ccr-droplet Tailscale (existing) | ccr-droplet / new endpoint / cloud-hosted |
+| BGE-M3 endpoint | private embedding host private network (existing) | private embedding host / new endpoint / cloud-hosted |
 | BM25 fallback | Graceful degradation on endpoint error | fail-fast / graceful fallback |
 
 ## Notes

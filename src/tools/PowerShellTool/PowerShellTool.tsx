@@ -289,7 +289,7 @@ export const PowerShellTool = buildTool({
     isSearch: boolean;
     isRead: boolean;
   } {
-    if (!input.command) {
+    if (!input?.command) {
       return {
         isSearch: false,
         isRead: false

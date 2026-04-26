@@ -12,7 +12,7 @@
 - Query categories: near_neighbor_memory, lexical_trap, cross_lingual, negative_exclusion, methodology_philosophy, engineering_specific
 - Queries: **24**
 - Runs per (pipeline × query): **1**
-- Stage 1: **BGE-M3-Q4_K_M-8080** via <REDACTED_EMBEDDING_ENDPOINT> (model: **bge-m3**)
+- Stage 1: **BGE-M3-Q4_K_M-8080** via <NON_LOCAL_PROVIDER_ENDPOINT> (model: **bge-m3**)
 - Embedding timeout: **180000ms**
 - Corpus batch size: **50**
 - Stage-1 candidate pool: **20**

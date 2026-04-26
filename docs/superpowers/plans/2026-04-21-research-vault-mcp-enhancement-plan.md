@@ -126,7 +126,7 @@ export type ChecksumStore = Record<string, { sha256: string; writtenAt: string }
 - [ ] **Step 2: Commit**
 
 ```bash
-cd /Users/0xvox/claude-code-reimagine-for-learning
+cd <REPO_ROOT>
 git add packages/research-vault-mcp/src/types.ts
 git commit -m "feat(mcp): add shared types for vault tools"
 ```
@@ -199,7 +199,7 @@ describe('IngestJobStore', () => {
 - [ ] **Step 2: Run test to verify it fails**
 
 ```bash
-cd /Users/0xvox/claude-code-reimagine-for-learning/packages/research-vault-mcp
+cd <REPO_ROOT>/packages/research-vault-mcp
 bun test __tests__/vault_jobs.test.ts
 # Expected: FAIL — file does not exist
 ```
@@ -302,7 +302,7 @@ export async function verifyChecksum(filePath: string, expected: string): Promis
 - [ ] **Step 4: Run test to verify it passes**
 
 ```bash
-cd /Users/0xvox/claude-code-reimagine-for-learning/packages/research-vault-mcp
+cd <REPO_ROOT>/packages/research-vault-mcp
 bun test __tests__/vault_jobs.test.ts
 # Expected: PASS
 ```
@@ -354,7 +354,7 @@ describe('parseArxivId', () => {
 - [ ] **Step 2: Run test to verify it fails**
 
 ```bash
-cd /Users/0xvox/claude-code-reimagine-for-learning/packages/research-vault-mcp
+cd <REPO_ROOT>/packages/research-vault-mcp
 bun test __tests__/ingest.test.ts
 # Expected: FAIL — file does not exist
 ```
@@ -432,7 +432,7 @@ function parseArxivXml(xml: string): ArxivMetadata {
 - [ ] **Step 4: Run test to verify it passes**
 
 ```bash
-cd /Users/0xvox/claude-code-reimagine-for-learning/packages/research-vault-mcp
+cd <REPO_ROOT>/packages/research-vault-mcp
 bun test __tests__/ingest.test.ts
 # Expected: PASS
 ```
@@ -643,7 +643,7 @@ describe('vault_delete', () => {
 - [ ] **Step 2: Run test to verify it fails**
 
 ```bash
-cd /Users/0xvox/claude-code-reimagine-for-learning/packages/research-vault-mcp
+cd <REPO_ROOT>/packages/research-vault-mcp
 bun test __tests__/vault_write.test.ts
 # Expected: FAIL — file does not exist
 ```
@@ -997,7 +997,7 @@ export const vaultWriteTools = [
 - [ ] **Step 4: Run test to verify it passes**
 
 ```bash
-cd /Users/0xvox/claude-code-reimagine-for-learning/packages/research-vault-mcp
+cd <REPO_ROOT>/packages/research-vault-mcp
 bun test __tests__/vault_write.test.ts
 # Expected: PASS
 ```

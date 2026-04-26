@@ -14,15 +14,15 @@ Hermes `config.yaml` 里配置的是：
 ```yaml
 mcp_servers:
   research_vault:
-    url: http://localhost:8765   # ← 只支持 plain HTTP，不支持 Tailscale
+    url: http://localhost:8765   # ← plain HTTP local endpoint
 ```
 
-CCR 能工作是因为 CCR 的 `.mcp.json` 用 `mcp-remote` 包装了 Tailscale URL：
+CCR 能工作是因为 CCR 的 `.mcp.json` 用 `mcp-remote` 包装了 private network SSE URL：
 ```json
-"args": ["-y", "mcp-remote", "http://100.127.140.74:8765/sse", "--allow-http"]
+"args": ["-y", "mcp-remote", "http://<PRIVATE_NETWORK_HOST>:8765/sse", "--allow-http"]
 ```
 
-Hermes 直连 `localhost:8765`，而 MCP server 跑在 Tailscale IP `100.127.140.74:8765`，所以 Hermes 连不上。
+Hermes 直连 `localhost:8765`，而 MCP server 当时跑在 private network host 上，所以 Hermes 连不上。
 
 ### 1.2 stdio transport 的实现 bug
 
@@ -86,7 +86,7 @@ mcp_servers:
     command: bun
     args:
       - run
-      - /Users/0xvox/claude-code-reimagine-for-learning/packages/research-vault-mcp/bin/research-vault-mcp.mjs
+      - <REPO_ROOT>/packages/research-vault-mcp/bin/research-vault-mcp.mjs
       - --transport=stdio
 ```
 
