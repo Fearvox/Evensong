@@ -1,7 +1,7 @@
 {
   "name": "@syndash/research-vault-mcp",
-  "version": "1.1.1",
-  "description": "MCP server for Nolan's research vault — semantic search + memory persistence over 200+ markdown docs via local Gemma (Atomic Chat) or cloud LLM fallback. Part of DASH SHATTER / SynDASH.",
+  "version": "1.1.2",
+  "description": "Evensong Research Vault MCP module — local-first semantic search, note persistence, and knowledge-base tools for MCP-compatible agents.",
   "type": "module",
   "bin": {
     "research-vault-mcp": "./bin/research-vault-mcp.mjs"
@@ -9,6 +9,7 @@
   "scripts": {
     "dev": "bun run src/server.ts",
     "build": "bun build src/server.ts --outdir=dist --target=bun",
+    "prepack": "bun run build",
     "test": "bun test"
   },
   "repository": {
@@ -20,12 +21,13 @@
   "bugs": {
     "url": "https://github.com/Fearvox/Evensong/issues"
   },
-  "license": "UNLICENSED",
+  "license": "Apache-2.0",
   "publishConfig": {
     "access": "public"
   },
   "files": [
     "src/**/*.ts",
+    "dist/**/*.js",
     "bin/**/*.mjs",
     "README.md",
     "package.json"

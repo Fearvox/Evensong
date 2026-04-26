@@ -1,5 +1,6 @@
-// Research Vault MCP Server — Standard MCP SSE Transport
-// MCP Protocol: JSON-RPC 2.0 over SSE (server→client) + HTTP POST (client→server)
+// Research Vault MCP Server — stdio by default, SSE when explicitly requested
+// MCP stdio: JSON-RPC 2.0 over stdin/stdout for command-launched MCP clients.
+// MCP SSE: JSON-RPC 2.0 over SSE (server→client) + HTTP POST (client→server).
 //
 // Flow:
 //   1. Client connects GET /sse
@@ -12,7 +13,7 @@ import { vaultWriteTools } from './vault_write.js'
 import { amplifyTools, configureAmplify } from './amplify'
 
 const HOST = '0.0.0.0'
-const TRANSPORT = process.env.MCP_TRANSPORT ?? 'sse'
+const TRANSPORT = process.env.MCP_TRANSPORT ?? 'stdio'
 const PORT = parseInt(process.env.MCP_PORT ?? '8765')
 
 // ─── MCP Protocol Types ──────────────────────────────────────────────────────
@@ -150,7 +151,10 @@ async function handleStdioTransport() {
 
 // ─── HTTP Server ──────────────────────────────────────────────────────────────
 
-const server = Bun.serve({
+let server: ReturnType<typeof Bun.serve> | undefined
+
+if (TRANSPORT !== 'stdio') {
+  server = Bun.serve({
   port: PORT,
   hostname: HOST,
 
@@ -266,7 +270,8 @@ const server = Bun.serve({
     // ── 404
     return Response.json({ error: 'Not found' }, { status: 404 })
   }
-})
+  })
+}
 
 // ─── Startup ─────────────────────────────────────────────────────────────────
 
@@ -296,6 +301,6 @@ process.on('SIGINT', () => {
     clearInterval(session.heartbeat)
   }
   sessions.clear()
-  server.stop()
+  server?.stop()
   process.exit(0)
 })

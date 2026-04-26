@@ -10,7 +10,10 @@
   ],
   "scripts": {
     "build": "bun build src/entrypoints/cli.tsx --outdir dist --target bun",
-    "dev": "bun run --watch src/entrypoints/cli.tsx"
+    "dev": "bun run --watch src/entrypoints/cli.tsx",
+    "test": "bun test",
+    "test:research-vault": "bun --filter @syndash/research-vault-mcp test",
+    "build:research-vault": "bun --filter @syndash/research-vault-mcp build"
   },
   "dependencies": {
     "1": "^0.1.2",

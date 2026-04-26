@@ -205,7 +205,16 @@ Canonical run：`dense-rar-2026-04-24T0854` · mode `formal` · clean metadata c
 
 ## ⚡ 快速开始
 
-**前置条件**：[Bun](https://bun.sh) 1.3+（Node.js 不兼容）。检索功能需 Atomic Chat 运行在 `127.0.0.1:1337`（[文档](https://atomicchat.io)）。
+**前置条件**：[Bun](https://bun.sh) 1.3+（完整 Evensong repo 不支持 Node.js 运行）。Atomic Chat `127.0.0.1:1337` 是可选项，只在本地检索功能需要（[文档](https://atomicchat.io)）。
+
+如果只需要 Research Vault MCP 模块，直接安装 package：
+
+```bash
+npx @syndash/research-vault-mcp --transport=stdio
+# 或：bunx @syndash/research-vault-mcp --transport=stdio
+```
+
+完整 Evensong repo：
 
 ```bash
 # 1. 安装
