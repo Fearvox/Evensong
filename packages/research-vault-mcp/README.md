@@ -1,75 +1,121 @@
 # @syndash/research-vault-mcp
 
-MCP (Model Context Protocol) server for [Nolan's research vault](https://github.com/Fearvox/dash-research-vault) — semantic search + memory persistence over 200+ markdown documents via local Gemma (Atomic Chat) or cloud LLM fallback.
+Research Vault is the memory/search module inside **Evensong**. This package exposes it as an MCP server for agents that speak the Model Context Protocol.
 
-**Part of**: DASH SHATTER / SynDASH ecosystem.
-**Home**: [github.com/Fearvox/Evensong](https://github.com/Fearvox/Evensong) — `packages/research-vault-mcp/`
-**Status**: Wave 3+ — not yet published to npm. Plan: `docs/superpowers/plans/2026-04-19-wave2d-submodule-mcp-package-prep.md`.
+It is not the whole Evensong product. Evensong is the hub: runtime, benchmark evidence, handoff pages, and modules. Research Vault MCP is the installable knowledge-base module.
 
-## Install & Run (future, post-publish)
+## Install
 
 ```bash
-# Via bun (recommended — native TS execution)
-bunx @syndash/research-vault-mcp
+# MCP clients usually launch the package for you.
+# The npm shim still delegates runtime execution to Bun.
+npx @syndash/research-vault-mcp --transport=stdio
 
-# Via Node
-npx @syndash/research-vault-mcp
+# Bun direct launch:
+bunx @syndash/research-vault-mcp --transport=stdio
 ```
 
-## Configure Claude Code / Claude Desktop
+Default transport is `stdio`, because command-launched MCP servers are expected to speak JSON-RPC over stdin/stdout. Install [Bun](https://bun.sh) before using either `npx` or `bunx`; the server itself is Bun-native.
 
-Add to `~/.claude/settings.json` or Claude Desktop config:
+Use SSE only when you explicitly want a long-running HTTP server:
+
+```bash
+MCP_PORT=8765 npx @syndash/research-vault-mcp --transport=sse
+# health: http://127.0.0.1:8765/health
+# sse:    http://127.0.0.1:8765/sse
+```
+
+## Configure an MCP client
+
+Claude Desktop / Claude Code style config:
 
 ```json
 {
   "mcpServers": {
-    "research-vault": {
+    "research_vault": {
+      "command": "npx",
+      "args": ["-y", "@syndash/research-vault-mcp", "--transport=stdio"]
+    }
+  }
+}
+```
+
+Bun variant:
+
+```json
+{
+  "mcpServers": {
+    "research_vault": {
       "command": "bunx",
-      "args": ["@syndash/research-vault-mcp"]
+      "args": ["--bun", "@syndash/research-vault-mcp", "--transport=stdio"]
     }
   }
 }
 ```
 
-For direct local dev from this monorepo:
+Local monorepo development:
 
 ```json
 {
   "mcpServers": {
-    "research-vault-dev": {
+    "research_vault_dev": {
       "command": "bun",
-      "args": ["run", "packages/research-vault-mcp/src/server.ts"]
+      "args": ["run", "packages/research-vault-mcp/src/server.ts", "--transport=stdio"]
     }
   }
 }
 ```
 
-## Tools Exposed (MCP contract)
+## Configure the vault root
 
-See `src/vault.ts` and `src/amplify.ts` for current tool definitions:
+Set the vault location with an environment variable before launching your MCP client:
 
-- `vault_search` — hybrid search over analyzed knowledge base
-- `vault_status` — decay scores + retention health
-- `vault_taxonomy` — category tree + item counts
-- `vault_batch_analyze` — raw queue status + preview
-- `amplify_*` — remote RAG query layer (currently requires Amplify API key — see `docs.evermind.ai`; Wave 3+ will add local Gemma fallback path via `@syndash/research-vault-mcp`'s built-in retrieval chain)
+```bash
+export VAULT_ROOT=/path/to/research-vault
+```
+
+The package is designed for markdown-based knowledge bases. Keep private vault contents outside the public Evensong repo.
+
+## Tools exposed
+
+Current MCP contract:
+
+- `vault_search` — search analyzed knowledge-base entries
+- `vault_status` — registry, retention, and decay health
+- `vault_taxonomy` — category tree and item counts
+- `vault_batch_analyze` — raw queue status and preview
+- `vault_note_save` — persist a markdown note into the vault
+- `vault_get` — retrieve a saved vault item by id
+- `vault_delete` — delete a saved vault item
+- `vault_raw_ingest` — queue a raw URL/text ingest job
+- `amplify_*` — optional remote RAG query layer when Amplify credentials are configured
+
+## Package mechanics
+
+Published packages include:
+
+- `bin/research-vault-mcp.mjs`
+- `dist/server.js`
+- `src/**/*.ts` for source inspection
+- `README.md`
+- `package.json`
+
+The bin prefers `dist/server.js`. In a monorepo checkout without `dist`, it falls back to `bun run src/server.ts` so development remains fast without a separate compile step.
 
 ## Architecture
 
-Per parent spec [2026-04-19 vault foundation & preamble design](https://github.com/Fearvox/Evensong/blob/main/docs/superpowers/specs/2026-04-19-vault-foundation-and-preamble-design.md) §3.4, retrieval uses a **unified multi-signal ranker** (not 3 separate subsystems):
+Research Vault MCP uses a multi-signal ranker for candidate retrieval:
 
+```text
+score(d, q, t) = lexical(q,d)
+               + semantic(embed(q), embed(d))
+               + recency/stability(d,t)
+               + access frequency(d)
+               + summary-level weight(d)
 ```
-score(d, q, t) = 0.35·BM25(q,d) + 0.35·cosine(embed(q), embed(d))
-               + 0.15·exp(-(t - lastAccess)/stability)
-               + 0.10·log1p(accessCount)/log1p(MAX_ACCESS)
-               + 0.05·summary_level_weight(d)
-```
 
-**Primary LLM**: Atomic Chat local Gemma-4-E4B-Uncensored-Q4_K_M (`http://127.0.0.1:1337/v1`).
-**Fallback chain**: xai-fast → minimax-m27 → openrouter/qwen3.6-plus → openrouter/llama-3.1-8b-free.
-
-**Prior art**: EverMemOS (arxiv 2601.02163, EverMind/Shanda, 2026-01) — LLM-orchestrated hybrid retrieval. This package adopts their Stage-1 hybrid candidate generation but replaces Stage-2 verifier-loop with direct listwise LLM judge (simpler + more deterministic).
+The Evensong benchmark evidence for hybrid retrieval and Dense RAR lives in the parent repo under `benchmarks/`.
 
 ## License
 
-`UNLICENSED` for now (pending org-level license decision). See parent repo LICENSE.
+Apache-2.0 for package code. Research artifacts in the parent repo may use separate licenses; check the repository root license files.

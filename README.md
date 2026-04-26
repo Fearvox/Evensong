@@ -205,7 +205,16 @@ See [`AGENTS.md`](./AGENTS.md) and [`CLAUDE.md`](./CLAUDE.md) for detailed devel
 
 ## ⚡ Quick start
 
-**Prerequisites**: [Bun](https://bun.sh) 1.3+ (Node.js not supported). Atomic Chat running on `127.0.0.1:1337` for retrieval features ([docs](https://atomicchat.io)).
+**Prerequisites**: [Bun](https://bun.sh) 1.3+ (Node.js not supported for the Evensong repo). Atomic Chat running on `127.0.0.1:1337` is optional and only needed for local retrieval features ([docs](https://atomicchat.io)).
+
+If you only want the Research Vault MCP module, install the package directly:
+
+```bash
+npx @syndash/research-vault-mcp --transport=stdio
+# or: bunx @syndash/research-vault-mcp --transport=stdio
+```
+
+For the full Evensong repo:
 
 ```bash
 # 1. Install

@@ -54,15 +54,32 @@ describe('@syndash/research-vault-mcp package shape (npx publish readiness)', ()
     expect(pkg.publishConfig?.access).toBe('public')
   })
 
-  test('has files allowlist', () => {
+  test('has files allowlist for compiled publish artifact', () => {
     expect(Array.isArray(pkg.files)).toBe(true)
     expect(pkg.files.length).toBeGreaterThan(0)
     expect(pkg.files).toContain('README.md')
     expect(pkg.files).toContain('package.json')
+    expect(pkg.files).toContain('dist/**/*.js')
   })
 
-  test('README.md exists', () => {
-    expect(existsSync(join(PKG_ROOT, 'README.md'))).toBe(true)
+  test('builds before npm pack', () => {
+    expect(pkg.scripts?.prepack).toBe('bun run build')
+  })
+
+  test('uses Apache-2.0 package license', () => {
+    expect(pkg.license).toBe('Apache-2.0')
+  })
+
+  test('README.md documents stdio launch', () => {
+    const readme = readFileSync(join(PKG_ROOT, 'README.md'), 'utf8')
+    expect(readme).toContain('--transport=stdio')
+    expect(readme).toContain('Evensong')
+    expect(readme).not.toContain('not yet published')
+  })
+
+  test('bin defaults to stdio transport', () => {
+    const bin = readFileSync(join(PKG_ROOT, pkg.bin['research-vault-mcp']), 'utf8')
+    expect(bin).toContain("return 'stdio'")
   })
 
   test('type=module for ESM', () => {

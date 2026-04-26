@@ -1,49 +1,65 @@
 #!/usr/bin/env node
 /**
  * CLI entry point for @syndash/research-vault-mcp.
- * Invoked via `npx @syndash/research-vault-mcp` or `bunx @syndash/research-vault-mcp`.
- * Delegates to src/server.ts (compiled or via bun direct).
  *
- * Part of DASH SHATTER (Fearvox/Evensong repo, SynDASH org).
- * See packages/research-vault-mcp/README.md for MCP client config.
+ * The server is Bun-native. The npm bin is a small Node-compatible shim so
+ * `npx` can install the package, then delegate execution to `bun`.
  */
 
 import { fileURLToPath } from 'url'
 import { dirname, join } from 'path'
 import { existsSync } from 'fs'
+import { spawn } from 'child_process'
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = dirname(__filename)
 const pkgRoot = join(__dirname, '..')
 
-// Prefer compiled JS if available (post-build); fall back to bun direct execution of TS source.
 const compiledServer = join(pkgRoot, 'dist', 'server.js')
 const sourceServer = join(pkgRoot, 'src', 'server.ts')
 
-async function main() {
-  const args = process.argv.slice(2)
-  let transport = 'sse'
-
+function parseTransport(args) {
   for (let i = 0; i < args.length; i++) {
-    if (args[i] === '--transport' && args[i + 1]) {
-      transport = args[i + 1]
-    } else if (args[i].startsWith('--transport=')) {
-      transport = args[i].split('=')[1]
-    }
+    if (args[i] === '--transport' && args[i + 1]) return args[i + 1]
+    if (args[i]?.startsWith('--transport=')) return args[i].split('=')[1]
   }
-  process.env.MCP_TRANSPORT = transport
+  return 'stdio'
+}
+
+function runWithBun(entrypoint, args) {
+  const child = spawn('bun', [entrypoint, ...args], {
+    cwd: pkgRoot,
+    stdio: 'inherit',
+    env: {
+      ...process.env,
+      MCP_TRANSPORT: parseTransport(args),
+    },
+  })
+
+  child.on('exit', (code, signal) => {
+    if (signal) process.kill(process.pid, signal)
+    process.exit(code ?? 1)
+  })
+
+  child.on('error', err => {
+    console.error('research-vault-mcp: failed to spawn bun')
+    console.error('Install Bun first: https://bun.sh')
+    console.error(err.message)
+    process.exit(1)
+  })
+}
+
+function main() {
+  const args = process.argv.slice(2)
 
   if (existsSync(compiledServer)) {
-    await import(compiledServer)
+    runWithBun(compiledServer, args)
   } else if (existsSync(sourceServer)) {
-    await import(sourceServer)
+    runWithBun(sourceServer, args)
   } else {
     console.error('research-vault-mcp: neither dist/server.js nor src/server.ts found')
     process.exit(1)
   }
 }
 
-main().catch(err => {
-  console.error('research-vault-mcp fatal:', err)
-  process.exit(1)
-})
+main()
