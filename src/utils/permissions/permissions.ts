@@ -853,12 +853,30 @@ export const hasPermissionsToUseTool: CanUseToolFn = async (
               CLASSIFIER_FAIL_CLOSED_REFRESH_MS,
             )
           ) {
+            if (appState.toolPermissionContext.shouldAvoidPermissionPrompts) {
+              logForDebugging(
+                'Auto mode classifier unavailable, denying with retry guidance (fail closed)',
+                { level: 'warn' },
+              )
+              return {
+                behavior: 'deny',
+                decisionReason: {
+                  type: 'classifier',
+                  classifier: 'auto-mode',
+                  reason: 'Classifier unavailable',
+                },
+                message: buildClassifierUnavailableMessage(
+                  tool.name,
+                  classifierResult.model,
+                ),
+              }
+            }
             logForDebugging(
-              'Auto mode classifier unavailable, denying with retry guidance (fail closed)',
+              'Auto mode classifier unavailable, falling back to prompting with retry guidance (fail closed)',
               { level: 'warn' },
             )
             return {
-              behavior: 'deny',
+              behavior: 'ask',
               decisionReason: {
                 type: 'classifier',
                 classifier: 'auto-mode',

@@ -67,7 +67,7 @@
     "cli-boxes": "latest",
     "cli-highlight": "^2.1.11",
     "code-excerpt": "latest",
-    "color-diff-napi": "^0.0.1",
+    "color-diff-napi": "workspace:*",
     "diff": "latest",
     "emoji-regex": "latest",
     "env-paths": "latest",
