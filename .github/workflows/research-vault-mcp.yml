@@ -1,0 +1,87 @@
+name: Research Vault MCP
+
+on:
+  pull_request:
+    paths:
+      - "packages/research-vault-mcp/**"
+      - "package.json"
+      - "bun.lock"
+      - ".github/workflows/research-vault-mcp.yml"
+  push:
+    branches:
+      - main
+    paths:
+      - "packages/research-vault-mcp/**"
+      - "package.json"
+      - "bun.lock"
+      - ".github/workflows/research-vault-mcp.yml"
+
+jobs:
+  package-readiness:
+    name: Package Readiness
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.3.11
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          registry-url: https://registry.npmjs.org/
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Run package tests
+        run: bun --filter @syndash/research-vault-mcp test
+
+      - name: Build package
+        run: bun --filter @syndash/research-vault-mcp build
+
+      - name: Build root CLI
+        run: bun run build
+
+      - name: Stdio bin smoke test
+        run: |
+          set -o pipefail
+          rm -f /tmp/rv-mcp-stdio.json
+          printf '{"jsonrpc":"2.0","id":1,"method":"tools/list"}\n' | timeout 10s node packages/research-vault-mcp/bin/research-vault-mcp.mjs --transport=stdio | tee /tmp/rv-mcp-stdio.json
+          node -e "
+            const fs = require('fs');
+            const lines = fs.readFileSync('/tmp/rv-mcp-stdio.json', 'utf8').trim().split('\n');
+            const last = JSON.parse(lines[lines.length - 1]);
+            if (!last.result?.tools || last.result.tools.length < 1) {
+              console.error('Smoke test failed: tools/list returned fewer than 1 tool');
+              process.exit(1);
+            }
+            console.log('Smoke test passed: tools/list returned', last.result.tools.length, 'tool(s)');
+          "
+
+      - name: Dry-run npm pack
+        working-directory: packages/research-vault-mcp
+        run: |
+          npm pack --dry-run --json > /tmp/rv-mcp-pack.json
+          node -e "
+            const fs = require('fs');
+            const text = fs.readFileSync('/tmp/rv-mcp-pack.json', 'utf8');
+            const start = text.indexOf('[');
+            if (start === -1) {
+              console.error('npm pack did not return JSON array');
+              process.exit(1);
+            }
+            const pack = JSON.parse(text.slice(start))[0];
+            const files = new Set(pack.files.map((f) => f.path));
+            for (const required of ['dist/server.js', 'CHANGELOG.md']) {
+              if (!files.has(required)) {
+                console.error('Missing from pack dry-run:', required);
+                process.exit(1);
+              }
+            }
+            console.log('Pack dry-run includes required files:', pack.filename);
+          "
