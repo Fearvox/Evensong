@@ -669,6 +669,89 @@
       background: var(--botanical-deep);
     }
 
+    .install-panel {
+      grid-column: span 12;
+      display: grid;
+      grid-template-columns: minmax(0, 0.88fr) minmax(320px, 1.12fr);
+      gap: clamp(22px, 4vw, 44px);
+      align-items: stretch;
+      margin-top: 8px;
+      padding: clamp(28px, 4vw, 44px);
+      border-radius: 6px;
+      background: oklch(0.06 0.01 160 / 0.62);
+      border: 1px solid oklch(0.9 0.03 84 / 0.18);
+      backdrop-filter: blur(30px) saturate(1.18);
+      -webkit-backdrop-filter: blur(30px) saturate(1.18);
+    }
+
+    .install-panel h2 {
+      max-width: 600px;
+      margin-bottom: 14px;
+      font-size: clamp(22px, 3vw, 32px);
+      line-height: 1.1;
+      letter-spacing: 0;
+      font-weight: 620;
+      color: oklch(0.96 0.01 85);
+    }
+
+    .install-panel > div:first-child p {
+      max-width: 600px;
+      color: oklch(0.86 0.025 84);
+      font-size: 15px;
+      line-height: 1.55;
+    }
+
+    .install-card {
+      display: grid;
+      align-content: center;
+      gap: 14px;
+      min-width: 0;
+    }
+
+    .install-step {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      min-width: 0;
+      padding: 16px;
+      border-radius: 4px;
+      background: oklch(0.08 0.01 160 / 0.7);
+      border: 1px solid oklch(0.9 0.03 84 / 0.14);
+    }
+
+    .step-label {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: oklch(0.78 0.025 84);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .install-step code {
+      display: block;
+      overflow-x: auto;
+      white-space: nowrap;
+      max-width: 100%;
+      padding-bottom: 2px;
+      font-family: var(--font-mono);
+      font-size: clamp(12px, 1.25vw, 13px);
+      color: var(--botanical-neon);
+    }
+
+    .install-note {
+      margin: 0;
+      padding: 12px 16px;
+      border-radius: 4px;
+      background: oklch(0.08 0.01 160 / 0.45);
+      border: 1px solid oklch(0.9 0.03 84 / 0.10);
+      font-size: 13px;
+      color: oklch(0.78 0.025 84);
+    }
+
+    .install-note strong {
+      color: var(--sun-gold);
+    }
+
     .command-row {
       display: flex;
       align-items: center;
@@ -872,6 +955,10 @@
         min-height: 440px;
       }
 
+      .install-panel {
+        grid-template-columns: 1fr;
+      }
+
       .section {
         padding: 56px 0;
       }
@@ -1044,6 +1131,24 @@
           </div>
           <span class="module-link">Open npm package</span>
         </a>
+
+        <section class="install-panel" aria-labelledby="install-rv-mcp">
+          <div>
+            <h2 id="install-rv-mcp">Use Research Vault MCP without cloning Evensong.</h2>
+            <p>Evensong is the hub. Research Vault MCP is the package: a stdio MCP server for search, note persistence, and markdown knowledge-base tools.</p>
+          </div>
+          <div class="install-card">
+            <div class="install-step">
+              <span class="step-label">npx launcher</span>
+              <code>npx @syndash/research-vault-mcp --transport=stdio</code>
+            </div>
+            <div class="install-step">
+              <span class="step-label">Claude config</span>
+              <code>{ "command": "npx", "args": ["-y", "@syndash/research-vault-mcp", "--transport=stdio"] }</code>
+            </div>
+            <p class="install-note"><strong>Note:</strong> Bun must be installed. <code>npx</code> is the launcher, not a Node-only runtime.</p>
+          </div>
+        </section>
 
         <a class="module-card small" href="https://github.com/Fearvox/Evensong/tree/main/packages/research-vault-mcp" target="_blank" rel="noreferrer" data-reveal>
           <div>
