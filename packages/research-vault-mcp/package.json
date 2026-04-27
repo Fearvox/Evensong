@@ -30,6 +30,7 @@
     "dist/**/*.js",
     "bin/**/*.mjs",
     "README.md",
+    "CHANGELOG.md",
     "package.json"
   ],
   "keywords": [

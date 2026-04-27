@@ -97,4 +97,10 @@ describe('@syndash/research-vault-mcp package shape (npx publish readiness)', ()
     expect(readme).toContain('`npx` is supported as an install/launch shim')
     expect(readme).toContain('must have `bun` available on `PATH`')
   })
+
+  test('CHANGELOG is packaged and documents current version', () => {
+    expect(pkg.files).toContain('CHANGELOG.md')
+    const changelog = readFileSync(join(PKG_ROOT, 'CHANGELOG.md'), 'utf8')
+    expect(changelog).toContain(`## ${pkg.version}`)
+  })
 })

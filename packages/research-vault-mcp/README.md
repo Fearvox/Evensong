@@ -125,3 +125,7 @@ The package is intentionally Bun-native today because the server uses Bun APIs a
 ## License
 
 Apache-2.0 for package code. Research artifacts in the parent repo may use separate licenses; check the repository root license files.
+
+## Releases
+
+See [CHANGELOG.md](./CHANGELOG.md). Current npm release: `1.1.2`.
