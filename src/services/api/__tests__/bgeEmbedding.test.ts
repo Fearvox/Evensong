@@ -1,15 +1,54 @@
-import { describe, test, expect, mock, beforeEach, afterEach } from 'bun:test'
-import {
-  createBgeEmbeddingClient,
-  embedBge,
-  isBgeEmbeddingAvailable,
-  BgeEmbeddingConnectionError,
-  BGE_EMBEDDING_DEFAULT_BASE_URL,
-  BGE_EMBEDDING_DROPLET_BASE_URL,
-  BGE_EMBEDDING_ATOMIC_BASE_URL,
-  BGE_EMBEDDING_DEFAULT_MODEL,
-  BGE_EMBEDDING_DEFAULT_DIMS,
-} from '../bgeEmbedding.js'
+import { describe, test, expect, beforeEach, afterEach } from 'bun:test'
+
+type BgeEmbeddingModule = typeof import('../bgeEmbedding.js')
+
+let savedBgeEmbeddingDropletBaseUrl: string | undefined
+let savedBgeEmbeddingBaseUrl: string | undefined
+let createBgeEmbeddingClient: BgeEmbeddingModule['createBgeEmbeddingClient']
+let embedBge: BgeEmbeddingModule['embedBge']
+let isBgeEmbeddingAvailable: BgeEmbeddingModule['isBgeEmbeddingAvailable']
+let BgeEmbeddingConnectionError: BgeEmbeddingModule['BgeEmbeddingConnectionError']
+let BGE_EMBEDDING_DEFAULT_BASE_URL: BgeEmbeddingModule['BGE_EMBEDDING_DEFAULT_BASE_URL']
+let BGE_EMBEDDING_DROPLET_BASE_URL: BgeEmbeddingModule['BGE_EMBEDDING_DROPLET_BASE_URL']
+let BGE_EMBEDDING_ATOMIC_BASE_URL: BgeEmbeddingModule['BGE_EMBEDDING_ATOMIC_BASE_URL']
+let BGE_EMBEDDING_DEFAULT_MODEL: BgeEmbeddingModule['BGE_EMBEDDING_DEFAULT_MODEL']
+let BGE_EMBEDDING_DEFAULT_DIMS: BgeEmbeddingModule['BGE_EMBEDDING_DEFAULT_DIMS']
+
+async function loadBgeEmbeddingModule(): Promise<BgeEmbeddingModule> {
+  return import(`../bgeEmbedding.js?isolation=${Date.now()}-${Math.random()}`)
+}
+
+beforeEach(async () => {
+  savedBgeEmbeddingDropletBaseUrl = process.env.BGE_EMBEDDING_DROPLET_BASE_URL
+  savedBgeEmbeddingBaseUrl = process.env.BGE_EMBEDDING_BASE_URL
+  delete process.env.BGE_EMBEDDING_DROPLET_BASE_URL
+  delete process.env.BGE_EMBEDDING_BASE_URL
+  ;({
+    createBgeEmbeddingClient,
+    embedBge,
+    isBgeEmbeddingAvailable,
+    BgeEmbeddingConnectionError,
+    BGE_EMBEDDING_DEFAULT_BASE_URL,
+    BGE_EMBEDDING_DROPLET_BASE_URL,
+    BGE_EMBEDDING_ATOMIC_BASE_URL,
+    BGE_EMBEDDING_DEFAULT_MODEL,
+    BGE_EMBEDDING_DEFAULT_DIMS,
+  } = await loadBgeEmbeddingModule())
+})
+
+afterEach(() => {
+  if (savedBgeEmbeddingDropletBaseUrl === undefined) {
+    delete process.env.BGE_EMBEDDING_DROPLET_BASE_URL
+  } else {
+    process.env.BGE_EMBEDDING_DROPLET_BASE_URL = savedBgeEmbeddingDropletBaseUrl
+  }
+
+  if (savedBgeEmbeddingBaseUrl === undefined) {
+    delete process.env.BGE_EMBEDDING_BASE_URL
+  } else {
+    process.env.BGE_EMBEDDING_BASE_URL = savedBgeEmbeddingBaseUrl
+  }
+})
 
 // bun:test does not provide jest.spyOn style global mocks; we monkey-patch
 // globalThis.fetch per-test. Save original and restore so other tests are

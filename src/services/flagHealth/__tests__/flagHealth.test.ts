@@ -1,5 +1,5 @@
 import { describe, test, expect, beforeEach, afterEach, mock } from 'bun:test'
-import { mkdtempSync, writeFileSync, mkdirSync } from 'fs'
+import { mkdtempSync, writeFileSync, mkdirSync, rmSync } from 'fs'
 import { join } from 'path'
 import { tmpdir } from 'os'
 
@@ -12,17 +12,24 @@ async function loadFlagHealthModule(): Promise<FlagHealthModule> {
 
 describe('flagHealth', () => {
   let savedEnv: NodeJS.ProcessEnv
+  let testHome: string
 
-  beforeEach(() => {
+  beforeEach(async () => {
     savedEnv = { ...process.env }
+    testHome = mkdtempSync(join(tmpdir(), 'hermes-test-'))
+    const claudeDir = join(testHome, '.claude')
+    mkdirSync(claudeDir, { recursive: true })
+    writeFileSync(join(testHome, 'feature-flags.json'), '{}')
+    writeFileSync(join(claudeDir, 'feature-flags.json'), JSON.stringify({ EXTRACT_MEMORIES: true }))
     // Clear all CLAUDE_FEATURE_ env vars
     for (const key of Object.keys(process.env)) {
       if (key.startsWith('CLAUDE_FEATURE_')) {
         delete process.env[key]
       }
     }
-    // Ensure HOME points to real location with feature-flags.json
-    process.env.HOME = process.env.HOME || '/tmp/hermes-test-home'
+    process.env.HOME = testHome
+    const { _reloadFlagsForTesting } = await import('../../../utils/featureFlag.js')
+    _reloadFlagsForTesting()
   })
 
   afterEach(async () => {
@@ -42,6 +49,9 @@ describe('flagHealth', () => {
     // Reload flag module to reset cache
     const { _reloadFlagsForTesting } = await import('../../../utils/featureFlag.js')
     _reloadFlagsForTesting()
+    try {
+      rmSync(testHome, { recursive: true, force: true })
+    } catch {}
   })
 
   // Test 1: scanAllFlags() returns an array
