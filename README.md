@@ -1,7 +1,7 @@
 <h1 align="center">Evensong</h1>
 
 <p align="center">
-  <em>Hackable agent-system hub built from a reverse-engineered Claude Code core.<br/>
+  <em>A hackable, verifiable agent-system workbench built from a reverse-engineered Claude Code core.<br/>
   <strong>Research Vault MCP module, public handoff dashboard, and four formal retrieval artifacts (648 + 972 + 72 + 72 calls).</strong></em>
 </p>
 
@@ -35,7 +35,7 @@
 
 ---
 
-## 目录
+## Contents
 
 - [What this is](#what-this-is)
 - [📊 The headline result](#-the-headline-result)
@@ -52,18 +52,18 @@
 
 ## What this is
 
-A **reverse-engineered, modifiable** implementation of Anthropic's Claude Code CLI, plus the public Evensong hub around it: Research Vault MCP packaging, handoff pages, and a production-grade hybrid retrieval benchmark suite for agent memory systems.
+Evensong is not just a benchmark and not just an MCP package. It is a public workbench around a runnable, modifiable CCR CLI: the core can be read and changed, Research Vault MCP is shipped as a module, and the retrieval claims are backed by committed evidence files instead of vibes.
 
-This repository exists to:
+This repository exists for four jobs:
 
 | Purpose | What that means |
 |---|---|
 | **Study** | Read the Claude Code source without the closed binary |
-| **Extend** | Custom agent tools, retrieval pipelines, telemetry — none of the blocks are glued shut |
+| **Modify** | Swap agent tools, retrieval pipelines, and telemetry without treating the system as a sealed box |
 | **Package** | Ship Research Vault MCP as an Evensong module/dependency instead of treating it as the whole product |
-| **Benchmark** | Retrieve-and-Rerank (RaR) architectures with reproducible evidence — the bar EverMemOS §3.4 set, measured with our numbers |
+| **Validate** | Measure Retrieve-and-Rerank (RaR) architectures against the EverMemOS §3.4 direction with our own reproducible numbers |
 
-<p align="right"><a href="#目录">↑ back to top</a></p>
+<p align="right"><a href="#contents">↑ back to top</a></p>
 
 ---
 
@@ -102,9 +102,9 @@ Raw: [`benchmarks/runs/wave3g-pipelines-2026-04-19T1652.md`](./benchmarks/runs/w
 
 ### Honest read
 
-- **The latency + token-cost edges are the rock-solid win.** Both runs agree: BM25 stage 1 narrowing the LLM's pool saves 22-27% p50 latency and 75% prompt tokens. That's what ships.
-- **The accuracy edge is noisier than first measured.** Wave 3+F caught Hybrid +2.5pp over LLM-only. Wave 3+G's 972-call re-run caught parity (−0.3pp). Per-run stddev (0.8-1.2pp) + API-load-window variance together cover the delta. Treat Hybrid as *"accuracy parity-to-slight-edge vs LLM-only, with a consistent latency + token-cost win"* — not a strict accuracy winner.
-- **The Adaptive tier is the real new contribution.** See the next subsection — trading −4.7pp accuracy for −43% avg latency and 27% zero-LLM queries, with the most stable per-run variance of the three pipelines (0.76pp).
+- **The hard claim is latency and token cost.** Both formal runs agree: BM25 stage 1 narrows the LLM's pool and saves 22-27% p50 latency plus 75% prompt tokens. That is the part to ship.
+- **Accuracy should not be oversold.** Wave 3+F saw Hybrid at +2.5pp over LLM-only; Wave 3+G's 972-call re-run saw practical parity (−0.3pp). Per-run stddev (0.8-1.2pp) and API-load-window variance cover that movement. Treat Hybrid as accuracy-parity-to-slight-edge, with stable latency and token savings.
+- **Adaptive is the product-shaped contribution.** It trades −4.7pp top-1 for −43% average latency and makes 27% of queries use zero LLM calls. The knob is explicit, measurable, and useful.
 
 Reproduce with one command (produces Wave 3+G's artifact):
 
@@ -154,52 +154,29 @@ Evidence: [summary](./benchmarks/runs/wave3i-dense-rar-2026-04-24T0854.md), [met
 
 Boundary: `dense-rar-2026-04-24T0801` remains the Stage-1 TopK 20 formal baseline at 23/24; its q113 miss was candidate recall, not reranker failure. `dense-rar-2026-04-24T0644` remains internal/probe-only evidence. Stage-1 TopK 50 fixes that blind spot, but it also increases rerank candidate exposure, so the 24/24 claim is limited to this verified hard suite.
 
-<p align="right"><a href="#目录">↑ back to top</a></p>
+<p align="right"><a href="#contents">↑ back to top</a></p>
 
 ---
 
 ## 🏗 Architecture
 
-```
-┌─────────────────────────────────────────────────────────────────┐
-│  CCR — the reverse-engineered Claude Code runtime               │
-│  src/entrypoints/cli.tsx → src/main.tsx → src/screens/REPL.tsx  │
-└────────────────┬────────────────────────────────────────────────┘
-                 │
-                 ▼
-┌─────────────────────────────────────────────────────────────────┐
-│  Retrieval pipeline (Wave 3+)                                   │
-│                                                                 │
-│   manifestBuilder   BM25 index      atomicProvider              │
-│   (reads vault →    (tokenize,      (LLM rerank via             │
-│   VaultManifest)    score, topK)    Atomic Chat gateway)        │
-│         │              │                    │                   │
-│         └──────────────┴────────┬───────────┘                   │
-│                                 ▼                               │
-│                         hybridProvider                          │
-│                    (stage1 → narrow → stage2)                   │
-│                                 │                               │
-│                     adaptiveHybridProvider                      │
-│              (BM25 gap ≥ 1.5× → skip stage 2 LLM)               │
-│                                 ▼                               │
-│                         vaultRetrieve                           │
-│                    (fallback chain orchestrator)                │
-└─────────────────────────────────────────────────────────────────┘
-                 │
-                 ▼
-┌─────────────────────────────────────────────────────────────────┐
-│  Atomic Chat gateway (http://127.0.0.1:1337/v1)                 │
-│  Unified OpenAI-compatible endpoint proxying:                   │
-│    • deepseek/deepseek-v3.2 (primary judge)                     │
-│    • grok-3, grok-4-*-fast-reasoning (xAI)                      │
-│    • MiniMax-M2.7, qwen/qwen3.6-plus, openrouter/auto:free      │
-│    • local Gemma-4-E4B via llama.cpp (offline fallback)         │
-└─────────────────────────────────────────────────────────────────┘
-```
+<p align="center">
+  <img src="./docs/assets/evensong-architecture.png" alt="Evensong architecture tree showing CCR runtime, Research Vault MCP, Hybrid Retrieval, Atomic Gateway, and public evidence outputs" width="620">
+</p>
+
+The diagram shows the public release shape, not every internal mechanism.
+
+| Layer | Owns |
+|---|---|
+| **Core** | CCR runtime: Bun entrypoint, CLI loop, and Ink REPL |
+| **Modules** | Research Vault MCP, hybrid retrieval, and the Atomic Chat-compatible judge path |
+| **Evidence** | Vault fixtures, formal benchmark artifacts, and the public handoff/dashboard surface |
+
+Diagram source lives in [`docs/assets/evensong-architecture.svg`](./docs/assets/evensong-architecture.svg) and was exported as PNG with [`fireworks-tech-graph`](https://github.com/yizhiyanhua-ai/fireworks-tech-graph) style 6.
 
 See [`AGENTS.md`](./AGENTS.md) and [`CLAUDE.md`](./CLAUDE.md) for detailed developer notes.
 
-<p align="right"><a href="#目录">↑ back to top</a></p>
+<p align="right"><a href="#contents">↑ back to top</a></p>
 
 ---
 
@@ -237,7 +214,7 @@ bun run scripts/benchmark-hybrid-scale.ts --runs=3 --with-body \
   --queries-file=benchmarks/wave3f-generated-queries-2026-04-19.json
 ```
 
-<p align="right"><a href="#目录">↑ back to top</a></p>
+<p align="right"><a href="#contents">↑ back to top</a></p>
 
 ---
 
@@ -266,7 +243,7 @@ services/             8-service microservice suite used inside benchmarks
 api/                  HTTP relay / provider fallback chain
 ```
 
-<p align="right"><a href="#目录">↑ back to top</a></p>
+<p align="right"><a href="#contents">↑ back to top</a></p>
 
 ---
 
@@ -311,7 +288,7 @@ const result = await vaultRetrieve(
 
 **Available providers**: `createAtomicProvider`, `createBM25Provider`, `createHybridProvider`, `createAdaptiveHybridProvider`. All implement the `VaultRetrievalProvider` contract — compose or swap freely.
 
-<p align="right"><a href="#目录">↑ back to top</a></p>
+<p align="right"><a href="#contents">↑ back to top</a></p>
 
 ---
 
@@ -330,7 +307,7 @@ This project dialogs with recent published work on agentic memory systems:
 
 The full 108-query test corpus with provenance is at [`benchmarks/wave3f-generated-queries-2026-04-19.json`](./benchmarks/wave3f-generated-queries-2026-04-19.json).
 
-<p align="right"><a href="#目录">↑ back to top</a></p>
+<p align="right"><a href="#contents">↑ back to top</a></p>
 
 ---
 
@@ -354,7 +331,7 @@ Templates are in place for:
 
 File an issue before non-trivial PRs to align on shape.
 
-<p align="right"><a href="#目录">↑ back to top</a></p>
+<p align="right"><a href="#contents">↑ back to top</a></p>
 
 ---
 
@@ -369,7 +346,7 @@ File an issue before non-trivial PRs to align on shape.
 
 All code is Apache 2.0 and can be freely incorporated into other Apache-compatible open-source projects (including [EverMind-AI/EverOS](https://github.com/EverMind-AI/EverOS)).
 
-<p align="right"><a href="#目录">↑ back to top</a></p>
+<p align="right"><a href="#contents">↑ back to top</a></p>
 
 ---
 
@@ -383,7 +360,7 @@ Upstream lineage: derived from the community reverse-engineered baseline at [git
 
 The hybrid retrieval architecture, benchmark harness, and all original code in `src/services/retrieval/`, `scripts/benchmark-*.ts`, and `benchmarks/wave3*` are original work, independently inspired by the EverMemOS published design.
 
-<p align="right"><a href="#目录">↑ back to top</a></p>
+<p align="right"><a href="#contents">↑ back to top</a></p>
 
 ---
 
