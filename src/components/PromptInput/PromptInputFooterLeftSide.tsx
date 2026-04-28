@@ -392,7 +392,7 @@ function ModeIndicator({
   // its click-target Box isn't nested inside the <Text wrap="truncate">
   // wrapper (reconciler throws on Box-in-Text).
   // Tmux pill (ant-only) — appears right after tasks in nav order
-  ...(("external" as string) === 'ant' && hasTmuxSession ? [<TungstenPill key="tmux" selected={tmuxSelected} />] : []), ...(isAgentSwarmsEnabled() && hasTeams ? [<TeamStatus key="teams" teamsSelected={teamsSelected} showHint={showHint && !hasBackgroundTasks} />] : []), ...(shouldShowPrStatus ? [<PrBadge key="pr-status" number={prStatus.number!} url={prStatus.url!} reviewState={prStatus.reviewState!} />] : []), ...(rssState ? [<Text key="rss" dimColor={rssState.level === 'normal'} color={rssState.level === 'error' ? 'error' : rssState.level === 'warning' ? 'warning' : undefined}>
+  ...(("external" as string) === 'ant' && hasTmuxSession ? [<TungstenPill key="tmux" selected={tmuxSelected} />] : []), ...(isAgentSwarmsEnabled() && hasTeams ? [<TeamStatus key="teams" teamsSelected={teamsSelected} showHint={showHint && !hasBackgroundTasks} />] : []), ...(shouldShowPrStatus ? [<PrBadge key="pr-status" number={prStatus.number!} url={prStatus.url!} reviewState={prStatus.reviewState!} />] : []), ...(rssState ? [<Text key="rss" dimColor={rssState.level === 'normal'} color={rssState.level === 'error' ? 'red' : rssState.level === 'warning' ? 'yellow' : undefined}>
           {rssState.text}
         </Text>] : [])];
 
