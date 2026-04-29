@@ -31,7 +31,7 @@ function validateUrl(url: string): void {
 
   // Block private IP ranges
   const ip = hostname
-  if (/^(10\.\d+|172\.(1[6-9]|2\d|3[01])\.\d+\.\d+|192\.168\.\d+)$/.test(ip)) {
+  if (/^(10\.\d+\.\d+\.\d+|172\.(1[6-9]|2\d|3[01])\.\d+\.\d+|192\.168\.\d+\.\d+)$/.test(ip)) {
     throw new Error(`Private IP not permitted: ${ip}`)
   }
 
@@ -41,14 +41,37 @@ function validateUrl(url: string): void {
   }
 }
 
+const MAX_REDIRECTS = 5
+
+/**
+ * fetch wrapper that follows redirects manually, re-validating each hop
+ * with validateUrl(). Closes the SSRF redirect-bypass: even if the original
+ * URL is public, a 30x to a private IP must not be followed.
+ */
+async function safeFetch(url: string, init: RequestInit = {}): Promise<Response> {
+  let currentUrl = url
+  for (let hop = 0; hop <= MAX_REDIRECTS; hop++) {
+    validateUrl(currentUrl)
+    const res = await fetch(currentUrl, { ...init, redirect: 'manual' })
+    if (res.status < 300 || res.status >= 400) {
+      return res
+    }
+    const location = res.headers.get('location')
+    if (!location) {
+      return res
+    }
+    currentUrl = new URL(location, currentUrl).toString()
+  }
+  throw new Error(`Too many redirects (>${MAX_REDIRECTS}) starting from ${url}`)
+}
+
 /**
  * Fetch a URL and convert HTML to plain markdown-like text.
  * Strips scripts, styles, nav, footer, header, aside elements.
  * Uses Bun's native fetch — no external dependencies.
  */
 export async function fetchHtml(url: string): Promise<string> {
-  validateUrl(url)
-  const res = await fetch(url, {
+  const res = await safeFetch(url, {
     headers: {
       'User-Agent': 'Mozilla/5.0 research-vault-mcp/1.1.0',
       'Accept': 'text/html'
