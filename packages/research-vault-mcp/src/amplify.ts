@@ -112,57 +112,48 @@ export const amplifyTools = [
           throw new Error(`HTTP ${res.status}: ${err}`)
         }
 
-        // Read SSE stream
         const reader = res.body?.getReader()
         if (!reader) throw new Error('No response body')
 
-        let fullText = ''
         const decoder = new TextDecoder()
+        let buffer = ''
+        let fullText = ''
 
-        while (true) {
-          const { done, value } = await reader.read()
-          if (done) break
-          const chunk = decoder.decode(value, { stream: true })
-          // Parse SSE lines: data: {...}
-          for (const line of chunk.split('\n')) {
-            if (line.startsWith('data: ')) {
-              try {
-                const parsed = JSON.parse(line.slice(6))
-                if (parsed.data?.content) fullText += parsed.data.content
-                else if (parsed.data) fullText += typeof parsed.data === 'string' ? parsed.data : JSON.stringify(parsed.data)
-              } catch {}
+        const processEventBlock = (block: string) => {
+          for (const line of block.split('\n')) {
+            if (!line.startsWith('data: ')) continue
+            let parsed: any
+            try { parsed = JSON.parse(line.slice(6)) } catch { continue }
+            let textChunk = ''
+            if (parsed?.data?.content) {
+              textChunk = parsed.data.content
+            } else if (parsed?.data) {
+              textChunk = typeof parsed.data === 'string' ? parsed.data : JSON.stringify(parsed.data)
+            }
+            if (textChunk) {
+              fullText += textChunk
+              if (stream && onProgress) {
+                onProgress({ type: 'chunk', text: textChunk })
+              }
             }
           }
         }
 
-        // ── Stream mode: yield chunks via onProgress ─────────────────────────
-        if (stream && onProgress) {
-          const res2 = await fetch(`${AMPLIFY_BASE}/chat`, {
-            method: 'POST',
-            headers: getHeaders(),
-            body: JSON.stringify(body)
-          })
-          if (!res2.ok) throw new Error(`HTTP ${res2.status}`)
-          const reader2 = res2.body?.getReader()
-          if (!reader2) throw new Error('No response body')
-          const decoder2 = new TextDecoder()
-          let buffer2 = ''
-          while (true) {
-            const { done, value } = await reader2.read()
-            if (done) break
-            buffer2 += decoder2.decode(value, { stream: true })
-            for (const line of buffer2.split('\n')) {
-              if (line.startsWith('data: ')) {
-                try {
-                  const parsed = JSON.parse(line.slice(6))
-                  if (parsed.data?.content) {
-                    onProgress({ type: 'chunk', text: parsed.data.content })
-                  }
-                } catch {}
-              }
-            }
+        while (true) {
+          const { done, value } = await reader.read()
+          if (done) break
+          buffer += decoder.decode(value, { stream: true })
+          let sep: number
+          while ((sep = buffer.indexOf('\n\n')) !== -1) {
+            const eventBlock = buffer.slice(0, sep)
+            buffer = buffer.slice(sep + 2)
+            processEventBlock(eventBlock)
           }
-          return { content: [{ type: 'text', text: '(streamed)' }] }
+        }
+        buffer += decoder.decode()
+        if (buffer.length > 0) {
+          processEventBlock(buffer)
+          buffer = ''
         }
 
         return {
