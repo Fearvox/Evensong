@@ -257,7 +257,7 @@ export const vaultWriteTools = [
       properties: {
         source: { type: 'string', enum: ['url', 'file', 'arxiv'] },
         value: { type: 'string', description: 'URL / absolute file path / ArXiv ID or URL' },
-        category: { type: 'string', description: 'raw/ subdirectory, default "inbox"' },
+        category: { type: 'string', description: 'raw/ subdirectory, default "_inbox"' },
         priority: { type: 'string', enum: ['high', 'low'], default: 'low' },
         arxivMetadata: { type: 'boolean', description: 'ArXiv: fetch metadata before storing, default true' }
       },
@@ -265,7 +265,7 @@ export const vaultWriteTools = [
     },
     call: async (args: RawIngestInput) => {
       try {
-        const category = args.category ?? 'inbox'
+        const category = args.category ?? '_inbox'
         let job
         if (args.source === 'arxiv') {
           job = await ingestArxiv(args.value, category)
