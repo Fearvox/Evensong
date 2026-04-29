@@ -18,16 +18,23 @@ function ensureDir(p: string) {
 
 function safePath(root: string, target: string): string {
   const joined = join(root, target)
+  let resolvedRoot: string
+  try {
+    resolvedRoot = realpathSync(root)
+  } catch {
+    resolvedRoot = pathResolve(root)
+  }
+
   let resolved: string
   try {
     resolved = realpathSync(joined)
   } catch {
     // Path doesn't exist yet (new file). Use resolve to normalize .. components
     // and verify the final path stays within root.
-    resolved = pathResolve(joined)
+    resolved = pathResolve(resolvedRoot, target)
   }
   // Normalize both to remove trailing slashes for prefix comparison
-  const rootNorm = root.replace(/\\/g, '/').replace(/\/$/, '')
+  const rootNorm = resolvedRoot.replace(/\\/g, '/').replace(/\/$/, '')
   const resolvedNorm = resolved.replace(/\\/g, '/').replace(/\/$/, '')
   if (!resolvedNorm.startsWith(rootNorm + '/') && resolvedNorm !== rootNorm) {
     throw new Error('Path traversal detected: target outside vault root')
@@ -42,11 +49,18 @@ export function normalizeId(raw: string): string {
     .replace(/\.md$/, '')
 }
 
-function loadDecayScores(): Record<string, DecayScore> {
-  try { return JSON.parse(readFileSync(DECAY_PATH, 'utf-8')) } catch { return {} }
+function loadDecayScores(): DecayScore[] {
+  try {
+    const data = JSON.parse(readFileSync(DECAY_PATH, 'utf-8'))
+    if (Array.isArray(data)) return data
+    if (data && typeof data === 'object') return Object.values(data) as DecayScore[]
+    return []
+  } catch {
+    return []
+  }
 }
 
-function saveDecayScores(scores: Record<string, DecayScore>) {
+function saveDecayScores(scores: DecayScore[]) {
   ensureDir(dirname(DECAY_PATH))
   writeFileSync(DECAY_PATH, JSON.stringify(scores, null, 2), 'utf-8')
 }
@@ -68,13 +82,14 @@ async function ingestArxiv(value: string, category: string) {
   const id = parseArxivId(value)
   if (!id) throw new Error(`Invalid ArXiv ID: ${value}`)
 
+  const metaPath = safePath(RAW_DIR, join(category, `arxiv-${id}.meta.json`))
+
   const job = await jobStore.createJob({ source: 'arxiv', value: id, category })
   await jobStore.updateJob(job.jobId, { status: 'fetching' })
 
   const metadata = await fetchArxivMetadata(id)
   metadata.arxivId = id
 
-  const metaPath = join(RAW_DIR, category, `arxiv-${id}.meta.json`)
   ensureDir(dirname(metaPath))
   writeFileSync(metaPath, JSON.stringify(metadata, null, 2), 'utf-8')
 
@@ -88,6 +103,8 @@ async function ingestArxiv(value: string, category: string) {
 }
 
 async function ingestUrl(value: string, category: string) {
+  safePath(RAW_DIR, category)
+
   const job = await jobStore.createJob({ source: 'url', value, category })
   await jobStore.updateJob(job.jobId, { status: 'fetching' })
 
@@ -95,7 +112,7 @@ async function ingestUrl(value: string, category: string) {
     try {
       const text = await fetchHtml(value)
       const safeName = value.replace(/[^a-z0-9]/gi, '_').slice(0, 64)
-      const rawPath = join(RAW_DIR, category, `${Date.now()}--${safeName}.html`)
+      const rawPath = safePath(RAW_DIR, join(category, `${Date.now()}--${safeName}.html`))
       ensureDir(dirname(rawPath))
       writeFileSync(rawPath, text, 'utf-8')
 
@@ -115,10 +132,12 @@ async function ingestUrl(value: string, category: string) {
 
 async function ingestFile(value: string, category: string) {
   if (!existsSync(value)) throw new Error(`File not found: ${value}`)
+
+  safePath(RAW_DIR, category)
+
   const job = await jobStore.createJob({ source: 'file', value, category })
-  const destDir = join(RAW_DIR, category)
-  ensureDir(destDir)
-  const destPath = join(destDir, `${Date.now()}--${basename(value)}`)
+  const destPath = safePath(RAW_DIR, join(category, `${Date.now()}--${basename(value)}`))
+  ensureDir(dirname(destPath))
   const content = readFileSync(value)
   writeFileSync(destPath, content)
 
@@ -142,12 +161,13 @@ async function saveNote(input: NoteSaveInput) {
   writeFileSync(filePath, content, 'utf-8')
 
   const scores = loadDecayScores()
-  scores[id] = {
+  const filtered = scores.filter(s => normalizeId(s.itemId) !== normalizeId(id))
+  filtered.push({
     itemId: id, score: 0.5, lastAccess: new Date().toISOString(),
     accessCount: 0, summaryLevel: input.summaryLevel ?? 'none',
     nextReviewAt: new Date().toISOString(), difficulty: 0.5
-  }
-  saveDecayScores(scores)
+  })
+  saveDecayScores(filtered)
 
   const hash = await computeChecksum(filePath)
   const checksums = loadChecksums()
@@ -205,8 +225,8 @@ function deleteEntry(input: VaultDeleteInput) {
 
   const id = normalizeId(basename(filePath))
   const scores = loadDecayScores()
-  delete scores[id]
-  saveDecayScores(scores)
+  const filtered = scores.filter(s => normalizeId(s.itemId) !== normalizeId(id))
+  saveDecayScores(filtered)
 
   const checksums = loadChecksums()
   delete checksums[filePath]

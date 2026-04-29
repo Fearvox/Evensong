@@ -1,5 +1,5 @@
 import { describe, test, expect, beforeEach } from 'bun:test'
-import { mkdirSync, rmSync, writeFileSync } from 'fs'
+import { mkdirSync, rmSync, readFileSync, writeFileSync } from 'fs'
 import { join } from 'path'
 import { tmpdir } from 'os'
 import { fileURLToPath } from 'url'
@@ -114,5 +114,134 @@ describe('vault_raw_ingest default category alignment with scanRaw', () => {
     expect(parsed.preview).toBeDefined()
     expect(Array.isArray(parsed.preview)).toBe(true)
     expect(parsed.preview.some((f: string) => f.endsWith('--visible-paper.md'))).toBe(true)
+  })
+})
+
+describe('vault_raw_ingest path traversal protection', () => {
+  test('rejects traversal category for arxiv source (no network call, no orphan job)', async () => {
+    const { vaultWriteTools } = await import('../src/vault_write.ts')
+    const tool = vaultWriteTools.find(t => t.name === 'vault_raw_ingest')!
+    const result = await tool.call({
+      source: 'arxiv',
+      value: '2501.00001',
+      category: '../../tmp/escape'
+    })
+    expect(result.isError).toBe(true)
+    expect(result.content[0].text.toLowerCase()).toMatch(/traversal|outside/i)
+
+    const jobsPath = join(TMP, '.meta', 'ingest-jobs.json')
+    const { existsSync } = await import('fs')
+    if (existsSync(jobsPath)) {
+      const jobs = JSON.parse(readFileSync(jobsPath, 'utf-8'))
+      expect(Object.keys(jobs).length).toBe(0)
+    }
+  })
+
+  test('rejects traversal category for url source (no orphan job)', async () => {
+    const { vaultWriteTools } = await import('../src/vault_write.ts')
+    const tool = vaultWriteTools.find(t => t.name === 'vault_raw_ingest')!
+    const result = await tool.call({
+      source: 'url',
+      value: 'https://example.com',
+      category: '../../tmp/escape'
+    })
+    expect(result.isError).toBe(true)
+    expect(result.content[0].text.toLowerCase()).toMatch(/traversal|outside/i)
+
+    const jobsPath = join(TMP, '.meta', 'ingest-jobs.json')
+    const { existsSync } = await import('fs')
+    if (existsSync(jobsPath)) {
+      const jobs = JSON.parse(readFileSync(jobsPath, 'utf-8'))
+      expect(Object.keys(jobs).length).toBe(0)
+    }
+  })
+
+  test('rejects traversal category for file source (no orphan job)', async () => {
+    const sourceFile = join(TMP, 'tmp-source.txt')
+    writeFileSync(sourceFile, 'test content')
+
+    const { vaultWriteTools } = await import('../src/vault_write.ts')
+    const tool = vaultWriteTools.find(t => t.name === 'vault_raw_ingest')!
+    const result = await tool.call({
+      source: 'file',
+      value: sourceFile,
+      category: '../../tmp/escape'
+    })
+    expect(result.isError).toBe(true)
+    expect(result.content[0].text.toLowerCase()).toMatch(/traversal|outside/i)
+
+    const jobsPath = join(TMP, '.meta', 'ingest-jobs.json')
+    const { existsSync } = await import('fs')
+    if (existsSync(jobsPath)) {
+      const jobs = JSON.parse(readFileSync(jobsPath, 'utf-8'))
+      expect(Object.keys(jobs).length).toBe(0)
+    }
+  })
+})
+
+describe('vault_note_save decay-scores persistence (regression: array format)', () => {
+  test('persists new decay score as an array entry', async () => {
+    const { vaultWriteTools } = await import('../src/vault_write.ts')
+    const tool = vaultWriteTools.find(t => t.name === 'vault_note_save')!
+    const result = await tool.call({ title: 'Decay Test', content: 'body', category: 'test' })
+    const { id } = JSON.parse(result.content[0].text)
+    const decayPath = join(TMP, '.meta', 'decay-scores.json')
+    const decay = JSON.parse(readFileSync(decayPath, 'utf-8'))
+    expect(Array.isArray(decay)).toBe(true)
+    expect(decay.find((s: { itemId: string }) => s.itemId === id)).toBeDefined()
+  })
+
+  test('preserves existing array entries when adding a new note', async () => {
+    mkdirSync(join(TMP, '.meta'), { recursive: true })
+    const decayPath = join(TMP, '.meta', 'decay-scores.json')
+    const seed = [{
+      itemId: 'pre-existing-entry', score: 0.8, lastAccess: new Date().toISOString(),
+      accessCount: 3, summaryLevel: 'deep' as const,
+      nextReviewAt: new Date().toISOString(), difficulty: 0.5
+    }]
+    writeFileSync(decayPath, JSON.stringify(seed))
+
+    const { vaultWriteTools } = await import('../src/vault_write.ts')
+    const tool = vaultWriteTools.find(t => t.name === 'vault_note_save')!
+    const result = await tool.call({ title: 'After Seed', content: 'body', category: 'test' })
+    const { id } = JSON.parse(result.content[0].text)
+
+    const decay = JSON.parse(readFileSync(decayPath, 'utf-8'))
+    expect(Array.isArray(decay)).toBe(true)
+    expect(decay.find((s: { itemId: string }) => s.itemId === 'pre-existing-entry')).toBeDefined()
+    expect(decay.find((s: { itemId: string }) => s.itemId === id)).toBeDefined()
+  })
+})
+
+describe('vault_delete decay-scores cleanup (regression: array format)', () => {
+  test('removes decay entry when deleting an existing knowledge file', async () => {
+    const knowledgeDir = join(TMP, 'knowledge', 'test')
+    mkdirSync(knowledgeDir, { recursive: true })
+    mkdirSync(join(TMP, '.meta'), { recursive: true })
+    const fileName = '20260420--1234-doomed-note.md'
+    const filePath = join(knowledgeDir, fileName)
+    writeFileSync(filePath, '# Doomed')
+
+    const itemId = '20260420--1234-doomed-note'
+    const decayPath = join(TMP, '.meta', 'decay-scores.json')
+    writeFileSync(decayPath, JSON.stringify([
+      { itemId, score: 0.5, lastAccess: new Date().toISOString(),
+        accessCount: 0, summaryLevel: 'none' as const,
+        nextReviewAt: new Date().toISOString(), difficulty: 0.5 },
+      { itemId: 'untouched-entry', score: 0.9, lastAccess: new Date().toISOString(),
+        accessCount: 5, summaryLevel: 'deep' as const,
+        nextReviewAt: new Date().toISOString(), difficulty: 0.5 }
+    ]))
+
+    const { vaultWriteTools } = await import('../src/vault_write.ts')
+    const delTool = vaultWriteTools.find(t => t.name === 'vault_delete')!
+    const result = await delTool.call({ path: 'knowledge/test/' + fileName })
+    const parsed = JSON.parse(result.content[0].text)
+    expect(parsed.deleted).toBe(true)
+
+    const decay = JSON.parse(readFileSync(decayPath, 'utf-8'))
+    expect(Array.isArray(decay)).toBe(true)
+    expect(decay.find((s: { itemId: string }) => s.itemId === itemId)).toBeUndefined()
+    expect(decay.find((s: { itemId: string }) => s.itemId === 'untouched-entry')).toBeDefined()
   })
 })
