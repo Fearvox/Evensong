@@ -1,6 +1,6 @@
-import { afterEach, describe, test, expect } from 'bun:test'
+import { afterEach, beforeEach, describe, test, expect } from 'bun:test'
 import { parseArxivId } from '../src/ingest/arxiv.ts'
-import { fetchHtml, validateUrl } from '../src/ingest/html.ts'
+import { _setDnsLookup, fetchHtml, validateHostDns, validateUrl } from '../src/ingest/html.ts'
 
 describe('parseArxivId', () => {
   test('parses full URL with abs path', () => {
@@ -195,5 +195,115 @@ describe('validateUrl SSRF protection — hostnames and schemes', () => {
     expect(() => validateUrl('https://8.8.8.8/foo')).not.toThrow()
     expect(() => validateUrl('https://192.169.1.1/foo')).not.toThrow()
     expect(() => validateUrl('https://1.1.1.1/foo')).not.toThrow()
+  })
+})
+
+describe('validateHostDns SSRF protection — DNS resolution', () => {
+  let originalFetch: typeof globalThis.fetch
+
+  beforeEach(() => {
+    originalFetch = globalThis.fetch
+  })
+
+  afterEach(() => {
+    globalThis.fetch = originalFetch
+    _setDnsLookup(null)
+  })
+
+  test('blocks hostname resolving to private IPv4', async () => {
+    _setDnsLookup(async () => [{ address: '192.168.1.1', family: 4 }])
+    await expect(validateHostDns('attacker.com')).rejects.toThrow(/private/i)
+  })
+
+  test('blocks if any resolved IP is private', async () => {
+    _setDnsLookup(async () => [
+      { address: '8.8.8.8', family: 4 },
+      { address: '10.0.0.5', family: 4 },
+    ])
+    await expect(validateHostDns('mixed.example')).rejects.toThrow(/private/i)
+  })
+
+  test('allows hostname resolving to public IPv4', async () => {
+    _setDnsLookup(async () => [{ address: '8.8.8.8', family: 4 }])
+    await expect(validateHostDns('example.com')).resolves.toBeUndefined()
+  })
+
+  test('blocks loopback IPv6', async () => {
+    _setDnsLookup(async () => [{ address: '::1', family: 6 }])
+    await expect(validateHostDns('loop.example')).rejects.toThrow(/loopback/i)
+  })
+
+  test('blocks unique-local IPv6', async () => {
+    _setDnsLookup(async () => [{ address: 'fc00::1', family: 6 }])
+    await expect(validateHostDns('ula.example')).rejects.toThrow(/unique-local/i)
+  })
+
+  test('blocks link-local IPv6', async () => {
+    _setDnsLookup(async () => [{ address: 'fe80::1', family: 6 }])
+    await expect(validateHostDns('linklocal.example')).rejects.toThrow(/link-local/i)
+  })
+
+  test('blocks IPv4-mapped IPv6 private address', async () => {
+    _setDnsLookup(async () => [{ address: '::ffff:192.168.1.1', family: 6 }])
+    await expect(validateHostDns('mapped.example')).rejects.toThrow(/private/i)
+  })
+
+  test('allows public IPv6', async () => {
+    _setDnsLookup(async () => [{ address: '2606:4700::1111', family: 6 }])
+    await expect(validateHostDns('cloudflare.example')).resolves.toBeUndefined()
+  })
+
+  test('blocks when DNS lookup throws', async () => {
+    _setDnsLookup(async () => { throw new Error('NXDOMAIN') })
+    await expect(validateHostDns('missing.example')).rejects.toThrow(/DNS lookup failed/i)
+  })
+
+  test('blocks empty DNS results', async () => {
+    _setDnsLookup(async () => [])
+    await expect(validateHostDns('empty.example')).rejects.toThrow(/no records/i)
+  })
+
+  test('skips DNS lookup for IP literals already handled by validateUrl', async () => {
+    _setDnsLookup(async () => { throw new Error('should not be called') })
+    await expect(validateHostDns('1.2.3.4')).resolves.toBeUndefined()
+    await expect(validateHostDns('[2606:4700::1111]')).resolves.toBeUndefined()
+  })
+
+  test('fetchHtml blocks hostname resolving to private IP before fetch', async () => {
+    let fetchCalls = 0
+    _setDnsLookup(async () => [{ address: '127.0.0.1', family: 4 }])
+    globalThis.fetch = (async () => {
+      fetchCalls++
+      return new Response('<html>should not fetch</html>', { status: 200 })
+    }) as typeof fetch
+
+    await expect(fetchHtml('http://attacker.com/path')).rejects.toThrow(/loopback/i)
+    expect(fetchCalls).toBe(0)
+  })
+
+  test('fetchHtml blocks redirect to hostname resolving to private IP', async () => {
+    _setDnsLookup(async (hostname: string) => {
+      if (hostname === 'attacker.com') return [{ address: '8.8.8.8', family: 4 }]
+      if (hostname === 'internal.attacker.com') return [{ address: '192.168.1.1', family: 4 }]
+      throw new Error(`unexpected lookup: ${hostname}`)
+    })
+
+    globalThis.fetch = (async (input: RequestInfo | URL) => {
+      const u = typeof input === 'string' ? input : input.toString()
+      if (u === 'http://attacker.com/start') {
+        return new Response(null, { status: 302, headers: { Location: 'http://internal.attacker.com/' } })
+      }
+      return new Response('should not be reached', { status: 200 })
+    }) as typeof fetch
+
+    await expect(fetchHtml('http://attacker.com/start')).rejects.toThrow(/private/i)
+  })
+
+  test('fetchHtml allows public hostname resolution', async () => {
+    _setDnsLookup(async () => [{ address: '8.8.8.8', family: 4 }])
+    globalThis.fetch = (async () => new Response('<html><body>public ok</body></html>', { status: 200 })) as typeof fetch
+
+    const result = await fetchHtml('http://example.com/')
+    expect(result).toContain('public ok')
   })
 })
