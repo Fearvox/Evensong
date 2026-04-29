@@ -74,6 +74,49 @@ describe('vault_delete', () => {
   })
 })
 
+describe('vault_raw_ingest default category alignment with scanRaw', () => {
+  test('writes to raw/_inbox/ when category is omitted (default)', async () => {
+    const sourceFile = join(TMP, 'default-cat-test.txt')
+    writeFileSync(sourceFile, 'default-category content')
+
+    const { vaultWriteTools } = await import('../src/vault_write.ts')
+    const tool = vaultWriteTools.find(t => t.name === 'vault_raw_ingest')!
+    const result = await tool.call({ source: 'file', value: sourceFile })
+    const parsed = JSON.parse(result.content[0].text)
+    expect(parsed.status).toBe('queued')
+
+    const { existsSync, readdirSync } = await import('fs')
+    const inboxDir = join(TMP, 'raw', '_inbox')
+    expect(existsSync(inboxDir)).toBe(true)
+    const files = readdirSync(inboxDir)
+    expect(files.some(f => f.endsWith('--default-cat-test.txt'))).toBe(true)
+
+    const oldInboxDir = join(TMP, 'raw', 'inbox')
+    if (existsSync(oldInboxDir)) {
+      const oldFiles = readdirSync(oldInboxDir)
+      expect(oldFiles.some(f => f.endsWith('--default-cat-test.txt'))).toBe(false)
+    }
+  })
+
+  test('default-ingested file becomes visible to vault_batch_analyze (scanRaw integration)', async () => {
+    const sourceFile = join(TMP, 'visible-paper.md')
+    writeFileSync(sourceFile, '# Visible Paper\n\nbody')
+
+    const { vaultWriteTools } = await import('../src/vault_write.ts')
+    const ingestTool = vaultWriteTools.find(t => t.name === 'vault_raw_ingest')!
+    await ingestTool.call({ source: 'file', value: sourceFile })
+
+    const { vaultTools } = await import('../src/vault.ts')
+    const batchTool = vaultTools.find((t: { name: string }) => t.name === 'vault_batch_analyze')!
+    const result = await batchTool.call({ count: 50 })
+    const parsed = JSON.parse(result.content[0].text)
+
+    expect(parsed.preview).toBeDefined()
+    expect(Array.isArray(parsed.preview)).toBe(true)
+    expect(parsed.preview.some((f: string) => f.endsWith('--visible-paper.md'))).toBe(true)
+  })
+})
+
 describe('vault_raw_ingest path traversal protection', () => {
   test('rejects traversal category for arxiv source (no network call, no orphan job)', async () => {
     const { vaultWriteTools } = await import('../src/vault_write.ts')
