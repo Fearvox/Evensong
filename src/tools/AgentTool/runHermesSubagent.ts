@@ -19,6 +19,17 @@ function resolveHermesBin(): string {
   return bin
 }
 
+async function collectStream(
+  stream: NodeJS.ReadableStream | null | undefined,
+): Promise<string> {
+  if (!stream) return ''
+  let result = ''
+  for await (const chunk of stream) {
+    result += chunk.toString()
+  }
+  return result
+}
+
 export interface HermesSubagentOptions {
   prompt: string
   cwd?: string
@@ -64,27 +75,13 @@ export async function* runHermesSubagent({
     env: { ...process.env },
   })
 
-  let stdout = ''
-  let stderr = ''
-
-  // Collect stdout
-  if (child.stdout) {
-    for await (const chunk of child.stdout) {
-      stdout += chunk.toString()
-    }
-  }
-
-  // Collect stderr (log only)
-  if (child.stderr) {
-    for await (const chunk of child.stderr) {
-      stderr += chunk.toString()
-    }
-  }
-
-  // Wait for process to exit
-  const exitCode = await new Promise<number>(resolve => {
-    child.on('close', code => resolve(code ?? 1))
-  })
+  const [stdout, stderr, exitCode] = await Promise.all([
+    collectStream(child.stdout),
+    collectStream(child.stderr),
+    new Promise<number>(resolve => {
+      child.on('close', code => resolve(code ?? 1))
+    }),
+  ])
 
   if (stderr) {
     logForDebugging(`[Hermes subagent] stderr: ${stderr}`)
