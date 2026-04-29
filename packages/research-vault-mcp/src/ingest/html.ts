@@ -2,9 +2,14 @@
 
 /**
  * Validate URL to prevent SSRF attacks.
- * Blocks: private IP ranges, localhost, cloud metadata endpoints, invalid schemes.
+ * Blocks: private IPv4/IPv6 ranges, loopback, link-local, cloud metadata
+ * endpoints, invalid schemes.
+ *
+ * KNOWN LIMITATION: Does not perform DNS resolution — a hostname that
+ * resolves to a private IP will pass this check. DNS rebinding mitigation
+ * is a follow-up.
  */
-function validateUrl(url: string): void {
+export function validateUrl(url: string): void {
   let parsed: URL
   try {
     parsed = new URL(url)
@@ -17,28 +22,52 @@ function validateUrl(url: string): void {
     throw new Error(`URL scheme not allowed: ${scheme}. Only http/https permitted.`)
   }
 
-  const hostname = parsed.hostname.toLowerCase()
+  const hostname = parsed.hostname.replace(/^\[(.*)\]$/, '$1').toLowerCase()
 
-  // Block cloud metadata endpoints
-  if (hostname === '169.254.169.254' || hostname === 'metadata.google.internal') {
-    throw new Error(`Cloud metadata endpoint blocked: ${hostname}`)
+  if (hostname === 'localhost' || hostname === 'metadata.google.internal') {
+    throw new Error(`Hostname not permitted: ${hostname}`)
   }
 
-  // Block localhost variants
-  if (hostname === 'localhost' || hostname === '127.0.0.1' || hostname === '::1' || hostname === '[::1]') {
-    throw new Error(`Localhost not permitted: ${hostname}`)
+  if (hostname.includes(':')) {
+    if (hostname === '::1' || hostname === '::') {
+      throw new Error(`IPv6 loopback blocked: ${hostname}`)
+    }
+    if (/^(fc|fd)[0-9a-f]{0,2}:/i.test(hostname)) {
+      throw new Error(`IPv6 unique-local blocked: ${hostname}`)
+    }
+    if (/^fe[89ab][0-9a-f]?:/i.test(hostname)) {
+      throw new Error(`IPv6 link-local blocked: ${hostname}`)
+    }
+    const mappedV4 = hostname.match(/^::ffff:(\d+\.\d+\.\d+\.\d+)$/i)
+    if (mappedV4) {
+      validateIpv4(mappedV4[1], hostname)
+    }
+    return
   }
 
-  // Block private IP ranges
-  const ip = hostname
-  if (/^(10\.\d+\.\d+\.\d+|172\.(1[6-9]|2\d|3[01])\.\d+\.\d+|192\.168\.\d+\.\d+)$/.test(ip)) {
-    throw new Error(`Private IP not permitted: ${ip}`)
+  const ipMatch = hostname.match(/^(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})$/)
+  if (ipMatch) {
+    validateIpv4(hostname, hostname)
+    return
   }
+}
 
-  // Block link-local
-  if (hostname.startsWith('169.254.')) {
-    throw new Error(`Link-local IP blocked: ${hostname}`)
+function validateIpv4(ip: string, originalHostname: string): void {
+  const parts = ip.split('.').map(p => parseInt(p, 10))
+  if (parts.length !== 4 || parts.some(n => Number.isNaN(n) || n < 0 || n > 255)) {
+    throw new Error(`Invalid IPv4 address: ${originalHostname}`)
   }
+  const [a, b] = parts
+
+  if (a === 0) throw new Error(`Reserved IP blocked: ${originalHostname}`)
+  if (a === 10) throw new Error(`Private IP blocked: ${originalHostname}`)
+  if (a === 127) throw new Error(`Loopback IP blocked: ${originalHostname}`)
+  if (a === 169 && b === 254 && parts[2] === 169 && parts[3] === 254) {
+    throw new Error(`Cloud metadata endpoint blocked: ${originalHostname}`)
+  }
+  if (a === 169 && b === 254) throw new Error(`Link-local IP blocked: ${originalHostname}`)
+  if (a === 172 && b >= 16 && b <= 31) throw new Error(`Private IP blocked: ${originalHostname}`)
+  if (a === 192 && b === 168) throw new Error(`Private IP blocked: ${originalHostname}`)
 }
 
 const MAX_REDIRECTS = 5
