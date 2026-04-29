@@ -112,7 +112,7 @@ async function ingestUrl(value: string, category: string) {
     try {
       const text = await fetchHtml(value)
       const safeName = value.replace(/[^a-z0-9]/gi, '_').slice(0, 64)
-      const rawPath = safePath(RAW_DIR, join(category, `${Date.now()}--${safeName}.html`))
+      const rawPath = safePath(RAW_DIR, join(category, `${Date.now()}--${safeName}.md`))
       ensureDir(dirname(rawPath))
       writeFileSync(rawPath, text, 'utf-8')
 
