@@ -11,6 +11,21 @@
 import { vaultTools } from './vault'
 import { vaultWriteTools } from './vault_write.js'
 import { amplifyTools, configureAmplify } from './amplify'
+import { createHash, timingSafeEqual } from 'crypto'
+
+// Env-var auto-config: skip the unauthenticated POST /configure step
+// when the API key is provided at startup via env.
+export function loadAmplifyFromEnv(): boolean {
+  if (process.env.AMPLIFY_API_KEY) {
+    configureAmplify(process.env.AMPLIFY_API_KEY)
+    console.error('[MCP] Loaded Amplify API key from AMPLIFY_API_KEY env var')
+    return true
+  }
+
+  return false
+}
+
+loadAmplifyFromEnv()
 
 const HOST = '0.0.0.0'
 const TRANSPORT = process.env.MCP_TRANSPORT ?? 'stdio'
@@ -65,6 +80,12 @@ function makeResponse(id: string | number | undefined, result?: any, error?: any
 
 function generateSessionId(): string {
   return crypto.randomUUID()
+}
+
+function timingSafeStringEqual(a: string, b: string): boolean {
+  const ah = createHash('sha256').update(a).digest()
+  const bh = createHash('sha256').update(b).digest()
+  return timingSafeEqual(ah, bh)
 }
 
 // ─── MCP Handlers ─────────────────────────────────────────────────────────────
@@ -153,134 +174,150 @@ async function handleStdioTransport() {
 
 let server: ReturnType<typeof Bun.serve> | undefined
 
-if (TRANSPORT !== 'stdio') {
-  server = Bun.serve({
-  port: PORT,
-  hostname: HOST,
+export async function httpHandler(req: Request): Promise<Response> {
+  const url = new URL(req.url)
 
-  async fetch(req: Request): Promise<Response> {
-    const url = new URL(req.url)
+  // ── GET /sse — MCP SSE Transport: establish SSE stream + send endpoint
+  if (url.pathname === '/sse' && req.method === 'GET') {
+    const sessionId = generateSessionId()
 
-    // ── GET /sse — MCP SSE Transport: establish SSE stream + send endpoint
-    if (url.pathname === '/sse' && req.method === 'GET') {
-      const sessionId = generateSessionId()
+    const stream = new ReadableStream({
+      start(controller) {
+        const encoder = new TextEncoder()
 
-      const stream = new ReadableStream({
-        start(controller) {
-          const encoder = new TextEncoder()
+        const send = (data: string) => {
+          try { controller.enqueue(encoder.encode(data)) } catch {}
+        }
 
-          const send = (data: string) => {
-            try { controller.enqueue(encoder.encode(data)) } catch {}
-          }
+        // Step 1: Send the endpoint event (MCP SSE spec requirement)
+        send(`event: endpoint\ndata: /messages?sessionId=${sessionId}\n\n`)
 
-          // Step 1: Send the endpoint event (MCP SSE spec requirement)
-          send(`event: endpoint\ndata: /messages?sessionId=${sessionId}\n\n`)
-
-          // Heartbeat every 15s
-          const heartbeat = setInterval(() => {
-            try {
-              controller.enqueue(encoder.encode(`: heartbeat\n\n`))
-            } catch {
-              clearInterval(heartbeat)
-              sessions.delete(sessionId)
-            }
-          }, 15000)
-
-          // Register session
-          sessions.set(sessionId, { send, heartbeat })
-
-          console.error(`[SSE] Session ${sessionId} connected`)
-
-          req.signal.addEventListener('abort', () => {
+        // Heartbeat every 15s
+        const heartbeat = setInterval(() => {
+          try {
+            controller.enqueue(encoder.encode(`: heartbeat\n\n`))
+          } catch {
             clearInterval(heartbeat)
             sessions.delete(sessionId)
-            console.error(`[SSE] Session ${sessionId} disconnected`)
-          })
-        }
-      })
+          }
+        }, 15000)
 
-      return new Response(stream, {
-        status: 200,
-        headers: {
-          'Content-Type': 'text/event-stream',
-          'Cache-Control': 'no-cache',
-          'Connection': 'keep-alive',
-          'X-Accel-Buffering': 'no'
-        }
-      })
-    }
+        // Register session
+        sessions.set(sessionId, { send, heartbeat })
 
-    // ── POST /messages?sessionId=xxx — MCP SSE Transport: receive JSON-RPC, respond via SSE
-    if (url.pathname === '/messages' && req.method === 'POST') {
-      const sessionId = url.searchParams.get('sessionId')
+        console.error(`[SSE] Session ${sessionId} connected`)
 
-      if (!sessionId || !sessions.has(sessionId)) {
-        return Response.json(
-          { error: 'Invalid or missing sessionId' },
-          { status: 400 }
-        )
+        req.signal.addEventListener('abort', () => {
+          clearInterval(heartbeat)
+          sessions.delete(sessionId)
+          console.error(`[SSE] Session ${sessionId} disconnected`)
+        })
       }
+    })
 
-      const session = sessions.get(sessionId)!
-
-      try {
-        const body = await req.json() as MCPRequest
-
-        const result = await handleRequest(body)
-
-        // Send response via SSE stream (MCP SSE spec)
-        if (result) {
-          session.send(`event: message\ndata: ${JSON.stringify(result)}\n\n`)
-        }
-
-        // Return 202 Accepted (MCP SSE spec: POST returns 202, response goes via SSE)
-        return new Response(null, { status: 202 })
-      } catch (e: any) {
-        return Response.json(
-          { jsonrpc: '2.0', error: { code: -32700, message: `Parse error: ${e.message}` } },
-          { status: 400 }
-        )
+    return new Response(stream, {
+      status: 200,
+      headers: {
+        'Content-Type': 'text/event-stream',
+        'Cache-Control': 'no-cache',
+        'Connection': 'keep-alive',
+        'X-Accel-Buffering': 'no'
       }
-    }
-
-    // ── GET /health
-    if (url.pathname === '/health' && req.method === 'GET') {
-      return Response.json({
-        status: 'ok',
-        tools: allTools.length,
-        vault_tools: vaultTools.length,
-        amplify_tools: amplifyTools.length,
-        sse_sessions: sessions.size,
-        uptime: process.uptime()
-      })
-    }
-
-    // ── POST /configure — set Amplify API key
-    if (url.pathname === '/configure' && req.method === 'POST') {
-      try {
-        const { apiKey } = await req.json() as { apiKey: string }
-        if (!apiKey) throw new Error('apiKey required')
-        configureAmplify(apiKey)
-        return Response.json({ status: 'configured' })
-      } catch (e: any) {
-        return Response.json({ error: e.message }, { status: 400 })
-      }
-    }
-
-    // ── 404
-    return Response.json({ error: 'Not found' }, { status: 404 })
+    })
   }
+
+  // ── POST /messages?sessionId=xxx — MCP SSE Transport: receive JSON-RPC, respond via SSE
+  if (url.pathname === '/messages' && req.method === 'POST') {
+    const sessionId = url.searchParams.get('sessionId')
+
+    if (!sessionId || !sessions.has(sessionId)) {
+      return Response.json(
+        { error: 'Invalid or missing sessionId' },
+        { status: 400 }
+      )
+    }
+
+    const session = sessions.get(sessionId)!
+
+    try {
+      const body = await req.json() as MCPRequest
+
+      const result = await handleRequest(body)
+
+      // Send response via SSE stream (MCP SSE spec)
+      if (result) {
+        session.send(`event: message\ndata: ${JSON.stringify(result)}\n\n`)
+      }
+
+      // Return 202 Accepted (MCP SSE spec: POST returns 202, response goes via SSE)
+      return new Response(null, { status: 202 })
+    } catch (e: any) {
+      return Response.json(
+        { jsonrpc: '2.0', error: { code: -32700, message: `Parse error: ${e.message}` } },
+        { status: 400 }
+      )
+    }
+  }
+
+  // ── GET /health
+  if (url.pathname === '/health' && req.method === 'GET') {
+    return Response.json({
+      status: 'ok',
+      tools: allTools.length,
+      vault_tools: vaultTools.length,
+      amplify_tools: amplifyTools.length,
+      sse_sessions: sessions.size,
+      uptime: process.uptime()
+    })
+  }
+
+  // ── POST /configure — set Amplify API key
+  if (url.pathname === '/configure' && req.method === 'POST') {
+    const requiredSecret = process.env.MCP_CONFIGURE_SECRET
+    if (requiredSecret) {
+      const providedSecret = req.headers.get('x-configure-secret') ?? ''
+      if (!timingSafeStringEqual(providedSecret, requiredSecret)) {
+        return Response.json({ error: 'Forbidden' }, { status: 403 })
+      }
+    }
+
+    try {
+      const { apiKey } = await req.json() as { apiKey: string }
+      if (!apiKey) throw new Error('apiKey required')
+      configureAmplify(apiKey)
+      return Response.json({ status: 'configured' })
+    } catch (e: any) {
+      return Response.json({ error: e.message }, { status: 400 })
+    }
+  }
+
+  // ── 404
+  return Response.json({ error: 'Not found' }, { status: 404 })
+}
+
+function startHttpServer() {
+  server = Bun.serve({
+    port: PORT,
+    hostname: HOST,
+    fetch: httpHandler
   })
 }
 
 // ─── Startup ─────────────────────────────────────────────────────────────────
 
-if (TRANSPORT === 'stdio') {
-  console.error('[MCP] Running in stdio mode (stdin/stdout JSON-RPC)')
-  await handleStdioTransport()
-  process.exit(0)
-} else {
-  console.log(`
+if (import.meta.main) {
+  if (TRANSPORT === 'stdio') {
+    console.error('[MCP] Running in stdio mode (stdin/stdout JSON-RPC)')
+    await handleStdioTransport()
+    process.exit(0)
+  } else {
+    if (!process.env.MCP_CONFIGURE_SECRET) {
+      console.error('[MCP] WARNING: /configure endpoint is unauthenticated. Set MCP_CONFIGURE_SECRET to require X-Configure-Secret header. Use AMPLIFY_API_KEY env var to skip /configure entirely.')
+    }
+
+    startHttpServer()
+
+    console.log(`
 ╔══════════════════════════════════════════════════════╗
 ║   Research Vault MCP Server — MCP SSE Transport     ║
 ╠══════════════════════════════════════════════════════╣
@@ -291,16 +328,17 @@ if (TRANSPORT === 'stdio') {
 ║  Tools:     ${String(allTools.length).padEnd(3)} (${vaultTools.length} vault, ${amplifyTools.length} amplify)     ║
 ╚══════════════════════════════════════════════════════╝
 `)
-}
-
-// ─── Graceful Shutdown ───────────────────────────────────────────────────────
-
-process.on('SIGINT', () => {
-  console.log('\nShutting down...')
-  for (const [id, session] of sessions) {
-    clearInterval(session.heartbeat)
   }
-  sessions.clear()
-  server?.stop()
-  process.exit(0)
-})
+
+  // ─── Graceful Shutdown ───────────────────────────────────────────────────────
+
+  process.on('SIGINT', () => {
+    console.log('\nShutting down...')
+    for (const [id, session] of sessions) {
+      clearInterval(session.heartbeat)
+    }
+    sessions.clear()
+    server?.stop()
+    process.exit(0)
+  })
+}
