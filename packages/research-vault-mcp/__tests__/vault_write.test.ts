@@ -1,5 +1,5 @@
 import { describe, test, expect, beforeEach } from 'bun:test'
-import { mkdirSync, readFileSync, rmSync, writeFileSync } from 'fs'
+import { mkdirSync, rmSync, readFileSync, writeFileSync } from 'fs'
 import { join } from 'path'
 import { tmpdir } from 'os'
 import { fileURLToPath } from 'url'
@@ -71,6 +71,68 @@ describe('vault_delete', () => {
     expect(deleted).toBe(true)
     const { existsSync } = await import('fs')
     expect(existsSync(path)).toBe(false)
+  })
+})
+
+describe('vault_raw_ingest path traversal protection', () => {
+  test('rejects traversal category for arxiv source (no network call, no orphan job)', async () => {
+    const { vaultWriteTools } = await import('../src/vault_write.ts')
+    const tool = vaultWriteTools.find(t => t.name === 'vault_raw_ingest')!
+    const result = await tool.call({
+      source: 'arxiv',
+      value: '2501.00001',
+      category: '../../tmp/escape'
+    })
+    expect(result.isError).toBe(true)
+    expect(result.content[0].text.toLowerCase()).toMatch(/traversal|outside/i)
+
+    const jobsPath = join(TMP, '.meta', 'ingest-jobs.json')
+    const { existsSync } = await import('fs')
+    if (existsSync(jobsPath)) {
+      const jobs = JSON.parse(readFileSync(jobsPath, 'utf-8'))
+      expect(Object.keys(jobs).length).toBe(0)
+    }
+  })
+
+  test('rejects traversal category for url source (no orphan job)', async () => {
+    const { vaultWriteTools } = await import('../src/vault_write.ts')
+    const tool = vaultWriteTools.find(t => t.name === 'vault_raw_ingest')!
+    const result = await tool.call({
+      source: 'url',
+      value: 'https://example.com',
+      category: '../../tmp/escape'
+    })
+    expect(result.isError).toBe(true)
+    expect(result.content[0].text.toLowerCase()).toMatch(/traversal|outside/i)
+
+    const jobsPath = join(TMP, '.meta', 'ingest-jobs.json')
+    const { existsSync } = await import('fs')
+    if (existsSync(jobsPath)) {
+      const jobs = JSON.parse(readFileSync(jobsPath, 'utf-8'))
+      expect(Object.keys(jobs).length).toBe(0)
+    }
+  })
+
+  test('rejects traversal category for file source (no orphan job)', async () => {
+    const sourceFile = join(TMP, 'tmp-source.txt')
+    writeFileSync(sourceFile, 'test content')
+
+    const { vaultWriteTools } = await import('../src/vault_write.ts')
+    const tool = vaultWriteTools.find(t => t.name === 'vault_raw_ingest')!
+    const result = await tool.call({
+      source: 'file',
+      value: sourceFile,
+      category: '../../tmp/escape'
+    })
+    expect(result.isError).toBe(true)
+    expect(result.content[0].text.toLowerCase()).toMatch(/traversal|outside/i)
+
+    const jobsPath = join(TMP, '.meta', 'ingest-jobs.json')
+    const { existsSync } = await import('fs')
+    if (existsSync(jobsPath)) {
+      const jobs = JSON.parse(readFileSync(jobsPath, 'utf-8'))
+      expect(Object.keys(jobs).length).toBe(0)
+    }
   })
 })
 
