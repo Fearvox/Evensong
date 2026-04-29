@@ -68,13 +68,14 @@ async function ingestArxiv(value: string, category: string) {
   const id = parseArxivId(value)
   if (!id) throw new Error(`Invalid ArXiv ID: ${value}`)
 
+  const metaPath = safePath(RAW_DIR, join(category, `arxiv-${id}.meta.json`))
+
   const job = await jobStore.createJob({ source: 'arxiv', value: id, category })
   await jobStore.updateJob(job.jobId, { status: 'fetching' })
 
   const metadata = await fetchArxivMetadata(id)
   metadata.arxivId = id
 
-  const metaPath = join(RAW_DIR, category, `arxiv-${id}.meta.json`)
   ensureDir(dirname(metaPath))
   writeFileSync(metaPath, JSON.stringify(metadata, null, 2), 'utf-8')
 
@@ -88,6 +89,8 @@ async function ingestArxiv(value: string, category: string) {
 }
 
 async function ingestUrl(value: string, category: string) {
+  safePath(RAW_DIR, category)
+
   const job = await jobStore.createJob({ source: 'url', value, category })
   await jobStore.updateJob(job.jobId, { status: 'fetching' })
 
@@ -95,7 +98,7 @@ async function ingestUrl(value: string, category: string) {
     try {
       const text = await fetchHtml(value)
       const safeName = value.replace(/[^a-z0-9]/gi, '_').slice(0, 64)
-      const rawPath = join(RAW_DIR, category, `${Date.now()}--${safeName}.html`)
+      const rawPath = safePath(RAW_DIR, join(category, `${Date.now()}--${safeName}.html`))
       ensureDir(dirname(rawPath))
       writeFileSync(rawPath, text, 'utf-8')
 
@@ -115,10 +118,12 @@ async function ingestUrl(value: string, category: string) {
 
 async function ingestFile(value: string, category: string) {
   if (!existsSync(value)) throw new Error(`File not found: ${value}`)
+
+  safePath(RAW_DIR, category)
+
   const job = await jobStore.createJob({ source: 'file', value, category })
-  const destDir = join(RAW_DIR, category)
-  ensureDir(destDir)
-  const destPath = join(destDir, `${Date.now()}--${basename(value)}`)
+  const destPath = safePath(RAW_DIR, join(category, `${Date.now()}--${basename(value)}`))
+  ensureDir(dirname(destPath))
   const content = readFileSync(value)
   writeFileSync(destPath, content)
 
