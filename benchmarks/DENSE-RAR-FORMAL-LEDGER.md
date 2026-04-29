@@ -2,6 +2,14 @@
 
 This is the canonical ledger for Dense/RAR retrieval evidence. It is separate from the older Evensong run index because these runs evaluate a retrieval pipeline, not self-evolution orchestration.
 
+## Run Index
+
+| Run ID | Date | Boundary | Result |
+|--------|------|----------|--------|
+| dense-rar-2026-04-24T0854 | 2026-04-24 | formal, live allowed | dense-rar and dense-adaptive 24/24 Top-1 and Top-5 across 24 queries; 0 errors |
+| dense-rar-2026-04-24T0801 | 2026-04-24 | formal, live allowed | Stage1TopK 20 baseline; dense-rar and dense-adaptive 23/24 |
+| dense-rar-2026-04-24T0644 | 2026-04-24 | probe only | internal/probe-only evidence; dirty git state |
+
 ## Canonical Formal Run
 
 - Run ID: `dense-rar-2026-04-24T0854`

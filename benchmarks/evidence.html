@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="A public evidence map for Evensong benchmark pages, ledgers, gated materials, and caveats.">
+<title>Evensong Evidence Map</title>
+<link rel="icon" type="image/svg+xml" href="dash-favicon.svg">
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+<link href="https://cdn.jsdelivr.net/npm/geist@1.3.1/dist/fonts/geist-sans/style.min.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/geist@1.3.1/dist/fonts/geist-mono/style.min.css" rel="stylesheet">
+<link rel="stylesheet" href="evensong-public.css">
+<script src="https://cdn.jsdelivr.net/npm/@vercel/analytics@1.4.1/dist/analytics.min.js" defer></script>
+</head>
+<body class="surface">
+<header class="topbar">
+  <div class="site-shell topbar-inner">
+    <a class="brand" href="index.html">
+      <span class="brand-mark" aria-hidden="true"></span>
+      <span class="brand-text">Evensong</span>
+    </a>
+    <nav class="nav" aria-label="Public Evensong pages">
+      <a href="index.html">Home</a>
+      <a href="dashboard.html">Dashboard</a>
+      <a href="handoff.html">Handoff</a>
+      <a href="promo.html">Promo</a>
+      <a href="evidence.html" aria-current="page">Evidence</a>
+      <a href="research.html">Research</a>
+      <a href="evensong/">Vault</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <section class="hero">
+    <div class="site-shell hero-grid">
+      <div>
+        <span class="eyebrow">Evidence map</span>
+        <h1>Trace the claims.</h1>
+        <p class="lead">A public index of where Evensong claims come from, which artifacts are open, and which materials remain gated or internal-only.</p>
+        <div class="actions">
+          <a class="btn primary" href="BENCHMARK-REGISTRY.md">Open registry</a>
+          <a class="btn secondary" href="evensong/">Gated vault</a>
+        </div>
+      </div>
+      <aside class="visual-panel">
+        <img src="evensong/fig2-behavioral-heatmap.png" alt="Behavioral heatmap evidence figure">
+        <div class="panel-caption">
+          <div class="label">Evidence posture</div>
+          <p>Claims should resolve to a public page, a ledger, a raw run artifact, or a clearly marked gated source.</p>
+        </div>
+      </aside>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="site-shell">
+      <div class="section-head">
+        <div>
+          <span class="eyebrow">Source map</span>
+          <h2>Public artifacts and boundaries</h2>
+        </div>
+        <p>This map is intentionally conservative. It helps readers separate polished explanation from raw evidence and internal-only reference material.</p>
+      </div>
+      <div class="evidence-list">
+        <div class="evidence-row">
+          <div><span class="status public">Public</span><h3>Benchmark hub</h3></div>
+          <p>Long-form dashboard with run matrix, timeline, architecture, and findings.</p>
+          <a href="index.html">Open</a>
+        </div>
+        <div class="evidence-row">
+          <div><span class="status public">Public</span><h3>Pressure research</h3></div>
+          <p>Readable synthesis of pressure, accountability, clean-room controls, and observed benchmark behavior.</p>
+          <a href="research.html">Open</a>
+        </div>
+        <div class="evidence-row">
+          <div><span class="status public">Ledger</span><h3>Benchmark registry</h3></div>
+          <p>Markdown run index and retrieval evidence pointer. Useful for source-of-truth run names and dates.</p>
+          <a href="BENCHMARK-REGISTRY.md">Open</a>
+        </div>
+        <div class="evidence-row">
+          <div><span class="status public">Ledger</span><h3>Dense RAR ledger</h3></div>
+          <p>Separate formal retrieval benchmark ledger with clean/probe status and eligibility notes.</p>
+          <a href="DENSE-RAR-FORMAL-LEDGER.md">Open</a>
+        </div>
+        <div class="evidence-row">
+          <div><span class="status caution">Gated</span><h3>R012-E vault</h3></div>
+          <p>Password-gated internal self-evolution reference. Linkable as provenance, not public dataset content.</p>
+          <a href="evensong/">Open</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="site-shell">
+      <div class="section-head">
+        <div>
+          <span class="eyebrow">Claim table</span>
+          <h2>Evidence quality by claim</h2>
+        </div>
+        <p>Use this table before strengthening public copy. It keeps the site from overstating what the open artifacts prove.</p>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Claim</th>
+              <th>Public evidence</th>
+              <th>Risk</th>
+              <th>Public wording</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="mono">Pressure increases work density</td>
+              <td>Dashboard matrix, research page, run registry</td>
+              <td>Different prompts and contexts can confound direct comparison.</td>
+              <td>Structured pressure was associated with higher output and self-monitoring in observed runs.</td>
+            </tr>
+            <tr>
+              <td class="mono">Memory changes strategy</td>
+              <td>Research synthesis, memory figures, selected public run notes</td>
+              <td>Some detailed R012-E references are gated.</td>
+              <td>Persistent memory appears to change strategy selection when the prior pattern is available.</td>
+            </tr>
+            <tr>
+              <td class="mono">Fabrication can be environment-triggered</td>
+              <td>Dashboard caveats, fabricated run rows, clean-room comparison notes</td>
+              <td>Needs careful phrasing to avoid model-general claims.</td>
+              <td>Four observed runs falsely reported work; clean-room controls reduced that failure mode in follow-up runs.</td>
+            </tr>
+            <tr>
+              <td class="mono">R012-E is public research data</td>
+              <td>None</td>
+              <td>Explicitly prohibited by the gated vault policy.</td>
+              <td>Do not make this claim.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="site-shell split">
+      <div>
+        <span class="eyebrow">Policy</span>
+        <h2>Internal-only line</h2>
+        <p class="lead">The public surface can explain that gated internal material exists. It should not republish internal benchmark data or present it as an academic dataset.</p>
+      </div>
+      <div class="notice">
+        <strong>Strict boundary:</strong> R012-E benchmark data is internal self-evolution reference only. Public pages should route readers to the gated vault and keep public claims grounded in open pages, ledgers, or raw run artifacts.
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="footer">
+  <div class="site-shell footer-inner">
+    <div>Evensong evidence map</div>
+    <div><a href="handoff.html">Handoff</a> / <a href="dashboard.html">Dashboard</a></div>
+  </div>
+</footer>
+</body>
+</html>

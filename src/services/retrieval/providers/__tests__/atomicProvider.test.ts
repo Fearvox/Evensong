@@ -85,6 +85,34 @@ describe('createAtomicProvider', () => {
     }
   })
 
+  test('dedupes JSON-array output and honors topK', async () => {
+    const saved = globalThis.fetch
+    globalThis.fetch = (async (url: Parameters<typeof fetch>[0]) => {
+      if (url.toString().endsWith('/models')) return new Response('{"data":[]}', { status: 200 })
+      return new Response(
+        JSON.stringify({
+          choices: [{ message: { content: '["a.md","a.md","b.md","c.md"]' } }],
+        }),
+        { status: 200 },
+      )
+    }) as typeof fetch
+    try {
+      const p = createAtomicProvider(createLocalGemmaClient({ model: ATOMIC_MODELS.GROK_3 }))
+      const r = await p.retrieve({
+        query: 'q',
+        topK: 2,
+        manifest: [
+          { path: 'a.md', title: 'A', retentionScore: 0.9, accessCount: 1, lastAccess: '2026-01-01', summaryLevel: 'deep' },
+          { path: 'b.md', title: 'B', retentionScore: 0.8, accessCount: 1, lastAccess: '2026-01-01', summaryLevel: 'deep' },
+          { path: 'c.md', title: 'C', retentionScore: 0.7, accessCount: 1, lastAccess: '2026-01-01', summaryLevel: 'deep' },
+        ],
+      })
+      expect(r.rankedPaths).toEqual(['a.md', 'b.md'])
+    } finally {
+      globalThis.fetch = saved
+    }
+  })
+
   test('reports regex fallback mode for prose output', () => {
     const parsed = parseJudgeOutputDetailed(
       'I would choose a.md first, then maybe b.md.',
@@ -110,6 +138,29 @@ describe('createAtomicProvider', () => {
     expect(parsed.parseMode).toBe('regex')
     expect(parsed.rankedPaths).toEqual(['a.md', 'b.md'])
     expect(parsed.rawResponse).toContain('choose a.md')
+  })
+
+  test('honors topK in regex fallback mode', () => {
+    const parsed = parseJudgeOutputDetailed(
+      'I would choose a.md first, then b.md, then c.md.',
+      [
+        { path: 'a.md', title: 'A', retentionScore: 0.9, accessCount: 1, lastAccess: '2026-01-01', summaryLevel: 'deep' },
+        { path: 'b.md', title: 'B', retentionScore: 0.8, accessCount: 1, lastAccess: '2026-01-01', summaryLevel: 'deep' },
+        { path: 'c.md', title: 'C', retentionScore: 0.7, accessCount: 1, lastAccess: '2026-01-01', summaryLevel: 'deep' },
+      ],
+      2,
+    )
+    expect(parsed.parseMode).toBe('regex')
+    expect(parsed.rankedPaths).toEqual(['a.md', 'b.md'])
+  })
+
+  test('returns no paths when maxPaths is zero', () => {
+    const parsed = parseJudgeOutputDetailed(
+      '["a.md"]',
+      [{ path: 'a.md', title: 'A', retentionScore: 0.9, accessCount: 1, lastAccess: '2026-01-01', summaryLevel: 'deep' }],
+      0,
+    )
+    expect(parsed.rankedPaths).toEqual([])
   })
 
   test('marks provider healthy after a successful retrieve', async () => {

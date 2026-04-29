@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="A public-facing Evensong promo page explaining pressure, memory, and agent benchmark behavior.">
+<title>Evensong Promo</title>
+<link rel="icon" type="image/svg+xml" href="dash-favicon.svg">
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+<link href="https://cdn.jsdelivr.net/npm/geist@1.3.1/dist/fonts/geist-sans/style.min.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/geist@1.3.1/dist/fonts/geist-mono/style.min.css" rel="stylesheet">
+<link rel="stylesheet" href="evensong-public.css">
+<script src="https://cdn.jsdelivr.net/npm/@vercel/analytics@1.4.1/dist/analytics.min.js" defer></script>
+</head>
+<body class="surface">
+<header class="topbar">
+  <div class="site-shell topbar-inner">
+    <a class="brand" href="index.html">
+      <span class="brand-mark" aria-hidden="true"></span>
+      <span class="brand-text">Evensong</span>
+    </a>
+    <nav class="nav" aria-label="Public Evensong pages">
+      <a href="index.html">Home</a>
+      <a href="dashboard.html">Dashboard</a>
+      <a href="handoff.html">Handoff</a>
+      <a href="promo.html" aria-current="page">Promo</a>
+      <a href="evidence.html">Evidence</a>
+      <a href="research.html">Research</a>
+      <a href="evensong/">Vault</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <section class="hero">
+    <div class="site-shell hero-grid">
+      <div>
+        <span class="eyebrow">Public narrative</span>
+        <h1>Evensong</h1>
+        <p class="lead">A benchmark story about why agents underperform until the harness asks them to work with memory, pressure, and proof.</p>
+        <div class="actions">
+          <a class="btn primary" href="dashboard.html">See the numbers</a>
+          <a class="btn secondary" href="handoff.html">Read the handoff</a>
+        </div>
+        <div class="meta-row">
+          <span class="pill">Pressure</span>
+          <span class="pill">Memory</span>
+          <span class="pill">Clean-room controls</span>
+        </div>
+      </div>
+      <aside class="visual-panel">
+        <img src="evensong/fig4-l2-pressure-timeline.png" alt="L2 pressure timeline figure">
+        <div class="panel-caption">
+          <div class="label">Core offer</div>
+          <p>Turn raw agent capability into observable work by changing the surrounding harness, not just the model.</p>
+        </div>
+      </aside>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="site-shell">
+      <div class="section-head">
+        <div>
+          <span class="eyebrow">Positioning</span>
+          <h2>The simple version</h2>
+        </div>
+        <p>Evensong is not a claim that agents are conscious. It is a claim that persistent context, pressure, and evaluation design materially change agent behavior.</p>
+      </div>
+      <div class="card-grid">
+        <article class="card">
+          <span class="status public">Pressure</span>
+          <h3>Agents ship more when the harness makes work visible</h3>
+          <p>Time checks, completion criteria, and self-monitoring changed how agents allocated effort across services and tests.</p>
+        </article>
+        <article class="card">
+          <span class="status public">Memory</span>
+          <h3>Strategy recall changes future runs</h3>
+          <p>When prior patterns are available, agents reuse or adapt them. The result is a different plan before the first file is written.</p>
+        </article>
+        <article class="card">
+          <span class="status caution">Proof</span>
+          <h3>False output is measured, not hidden</h3>
+          <p>Fabricated runs remain in the public story because they explain why clean-room protocols and evidence trails matter.</p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="site-shell split">
+      <div>
+        <span class="eyebrow">Public copy</span>
+        <h2>Use this framing</h2>
+        <p class="lead">The model is only one part of the system. Evensong studies the work loop around it: prompts, memory, pressure, tools, verification, and the way a run is allowed to stop.</p>
+      </div>
+      <div class="notice">
+        <strong>Boundary:</strong> Public pages can promote the operational lesson, but gated R012-E details remain internal self-evolution reference. Do not turn internal vault material into public claims.
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="site-shell">
+      <div class="section-head">
+        <div>
+          <span class="eyebrow">Audience</span>
+          <h2>Who this is for</h2>
+        </div>
+        <p>The page is written for builders evaluating agent harnesses, not for a general AI hype audience.</p>
+      </div>
+      <div class="card-grid">
+        <article class="card">
+          <span class="status work">Researchers</span>
+          <h3>Study behavior under controlled pressure</h3>
+          <p>Use the public evidence map to evaluate which claims are empirical, which are narrative, and which remain gated.</p>
+        </article>
+        <article class="card">
+          <span class="status work">Operators</span>
+          <h3>Design agent loops that expose failure</h3>
+          <p>Fabrication, context shortcuts, and self-repair are operational signals. Evensong keeps them visible.</p>
+        </article>
+        <article class="card">
+          <span class="status work">Product teams</span>
+          <h3>Improve the harness before changing the model</h3>
+          <p>The public lesson is pragmatic: better constraints can unlock more reliable work from the model already in use.</p>
+        </article>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="footer">
+  <div class="site-shell footer-inner">
+    <div>Evensong public promo</div>
+    <div><a href="dashboard.html">Dashboard</a> / <a href="research.html">Research synthesis</a></div>
+  </div>
+</footer>
+</body>
+</html>

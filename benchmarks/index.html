@@ -688,6 +688,17 @@ footer {
   .footer-right { text-align: left; }
 
   .palm-layer { display: none; }
+
+  .surface-nav {
+    position: static;
+    margin: 12px var(--container-pad) 0;
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .surface-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
 }
 
 @media (max-width: 480px) {
@@ -702,6 +713,9 @@ footer {
     border-top: 1px solid oklch(0.88 0.02 75 / 0.5);
   }
   .hero h1 { font-size: 1.8rem; }
+  .surface-grid {
+    grid-template-columns: 1fr;
+  }
 }
 
 /* ===== REDUCED MOTION ===== */
@@ -775,6 +789,98 @@ a.lang-btn:active {
 }
 .lang-btn + .lang-btn {
   border-left: 1px solid rgba(200, 195, 180, 0.5);
+}
+
+/* ===== PUBLIC SURFACE NAV ===== */
+.surface-nav {
+  position: fixed;
+  top: 20px;
+  left: 20px;
+  z-index: 9998;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 5px;
+  border: 1px solid rgba(200, 195, 180, 0.7);
+  border-radius: 6px;
+  background: rgba(240, 238, 230, 0.95);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+.surface-nav-brand {
+  padding: 6px 10px;
+  font-weight: 700;
+  color: var(--ink-primary);
+  text-decoration: none;
+}
+.surface-nav-links {
+  display: flex;
+  gap: 2px;
+  flex-wrap: wrap;
+}
+.surface-nav a {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  text-decoration: none;
+  color: var(--ink-secondary);
+  border-radius: 4px;
+}
+.surface-nav-links a {
+  padding: 6px 9px;
+}
+.surface-nav a:hover,
+.surface-nav a.active {
+  color: var(--palm-shadow);
+  background: oklch(0.35 0.08 160 / 0.08);
+}
+
+/* ===== PUBLIC SURFACE CARDS ===== */
+.surface-strip {
+  padding-top: 24px;
+}
+.surface-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+}
+.surface-card {
+  min-height: 150px;
+  padding: 18px;
+  border: 1px solid oklch(0.88 0.02 75 / 0.7);
+  border-radius: 6px;
+  background: oklch(0.94 0.012 83 / 0.44);
+  text-decoration: none;
+  color: var(--ink-primary);
+  transition: background-color 180ms ease, transform 180ms var(--ease-bounce), border-color 180ms ease;
+}
+.surface-card:hover {
+  background: var(--hover-glow);
+  border-color: oklch(0.35 0.08 160 / 0.28);
+  transform: translateY(-2px);
+}
+.surface-card-k {
+  display: block;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--palm-shadow);
+  margin-bottom: 10px;
+}
+.surface-card-title {
+  display: block;
+  font-size: 1rem;
+  font-weight: 700;
+  line-height: 1.25;
+  margin-bottom: 8px;
+}
+.surface-card-desc {
+  display: block;
+  font-size: 0.84rem;
+  line-height: 1.5;
+  color: var(--ink-secondary);
 }
 
 /* ===== FILTER CHIPS ===== */
@@ -922,6 +1028,19 @@ a.lang-btn:active {
   <a href="zh/" class="lang-btn" onclick="localStorage.setItem('ds-locale','zh')">中文</a>
 </div>
 
+<!-- PUBLIC SURFACE NAV -->
+<nav class="surface-nav" aria-label="Public Evensong pages">
+  <a href="index.html" class="surface-nav-brand active">Evensong</a>
+  <span class="surface-nav-links">
+    <a href="dashboard.html">Dashboard</a>
+    <a href="handoff.html">Handoff</a>
+    <a href="promo.html">Promo</a>
+    <a href="evidence.html">Evidence</a>
+    <a href="research.html">Research</a>
+    <a href="evensong/">Vault</a>
+  </span>
+</nav>
+
 <!-- PAPER TEXTURE: SVG NOISE FILTER -->
 <svg class="noise-layer" width="100%" height="100%">
   <defs>
@@ -967,16 +1086,47 @@ a.lang-btn:active {
   <!-- ===== HERO ===== -->
   <section class="hero">
     <div class="reveal">
-      <span class="kicker">DASH SHATTER Benchmark Report / Gen 0 + Gen 1 + Gen 2</span>
-      <h1>Twenty-five runs, seven models,<br>one <span class="gold-word">self-evolving</span> agent.</h1>
-      <p class="hero-sub">A controlled study of orchestration strategies across Opus 4.6 and MiniMax M2.7. Every run passed. The interesting part is how they got there.</p>
+      <span class="kicker">DASH SHATTER / Evensong public surface</span>
+      <h1>Pressure, memory,<br>and <span class="gold-word">proof</span> for agent work.</h1>
+      <p class="hero-sub">A public benchmark hub for studying how orchestration, persistent context, and clean-room controls change agent behavior across real runs.</p>
       <div class="hero-meta">
-        <span class="hero-tag">2026-04-09 — 04-11</span>
-        <span class="hero-tag">12 orchestration modes</span>
+        <span class="hero-tag">46 indexed runs</span>
+        <span class="hero-tag">9 model families</span>
         <span class="hero-tag">29 emergent behaviors</span>
       </div>
       <div style="margin-top:16px;">
-        <a href="research.html" style="font-family:var(--font-mono); font-size:12px; color:var(--ink-muted); text-decoration:none; border-bottom:1px solid oklch(0.62 0.015 70 / 0.3); padding-bottom:2px; transition:color 150ms ease;">Research: Why Pressure Works →</a>
+        <a href="dashboard.html" style="font-family:var(--font-mono); font-size:12px; color:var(--ink-muted); text-decoration:none; border-bottom:1px solid oklch(0.62 0.015 70 / 0.3); padding-bottom:2px; transition:color 150ms ease;">Public dashboard &rarr;</a>
+        <span style="color:var(--ink-muted); margin:0 8px;">/</span>
+        <a href="research.html" style="font-family:var(--font-mono); font-size:12px; color:var(--ink-muted); text-decoration:none; border-bottom:1px solid oklch(0.62 0.015 70 / 0.3); padding-bottom:2px; transition:color 150ms ease;">Research synthesis &rarr;</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== PUBLIC SURFACE ===== -->
+  <section class="surface-strip">
+    <div class="reveal">
+      <span class="kicker">Public surface</span>
+      <div class="surface-grid">
+        <a class="surface-card" href="dashboard.html">
+          <span class="surface-card-k">Dashboard</span>
+          <span class="surface-card-title">Scan the current readout</span>
+          <span class="surface-card-desc">Headline metrics, claim status, run bands, and visual artifacts.</span>
+        </a>
+        <a class="surface-card" href="handoff.html">
+          <span class="surface-card-k">Handoff</span>
+          <span class="surface-card-title">Understand the boundary</span>
+          <span class="surface-card-desc">Reading order, public claims, internal-only caveats, and operator notes.</span>
+        </a>
+        <a class="surface-card" href="promo.html">
+          <span class="surface-card-k">Promo</span>
+          <span class="surface-card-title">Use the public framing</span>
+          <span class="surface-card-desc">A concise narrative for builders evaluating agent harness design.</span>
+        </a>
+        <a class="surface-card" href="evidence.html">
+          <span class="surface-card-k">Evidence</span>
+          <span class="surface-card-title">Trace claims to artifacts</span>
+          <span class="surface-card-desc">Public pages, ledgers, raw artifacts, and gated R012-E policy boundaries.</span>
+        </a>
       </div>
     </div>
   </section>
@@ -1034,7 +1184,7 @@ a.lang-btn:active {
     <div class="reveal">
       <span class="kicker">Run Comparison</span>
       <h2 style="font-size:1.4rem; font-weight:600; color:var(--ink-primary); margin-bottom:4px;">Benchmark Matrix</h2>
-      <p style="font-size:0.9rem; color:var(--ink-secondary); margin-bottom:20px; max-width:560px;">Twenty-five runs across 7 models. 4 fabricated runs. GPT-5.4 achieves highest code quality with parameterized test framework and proactive Bun isolation fix. Gemini fastest at 3.3min.</p>
+      <p style="font-size:0.9rem; color:var(--ink-secondary); margin-bottom:20px; max-width:560px;">Forty-six indexed runs across 9 model families. 4 fabricated runs remain visible as failure evidence. GPT-5.4 shows the strongest code-quality signal in this public matrix; Gemini is the fastest clean-room finisher at 3.3min.</p>
     </div>
     <div class="reveal" style="transition-delay: 100ms;">
 
@@ -1834,7 +1984,7 @@ a.lang-btn:active {
     <div class="reveal">
       <span class="kicker">Infrastructure</span>
       <h2 style="font-size:1.4rem; font-weight:600; color:var(--ink-primary); margin-bottom:4px;">Provider Routing Architecture</h2>
-        <p style="font-size:0.9rem; color:var(--ink-secondary); max-width:560px; margin-bottom:20px;">7 models tested across 25 runs through a unified provider interface.</p>
+        <p style="font-size:0.9rem; color:var(--ink-secondary); max-width:560px; margin-bottom:20px;">9 model families represented across 46 indexed runs through a unified provider interface.</p>
         <div class="arch-svg-wrap" id="archDiagram">
           <svg viewBox="0 0 860 280" xmlns="http://www.w3.org/2000/svg">
             <!-- USER NODE -->
@@ -1955,7 +2105,7 @@ a.lang-btn:active {
         Built with Opus 4.6 + MiniMax M2.7 + Grok 4.1/4.20
       </div>
       <div class="footer-right">
-        Gen 0-3 data collected 2026-04-09 — 04-11 · 25 runs · 7 models
+        Gen 0-3 public data collected April 2026 · 46 indexed runs · 9 model families
       </div>
     </div>
   </footer>

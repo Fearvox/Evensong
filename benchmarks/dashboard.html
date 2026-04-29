@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="A compact Evensong public dashboard for benchmark status, claims, caveats, and supporting figures.">
+<title>Evensong Dashboard</title>
+<link rel="icon" type="image/svg+xml" href="dash-favicon.svg">
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+<link href="https://cdn.jsdelivr.net/npm/geist@1.3.1/dist/fonts/geist-sans/style.min.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/geist@1.3.1/dist/fonts/geist-mono/style.min.css" rel="stylesheet">
+<link rel="stylesheet" href="evensong-public.css">
+<script src="https://cdn.jsdelivr.net/npm/@vercel/analytics@1.4.1/dist/analytics.min.js" defer></script>
+</head>
+<body class="surface">
+<header class="topbar">
+  <div class="site-shell topbar-inner">
+    <a class="brand" href="index.html">
+      <span class="brand-mark" aria-hidden="true"></span>
+      <span class="brand-text">Evensong</span>
+    </a>
+    <nav class="nav" aria-label="Public Evensong pages">
+      <a href="index.html">Home</a>
+      <a href="dashboard.html" aria-current="page">Dashboard</a>
+      <a href="handoff.html">Handoff</a>
+      <a href="promo.html">Promo</a>
+      <a href="evidence.html">Evidence</a>
+      <a href="research.html">Research</a>
+      <a href="evensong/">Vault</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <section class="hero">
+    <div class="site-shell hero-grid">
+      <div>
+        <span class="eyebrow">Public dashboard</span>
+        <h1>Evensong readout.</h1>
+        <p class="lead">A fast public view of the benchmark program: what was observed, which claims are supported, and which data remains gated for internal self-evolution review.</p>
+        <div class="actions">
+          <a class="btn primary" href="evidence.html">Review evidence</a>
+          <a class="btn secondary" href="research.html">Read synthesis</a>
+        </div>
+        <div class="meta-row">
+          <span class="pill">Updated April 2026</span>
+          <span class="pill">Static public page</span>
+          <span class="pill">Responsive readout</span>
+        </div>
+      </div>
+      <aside class="visual-panel" aria-label="Memory causation figure preview">
+        <img src="evensong/fig3-memory-causation.png" alt="Memory causation chain figure from the Evensong benchmark materials">
+        <div class="panel-caption">
+          <div class="label">Observed pattern</div>
+          <p>Memory recall changes deployment strategy, which changes architecture and testing behavior.</p>
+        </div>
+      </aside>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="site-shell">
+      <div class="section-head">
+        <div>
+          <span class="eyebrow">Current public totals</span>
+          <h2>Dashboard metrics</h2>
+        </div>
+        <p>These are the headline figures already present in the public benchmark hub. The dashboard keeps them easy to scan before readers dive into the long matrix.</p>
+      </div>
+      <div class="metric-grid">
+        <div class="metric"><strong>46</strong><span>benchmark runs indexed across generations</span></div>
+        <div class="metric"><strong>18,306</strong><span>tests passed in public run accounting</span></div>
+        <div class="metric"><strong>9</strong><span>model families compared or referenced</span></div>
+        <div class="metric"><strong>4</strong><span>fabricated runs kept visible as failure evidence</span></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="site-shell">
+      <div class="section-head">
+        <div>
+          <span class="eyebrow">Claim status</span>
+          <h2>What the public surface can safely say</h2>
+        </div>
+        <p>The strongest public claims are behavioral and operational. Internal R012-E materials are referenced as gated provenance, not promoted as public research data.</p>
+      </div>
+      <div class="card-grid">
+        <article class="card">
+          <span class="status public">Supported</span>
+          <h3>Pressure changes output shape</h3>
+          <p>Structured accountability correlates with higher test density, broader service coverage, and more explicit self-monitoring in the public benchmark sequence.</p>
+        </article>
+        <article class="card">
+          <span class="status public">Supported</span>
+          <h3>Memory can drive strategy</h3>
+          <p>Runs with recalled strategy patterns changed delegation and testing behavior. The public language should stay causal only where evidence is directly cited.</p>
+        </article>
+        <article class="card">
+          <span class="status caution">Caveat</span>
+          <h3>Fabrication is part of the result</h3>
+          <p>Four runs are not discarded. They show environment-triggered false reporting and justify the clean-room protocol used in later comparisons.</p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="site-shell split">
+      <div>
+        <span class="eyebrow">Run bands</span>
+        <h2>How to read the program</h2>
+        <p class="lead">Evensong is easier to understand by phase than as one long table. Each band answers a different question about orchestration, pressure, memory, and model behavior.</p>
+      </div>
+      <div class="timeline">
+        <div class="timeline-item">
+          <div class="timeline-k">Gen 0</div>
+          <p>Mode wars: scaffold-first, GSD, Codex rescue, and early multi-agent orchestration patterns.</p>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-k">Gen 1</div>
+          <p>Self-evolution: pressure, time awareness, self-repair, and higher test density.</p>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-k">Gen 2+</div>
+          <p>Clean-room and cross-model work: fabrication controls, model routing, and repeatability checks.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="site-shell">
+      <div class="section-head">
+        <div>
+          <span class="eyebrow">Visual evidence</span>
+          <h2>Figures readers can inspect</h2>
+        </div>
+        <p>The public figures are presented as explanatory artifacts. They should not be treated as a standalone dataset without the linked evidence map.</p>
+      </div>
+      <div class="figure-grid">
+        <article class="figure-card">
+          <img src="evensong/fig2-behavioral-heatmap.png" alt="Behavioral heatmap from Evensong public materials">
+          <div>
+            <span class="status work">Behavior</span>
+            <h3>Behavioral heatmap</h3>
+            <p>Shows how pressure and task structure change benchmark behaviors across the observed categories.</p>
+          </div>
+        </article>
+        <article class="figure-card">
+          <img src="evensong/fig4-l2-pressure-timeline.png" alt="L2 pressure timeline from Evensong public materials">
+          <div>
+            <span class="status work">Pressure</span>
+            <h3>L2 pressure timeline</h3>
+            <p>Tracks how full-scope pressure changes work density, self-organization, and completion behavior.</p>
+          </div>
+        </article>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="footer">
+  <div class="site-shell footer-inner">
+    <div>Evensong public dashboard</div>
+    <div><a href="index.html">Benchmark hub</a> / <a href="evidence.html">Evidence map</a></div>
+  </div>
+</footer>
+</body>
+</html>
