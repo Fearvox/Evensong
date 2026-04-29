@@ -1,16 +1,33 @@
-import { readFileSync, writeFileSync, existsSync, statSync, mkdirSync, unlinkSync, realpathSync, readdirSync } from 'fs'
+import { readFileSync, writeFileSync, existsSync, statSync, mkdirSync, unlinkSync, realpathSync } from 'fs'
 import { join, dirname, basename, resolve as pathResolve } from 'path'
 import { homedir } from 'os'
 import { IngestJobStore, computeChecksum } from './vault_jobs.js'
 import { parseArxivId, fetchArxivMetadata } from './ingest/arxiv.js'
 import { fetchHtml } from './ingest/html.js'
-import type { VaultEntry, RawIngestInput, NoteSaveInput, VaultGetInput, VaultDeleteInput, DecayScore } from './types.js'
+import { scanKnowledge } from './vault.js'
+import type { RawIngestInput, NoteSaveInput, VaultGetInput, VaultDeleteInput, DecayScore } from './types.js'
 
-const VAULT_ROOT = process.env.VAULT_ROOT ?? `${homedir()}/Documents/Evensong/research-vault`
-const KNOWLEDGE_DIR = join(VAULT_ROOT, 'knowledge')
-const RAW_DIR = join(VAULT_ROOT, 'raw')
-const DECAY_PATH = join(VAULT_ROOT, '.meta', 'decay-scores.json')
-const CHECKSUMS_PATH = join(VAULT_ROOT, '.meta', 'checksums.json')
+const DEFAULT_VAULT_ROOT = `${homedir()}/Documents/Evensong/research-vault`
+
+function getVaultRoot(): string {
+  return process.env.VAULT_ROOT ?? DEFAULT_VAULT_ROOT
+}
+
+function getKnowledgeDir(): string {
+  return join(getVaultRoot(), 'knowledge')
+}
+
+function getRawDir(): string {
+  return join(getVaultRoot(), 'raw')
+}
+
+function getDecayPath(): string {
+  return join(getVaultRoot(), '.meta', 'decay-scores.json')
+}
+
+function getChecksumsPath(): string {
+  return join(getVaultRoot(), '.meta', 'checksums.json')
+}
 
 function ensureDir(p: string) {
   if (!existsSync(p)) mkdirSync(p, { recursive: true })
@@ -51,7 +68,7 @@ export function normalizeId(raw: string): string {
 
 function loadDecayScores(): DecayScore[] {
   try {
-    const data = JSON.parse(readFileSync(DECAY_PATH, 'utf-8'))
+    const data = JSON.parse(readFileSync(getDecayPath(), 'utf-8'))
     if (Array.isArray(data)) return data
     if (data && typeof data === 'object') return Object.values(data) as DecayScore[]
     return []
@@ -61,28 +78,33 @@ function loadDecayScores(): DecayScore[] {
 }
 
 function saveDecayScores(scores: DecayScore[]) {
-  ensureDir(dirname(DECAY_PATH))
-  writeFileSync(DECAY_PATH, JSON.stringify(scores, null, 2), 'utf-8')
+  const decayPath = getDecayPath()
+  ensureDir(dirname(decayPath))
+  writeFileSync(decayPath, JSON.stringify(scores, null, 2), 'utf-8')
 }
 
 function loadChecksums(): Record<string, { sha256: string; writtenAt: string }> {
-  try { return JSON.parse(readFileSync(CHECKSUMS_PATH, 'utf-8')) } catch { return {} }
+  try { return JSON.parse(readFileSync(getChecksumsPath(), 'utf-8')) } catch { return {} }
 }
 
 function saveChecksums(store: Record<string, { sha256: string; writtenAt: string }>) {
-  ensureDir(dirname(CHECKSUMS_PATH))
-  writeFileSync(CHECKSUMS_PATH, JSON.stringify(store, null, 2), 'utf-8')
+  const checksumsPath = getChecksumsPath()
+  ensureDir(dirname(checksumsPath))
+  writeFileSync(checksumsPath, JSON.stringify(store, null, 2), 'utf-8')
 }
 
 // ─── ingest helpers ──────────────────────────────────────────────────────────────
 
-const jobStore = new IngestJobStore(VAULT_ROOT)
+function getJobStore(): IngestJobStore {
+  return new IngestJobStore(getVaultRoot())
+}
 
 async function ingestArxiv(value: string, category: string) {
   const id = parseArxivId(value)
   if (!id) throw new Error(`Invalid ArXiv ID: ${value}`)
 
-  const metaPath = safePath(RAW_DIR, join(category, `arxiv-${id}.meta.json`))
+  const jobStore = getJobStore()
+  const metaPath = safePath(getRawDir(), join(category, `arxiv-${id}.meta.json`))
 
   const job = await jobStore.createJob({ source: 'arxiv', value: id, category })
   await jobStore.updateJob(job.jobId, { status: 'fetching' })
@@ -103,8 +125,10 @@ async function ingestArxiv(value: string, category: string) {
 }
 
 async function ingestUrl(value: string, category: string) {
-  safePath(RAW_DIR, category)
+  const rawDir = getRawDir()
+  safePath(rawDir, category)
 
+  const jobStore = getJobStore()
   const job = await jobStore.createJob({ source: 'url', value, category })
   await jobStore.updateJob(job.jobId, { status: 'fetching' })
 
@@ -112,7 +136,7 @@ async function ingestUrl(value: string, category: string) {
     try {
       const text = await fetchHtml(value)
       const safeName = value.replace(/[^a-z0-9]/gi, '_').slice(0, 64)
-      const rawPath = safePath(RAW_DIR, join(category, `${Date.now()}--${safeName}.md`))
+      const rawPath = safePath(rawDir, join(category, `${Date.now()}--${safeName}.md`))
       ensureDir(dirname(rawPath))
       writeFileSync(rawPath, text, 'utf-8')
 
@@ -133,10 +157,12 @@ async function ingestUrl(value: string, category: string) {
 async function ingestFile(value: string, category: string) {
   if (!existsSync(value)) throw new Error(`File not found: ${value}`)
 
-  safePath(RAW_DIR, category)
+  const rawDir = getRawDir()
+  safePath(rawDir, category)
 
+  const jobStore = getJobStore()
   const job = await jobStore.createJob({ source: 'file', value, category })
-  const destPath = safePath(RAW_DIR, join(category, `${Date.now()}--${basename(value)}`))
+  const destPath = safePath(rawDir, join(category, `${Date.now()}--${basename(value)}`))
   ensureDir(dirname(destPath))
   const content = readFileSync(value)
   writeFileSync(destPath, content)
@@ -155,7 +181,7 @@ async function ingestFile(value: string, category: string) {
 async function saveNote(input: NoteSaveInput) {
   const safeTitle = input.title.replace(/[^a-z0-9]/gi, '-').slice(0, 32)
   const id = `${Date.now()}--${safeTitle}`
-  const filePath = safePath(KNOWLEDGE_DIR, join(input.category, `${id}.md`))
+  const filePath = safePath(getKnowledgeDir(), join(input.category, `${id}.md`))
   ensureDir(dirname(filePath))
   const content = `# ${input.title}\n\n${input.content}\n`
   writeFileSync(filePath, content, 'utf-8')
@@ -183,7 +209,7 @@ function getEntry(input: VaultGetInput) {
   let filePath: string
 
   if (input.path) {
-    filePath = safePath(VAULT_ROOT, input.path)
+    filePath = safePath(getVaultRoot(), input.path)
   } else if (input.id) {
     const entry = scanKnowledge().find(e => normalizeId(e.id) === normalizeId(input.id!))
     if (!entry) throw new Error(`Entry not found: ${input.id}`)
@@ -194,7 +220,7 @@ function getEntry(input: VaultGetInput) {
 
   const content = readFileSync(filePath, 'utf-8')
   const s = statSync(filePath)
-  const relPath = filePath.replace(VAULT_ROOT + '/', '')
+  const relPath = filePath.replace(getVaultRoot() + '/', '')
 
   return {
     id: normalizeId(basename(filePath)),
@@ -212,7 +238,7 @@ function deleteEntry(input: VaultDeleteInput) {
   let filePath: string
 
   if (input.path) {
-    filePath = safePath(VAULT_ROOT, input.path)
+    filePath = safePath(getVaultRoot(), input.path)
   } else if (input.id) {
     const entry = scanKnowledge().find(e => normalizeId(e.id) === normalizeId(input.id!))
     if (!entry) throw new Error(`Entry not found: ${input.id}`)
@@ -233,37 +259,6 @@ function deleteEntry(input: VaultDeleteInput) {
   saveChecksums(checksums)
 
   return { deleted: true, path: filePath }
-}
-
-// ─── scanKnowledge ───────────────────────────────────────────────────────────
-
-function scanKnowledge(): VaultEntry[] {
-  const entries: VaultEntry[] = []
-  if (!existsSync(KNOWLEDGE_DIR)) return entries
-  try {
-    const categories = readdirSync(KNOWLEDGE_DIR)
-    for (const cat of categories) {
-      if (cat.startsWith('_')) continue
-      const catPath = join(KNOWLEDGE_DIR, cat)
-      if (!existsSync(catPath) || !statSync(catPath).isDirectory()) continue
-      try {
-        const files = readdirSync(catPath).filter((f: string) => f.endsWith('.md'))
-        for (const file of files) {
-          const fp = join(catPath, file)
-          const s = statSync(fp)
-          entries.push({
-            id: normalizeId(file),
-            title: normalizeId(file),
-            category: cat,
-            path: fp,
-            modified: s.mtime.toISOString(),
-            size: s.size
-          })
-        }
-      } catch {}
-    }
-  } catch {}
-  return entries
 }
 
 // ─── Tool Definitions ──────────────────────────────────────────────────────────

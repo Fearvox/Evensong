@@ -57,6 +57,25 @@ describe('vault_get', () => {
     const parsed = JSON.parse(getResult.content[0].text)
     expect(parsed.content).toContain('Secret content')
   })
+
+  test('retrieves nested knowledge entries by id', async () => {
+    const nestedDir = join(TMP, 'knowledge', 'ai-agents', 'self-evolution')
+    mkdirSync(nestedDir, { recursive: true })
+    writeFileSync(
+      join(nestedDir, '20260411-evensong-paper-zh.md'),
+      '# Evensong Paper ZH\n\nNested category content',
+      'utf-8',
+    )
+
+    const { vaultWriteTools } = await import('../src/vault_write.ts')
+    const getTool = vaultWriteTools.find(t => t.name === 'vault_get')!
+    const getResult = await getTool.call({ id: '20260411-evensong-paper-zh' })
+
+    expect(getResult.isError).not.toBe(true)
+    const parsed = JSON.parse(getResult.content[0].text)
+    expect(parsed.content).toContain('Nested category content')
+    expect(parsed.category).toBe('knowledge/ai-agents/self-evolution')
+  })
 })
 
 describe('vault_delete', () => {
@@ -71,6 +90,24 @@ describe('vault_delete', () => {
     expect(deleted).toBe(true)
     const { existsSync } = await import('fs')
     expect(existsSync(path)).toBe(false)
+  })
+
+  test('deletes nested knowledge entries by id', async () => {
+    const nestedDir = join(TMP, 'knowledge', 'ai-agents', 'self-evolution')
+    const nestedPath = join(nestedDir, '20260411-evensong-paper-zh.md')
+    mkdirSync(nestedDir, { recursive: true })
+    writeFileSync(nestedPath, '# Evensong Paper ZH\n\nNested category content', 'utf-8')
+
+    const { vaultWriteTools } = await import('../src/vault_write.ts')
+    const deleteTool = vaultWriteTools.find(t => t.name === 'vault_delete')!
+    const delResult = await deleteTool.call({ id: '20260411-evensong-paper-zh' })
+
+    expect(delResult.isError).not.toBe(true)
+    const { deleted, path } = JSON.parse(delResult.content[0].text)
+    expect(deleted).toBe(true)
+    expect(path).toBe(nestedPath)
+    const { existsSync } = await import('fs')
+    expect(existsSync(nestedPath)).toBe(false)
   })
 })
 

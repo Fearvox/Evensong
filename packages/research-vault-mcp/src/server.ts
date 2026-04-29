@@ -1,12 +1,18 @@
-// Research Vault MCP Server — stdio by default, SSE when explicitly requested
+// Research Vault MCP Server — stdio by default, HTTP when explicitly requested
 // MCP stdio: JSON-RPC 2.0 over stdin/stdout for command-launched MCP clients.
 // MCP SSE: JSON-RPC 2.0 over SSE (server→client) + HTTP POST (client→server).
+// MCP Streamable HTTP: JSON-RPC 2.0 over POST /mcp for remote MCP clients.
 //
-// Flow:
+// Legacy SSE flow:
 //   1. Client connects GET /sse
 //   2. Server sends: event: endpoint\ndata: /messages?sessionId=<uuid>
 //   3. Client POSTs JSON-RPC to /messages?sessionId=<uuid>
 //   4. Server sends JSON-RPC response via SSE: event: message\ndata: {...}
+//
+// Streamable HTTP flow:
+//   1. Client POSTs initialize to /mcp
+//   2. Server returns JSON-RPC response + mcp-session-id header
+//   3. Client POSTs requests/notifications to /mcp with mcp-session-id
 
 import { vaultTools } from './vault'
 import { vaultWriteTools } from './vault_write.js'
@@ -30,6 +36,16 @@ loadAmplifyFromEnv()
 const HOST = '0.0.0.0'
 const TRANSPORT = process.env.MCP_TRANSPORT ?? 'stdio'
 const PORT = parseInt(process.env.MCP_PORT ?? '8765')
+
+const SUPPORTED_PROTOCOL_VERSIONS = [
+  '2025-11-25',
+  '2025-06-18',
+  '2025-03-26',
+  '2024-11-05',
+  '2024-10-07'
+]
+
+const DEFAULT_STREAMABLE_PROTOCOL_VERSION = '2025-03-26'
 
 // ─── MCP Protocol Types ──────────────────────────────────────────────────────
 
@@ -71,6 +87,7 @@ interface Session {
 }
 
 const sessions = new Map<string, Session>()
+const streamableSessions = new Set<string>()
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
@@ -88,6 +105,33 @@ function timingSafeStringEqual(a: string, b: string): boolean {
   return timingSafeEqual(ah, bh)
 }
 
+function negotiateProtocolVersion(requested: unknown): string {
+  if (typeof requested === 'string' && SUPPORTED_PROTOCOL_VERSIONS.includes(requested)) {
+    return requested
+  }
+  return DEFAULT_STREAMABLE_PROTOCOL_VERSION
+}
+
+function mcpResponseHeaders(sessionId?: string): Headers {
+  const headers = new Headers()
+  if (sessionId) headers.set('mcp-session-id', sessionId)
+  return headers
+}
+
+function makeMcpJsonError(status: number, code: number, message: string, sessionId?: string): Response {
+  return Response.json(
+    {
+      jsonrpc: '2.0',
+      error: { code, message },
+      id: null
+    },
+    {
+      status,
+      headers: mcpResponseHeaders(sessionId)
+    }
+  )
+}
+
 // ─── MCP Handlers ─────────────────────────────────────────────────────────────
 
 async function handleRequest(req: MCPRequest): Promise<MCPResponse | null> {
@@ -101,7 +145,7 @@ async function handleRequest(req: MCPRequest): Promise<MCPResponse | null> {
   // ── initialize
   if (method === 'initialize') {
     return makeResponse(id, {
-      protocolVersion: '2024-11-05',
+      protocolVersion: negotiateProtocolVersion(params?.protocolVersion),
       capabilities: {
         tools: { listChanged: false },
       },
@@ -176,6 +220,92 @@ let server: ReturnType<typeof Bun.serve> | undefined
 
 export async function httpHandler(req: Request): Promise<Response> {
   const url = new URL(req.url)
+
+  // ── POST /mcp — MCP Streamable HTTP Transport: receive JSON-RPC, respond directly
+  if (url.pathname === '/mcp' && req.method === 'POST') {
+    let body: MCPRequest | MCPRequest[]
+
+    try {
+      body = await req.json() as MCPRequest | MCPRequest[]
+    } catch (e: any) {
+      return makeMcpJsonError(400, -32700, `Parse error: ${e.message}`)
+    }
+
+    const messages = Array.isArray(body) ? body : [body]
+    if (messages.length === 0) {
+      return makeMcpJsonError(400, -32600, 'Invalid Request: empty batch')
+    }
+
+    const hasInitialize = messages.some(message => message?.method === 'initialize')
+    let sessionId = req.headers.get('mcp-session-id') ?? undefined
+
+    if (hasInitialize) {
+      if (messages.length > 1) {
+        return makeMcpJsonError(400, -32600, 'Invalid Request: initialize must be sent alone')
+      }
+      sessionId = generateSessionId()
+      streamableSessions.add(sessionId)
+    } else {
+      if (!sessionId) {
+        return makeMcpJsonError(400, -32000, 'Bad Request: Mcp-Session-Id header is required')
+      }
+      if (!streamableSessions.has(sessionId)) {
+        return makeMcpJsonError(404, -32001, 'Session not found', sessionId)
+      }
+    }
+
+    const responses: MCPResponse[] = []
+
+    for (const message of messages) {
+      const result = await handleRequest(message)
+      if (result) responses.push(result)
+    }
+
+    if (responses.length === 0) {
+      return new Response(null, {
+        status: 202,
+        headers: mcpResponseHeaders(sessionId)
+      })
+    }
+
+    return Response.json(
+      Array.isArray(body) ? responses : responses[0],
+      {
+        status: 200,
+        headers: mcpResponseHeaders(sessionId)
+      }
+    )
+  }
+
+  // ── GET /mcp — optional Streamable HTTP SSE stream, not needed for JSON response mode
+  if (url.pathname === '/mcp' && req.method === 'GET') {
+    return Response.json(
+      {
+        jsonrpc: '2.0',
+        error: { code: -32000, message: 'Method Not Allowed: /mcp supports POST JSON responses' },
+        id: null
+      },
+      {
+        status: 405,
+        headers: {
+          Allow: 'POST, DELETE'
+        }
+      }
+    )
+  }
+
+  // ── DELETE /mcp — terminate a Streamable HTTP session
+  if (url.pathname === '/mcp' && req.method === 'DELETE') {
+    const sessionId = req.headers.get('mcp-session-id') ?? undefined
+    if (!sessionId) {
+      return makeMcpJsonError(400, -32000, 'Bad Request: Mcp-Session-Id header is required')
+    }
+    if (!streamableSessions.has(sessionId)) {
+      return makeMcpJsonError(404, -32001, 'Session not found', sessionId)
+    }
+    streamableSessions.delete(sessionId)
+    return new Response(null, { status: 204 })
+  }
 
   // ── GET /sse — MCP SSE Transport: establish SSE stream + send endpoint
   if (url.pathname === '/sse' && req.method === 'GET') {
@@ -267,6 +397,7 @@ export async function httpHandler(req: Request): Promise<Response> {
       vault_tools: vaultTools.length,
       amplify_tools: amplifyTools.length,
       sse_sessions: sessions.size,
+      streamable_sessions: streamableSessions.size,
       uptime: process.uptime()
     })
   }
@@ -319,8 +450,9 @@ if (import.meta.main) {
 
     console.log(`
 ╔══════════════════════════════════════════════════════╗
-║   Research Vault MCP Server — MCP SSE Transport     ║
+║   Research Vault MCP Server — MCP HTTP Transport    ║
 ╠══════════════════════════════════════════════════════╣
+║  MCP:       http://${HOST}:${PORT}/mcp                ║
 ║  SSE:       http://${HOST}:${PORT}/sse                ║
 ║  Messages:  http://${HOST}:${PORT}/messages          ║
 ║  Health:    http://${HOST}:${PORT}/health            ║
@@ -338,6 +470,7 @@ if (import.meta.main) {
       clearInterval(session.heartbeat)
     }
     sessions.clear()
+    streamableSessions.clear()
     server?.stop()
     process.exit(0)
   })
