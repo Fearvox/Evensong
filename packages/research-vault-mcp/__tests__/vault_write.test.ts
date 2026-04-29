@@ -1,4 +1,4 @@
-import { describe, test, expect, beforeEach } from 'bun:test'
+import { describe, test, expect, beforeEach, afterEach } from 'bun:test'
 import { mkdirSync, rmSync, readFileSync, writeFileSync } from 'fs'
 import { join } from 'path'
 import { tmpdir } from 'os'
@@ -244,4 +244,63 @@ describe('vault_delete decay-scores cleanup (regression: array format)', () => {
     expect(decay.find((s: { itemId: string }) => s.itemId === itemId)).toBeUndefined()
     expect(decay.find((s: { itemId: string }) => s.itemId === 'untouched-entry')).toBeDefined()
   })
+})
+
+describe('vault_raw_ingest URL output extension (regression)', () => {
+  const originalFetch = globalThis.fetch
+
+  afterEach(() => {
+    globalThis.fetch = originalFetch
+  })
+
+  test('URL ingest writes .md extension so scanRaw picks it up', async () => {
+    globalThis.fetch = (async (input: RequestInfo | URL) => {
+      const u = typeof input === 'string' ? input : input.toString()
+      if (u === 'http://example.com/article') {
+        return new Response(
+          '<html><head><title>x</title></head><body><h1>Hello</h1><p>article body</p></body></html>',
+          { status: 200, headers: { 'Content-Type': 'text/html' } },
+        )
+      }
+      return new Response('unexpected', { status: 500 })
+    }) as typeof fetch
+
+    const { vaultWriteTools } = await import('../src/vault_write.ts')
+    const tool = vaultWriteTools.find(t => t.name === 'vault_raw_ingest')!
+    const result = await tool.call({ source: 'url', value: 'http://example.com/article' })
+    const job = JSON.parse(result.content[0].text)
+    expect(job.jobId).toMatch(/^[0-9a-f-]{36}$/)
+
+    const jobsPath = join(TMP, '.meta', 'ingest-jobs.json')
+    const { readFileSync, existsSync, readdirSync } = await import('fs')
+    const start = Date.now()
+    let final
+    while (Date.now() - start < 5000) {
+      if (existsSync(jobsPath)) {
+        const jobs = JSON.parse(readFileSync(jobsPath, 'utf-8'))
+        const j = jobs[job.jobId]
+        if (j && (j.status === 'queued' || j.status === 'failed') && j.rawPath) {
+          final = j
+          break
+        }
+      }
+      await new Promise(r => setTimeout(r, 25))
+    }
+    expect(final).toBeDefined()
+    expect(final.status).toBe('queued')
+
+    const inboxDir = join(TMP, 'raw', '_inbox')
+    expect(existsSync(inboxDir)).toBe(true)
+    const files = readdirSync(inboxDir)
+    const mdFile = files.find(f => f.endsWith('.md'))
+    expect(mdFile).toBeDefined()
+    expect(files.find(f => f.endsWith('.html'))).toBeUndefined()
+
+    const { vaultTools } = await import('../src/vault.ts')
+    const batchTool = vaultTools.find((t: { name: string }) => t.name === 'vault_batch_analyze')!
+    const batchResult = await batchTool.call({ count: 50 })
+    const batchParsed = JSON.parse(batchResult.content[0].text)
+    expect(batchParsed.preview).toBeDefined()
+    expect(batchParsed.preview.some((f: string) => f.endsWith('.md'))).toBe(true)
+  }, 8000)
 })
