@@ -164,4 +164,54 @@ describe('buildVaultManifest (integration with fake FS)', () => {
     // orphan's knowledge file is missing; entry dropped.
     expect(result.length).toBe(0)
   })
+
+  test('supports legacy object-shaped decay score stores', async () => {
+    const fakeFs = new Map<string, string>([
+      [
+        '/vault/.meta/registry.jsonl',
+        JSON.stringify({
+          id: 'legacy-note',
+          title: 'Legacy Note',
+          rawPath: 'raw/legacy-note.md',
+          knowledgePath: 'knowledge/legacy-note.md',
+          status: 'analyzed',
+          tags: [],
+          ingestedAt: '2026-01-01',
+          source: 'local',
+        }) + '\n',
+      ],
+      [
+        '/vault/.meta/decay-scores.json',
+        JSON.stringify({
+          'legacy-note': {
+            itemId: 'legacy-note',
+            score: 0.42,
+            accessCount: 7,
+            lastAccess: '2026-04-20',
+            summaryLevel: 'shallow',
+            nextReviewAt: '',
+            difficulty: 2,
+          },
+        }),
+      ],
+      ['/vault/knowledge/legacy-note.md', '# Legacy Note\n\nObject-shaped decay metadata should still be honored.\n'],
+    ])
+
+    const result = await buildVaultManifest({
+      vaultRoot: '/vault',
+      readFile: (p: string) => {
+        const v = fakeFs.get(p)
+        if (v === undefined) throw new Error(`ENOENT ${p}`)
+        return v
+      },
+    })
+
+    expect(result).toHaveLength(1)
+    expect(result[0]).toMatchObject({
+      path: 'knowledge/legacy-note.md',
+      retentionScore: 0.42,
+      accessCount: 7,
+      summaryLevel: 'shallow',
+    })
+  })
 })

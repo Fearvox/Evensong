@@ -135,8 +135,9 @@ function readRegistry(jsonl: string): RegistryEntry[] {
 
 function readDecayScores(json: string): DecayEntry[] {
   const parsed = JSON.parse(json)
-  if (!Array.isArray(parsed)) return []
-  return parsed as DecayEntry[]
+  if (Array.isArray(parsed)) return parsed as DecayEntry[]
+  if (parsed && typeof parsed === 'object') return Object.values(parsed) as DecayEntry[]
+  return []
 }
 
 export async function buildVaultManifest(

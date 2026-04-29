@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="A public handoff for understanding Evensong claims, caveats, and next reading steps.">
+<title>Evensong Handoff</title>
+<link rel="icon" type="image/svg+xml" href="dash-favicon.svg">
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+<link href="https://cdn.jsdelivr.net/npm/geist@1.3.1/dist/fonts/geist-sans/style.min.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/geist@1.3.1/dist/fonts/geist-mono/style.min.css" rel="stylesheet">
+<link rel="stylesheet" href="evensong-public.css">
+<script src="https://cdn.jsdelivr.net/npm/@vercel/analytics@1.4.1/dist/analytics.min.js" defer></script>
+</head>
+<body class="surface">
+<header class="topbar">
+  <div class="site-shell topbar-inner">
+    <a class="brand" href="index.html">
+      <span class="brand-mark" aria-hidden="true"></span>
+      <span class="brand-text">Evensong</span>
+    </a>
+    <nav class="nav" aria-label="Public Evensong pages">
+      <a href="index.html">Home</a>
+      <a href="dashboard.html">Dashboard</a>
+      <a href="handoff.html" aria-current="page">Handoff</a>
+      <a href="promo.html">Promo</a>
+      <a href="evidence.html">Evidence</a>
+      <a href="research.html">Research</a>
+      <a href="evensong/">Vault</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <section class="hero">
+    <div class="site-shell hero-grid">
+      <div>
+        <span class="eyebrow">Public handoff</span>
+        <h1>Read this before the data.</h1>
+        <p class="lead">Evensong mixes product storytelling, benchmark evidence, and internal self-evolution notes. This handoff separates the public reading path from gated internal material.</p>
+        <div class="actions">
+          <a class="btn primary" href="dashboard.html">Open dashboard</a>
+          <a class="btn secondary" href="evidence.html">Check evidence map</a>
+        </div>
+      </div>
+      <aside class="visual-panel">
+        <img src="evensong/fig1-swarm-taxonomy.png" alt="Four-topic swarm taxonomy figure">
+        <div class="panel-caption">
+          <div class="label">Coordination map</div>
+          <p>The public explanation should stay anchored in observable coordination behavior: scheduling, memory, repeatability, and vault controls.</p>
+        </div>
+      </aside>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="site-shell">
+      <div class="section-head">
+        <div>
+          <span class="eyebrow">Reading order</span>
+          <h2>The shortest path through Evensong</h2>
+        </div>
+        <p>Use this order when handing the project to a reviewer, operator, or public reader who has not followed the benchmark history.</p>
+      </div>
+      <div class="timeline">
+        <div class="timeline-item">
+          <div class="timeline-k">1. Promo</div>
+          <p>Start with the plain-language premise: pressure and memory change agent work, and harness design matters.</p>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-k">2. Dashboard</div>
+          <p>Scan totals, supported claims, and caveats before reading the long benchmark matrix.</p>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-k">3. Research</div>
+          <p>Read the pressure synthesis for the argument and its relationship to outside work.</p>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-k">4. Evidence</div>
+          <p>Use the evidence map to distinguish public pages, ledgers, raw run artifacts, and gated internal reference material.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="site-shell split">
+      <div>
+        <span class="eyebrow">Public boundary</span>
+        <h2>What to say, and what to avoid</h2>
+        <p class="lead">The public surface should be confident about observable benchmark behavior and conservative about private R012-E claims.</p>
+      </div>
+      <div class="card-grid" style="grid-template-columns: 1fr;">
+        <article class="card">
+          <span class="status public">Say</span>
+          <h3>Harness design changes agent behavior</h3>
+          <p>Public pages can explain pressure, clean-room controls, self-monitoring, and benchmark output differences with links to supporting runs.</p>
+        </article>
+        <article class="card">
+          <span class="status caution">Avoid</span>
+          <h3>Treating internal R012-E data as public research</h3>
+          <p>The gated vault states that R012-E benchmark data is internal self-evolution reference only. The public site should preserve that line.</p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="site-shell">
+      <div class="section-head">
+        <div>
+          <span class="eyebrow">Operator notes</span>
+          <h2>Maintenance handoff</h2>
+        </div>
+        <p>Keep the public pages readable first. Readers should not need to parse raw markdown ledgers before they understand the claim and caveat structure.</p>
+      </div>
+      <div class="card-grid">
+        <article class="card">
+          <span class="status work">Content</span>
+          <h3>Keep claims tied to artifacts</h3>
+          <p>When a new benchmark is added, update the dashboard and evidence map together so public claims stay traceable.</p>
+        </article>
+        <article class="card">
+          <span class="status work">Design</span>
+          <h3>Use restrained product UI</h3>
+          <p>Prefer compact sections, quiet cards, real figures, and clear tables that make evidence easy to scan.</p>
+        </article>
+        <article class="card">
+          <span class="status work">Safety</span>
+          <h3>Keep the vault boundary explicit</h3>
+          <p>The vault can be linked as gated provenance, but internal-only benchmark material should not be copied into public pages.</p>
+        </article>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="footer">
+  <div class="site-shell footer-inner">
+    <div>Evensong public handoff</div>
+    <div><a href="promo.html">Promo</a> / <a href="dashboard.html">Dashboard</a> / <a href="evidence.html">Evidence</a></div>
+  </div>
+</footer>
+</body>
+</html>

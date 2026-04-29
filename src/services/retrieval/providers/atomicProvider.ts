@@ -32,9 +32,31 @@ export interface JudgeParseResult {
   rawResponse: string
 }
 
+function normalizeLimit(maxPaths?: number): number {
+  if (maxPaths === undefined || !Number.isFinite(maxPaths)) return Number.POSITIVE_INFINITY
+  return Math.max(0, Math.floor(maxPaths))
+}
+
+function selectKnownUniquePaths(
+  candidates: string[],
+  knownPaths: Set<string>,
+  maxPaths?: number,
+): string[] {
+  const limit = normalizeLimit(maxPaths)
+  if (limit <= 0) return []
+  const selected: string[] = []
+  for (const candidate of candidates) {
+    if (!knownPaths.has(candidate) || selected.includes(candidate)) continue
+    selected.push(candidate)
+    if (selected.length >= limit) break
+  }
+  return selected
+}
+
 export function parseJudgeOutputDetailed(
   content: string,
   manifest: VaultRetrievalRequest['manifest'],
+  maxPaths?: number,
 ): JudgeParseResult {
   const knownPaths = new Set(manifest.map((m) => m.path))
   const trimmed = content.trim()
@@ -45,7 +67,7 @@ export function parseJudgeOutputDetailed(
       // invented that isn't in the manifest. Observed 2026-04-19 E2E with
       // deepseek-v3.2 which occasionally returned a plausible-sounding path
       // that didn't exist.
-      const rankedPaths = (parsed as string[]).filter((p) => knownPaths.has(p))
+      const rankedPaths = selectKnownUniquePaths(parsed as string[], knownPaths, maxPaths)
       const discardedPaths = (parsed as string[]).filter((p) => !knownPaths.has(p))
       return { rankedPaths, parseMode: 'json', discardedPaths, rawResponse: content }
     }
@@ -54,12 +76,7 @@ export function parseJudgeOutputDetailed(
   }
   const mdPathPattern = /[a-zA-Z0-9/_\-.]+\.md/g
   const matches = content.match(mdPathPattern) ?? []
-  const found: string[] = []
-  for (const candidate of matches) {
-    if (knownPaths.has(candidate) && !found.includes(candidate)) {
-      found.push(candidate)
-    }
-  }
+  const found = selectKnownUniquePaths(matches, knownPaths, maxPaths)
   return {
     rankedPaths: found,
     parseMode: found.length > 0 ? 'regex' : 'empty',
@@ -128,7 +145,7 @@ export function createAtomicProvider(
         maxTokens: options.maxTokens ?? 1024,
       })
       lastHealthyAt = Date.now()
-      const parsed = parseJudgeOutputDetailed(response.content, req.manifest)
+      const parsed = parseJudgeOutputDetailed(response.content, req.manifest, req.topK ?? 10)
       return {
         rankedPaths: parsed.rankedPaths,
         provider: providerName,

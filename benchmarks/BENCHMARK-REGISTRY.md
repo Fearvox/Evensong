@@ -5,10 +5,11 @@
 Dense/RAR retrieval evidence is tracked in a dedicated ledger because it evaluates a retrieval pipeline, not the Evensong self-evolution run index below.
 
 - Ledger: [`benchmarks/DENSE-RAR-FORMAL-LEDGER.md`](DENSE-RAR-FORMAL-LEDGER.md)
-- Canonical formal run: `dense-rar-2026-04-24T0854`
+- Latest formal run: `dense-rar-2026-04-24T0854`
 - Result: dense-rar `24/24` Top-1 and `24/24` Top-5; dense-adaptive `24/24` Top-1 and `24/24` Top-5; errors `0`
 - Stack: BGE-M3 Stage 1 with `stage1TopK=50`; `deepseek-v4-flash` reranker with thinking disabled
-- Boundary: `dense-rar-2026-04-24T0801` remains the Stage1TopK 20 formal baseline at `23/24`; `dense-rar-2026-04-24T0644` remains internal/probe-only because it was `mode=probe` on dirty git
+- Prior `dense-rar-2026-04-24T0801` remains the Stage1TopK 20 formal baseline at `23/24`.
+- Prior `dense-rar-2026-04-24T0644` remains internal/probe only because it was `mode=probe` on dirty git.
 
 ## Run Index
 

@@ -6,11 +6,27 @@ import { readFileSync, readdirSync, existsSync, statSync } from 'fs'
 import { join, basename } from 'path'
 import { homedir } from 'os'
 
-const VAULT_ROOT = process.env.VAULT_ROOT ?? `${homedir()}/Documents/Evensong/research-vault`
-const KNOWLEDGE_DIR = join(VAULT_ROOT, 'knowledge')
-const RAW_DIR = join(VAULT_ROOT, 'raw')
-const DECAY_PATH = join(VAULT_ROOT, '.meta', 'decay-scores.json')
-const TAXONOMY_PATH = join(VAULT_ROOT, 'knowledge', '_taxonomy.md')
+const DEFAULT_VAULT_ROOT = `${homedir()}/Documents/Evensong/research-vault`
+
+function getVaultRoot(): string {
+  return process.env.VAULT_ROOT ?? DEFAULT_VAULT_ROOT
+}
+
+function getKnowledgeDir(): string {
+  return join(getVaultRoot(), 'knowledge')
+}
+
+function getRawDir(): string {
+  return join(getVaultRoot(), 'raw')
+}
+
+function getDecayPath(): string {
+  return join(getVaultRoot(), '.meta', 'decay-scores.json')
+}
+
+function getTaxonomyPath(): string {
+  return join(getVaultRoot(), 'knowledge', '_taxonomy.md')
+}
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -42,9 +58,16 @@ function normalizeId(raw: string): string {
     .replace(/\.md$/, '')
 }
 
+export function normalizeDecayScoresStore(parsed: unknown): DecayScore[] {
+  if (Array.isArray(parsed)) return parsed as DecayScore[]
+  if (parsed && typeof parsed === 'object') return Object.values(parsed) as DecayScore[]
+  return []
+}
+
 function loadDecayScores(): DecayScore[] {
   try {
-    return JSON.parse(readFileSync(DECAY_PATH, 'utf-8'))
+    const parsed = JSON.parse(readFileSync(getDecayPath(), 'utf-8'))
+    return normalizeDecayScoresStore(parsed)
   } catch {
     return []
   }
@@ -52,7 +75,7 @@ function loadDecayScores(): DecayScore[] {
 
 function loadTaxonomy(): string {
   try {
-    return readFileSync(TAXONOMY_PATH, 'utf-8')
+    return readFileSync(getTaxonomyPath(), 'utf-8')
   } catch {
     return ''
   }
@@ -80,12 +103,13 @@ function loadFileMeta(filePath: string): { title: string; modified: string; size
 
 function scanKnowledge(): VaultEntry[] {
   const entries: VaultEntry[] = []
-  if (!existsSync(KNOWLEDGE_DIR)) return entries
+  const knowledgeDir = getKnowledgeDir()
+  if (!existsSync(knowledgeDir)) return entries
 
-  const categories = readdirSync(KNOWLEDGE_DIR)
+  const categories = readdirSync(knowledgeDir)
   for (const cat of categories) {
     if (cat.startsWith('_')) continue
-    const catPath = join(KNOWLEDGE_DIR, cat)
+    const catPath = join(knowledgeDir, cat)
     if (!existsSync(catPath) || !statSync(catPath).isDirectory()) continue
 
     const subEntries = readdirSync(catPath)
@@ -125,18 +149,19 @@ function scanKnowledge(): VaultEntry[] {
 
 function scanRaw(): string[] {
   const pending: string[] = []
-  if (!existsSync(RAW_DIR)) return pending
+  const rawDir = getRawDir()
+  if (!existsSync(rawDir)) return pending
 
   try {
-    const entries = readdirSync(RAW_DIR)
+    const entries = readdirSync(rawDir)
     for (const entry of entries) {
       if (entry === '_inbox') {
-        const inbox = join(RAW_DIR, entry)
+        const inbox = join(rawDir, entry)
         if (existsSync(inbox)) {
           pending.push(...readdirSync(inbox).filter(f => /\.(md|pdf|txt)$/.test(f)))
         }
       } else if (/^\d{4}-\d{2}$/.test(entry)) {
-        const monthDir = join(RAW_DIR, entry)
+        const monthDir = join(rawDir, entry)
         if (existsSync(monthDir)) {
           pending.push(
             ...readdirSync(monthDir)

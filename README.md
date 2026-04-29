@@ -69,7 +69,7 @@ This repository exists for four jobs:
 
 ## 📊 The headline result
 
-**Four formal retrieval artifacts** are committed under [`benchmarks/runs/`](./benchmarks/runs): Wave 3+F/G cover the original 108-query cross-LLM design; Wave 3+I is the newer 24-query adversarial hard suite for dense stage-1 + RAR. The Wave 3+I claim is scoped to that hard suite and does **not** replace the broader 108-query F/G comparisons.
+**Four formal retrieval artifacts** are committed under [`benchmarks/runs/`](./benchmarks/runs): Wave 3+F/G cover the original 108-query cross-LLM design; Wave 3+I is the newer 24-query adversarial suite for dense stage-1 + RAR. The Wave 3+I claim is scoped to that hard suite and does **not** replace the broader 108-query F/G comparisons.
 
 ### Wave 3+F — 648-call two-pipeline run ✅
 
