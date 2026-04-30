@@ -82,3 +82,78 @@ describe('vaultRetrieve fallback', () => {
     })).rejects.toBeInstanceOf(AllProvidersFailedError)
   })
 })
+
+describe('vaultRetrieve topK sanitization', () => {
+  test('returns empty result for topK zero without falling back', async () => {
+    const primary = mock(async () => ({
+      rankedPaths: ['knowledge/msa.md'],
+      provider: 'primary-api',
+      latencyMs: 15,
+      scores: [0.98],
+      diagnostics: { source: 'primary' },
+    }))
+    const fallback = mock(async () => ({
+      rankedPaths: ['knowledge/msa.md'],
+      provider: 'fallback-api',
+      latencyMs: 20,
+    }))
+
+    const result = await vaultRetrieve({ query: 'msa', manifest: sample, topK: 0 }, {
+      providers: [
+        { name: 'primary-api', available: async () => true, retrieve: primary },
+        { name: 'fallback-api', available: async () => true, retrieve: fallback },
+      ],
+    })
+
+    expect(result.provider).toBe('primary-api')
+    expect(result.rankedPaths).toEqual([])
+    expect(result.scores).toEqual([])
+    expect(result.diagnostics).toEqual({ source: 'primary' })
+    expect(primary).toHaveBeenCalledTimes(1)
+    expect(fallback).toHaveBeenCalledTimes(0)
+  })
+
+  test('treats negative topK as zero without falling back', async () => {
+    const primary = mock(async () => ({
+      rankedPaths: ['knowledge/msa.md'],
+      provider: 'primary-api',
+      latencyMs: 15,
+    }))
+    const fallback = mock(async () => ({ rankedPaths: ['knowledge/msa.md'], provider: 'fallback-api', latencyMs: 20 }))
+
+    const result = await vaultRetrieve({ query: 'msa', manifest: sample, topK: -3 }, {
+      providers: [
+        { name: 'primary-api', available: async () => true, retrieve: primary },
+        { name: 'fallback-api', available: async () => true, retrieve: fallback },
+      ],
+    })
+
+    expect(result.provider).toBe('primary-api')
+    expect(result.rankedPaths).toEqual([])
+    expect(fallback).toHaveBeenCalledTimes(0)
+  })
+
+  test('still falls back when provider returns only stale or duplicate paths and topK is positive', async () => {
+    const stale = mock(async () => ({
+      rankedPaths: ['missing/stale.md', 'missing/stale.md'],
+      provider: 'stale-api',
+      latencyMs: 10,
+    }))
+    const fallback = mock(async () => ({
+      rankedPaths: ['knowledge/msa.md'],
+      provider: 'fallback-api',
+      latencyMs: 20,
+    }))
+
+    const result = await vaultRetrieve({ query: 'msa', manifest: sample, topK: 2 }, {
+      providers: [
+        { name: 'stale-api', available: async () => true, retrieve: stale },
+        { name: 'fallback-api', available: async () => true, retrieve: fallback },
+      ],
+    })
+
+    expect(result.provider).toBe('fallback-api')
+    expect(stale).toHaveBeenCalledTimes(1)
+    expect(fallback).toHaveBeenCalledTimes(1)
+  })
+})

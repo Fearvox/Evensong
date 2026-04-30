@@ -35,6 +35,14 @@ export interface HealthSnapshot {
   notes: string[]
 }
 
+export interface OperatorHealthResult {
+  ok: boolean
+  status: string
+  failures: string[]
+  warnings: string[]
+  evidence: Record<string, string>
+}
+
 const DEFAULT_THRESHOLDS: Thresholds = {
   loadPerCpuWarn: 1.5,
   loadPerCpuBlock: 2.5,

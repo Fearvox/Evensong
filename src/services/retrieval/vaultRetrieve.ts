@@ -27,12 +27,22 @@ function sanitizeResult(
   const rankedPaths: string[] = []
   const scores: number[] | undefined = result.scores ? [] : undefined
   const droppedPaths: string[] = []
+  const seen = new Set<string>()
+
+  if (limit === 0) {
+    return {
+      ...result,
+      rankedPaths,
+      scores,
+    }
+  }
 
   for (const [index, path] of result.rankedPaths.entries()) {
-    if (!knownPaths.has(path) || rankedPaths.includes(path)) {
+    if (!knownPaths.has(path) || seen.has(path)) {
       droppedPaths.push(path)
       continue
     }
+    seen.add(path)
     if (rankedPaths.length < limit) {
       rankedPaths.push(path)
       if (scores && result.scores?.[index] !== undefined) scores.push(result.scores[index]!)

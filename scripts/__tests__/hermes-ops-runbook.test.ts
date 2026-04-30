@@ -62,7 +62,10 @@ describe('hermes ops runbook', () => {
   test('rendered handoff stub does not leak private repo roots', () => {
     const text = renderHermesOpsRunbook({ repoRoot: '/home/operator/private-ccr', runId: 'R085', lane: 'ops' })
 
-    expect(text).toContain('repo=<repo-root>')
+    expect(text).toContain('Repo: `<operator-local-repo-root>`')
+    expect(text).toContain('Set `EVENSONG_REPO_ROOT` locally before running command blocks; do not paste private absolute paths into public notes.')
+    expect(text).toContain('cd $EVENSONG_REPO_ROOT')
+    expect(text).toContain('repo=<operator-local-repo-root>')
     expect(text).not.toContain('/home/operator')
     expect(text).not.toContain('private-ccr')
   })

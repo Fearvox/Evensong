@@ -76,8 +76,16 @@ export function buildHermesSessionName(input: HermesOpsRunbookInput = {}): strin
   return ['hermes', middle, lane].filter(Boolean).join('-').slice(0, 80)
 }
 
+function isPrivateRepoRoot(value: string): boolean {
+  return PRIVATE_REPO_ROOT.test(value) || isSecretLike(value)
+}
+
 function publicRepoRoot(value: string): string {
-  return PRIVATE_REPO_ROOT.test(value) || isSecretLike(value) ? '<repo-root>' : value
+  return isPrivateRepoRoot(value) ? '<operator-local-repo-root>' : value
+}
+
+function publicCommandRoot(value: string): string {
+  return isPrivateRepoRoot(value) ? '$EVENSONG_REPO_ROOT' : shellQuote(value)
 }
 
 export function buildHermesOpsRunbook(input: HermesOpsRunbookInput = {}): HermesOpsRunbook {
@@ -101,6 +109,8 @@ export function buildHermesOpsRunbook(input: HermesOpsRunbookInput = {}): Hermes
 export function renderHermesOpsRunbook(input: HermesOpsRunbookInput = {}): string {
   const runbook = buildHermesOpsRunbook(input)
   const repoRoot = publicRepoRoot(runbook.repoRoot)
+  const commandRoot = publicCommandRoot(runbook.repoRoot)
+  const requiresLocalRepoRoot = isPrivateRepoRoot(runbook.repoRoot)
 
   return [
     '# Hermes Ops Runbook',
@@ -108,11 +118,12 @@ export function renderHermesOpsRunbook(input: HermesOpsRunbookInput = {}): strin
     `Session: \`${runbook.sessionName}\``,
     `Repo: \`${repoRoot}\``,
     `Windows: \`${runbook.windows.join('`, `')}\``,
+    ...(requiresLocalRepoRoot ? ['', 'Set `EVENSONG_REPO_ROOT` locally before running command blocks; do not paste private absolute paths into public notes.'] : []),
     '',
     '## Start or Resume',
     '',
     '```bash',
-    `cd ${shellQuote(repoRoot)}`,
+    `cd ${commandRoot}`,
     runbook.commands.launch,
     runbook.commands.attach,
     '```',
@@ -122,7 +133,7 @@ export function renderHermesOpsRunbook(input: HermesOpsRunbookInput = {}): strin
     '## Lane Persistence Guard',
     '',
     '```bash',
-    `cd ${shellQuote(repoRoot)}`,
+    `cd ${commandRoot}`,
     "test -f .hermes-lane.txt && awk -F= '/^(lane|session)=/{print}' .hermes-lane.txt",
     'printf "worktree="; git rev-parse --show-toplevel',
     'git status --short --branch --untracked-files=all',
@@ -141,7 +152,7 @@ export function renderHermesOpsRunbook(input: HermesOpsRunbookInput = {}): strin
     '## Health Gate',
     '',
     '```bash',
-    `cd ${shellQuote(repoRoot)}`,
+    `cd ${commandRoot}`,
     runbook.commands.health,
     '```',
     '',

@@ -110,6 +110,8 @@ function normalizeArtifactPath(path: string, repoRoot: string): { value: string;
 
 export function sanitizeConductorEvent(event: ConductorEvent, repoRoot = process.cwd()): { event: ConductorEvent; violations: string[] } {
   const violations: string[] = []
+  const status = sanitizeText(event.status)
+  violations.push(...status.violations)
   const summary = sanitizeText(event.summary)
   violations.push(...summary.violations)
 
@@ -151,6 +153,7 @@ export function sanitizeConductorEvent(event: ConductorEvent, repoRoot = process
     event: {
       ...event,
       ...(runId ? { runId: runId.value } : {}),
+      status: status.value,
       summary: summary.value,
       evidence,
     },
