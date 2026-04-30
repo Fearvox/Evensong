@@ -76,17 +76,35 @@ export interface JoinOptions {
   minRetention?: number
 }
 
+function normalizeVaultItemId(raw: string): string {
+  return raw
+    .replace(/^\d{8}--?\d{4}-/, '')
+    .replace(/^(\d{10,})--?/, '')
+    .replace(/\.md$/, '')
+    .replace(/--/g, '-')
+}
+
+function buildDecayLookup(decay: DecayEntry[]): Map<string, DecayEntry> {
+  const lookup = new Map<string, DecayEntry>()
+  for (const entry of decay) {
+    for (const key of [entry.itemId, normalizeVaultItemId(entry.itemId)]) {
+      if (!lookup.has(key)) lookup.set(key, entry)
+    }
+  }
+  return lookup
+}
+
 export function joinRegistryWithDecay(
   registry: RegistryEntry[],
   decay: DecayEntry[],
   options: JoinOptions = {},
 ): JoinedEntry[] {
   const minRetention = options.minRetention ?? 0
-  const decayById = new Map(decay.map((d) => [d.itemId, d]))
+  const decayById = buildDecayLookup(decay)
   const joined: JoinedEntry[] = []
   for (const r of registry) {
     if (!r.knowledgePath) continue
-    const d = decayById.get(r.id) ?? { itemId: r.id, ...DEFAULT_FRESH_DECAY }
+    const d = decayById.get(r.id) ?? decayById.get(normalizeVaultItemId(r.id)) ?? { itemId: r.id, ...DEFAULT_FRESH_DECAY }
     if (d.score < minRetention) continue
     joined.push({
       id: r.id,

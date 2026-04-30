@@ -52,6 +52,22 @@ const SECRET_PATTERNS: RegExp[] = [
 ]
 
 const PRIVATE_PATH_PATTERN = /(?:\/Users|\/home|\/root)\/[^\s"']+/g
+const SOURCES = new Set<ConductorEvent['source']>(['hermes', 'mimo', 'codex', 'operator-health', 'evensong-harness', 'research-vault', 'manual'])
+const KINDS = new Set<ConductorEventKind>(['health', 'benchmark-run', 'benchmark-batch', 'memory-preflight', 'handoff'])
+const SEVERITIES = new Set<ConductorEventSeverity>(['info', 'warn', 'blocker'])
+
+function validateEventEnvelope(event: ConductorEvent): string[] {
+  const violations: string[] = []
+  if (event.schemaVersion !== 'evensong-conductor-event-v1') violations.push('invalid-schema-version')
+  if (!SOURCES.has(event.source)) violations.push('invalid-source')
+  if (!KINDS.has(event.kind)) violations.push('invalid-kind')
+  if (!SEVERITIES.has(event.severity)) violations.push('invalid-severity')
+  if (!event.ts || Number.isNaN(Date.parse(event.ts))) violations.push('invalid-timestamp')
+  if (!event.status || event.status.length > 80) violations.push('invalid-status')
+  if (!event.summary || event.summary.length > 240) violations.push('invalid-summary')
+  if (!event.evidence || typeof event.evidence !== 'object') violations.push('invalid-evidence')
+  return violations
+}
 
 function sanitizeText(text: string): { value: string; violations: string[] } {
   let value = text
@@ -94,6 +110,8 @@ function normalizeArtifactPath(path: string, repoRoot: string): { value: string;
 
 export function sanitizeConductorEvent(event: ConductorEvent, repoRoot = process.cwd()): { event: ConductorEvent; violations: string[] } {
   const violations: string[] = []
+  const status = sanitizeText(event.status)
+  violations.push(...status.violations)
   const summary = sanitizeText(event.summary)
   violations.push(...summary.violations)
 
@@ -135,6 +153,7 @@ export function sanitizeConductorEvent(event: ConductorEvent, repoRoot = process
     event: {
       ...event,
       ...(runId ? { runId: runId.value } : {}),
+      status: status.value,
       summary: summary.value,
       evidence,
     },
@@ -146,8 +165,9 @@ export function appendConductorEvent(path: string | undefined, event: ConductorE
   if (!path) return { ok: true, skipped: true, violations: [] }
 
   const sanitized = sanitizeConductorEvent(event, repoRoot)
-  if (sanitized.violations.length > 0) {
-    return { ok: false, skipped: true, path, violations: sanitized.violations }
+  const violations = unique([...validateEventEnvelope(sanitized.event), ...sanitized.violations])
+  if (violations.length > 0) {
+    return { ok: false, skipped: true, path, violations }
   }
 
   try {

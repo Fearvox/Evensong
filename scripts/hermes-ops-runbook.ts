@@ -22,15 +22,17 @@ export interface HermesOpsRunbook {
     launch: string
     attach: string
     health: string
+    monitor: string
     runbook: string
   }
 }
 
 const DEFAULT_SCOPE = 'evensong'
 const DEFAULT_LANE = 'ops'
-const DEFAULT_REPO_ROOT = '/root/ccr'
+const DEFAULT_REPO_ROOT = '.'
 const DEFAULT_WINDOWS = ['ops', 'main', 'research', 'verify', 'bench']
-const SECRET_TEXT = /(?:access[_-]?token|api[_-]?key|auth|authorization|bearer|client[_-]?secret|credential|jwt|password|secret|sk-[a-z0-9]{8,}|token)/i
+const SECRET_TEXT = /(?:api[_-]?key|authorization|bearer\s+|password|token\s*[:=]|secret|sk-[a-z0-9._-]{8,})/i
+const PRIVATE_REPO_ROOT = /^(?:\/Users|\/home|\/root)\//
 
 function trimSessionSeparators(value: string): string {
   return value.replace(/^[._-]+|[._-]+$/g, '')
@@ -74,6 +76,18 @@ export function buildHermesSessionName(input: HermesOpsRunbookInput = {}): strin
   return ['hermes', middle, lane].filter(Boolean).join('-').slice(0, 80)
 }
 
+function isPrivateRepoRoot(value: string): boolean {
+  return PRIVATE_REPO_ROOT.test(value) || isSecretLike(value)
+}
+
+function publicRepoRoot(value: string): string {
+  return isPrivateRepoRoot(value) ? '<operator-local-repo-root>' : value
+}
+
+function publicCommandRoot(value: string): string {
+  return isPrivateRepoRoot(value) ? '$EVENSONG_REPO_ROOT' : shellQuote(value)
+}
+
 export function buildHermesOpsRunbook(input: HermesOpsRunbookInput = {}): HermesOpsRunbook {
   const sessionName = buildHermesSessionName(input)
   const repoRoot = input.repoRoot?.trim() || DEFAULT_REPO_ROOT
@@ -86,6 +100,7 @@ export function buildHermesOpsRunbook(input: HermesOpsRunbookInput = {}): Hermes
       launch: `HERMES_HARNESS_SESSION=${sessionName} ./scripts/open-hermes-evo-harness.sh`,
       attach: `tmux attach -t ${sessionName}`,
       health: `OPERATOR_HEALTH_REQUIRED_TMUX=${sessionName} bun run scripts/operator-health-snapshot.ts --compact`,
+      monitor: `tmux list-windows -t ${sessionName} && tmux list-panes -a -F "#{session_name}:#{window_index}.#{pane_index} #{pane_current_command} #{pane_active}"`,
       runbook: `bun run scripts/hermes-ops-runbook.ts --session ${sessionName}`,
     },
   }
@@ -93,28 +108,51 @@ export function buildHermesOpsRunbook(input: HermesOpsRunbookInput = {}): Hermes
 
 export function renderHermesOpsRunbook(input: HermesOpsRunbookInput = {}): string {
   const runbook = buildHermesOpsRunbook(input)
+  const repoRoot = publicRepoRoot(runbook.repoRoot)
+  const commandRoot = publicCommandRoot(runbook.repoRoot)
+  const requiresLocalRepoRoot = isPrivateRepoRoot(runbook.repoRoot)
 
   return [
     '# Hermes Ops Runbook',
     '',
     `Session: \`${runbook.sessionName}\``,
-    `Repo: \`${runbook.repoRoot}\``,
+    `Repo: \`${repoRoot}\``,
     `Windows: \`${runbook.windows.join('`, `')}\``,
+    ...(requiresLocalRepoRoot ? ['', 'Set `EVENSONG_REPO_ROOT` locally before running command blocks; do not paste private absolute paths into public notes.'] : []),
     '',
     '## Start or Resume',
     '',
     '```bash',
-    `cd ${shellQuote(runbook.repoRoot)}`,
+    `cd ${commandRoot}`,
     runbook.commands.launch,
     runbook.commands.attach,
     '```',
     '',
     'Attach before creating a replacement session. A detached tmux session is the normal paused state, not a failure.',
     '',
+    '## Lane Persistence Guard',
+    '',
+    '```bash',
+    `cd ${commandRoot}`,
+    "test -f .hermes-lane.txt && awk -F= '/^(lane|session)=/{print}' .hermes-lane.txt",
+    'printf "worktree="; git rev-parse --show-toplevel',
+    'git status --short --branch --untracked-files=all',
+    '```',
+    '',
+    'Do not paste raw `.hermes-lane.txt` output into public notes; it may contain private run directories or prompt paths. Record only lane, session, worktree, branch, and compact status.',
+    '',
+    '## Termius Monitor',
+    '',
+    '```bash',
+    runbook.commands.monitor,
+    '```',
+    '',
+    'Use the monitor view before attaching from a small screen: confirm the session, window names, active pane, and current command without dumping pane text.',
+    '',
     '## Health Gate',
     '',
     '```bash',
-    `cd ${shellQuote(runbook.repoRoot)}`,
+    `cd ${commandRoot}`,
     runbook.commands.health,
     '```',
     '',
@@ -145,7 +183,7 @@ export function renderHermesOpsRunbook(input: HermesOpsRunbookInput = {}): strin
     '',
     '```text',
     `session=${runbook.sessionName}`,
-    `repo=${runbook.repoRoot}`,
+    `repo=${repoRoot}`,
     'health=<paste compact operator-health line>',
     'branch=<git branch>',
     'latest_artifact=<path or none>',

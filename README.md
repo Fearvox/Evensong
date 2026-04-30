@@ -54,6 +54,8 @@
 
 Evensong is not just a benchmark and not just an MCP package. It is a public workbench around a runnable, modifiable CCR CLI: the core can be read and changed, Research Vault MCP is shipped as a module, and the retrieval claims are backed by committed evidence files instead of vibes.
 
+Executive read: Evensong turns a reverse-engineered agent CLI into an auditable workbench. The current public evidence is narrow but concrete: four committed retrieval artifacts, including a 24-query Wave 3+I Dense RAR hard-suite run where rerank paths reached 24/24 Top-1 and Top-5. Treat that as proof of this harness and design path, not as a universal retrieval win.
+
 This repository exists for four jobs:
 
 | Purpose | What that means |
@@ -132,7 +134,7 @@ The always-rerank Hybrid pays 1 LLM call per query. For a large fraction of quer
 
 **Trade-off**: −4.7pp top-1 accuracy vs llm-only buys **−43% avg latency**. The gate is a tuning knob: `gapRatioThreshold: 1.3` raises skip rate and drops accuracy; `2.0` reverts toward Hybrid parity.
 
-**Positioning vs EverOS**: this fills the gap between EverOS's published Fast tier (0 LLM calls, 200-600 ms) and Agentic tier (1-3 LLM calls, 2-5 s) — **Adaptive Hybrid is 0 _or_ 1 conditional LLM call, with a user-tunable gating knob**. Not covered by any published EverOS / EverMemOS / HyperMem design.
+**Positioning vs EverOS**: this is a concrete design point between EverOS's published Fast tier (0 LLM calls, 200-600 ms) and Agentic tier (1-3 LLM calls, 2-5 s): **Adaptive Hybrid is 0 _or_ 1 conditional LLM call, with a user-tunable gating knob**. Keep public wording to the measured Evensong implementation and avoid implying broad coverage or superiority over unpublished designs.
 
 See [`src/services/retrieval/providers/adaptiveHybridProvider.ts`](./src/services/retrieval/providers/adaptiveHybridProvider.ts) and the 7 unit tests in `adaptiveHybridProvider.test.ts`. Shipped at [`86bb4ee`](https://github.com/Fearvox/Evensong/commit/86bb4ee). **66/66 retrieval-domain tests pass.**
 
@@ -150,9 +152,11 @@ Operator handoff: [`evensong.zonicdesign.art/handoff`](https://evensong.zonicdes
 | **Dense RAR** | **24/24 (100.0%)** | **24/24 (100.0%)** | **24/24** | **0** | **1703 ms** | **1842 ms** |
 | **Dense Adaptive RAR** | **24/24 (100.0%)** | **24/24 (100.0%)** | **24/24** | **0** | **1615 ms** | **1854 ms** |
 
+Partner read: the result shows that dense retrieval plus a lightweight rerank step can recover all targets in this adversarial 24-query suite, where dense-only retrieval misses several targets. It is evidence for this retrieval design and evidence harness, not a broad leaderboard claim.
+
 Evidence: [summary](./benchmarks/runs/wave3i-dense-rar-2026-04-24T0854.md), [metadata](./benchmarks/runs/wave3i-dense-rar-2026-04-24T0854.meta.json), [raw JSONL](./benchmarks/runs/wave3i-dense-rar-2026-04-24T0854.jsonl), and the [formal ledger](./benchmarks/DENSE-RAR-FORMAL-LEDGER.md).
 
-Boundary: `dense-rar-2026-04-24T0801` remains the Stage-1 TopK 20 formal baseline at 23/24; its q113 miss was candidate recall, not reranker failure. `dense-rar-2026-04-24T0644` remains internal/probe-only evidence. Stage-1 TopK 50 fixes that blind spot, but it also increases rerank candidate exposure, so the 24/24 claim is limited to this verified hard suite.
+Boundary: `dense-rar-2026-04-24T0801` remains the Stage-1 TopK 20 formal baseline at 23/24; its q113 miss was candidate recall, not reranker failure. `dense-rar-2026-04-24T0644` remains internal/probe-only evidence. Stage-1 TopK 50 fixes that blind spot, but it also increases rerank candidate exposure, so the 24/24 claim is limited to this verified hard suite. The public claim should be cited as "24/24 on the Wave 3+I adversarial hard suite," never as broad retrieval superiority.
 
 <p align="right"><a href="#contents">↑ back to top</a></p>
 
@@ -209,9 +213,11 @@ bun test src/services/retrieval src/services/api
 # 5. Fire an ad-hoc vault retrieval
 bun run scripts/vault-recall.ts "hypergraph memory for conversations"
 
-# 6. Replay the 648-trial hybrid vs LLM-only benchmark
+# 6. Replay the formal Wave 3+F 648-call hybrid vs LLM-only benchmark
 bun run scripts/benchmark-hybrid-scale.ts --runs=3 --with-body \
   --queries-file=benchmarks/wave3f-generated-queries-2026-04-19.json
+# For Wave 3+G's 972-call three-pipeline run, add:
+#   --pipelines=llm-only,hybrid,adaptive
 ```
 
 <p align="right"><a href="#contents">↑ back to top</a></p>

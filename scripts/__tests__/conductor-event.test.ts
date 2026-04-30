@@ -79,6 +79,45 @@ describe('conductor event envelope', () => {
     expect(result.violations).toContain('private-path')
   })
 
+
+
+  test('blocks appending events when status contains secret-like text', () => {
+    const dir = mkdtempSync(join(tmpdir(), 'conductor-event-'))
+    const file = join(dir, 'events.jsonl')
+    const event = createBenchmarkRunEvent({
+      run: 'R103',
+      model: 'GPT-5.4',
+      mode: 'L0 / Clean',
+      tests: 1,
+      failures: 0,
+      time_min: 1,
+    }, [], '2026-04-29T00:00:00.000Z')
+    event.status = 'token=abc123'
+
+    const result = appendConductorEvent(file, event, process.cwd())
+
+    expect(result.ok).toBe(false)
+    expect(result.skipped).toBe(true)
+    expect(result.violations).toContain('secret-pattern:token\\s*[:=]\\s*\\S+')
+  })
+
+  test('sanitizes private paths in status and reports violation', () => {
+    const event = createBenchmarkRunEvent({
+      run: 'R104',
+      model: 'GPT-5.4',
+      mode: 'L0 / Clean',
+      tests: 1,
+      failures: 0,
+      time_min: 1,
+    }, [], '2026-04-29T00:00:00.000Z')
+    event.status = 'stored at /root/private/session'
+
+    const sanitized = sanitizeConductorEvent(event, '/repo')
+
+    expect(sanitized.violations).toContain('private-path')
+    expect(sanitized.event.status).toBe('stored at [REDACTED-PATH]')
+  })
+
   test('appends JSONL when event is safe', () => {
     const dir = mkdtempSync(join(tmpdir(), 'conductor-event-'))
     const file = join(dir, 'events.jsonl')
@@ -100,5 +139,26 @@ describe('conductor event envelope', () => {
     expect(lines).toHaveLength(1)
     expect(parsed.runId).toBe('R102')
     expect(parsed.evidence.artifacts).toEqual(['benchmarks/runs/R102/result.json'])
+  })
+
+  test('blocks malformed event envelopes before writing JSONL', () => {
+    const dir = mkdtempSync(join(tmpdir(), 'conductor-event-'))
+    const file = join(dir, 'events.jsonl')
+    const event = {
+      schemaVersion: 'evensong-conductor-event-v1',
+      ts: '2026-04-29T00:00:00.000Z',
+      source: 'unknown-source',
+      kind: 'handoff',
+      severity: 'info',
+      status: 'note',
+      summary: 'handoff ready',
+      evidence: {},
+    } as const
+
+    const result = appendConductorEvent(file, event as any, process.cwd())
+
+    expect(result.ok).toBe(false)
+    expect(result.skipped).toBe(true)
+    expect(result.violations).toContain('invalid-source')
   })
 })

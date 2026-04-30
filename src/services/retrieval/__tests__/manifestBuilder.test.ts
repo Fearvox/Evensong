@@ -78,6 +78,31 @@ describe('joinRegistryWithDecay', () => {
     expect(b.summaryLevel).toBe('deep')
   })
 
+  test('joins decay metadata when registry ids carry ingest timestamp prefixes', () => {
+    const joined = joinRegistryWithDecay([
+      {
+        id: '20260429-0744-memory-layer',
+        title: 'Memory Layer',
+        rawPath: 'raw/memory-layer.md',
+        knowledgePath: 'knowledge/memory-layer.md',
+        status: 'analyzed',
+        tags: [],
+        ingestedAt: '2026-04-29',
+        source: 'local',
+      },
+    ], [
+      { itemId: 'memory-layer', score: 0.37, accessCount: 5, lastAccess: '2026-04-29', summaryLevel: 'shallow', nextReviewAt: '', difficulty: 1 },
+    ])
+
+    expect(joined).toHaveLength(1)
+    expect(joined[0]).toMatchObject({
+      id: '20260429-0744-memory-layer',
+      retentionScore: 0.37,
+      accessCount: 5,
+      summaryLevel: 'shallow',
+    })
+  })
+
   test('filters entries below minRetention', () => {
     const joined = joinRegistryWithDecay(reg, decay, { minRetention: 0.95 })
     // a has 0.9 → dropped, b has default 1 → kept
