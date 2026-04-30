@@ -39,6 +39,10 @@ describe('operator health snapshot', () => {
   })
 
 
+  test('treats sentinel disk-used-pct=100 (df unavailable) as block', () => {
+    expect(assessSnapshot(snapshot({ diskUsedPct: 100 }))).toBe('block')
+  })
+
   test('command runner degrades when optional command is missing', async () => {
     const result = await runHealthCommand('__evensong_missing_health_command__', [])
 
