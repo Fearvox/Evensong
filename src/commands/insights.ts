@@ -26,6 +26,7 @@ import { execFileNoThrow } from '../utils/execFileNoThrow.js'
 import { logError } from '../utils/log.js'
 import { extractTextContent } from '../utils/messages.js'
 import { getDefaultOpusModel } from '../utils/model/model.js'
+import { shellSingleQuote } from '../utils/shellQuote.js'
 import {
   getProjectsDir,
   getSessionFilesWithMtime,
@@ -54,10 +55,6 @@ function getInsightsModel(): string {
 type RemoteHostInfo = {
   name: string
   sessionCount: number
-}
-
-function shellSingleQuote(value: string): string {
-  return `'${value.replace(/'/g, `'\\''`)}'`
 }
 
 /* eslint-disable custom-rules/no-process-env-top-level */
@@ -117,7 +114,7 @@ const collectFromRemoteHost: (
           // SCP the projects folder
           const scpResult = await execFileNoThrow(
             'scp',
-            ['-rq', `${homespace}.coder:${remoteProjectsDir}/`, tempDir],
+            ['-rq', `${homespace}.coder:${shellSingleQuote(remoteProjectsDir)}/`, tempDir],
             { timeout: 300000 },
           )
           if (scpResult.code !== 0) {

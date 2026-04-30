@@ -1,10 +1,34 @@
 import { spawn } from 'child_process'
 import { randomUUID } from 'crypto'
+import { accessSync, constants } from 'fs'
 import type { Message } from '../../types/message.js'
 import { getProjectRoot } from '../../bootstrap/state.js'
 import { logForDebugging } from '../../utils/debug.js'
 
-const HERMES_BIN = process.env.HERMES_BIN ?? 'hermes'
+function resolveHermesBin(): string {
+  const bin = process.env.HERMES_BIN ?? 'hermes'
+  if (bin.includes('/') || bin.includes('\\')) {
+    try {
+      accessSync(bin, constants.X_OK)
+    } catch {
+      throw new Error(
+        `HERMES_BIN=${bin} is not executable. Set HERMES_BIN to the hermes binary path or ensure 'hermes' is on PATH.`,
+      )
+    }
+  }
+  return bin
+}
+
+async function collectStream(
+  stream: NodeJS.ReadableStream | null | undefined,
+): Promise<string> {
+  if (!stream) return ''
+  let result = ''
+  for await (const chunk of stream) {
+    result += chunk.toString()
+  }
+  return result
+}
 
 export interface HermesSubagentOptions {
   prompt: string
@@ -27,7 +51,9 @@ export async function* runHermesSubagent({
 }: HermesSubagentOptions): AsyncGenerator<Message> {
   const workingDir = cwd ?? getProjectRoot()
 
-  logForDebugging(`[Hermes subagent] spawning: ${HERMES_BIN} -q "${prompt}" --directory ${workingDir}`)
+  const hermesBin = resolveHermesBin()
+
+  logForDebugging(`[Hermes subagent] spawning: ${hermesBin} -q "${prompt}" --directory ${workingDir}`)
 
   // Yield a progress message indicating Hermes has been dispatched
   yield {
@@ -40,7 +66,7 @@ export async function* runHermesSubagent({
   } as Message
 
   // Spawn Hermes CLI
-  const child = spawn(HERMES_BIN, ['-q', prompt, '--directory', workingDir], {
+  const child = spawn(hermesBin, ['-q', prompt, '--directory', workingDir], {
     cwd: workingDir,
     signal,
     // Capture stdout and stderr
@@ -49,27 +75,13 @@ export async function* runHermesSubagent({
     env: { ...process.env },
   })
 
-  let stdout = ''
-  let stderr = ''
-
-  // Collect stdout
-  if (child.stdout) {
-    for await (const chunk of child.stdout) {
-      stdout += chunk.toString()
-    }
-  }
-
-  // Collect stderr (log only)
-  if (child.stderr) {
-    for await (const chunk of child.stderr) {
-      stderr += chunk.toString()
-    }
-  }
-
-  // Wait for process to exit
-  const exitCode = await new Promise<number>(resolve => {
-    child.on('close', code => resolve(code ?? 1))
-  })
+  const [stdout, stderr, exitCode] = await Promise.all([
+    collectStream(child.stdout),
+    collectStream(child.stderr),
+    new Promise<number>(resolve => {
+      child.on('close', code => resolve(code ?? 1))
+    }),
+  ])
 
   if (stderr) {
     logForDebugging(`[Hermes subagent] stderr: ${stderr}`)

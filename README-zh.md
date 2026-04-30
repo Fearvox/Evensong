@@ -1,8 +1,8 @@
 <h1 align="center">Evensong</h1>
 
 <p align="center">
-  <em>基于逆向工程 Claude Code core 的可修改 agent-system hub<br/>
-  <strong>Research Vault MCP 模块、公开 handoff dashboard、四份正式检索 artifact（648 + 972 + 72 + 72 次调用）</strong></em>
+  <em>一个可以拆开、改动、验证的 agent 系统工作台。核心来自逆向工程的 Claude Code CLI。<br/>
+  <strong>包含 Research Vault MCP、公开 handoff dashboard，以及四份可复现的正式检索证据（648 + 972 + 72 + 72 次调用）</strong></em>
 </p>
 
 <p align="center">
@@ -52,16 +52,16 @@
 
 ## 这是什么
 
-一个**逆向工程、可修改**的 Anthropic Claude Code CLI 实现，加上围绕它建立的 Evensong 公共 hub：Research Vault MCP 包、handoff 页面，以及用于 agent 记忆系统评估的 **production 级混合检索基准套件**。
+Evensong 不是单个 benchmark，也不只是一个 MCP 包。它是围绕可运行 CCR CLI 搭起来的公共工作台：核心可以读、可以改；Research Vault MCP 作为模块发布；检索实验用公开证据文件把证据链交代清楚。
 
-本仓库存在的三个目的：
+本仓库主要做四件事：
 
 | 目的 | 具体意义 |
 |---|---|
-| **学习** | 在不依赖闭源二进制的前提下，从源码层面研究 Claude Code 的工作方式 |
-| **扩展** | 自定义 agent 工具、检索流水线、遥测——模块间不是胶水粘死的，可以换 |
-| **模块化** | 把 Research Vault MCP 作为 Evensong 的模块/依赖发布，而不是把它误说成整个产品 |
-| **基准测试** | 以可复现证据评估 Retrieve-and-Rerank (RaR) 架构——EverMemOS §3.4 立的 bar，用我们的数字度量 |
+| **学习** | 不依赖闭源二进制，直接从源码层面看 Claude Code CLI 怎么工作 |
+| **改造** | 自定义 agent 工具、检索流水线、遥测；每个模块都应该能被替换，而不是粘死 |
+| **发布模块** | 把 Research Vault MCP 作为 Evensong 的模块/依赖发布，不把它误说成整个产品 |
+| **验证** | 用可复现数据评估 Retrieve-and-Rerank (RaR) 架构；EverMemOS §3.4 提出的方向，我们用自己的数字来量 |
 
 <p align="right"><a href="#目录">↑ 回目录</a></p>
 
@@ -69,7 +69,7 @@
 
 ## 📊 核心数据
 
-**四份正式检索 artifact** 已 commit 至 [`benchmarks/runs/`](./benchmarks/runs)：Wave 3+F/G 覆盖原 108 道跨 LLM 设计；Wave 3+I 是新的 24 道 adversarial hard suite，用于 dense stage-1 + RAR 路径。Wave 3+I 的结论只作用于该 hard suite，不替代更宽的 108-query F/G 对比。
+**四份正式检索证据** 已 commit 至 [`benchmarks/runs/`](./benchmarks/runs)：Wave 3+F/G 覆盖原 108 道跨 LLM 设计；Wave 3+I 是新的 24 道 adversarial hard suite，用于 dense stage-1 + RAR 路径。这里的写法刻意保守：Wave 3+I 只说明这套 hard suite，不替代更宽的 108-query F/G 对比。
 
 ### Wave 3+F — 648 次两流水线对比 ✅
 
@@ -78,7 +78,7 @@
 | LLM 直判 | 76.9% (249/324) | 2056 ms | 3595 ms | 100% (200 entries) |
 | **Hybrid BM25 + LLM Rerank** | **79.3%** (257/324) | **1509 ms** | **2725 ms** | **25%** (50 entries) |
 
-原始 artifact：[`benchmarks/runs/wave3d-hybrid-scale-2026-04-19T1220.md`](./benchmarks/runs/wave3d-hybrid-scale-2026-04-19T1220.md)。3 次跑 stddev 0.00–0.44pp。
+原始记录：[`benchmarks/runs/wave3d-hybrid-scale-2026-04-19T1220.md`](./benchmarks/runs/wave3d-hybrid-scale-2026-04-19T1220.md)。3 次跑 stddev 0.00–0.44pp。
 
 ### Wave 3+G — 972 次三流水线正式复测 ✅
 
@@ -88,7 +88,7 @@
 | Hybrid BM25 + LLM Rerank | 77.5% (251/324) | 2919 ms | 4669 ms | 3248 ms | 100% (50 entries) |
 | **Adaptive Hybrid** | **73.1%** (237/324) | **2519 ms** | **4376 ms** | **2365 ms** | **73%**（27% 跳过） |
 
-原始 artifact：[`benchmarks/runs/wave3g-pipelines-2026-04-19T1652.md`](./benchmarks/runs/wave3g-pipelines-2026-04-19T1652.md)。墙钟时间 **10.5 min**。3 次跑 stddev：llm-only 0.76pp · hybrid 1.15pp · adaptive 0.76pp。
+原始记录：[`benchmarks/runs/wave3g-pipelines-2026-04-19T1652.md`](./benchmarks/runs/wave3g-pipelines-2026-04-19T1652.md)。墙钟时间 **10.5 min**。3 次跑 stddev：llm-only 0.76pp · hybrid 1.15pp · adaptive 0.76pp。
 
 ### 两次跑都站得住的结论
 
@@ -102,11 +102,11 @@
 
 ### 诚实解读
 
-- **延迟 + token 成本优势是稳的赢。** 两次跑都一致：BM25 stage 1 收窄 LLM 输入池，能节省 22–27% p50 延迟 + 75% prompt token。这是能 ship 的 claim。
-- **准确度优势比首次测量要 noisier。** Wave 3+F 测出 Hybrid 相对 LLM-only 领先 +2.5pp。Wave 3+G 的 972 次复测捕捉到的是持平（−0.3pp）。per-run stddev（0.8–1.2pp）+ API 负载时段方差一起足以覆盖这个 delta。请把 Hybrid 理解为 *"vs LLM-only 准确度持平到微胜，且带稳定的延迟 + token 成本优势"*——不是严格的准确度赢家。
-- **Adaptive 层才是真正的新贡献。** 见下一节——用 −4.7pp 准确度换 −43% 平均延迟 + 27% 查询完全零 LLM 调用，且是三条流水线中 per-run 方差最稳的（0.76pp）。
+- **最硬的结论是延迟和 token 成本。** 两次正式跑都指向同一件事：BM25 stage 1 先把候选池收窄，再交给 LLM，可以稳定省下 22–27% p50 延迟和 75% prompt token。这是可以对外说的收益。
+- **准确度不要吹过头。** Wave 3+F 看到 Hybrid 比 LLM-only 高 +2.5pp；Wave 3+G 的 972 次复测看到的是基本持平（−0.3pp）。per-run stddev（0.8–1.2pp）和 API 负载时段差异足以覆盖这个变化。所以更准确的说法是：Hybrid 在准确度上接近 LLM-only，偶尔略胜，同时稳定更省、更快。
+- **Adaptive 层更有意思。** 它用 −4.7pp top-1 换来 −43% 平均延迟，并让 27% 查询完全不触发 LLM。这个 trade-off 很清楚，也更像真实产品里会被调参使用的东西。
 
-一条命令复现（产出 Wave 3+G 的 artifact）：
+一条命令复现（产出 Wave 3+G 的记录）：
 
 ```bash
 bun run scripts/benchmark-hybrid-scale.ts \
@@ -160,42 +160,19 @@ Canonical run：`dense-rar-2026-04-24T0854` · mode `formal` · clean metadata c
 
 ## 🏗 架构
 
-```
-┌─────────────────────────────────────────────────────────────────┐
-│  CCR — 逆向工程的 Claude Code 运行时                             │
-│  src/entrypoints/cli.tsx → src/main.tsx → src/screens/REPL.tsx  │
-└────────────────┬────────────────────────────────────────────────┘
-                 │
-                 ▼
-┌─────────────────────────────────────────────────────────────────┐
-│  检索流水线（Wave 3+）                                           │
-│                                                                 │
-│   manifestBuilder   BM25 索引       atomicProvider              │
-│   (读 vault →       (tokenize,      (LLM Rerank，                │
-│    VaultManifest)    score, topK)   走 Atomic Chat 网关)         │
-│         │              │                    │                   │
-│         └──────────────┴────────┬───────────┘                   │
-│                                 ▼                               │
-│                         hybridProvider                          │
-│                  (stage1 → 收窄 → stage2)                       │
-│                                 │                               │
-│                     adaptiveHybridProvider                      │
-│              (BM25 gap ≥ 1.5× → 跳过 stage 2 LLM)               │
-│                                 ▼                               │
-│                         vaultRetrieve                           │
-│                       (回退链编排)                              │
-└─────────────────────────────────────────────────────────────────┘
-                 │
-                 ▼
-┌─────────────────────────────────────────────────────────────────┐
-│  Atomic Chat 网关 (http://127.0.0.1:1337/v1)                    │
-│  统一 OpenAI 兼容端点，代理：                                    │
-│    • deepseek/deepseek-v3.2 (主 judge)                          │
-│    • grok-3, grok-4-*-fast-reasoning (xAI)                      │
-│    • MiniMax-M2.7, qwen/qwen3.6-plus, openrouter/auto:free      │
-│    • 本地 Gemma-4-E4B via llama.cpp (离线兜底)                   │
-└─────────────────────────────────────────────────────────────────┘
-```
+<p align="center">
+  <img src="./docs/assets/evensong-architecture.png" alt="Evensong 架构树：CCR runtime、Research Vault MCP、Hybrid Retrieval、Atomic Gateway 与公开证据输出" width="620">
+</p>
+
+这张图只画公开发布面，不把每个内部开关都塞进 README。
+
+| 层 | 负责 |
+|---|---|
+| **Core** | CCR runtime：Bun 入口、CLI loop、Ink REPL |
+| **Modules** | Research Vault MCP、hybrid retrieval，以及兼容 Atomic Chat 的 judge 路径 |
+| **Evidence** | Vault fixtures、正式 benchmark 记录、公开 handoff/dashboard |
+
+图源在 [`docs/assets/evensong-architecture.svg`](./docs/assets/evensong-architecture.svg)，PNG 由 [`fireworks-tech-graph`](https://github.com/yizhiyanhua-ai/fireworks-tech-graph) style 6 导出。
 
 详细开发者注释见 [`AGENTS.md`](./AGENTS.md) 和 [`CLAUDE.md`](./CLAUDE.md)。
 

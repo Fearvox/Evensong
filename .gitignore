@@ -9,6 +9,11 @@ coverage
 *.suo
 *.lock
 
+# Local/internal hidden tool directories
+.*/
+!.github/
+!.github/**
+
 # Environment / secrets
 .env
 .env.local

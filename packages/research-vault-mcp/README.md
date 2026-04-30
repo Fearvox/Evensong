@@ -19,12 +19,13 @@ Default transport is `stdio`, because command-launched MCP servers are expected 
 
 **Runtime note:** `@syndash/research-vault-mcp` is Bun-native. `npx` is supported as an install/launch shim, but the target machine must have `bun` available on `PATH`. If you need a pure Node runtime, treat that as a separate compatibility track rather than assuming this package already provides it.
 
-Use SSE only when you explicitly want a long-running HTTP server:
+Use HTTP only when you explicitly want a long-running remote MCP server. The HTTP server exposes both the current Streamable HTTP endpoint and the legacy SSE endpoint:
 
 ```bash
-MCP_PORT=8765 npx @syndash/research-vault-mcp --transport=sse
-# health: http://127.0.0.1:8765/health
-# sse:    http://127.0.0.1:8765/sse
+MCP_PORT=8765 npx @syndash/research-vault-mcp --transport=http
+# streamable: http://127.0.0.1:8765/mcp
+# legacy sse: http://127.0.0.1:8765/sse
+# health:     http://127.0.0.1:8765/health
 ```
 
 ## Configure an MCP client

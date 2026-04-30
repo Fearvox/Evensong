@@ -1,5 +1,12 @@
 # Changelog
 
+## Unreleased
+
+### Added
+
+- HTTP transport now supports Streamable HTTP at `POST /mcp`, while keeping the legacy `/sse` + `/messages` endpoints.
+- Added a Streamable HTTP regression test that initializes a session and lists MCP tools through `/mcp`.
+
 ## 1.1.2 — 2026-04-26
 
 ### Changed
