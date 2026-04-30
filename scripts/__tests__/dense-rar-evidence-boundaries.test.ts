@@ -16,6 +16,7 @@ describe('canonical Dense RAR evidence boundaries', () => {
     const rows = parseJsonlRows(read(`${PREFIX}.jsonl`))
     const trust = assessDenseRarArtifactTrust(meta, rows, {
       requirePublishableEvidence: true,
+      requireWave3HardSuite: true,
     })
 
     expect(trust.formalEligible).toBe(true)

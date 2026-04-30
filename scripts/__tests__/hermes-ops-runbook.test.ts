@@ -23,11 +23,20 @@ describe('hermes ops runbook', () => {
   })
 
   test('renders commands for the same scoped session name', () => {
-    const runbook = buildHermesOpsRunbook({ runId: 'R070', lane: 'bench', repoRoot: '/root/ccr' })
+    const runbook = buildHermesOpsRunbook({ runId: 'R070', lane: 'bench', repoRoot: './ccr' })
 
     expect(runbook.sessionName).toBe('hermes-r070-bench')
     expect(runbook.commands.launch).toBe('HERMES_HARNESS_SESSION=hermes-r070-bench ./scripts/open-hermes-evo-harness.sh')
     expect(runbook.commands.health).toBe('OPERATOR_HEALTH_REQUIRED_TMUX=hermes-r070-bench bun run scripts/operator-health-snapshot.ts --compact')
+    expect(runbook.commands.monitor).toBe('tmux list-windows -t hermes-r070-bench && tmux list-panes -a -F "#{session_name}:#{window_index}.#{pane_index} #{pane_current_command} #{pane_active}"')
+  })
+
+  test('rendered runbook includes a compact Termius monitor view', () => {
+    const text = renderHermesOpsRunbook({ runId: 'R070', lane: 'ops', repoRoot: './ccr' })
+
+    expect(text).toContain('## Termius Monitor')
+    expect(text).toContain('tmux list-windows -t hermes-r070-ops')
+    expect(text).toContain('Use the monitor view before attaching from a small screen')
   })
 
   test('rendered runbook avoids secret-like input values', () => {
@@ -35,7 +44,7 @@ describe('hermes ops runbook', () => {
       sessionName: 'secret-session',
       runId: 'api_key=abc123',
       lane: 'token-lane',
-      repoRoot: '/root/ccr',
+      repoRoot: './ccr',
     })
 
     expect(text).toContain('Session: `hermes-harness`')
@@ -45,9 +54,27 @@ describe('hermes ops runbook', () => {
   })
 
   test('rendered shell commands quote repo paths with spaces', () => {
-    const text = renderHermesOpsRunbook({ repoRoot: '/root/ccr ops' })
+    const text = renderHermesOpsRunbook({ repoRoot: './ccr ops' })
 
-    expect(text).toContain("cd '/root/ccr ops'")
+    expect(text).toContain("cd './ccr ops'")
+  })
+
+  test('rendered handoff stub does not leak private repo roots', () => {
+    const text = renderHermesOpsRunbook({ repoRoot: '/home/operator/private-ccr', runId: 'R085', lane: 'ops' })
+
+    expect(text).toContain('repo=<repo-root>')
+    expect(text).not.toContain('/home/operator')
+    expect(text).not.toContain('private-ccr')
+  })
+
+  test('renders a lane persistence guard without dumping raw lane artifacts', () => {
+    const text = renderHermesOpsRunbook({ runId: 'R086', lane: 'conductor' })
+
+    expect(text).toContain('## Lane Persistence Guard')
+    expect(text).toContain("awk -F= '/^(lane|session)=/{print}' .hermes-lane.txt")
+    expect(text).toContain('Do not paste raw `.hermes-lane.txt` output into public notes')
+    expect(text).not.toContain('run_dir')
+    expect(text).not.toContain('prompt=')
   })
 
   test('parses CLI args before environment defaults', () => {

@@ -14,7 +14,11 @@ import { findPublishableLeaks } from './dense-rar-privacy'
 export interface ArtifactTrustOptions {
   requirePreflight?: boolean
   requirePublishableEvidence?: boolean
+  requireWave3HardSuite?: boolean
 }
+
+const WAVE3_HARD_SUITE_PIPELINES = ['dense', 'dense-rar', 'dense-adaptive'] as const
+const WAVE3_HARD_SUITE_QUERY_COUNT = 24
 
 export interface ArtifactTrustResult {
   formalEligible: boolean
@@ -55,6 +59,45 @@ export function parseJsonlRows(text: string): DenseRarRow[] {
     })
 }
 
+function pushWave3HardSuiteBlockers(meta: any, rows: DenseRarRow[], blockers: string[]) {
+  if (meta?.inputs?.querySuite?.name !== 'wave3-adversarial-retrieval') {
+    blockers.push(`querySuite is ${meta?.inputs?.querySuite?.name ?? 'missing'}, not wave3-adversarial-retrieval`)
+  }
+
+  const expectedRows = WAVE3_HARD_SUITE_PIPELINES.length * WAVE3_HARD_SUITE_QUERY_COUNT
+  if (rows.length !== expectedRows) {
+    blockers.push(`wave3 hard-suite row count is ${rows.length}, not ${expectedRows}`)
+  }
+
+  for (const pipeline of WAVE3_HARD_SUITE_PIPELINES) {
+    const scoped = rows.filter(row => row.pipeline === pipeline)
+    const queryIds = new Set(scoped.map(row => row.queryId).filter(value => typeof value === 'number'))
+    if (scoped.length !== WAVE3_HARD_SUITE_QUERY_COUNT) {
+      blockers.push(`${pipeline} row count is ${scoped.length}, not ${WAVE3_HARD_SUITE_QUERY_COUNT}`)
+    }
+    if (queryIds.size !== WAVE3_HARD_SUITE_QUERY_COUNT) {
+      blockers.push(`${pipeline} unique numeric queryId count is ${queryIds.size}, not ${WAVE3_HARD_SUITE_QUERY_COUNT}`)
+    }
+    const missingEssentials = scoped.filter(row =>
+      typeof row.queryId !== 'number' ||
+      typeof row.category !== 'string' || row.category.length === 0 ||
+      typeof row.query !== 'string' || row.query.length === 0 ||
+      typeof row.ideal !== 'string' || row.ideal.length === 0 ||
+      row.resultStatus !== 'ok',
+    ).length
+    if (missingEssentials > 0) {
+      blockers.push(`${pipeline} has ${missingEssentials} row(s) with missing essentials or non-ok status`)
+    }
+  }
+
+  const unexpectedPipelines = Array.from(new Set(rows.map(row => String(row.pipeline)))).filter(
+    pipeline => !WAVE3_HARD_SUITE_PIPELINES.includes(pipeline as any),
+  )
+  if (unexpectedPipelines.length > 0) {
+    blockers.push(`unexpected pipeline(s): ${unexpectedPipelines.join(', ')}`)
+  }
+}
+
 export function assessDenseRarArtifactTrust(
   meta: any,
   rows: DenseRarRow[],
@@ -64,6 +107,7 @@ export function assessDenseRarArtifactTrust(
   const warnings: string[] = []
   const requirePreflight = options.requirePreflight ?? false
   const requirePublishableEvidence = options.requirePublishableEvidence ?? false
+  const requireWave3HardSuite = options.requireWave3HardSuite ?? false
 
   if (meta?.schemaVersion !== 'dense-rar-v3') {
     blockers.push(`schemaVersion is ${meta?.schemaVersion ?? 'missing'}, not dense-rar-v3`)
@@ -93,6 +137,9 @@ export function assessDenseRarArtifactTrust(
   if (rows.length === 0) {
     blockers.push('jsonl has 0 rows')
   }
+  if (requireWave3HardSuite) {
+    pushWave3HardSuiteBlockers(meta, rows, blockers)
+  }
   if (requirePublishableEvidence) {
     const leaks = [
       ...findPublishableLeaks(JSON.stringify(meta)).map(leak => `metadata ${leak}`),
@@ -119,6 +166,7 @@ export function assessDenseRarArtifactTrust(
       rowCount: rows.length,
       errorRows: errorRows.length,
       publishablePrivacyChecked: requirePublishableEvidence,
+      wave3HardSuiteChecked: requireWave3HardSuite,
     },
   }
 }
@@ -140,13 +188,14 @@ function parseArgs(argv: string[]) {
   const meta = flags.get('meta')
   const jsonl = flags.get('jsonl')
   if (typeof meta !== 'string' || typeof jsonl !== 'string') {
-    throw new Error('Usage: bun run scripts/validate-dense-rar-artifact.ts --meta <run.meta.json> --jsonl <run.jsonl> [--require-preflight] [--require-publishable]')
+    throw new Error('Usage: bun run scripts/validate-dense-rar-artifact.ts --meta <run.meta.json> --jsonl <run.jsonl> [--require-preflight] [--require-publishable] [--require-wave3-hard-suite]')
   }
   return {
     meta,
     jsonl,
     requirePreflight: flags.get('require-preflight') === true || flags.get('require-preflight') === 'true',
     requirePublishableEvidence: flags.get('require-publishable') === true || flags.get('require-publishable') === 'true',
+    requireWave3HardSuite: flags.get('require-wave3-hard-suite') === true || flags.get('require-wave3-hard-suite') === 'true',
   }
 }
 
@@ -158,6 +207,7 @@ if (import.meta.main) {
     const result = assessDenseRarArtifactTrust(meta, rows, {
       requirePreflight: args.requirePreflight,
       requirePublishableEvidence: args.requirePublishableEvidence,
+      requireWave3HardSuite: args.requireWave3HardSuite,
     })
     console.log(JSON.stringify(result, null, 2))
     if (!result.formalEligible) process.exit(1)

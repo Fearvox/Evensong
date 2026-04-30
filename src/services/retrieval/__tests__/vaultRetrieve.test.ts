@@ -21,7 +21,7 @@ describe('vaultRetrieve', () => {
 describe('vaultRetrieve fallback', () => {
   test('skips unavailable provider to next', async () => {
     const a = mock(async () => ({ rankedPaths: [], provider: 'a', latencyMs: 0 }))
-    const b = mock(async () => ({ rankedPaths: ['x.md'], provider: 'b', latencyMs: 100 }))
+    const b = mock(async () => ({ rankedPaths: ['knowledge/msa.md'], provider: 'b', latencyMs: 100 }))
     const result = await vaultRetrieve({ query: 'q', manifest: sample }, {
       providers: [
         { name: 'a', available: async () => false, retrieve: a },
@@ -36,7 +36,7 @@ describe('vaultRetrieve fallback', () => {
   test('falls through 3 providers when first 2 throw', async () => {
     const a = mock(async () => { throw new Error('conn') })
     const b = mock(async () => { throw new Error('5xx') })
-    const c = mock(async () => ({ rankedPaths: ['x.md'], provider: 'c', latencyMs: 200 }))
+    const c = mock(async () => ({ rankedPaths: ['knowledge/msa.md'], provider: 'c', latencyMs: 200 }))
     const result = await vaultRetrieve({ query: 'q', manifest: sample }, {
       providers: [
         { name: 'a', available: async () => true, retrieve: a },
@@ -45,6 +45,32 @@ describe('vaultRetrieve fallback', () => {
       ],
     })
     expect(result.provider).toBe('c')
+  })
+
+  test('deduplicates and drops stale provider paths before returning context', async () => {
+    const retrieve = mock(async () => ({
+      rankedPaths: ['knowledge/msa.md', 'missing/stale.md', 'knowledge/msa.md'],
+      provider: 'noisy-api',
+      latencyMs: 40,
+    }))
+    const result = await vaultRetrieve({ query: 'msa', manifest: sample, topK: 5 }, {
+      providers: [{ name: 'noisy-api', available: async () => true, retrieve }],
+    })
+    expect(result.rankedPaths).toEqual(['knowledge/msa.md'])
+  })
+
+  test('falls back when a provider returns only stale paths', async () => {
+    const stale = mock(async () => ({ rankedPaths: ['missing/stale.md'], provider: 'stale-api', latencyMs: 20 }))
+    const fallback = mock(async () => ({ rankedPaths: ['knowledge/msa.md'], provider: 'fallback-api', latencyMs: 30 }))
+    const result = await vaultRetrieve({ query: 'msa', manifest: sample, topK: 1 }, {
+      providers: [
+        { name: 'stale-api', available: async () => true, retrieve: stale },
+        { name: 'fallback-api', available: async () => true, retrieve: fallback },
+      ],
+    })
+    expect(result.provider).toBe('fallback-api')
+    expect(stale).toHaveBeenCalledTimes(1)
+    expect(fallback).toHaveBeenCalledTimes(1)
   })
 
   test('throws AllProvidersFailedError when every provider fails', async () => {

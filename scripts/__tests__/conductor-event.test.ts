@@ -101,4 +101,25 @@ describe('conductor event envelope', () => {
     expect(parsed.runId).toBe('R102')
     expect(parsed.evidence.artifacts).toEqual(['benchmarks/runs/R102/result.json'])
   })
+
+  test('blocks malformed event envelopes before writing JSONL', () => {
+    const dir = mkdtempSync(join(tmpdir(), 'conductor-event-'))
+    const file = join(dir, 'events.jsonl')
+    const event = {
+      schemaVersion: 'evensong-conductor-event-v1',
+      ts: '2026-04-29T00:00:00.000Z',
+      source: 'unknown-source',
+      kind: 'handoff',
+      severity: 'info',
+      status: 'note',
+      summary: 'handoff ready',
+      evidence: {},
+    } as const
+
+    const result = appendConductorEvent(file, event as any, process.cwd())
+
+    expect(result.ok).toBe(false)
+    expect(result.skipped).toBe(true)
+    expect(result.violations).toContain('invalid-source')
+  })
 })

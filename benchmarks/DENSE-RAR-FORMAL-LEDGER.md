@@ -30,6 +30,8 @@ This is the canonical ledger for Dense/RAR retrieval evidence. It is separate fr
 
 q113 (`negative_exclusion`) is resolved in this run. Stage 1 recovers the ideal at candidate rank 27, and dense-rar/dense-adaptive both rerank it to Top-1.
 
+Partner interpretation: compared with dense-only retrieval, the rerank paths recover every target in this 24-query adversarial suite while keeping a committed evidence trail. Cite it as a bounded hard-suite result, not as broad retrieval superiority.
+
 ## Prior Formal Baseline
 
 - Run ID: `dense-rar-2026-04-24T0801`

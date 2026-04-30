@@ -42,14 +42,14 @@ The helper sanitizes session names and falls back when an input looks like a tok
 ## Start
 
 ```bash
-cd /root/ccr
+cd <repo-root>
 ./scripts/open-hermes-evo-harness.sh
 ```
 
 With a run-specific session:
 
 ```bash
-cd /root/ccr
+cd <repo-root>
 session="$(bun run scripts/hermes-ops-runbook.ts --print-name --run R066 --lane ops)"
 HERMES_HARNESS_SESSION="$session" ./scripts/open-hermes-evo-harness.sh
 ```
@@ -78,6 +78,17 @@ For a named lane:
 OPERATOR_HEALTH_REQUIRED_TMUX=hermes-r066-ops \
 bun run scripts/operator-health-snapshot.ts --compact
 ```
+
+## Termius Monitor
+
+Before attaching from a narrow Termius screen, list windows and panes without capturing pane text:
+
+```bash
+tmux list-windows -t hermes-r066-ops
+tmux list-panes -a -F '#{session_name}:#{window_index}.#{pane_index} #{pane_current_command} #{pane_active}'
+```
+
+Use this as the safe quick view: session exists, role windows are present, one pane is active, and current commands look alive. If the pane command is stale or surprising, attach and inspect interactively rather than pasting pane output into public notes.
 
 Resume handoff minimum:
 
@@ -121,8 +132,20 @@ Health config rules:
 - `OPERATOR_HEALTH_UNITS` lists required systemd units by name.
 - `OPERATOR_HEALTH_REQUIRED_TMUX` lists tmux sessions that must exist.
 - `OPERATOR_HEALTH_ENDPOINTS` accepts only loopback HTTP(S) health URLs.
-- Endpoint response bodies are never printed.
+- Endpoint response bodies and raw endpoint URLs are never printed.
 - Raw endpoint URLs should stay in private env files, not public docs or handoffs.
+
+Default health thresholds:
+
+| Signal | Warn | Block |
+| --- | --- | --- |
+| 1m load per CPU | `>= 1.5` | `>= 2.5` |
+| memory available | `<= 20%` | `<= 10%` |
+| swap used | `>= 40%` | `>= 70%` |
+| root disk used | `>= 80%` | `>= 90%` |
+| required tmux session | n/a | missing |
+| required systemd unit | n/a | not `active` |
+| loopback endpoint | failed request warns | n/a |
 
 ## Context Window Pitfalls
 
@@ -153,6 +176,16 @@ Do not include:
 - remote hostnames beyond documented loopback examples
 
 If pane output must be preserved, redact it manually in a private handoff. Keep public notes to command names, status evidence, and artifact paths.
+
+## Conductor Event JSONL
+
+Use the conductor event helper for local sync between long-running lanes:
+
+```bash
+bun run scripts/conductor-event.ts --file <local-jsonl> --kind handoff --status ready --summary "verify lane handoff ready"
+```
+
+The helper writes only local JSONL. It blocks malformed envelopes, secret-like text, private absolute paths, and artifacts outside the repo root. Keep summaries compact; put only repo-relative artifact paths in `--artifact`.
 
 ## Generated Checklist
 

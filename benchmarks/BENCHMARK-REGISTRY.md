@@ -1,12 +1,15 @@
-# CCB Benchmark Registry
+# Evensong Benchmark Registry
 
 ## Retrieval benchmark evidence
 
 Dense/RAR retrieval evidence is tracked in a dedicated ledger because it evaluates a retrieval pipeline, not the Evensong self-evolution run index below.
 
+Public read: cite the latest Dense/RAR result as a bounded evidence artifact, not as a leaderboard claim. The CEO-level story is that Evensong can preserve exact benchmark evidence while keeping the public narrative honest about suite size, candidate exposure, and probe/formal boundaries.
+
 - Ledger: [`benchmarks/DENSE-RAR-FORMAL-LEDGER.md`](DENSE-RAR-FORMAL-LEDGER.md)
 - Latest formal run: `dense-rar-2026-04-24T0854`
 - Result: dense-rar `24/24` Top-1 and `24/24` Top-5; dense-adaptive `24/24` Top-1 and `24/24` Top-5; errors `0`
+- Public boundary: this is a 24-query Wave 3+I adversarial hard-suite result only, not a broad leaderboard claim
 - Stack: BGE-M3 Stage 1 with `stage1TopK=50`; `deepseek-v4-flash` reranker with thinking disabled
 - Prior `dense-rar-2026-04-24T0801` remains the Stage1TopK 20 formal baseline at `23/24`.
 - Prior `dense-rar-2026-04-24T0644` remains internal/probe only because it was `mode=probe` on dirty git.
