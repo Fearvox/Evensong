@@ -42,5 +42,7 @@ describe('vault read metadata', () => {
 
     expect(matchesVaultQuery(item, 'Memory-Layer and Embodied Self-Model')).toBe(true)
     expect(matchesVaultQuery(item, 'unrelated planning trace')).toBe(false)
+    expect(matchesVaultQuery(item, 'the and to')).toBe(false)
+    expect(matchesVaultQuery(item, '!!!')).toBe(false)
   })
 })

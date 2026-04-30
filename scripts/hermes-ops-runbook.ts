@@ -31,7 +31,7 @@ const DEFAULT_SCOPE = 'evensong'
 const DEFAULT_LANE = 'ops'
 const DEFAULT_REPO_ROOT = '.'
 const DEFAULT_WINDOWS = ['ops', 'main', 'research', 'verify', 'bench']
-const SECRET_TEXT = /(?:api[_-]?key|authorization|bearer\s+|password|token\s*[:=]|secret|sk-[a-z0-9._-]{8,})/i
+const SECRET_TEXT = /(?:\b(?:access[_-]?token|api[_-]?key|auth(?:orization)?|client[_-]?secret|credential|jwt|password|passwd|secret)\b(?:\s*[:=]\s*\S+)?|bearer\s+\S+|sk-[a-z0-9._-]{8,}|\btoken\s*[:=]\s*\S+)/i
 const PRIVATE_REPO_ROOT = /^(?:\/Users|\/home|\/root)\//
 
 function trimSessionSeparators(value: string): string {
