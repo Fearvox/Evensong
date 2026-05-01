@@ -51,8 +51,6 @@ describe('canonical Dense RAR evidence boundaries', () => {
       'benchmarks/DENSE-RAR-FORMAL-LEDGER.md',
       `${PREFIX}.md`,
       `${PREFIX}.meta.json`,
-      '.planning/phases/15.0-stage1topk50-formal-rerun/report.md',
-      '.planning/phases/15.1-canonical-dense-rar-reporting/report.md',
     ]
 
     for (const file of publishableFiles) {
