@@ -1,0 +1,44 @@
+{
+  "name": "@syndash/creator-motion-storyboard",
+  "version": "0.1.0",
+  "description": "Capsule-to-motion-storyboard controller — public-safe route with JSON contract, fixed-canvas HTML storyboard, and ledger retention.",
+  "type": "module",
+  "bin": {
+    "creator-motion-storyboard": "bin/creator-motion-storyboard.mjs"
+  },
+  "scripts": {
+    "dev": "bun run src/server.ts",
+    "build": "bun build src/server.ts --outdir=dist --target=bun",
+    "prepack": "bun run build",
+    "test": "bun test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Fearvox/Evensong.git",
+    "directory": "packages/creator-motion-storyboard"
+  },
+  "homepage": "https://github.com/Fearvox/Evensong/tree/main/packages/creator-motion-storyboard",
+  "bugs": {
+    "url": "https://github.com/Fearvox/Evensong/issues"
+  },
+  "license": "Apache-2.0",
+  "publishConfig": {
+    "access": "public"
+  },
+  "files": [
+    "src/**/*.ts",
+    "dist/**/*.js",
+    "bin/**/*.mjs",
+    "README.md",
+    "CHANGELOG.md",
+    "package.json"
+  ],
+  "keywords": [
+    "storyboard",
+    "motion",
+    "capsule",
+    "creator",
+    "dash-shatter",
+    "syndash"
+  ]
+}
