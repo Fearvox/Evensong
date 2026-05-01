@@ -28,7 +28,10 @@ Source checkout `<operator-main-checkout>` was not edited. Work was performed on
 - 5875e9e `docs(report): record plugin parity checkpoint`
 - 7dd1191 `test(auth): cover unauthenticated status output`
 - 7dd43a2 `docs(report): record auth parity checkpoint`
-- this commit `test(settings): cover source precedence parity`
+- 1e52b07 `test(settings): cover source precedence parity`
+- d409864 `fix(tools): tolerate unauthenticated preset filtering`
+- 9f75503 `test(auth): cover logout and login validation`
+- this commit `docs(report): refresh full parity checkpoint`
 
 ## Changed files
 
@@ -59,8 +62,8 @@ Source checkout `<operator-main-checkout>` was not edited. Work was performed on
 - Tool restriction GREEN focused: `bun test src/utils/permissions/__tests__/toolRestrictions.test.ts`: PASS, 3 pass, 0 fail.
 - Tool registry/restriction focused: `bun test tests/tools-registry.test.ts src/utils/permissions/__tests__/toolRestrictions.test.ts`: PASS, 7 pass, 0 fail.
 - `bun run build`: PASS. Bundle output: `cli.js` about 27.15 MB.
-- `bun test`: PASS. 2246 pass, 1 skip, 0 fail, 5506 expect calls, 154 files.
-- `bun run src/entrypoints/cli.tsx --help >/tmp/ccr-help.txt`: PASS. 68 help lines; first line is `Usage: dash-shatter [options] [command] [prompt]`.
+- `bun test`: PASS. 2251 pass, 1 skip, 0 fail, 5551 expect calls, 155 files.
+- `bun run src/entrypoints/cli.tsx --help >/tmp/ccr-goal-help.txt`: PASS. 68 help lines; first line is `Usage: dash-shatter [options] [command] [prompt]`.
 - `git diff --check`: PASS.
 - Compact privacy scan over branch-touched public docs/reports/source: PASS. Checked for raw key-shaped strings, private endpoints, private overlay-network details, and operator-local absolute paths.
 - Independent reviewer subagent attempt during plugin fix: blocked by provider quota (HTTP 429), so no external reviewer verdict was available. Static scan and full verification passed locally.
