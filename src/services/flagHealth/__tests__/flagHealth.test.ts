@@ -11,6 +11,7 @@ async function loadFlagHealthModule(): Promise<FlagHealthModule> {
 }
 
 describe('flagHealth', () => {
+  const testFlags = { EXTRACT_MEMORIES: true }
   let savedEnv: NodeJS.ProcessEnv
   let testHome: string
 
@@ -54,17 +55,17 @@ describe('flagHealth', () => {
     } catch {}
   })
 
-  // Test 1: scanAllFlags() returns an array
-  test('scanAllFlags() returns an array of FlagHealthResult', async () => {
+  // Test 1: scanAllFlags(testFlags) returns an array
+  test('scanAllFlags(testFlags) returns an array of FlagHealthResult', async () => {
     const mod = await loadFlagHealthModule()
-    const results = await mod.scanAllFlags()
+    const results = await mod.scanAllFlags(testFlags)
     expect(Array.isArray(results)).toBe(true)
   })
 
   // Test 2: Each result has required fields
   test('each result has flag, status, and loadTimeMs fields', async () => {
     const mod = await loadFlagHealthModule()
-    const results = await mod.scanAllFlags()
+    const results = await mod.scanAllFlags(testFlags)
     expect(results.length).toBeGreaterThan(0)
     for (const result of results) {
       expect(typeof result.flag).toBe('string')
@@ -78,7 +79,7 @@ describe('flagHealth', () => {
   test('scan completes in under 2 seconds', async () => {
     const mod = await loadFlagHealthModule()
     const start = Date.now()
-    await mod.scanAllFlags()
+    await mod.scanAllFlags(testFlags)
     const elapsed = Date.now() - start
     expect(elapsed).toBeLessThan(2000)
   })
@@ -86,7 +87,7 @@ describe('flagHealth', () => {
   // Test 4: Results are sorted by flag name (case-insensitive, with underscore prefix handled)
   test('results are sorted by flag name', async () => {
     const mod = await loadFlagHealthModule()
-    const results = await mod.scanAllFlags()
+    const results = await mod.scanAllFlags(testFlags)
     const flags = results.map(r => r.flag)
     // Check that results are in consistent sorted order
     // Using localeCompare which handles case and special chars
@@ -98,11 +99,10 @@ describe('flagHealth', () => {
   // Test 5: All active flags from feature-flags.json are scanned
   test('all active flags from feature-flags.json are scanned', async () => {
     const mod = await loadFlagHealthModule()
-    const { getAllFlags } = await import('../../../utils/featureFlag.js')
-    const activeFlags = Object.entries(getAllFlags())
+    const activeFlags = Object.entries(testFlags)
       .filter(([, v]) => v === true)
       .map(([k]) => k)
-    const results = await mod.scanAllFlags()
+    const results = await mod.scanAllFlags(testFlags)
     const scannedFlags = results.map(r => r.flag)
     for (const flag of activeFlags) {
       expect(scannedFlags).toContain(flag)
@@ -112,7 +112,7 @@ describe('flagHealth', () => {
   // Test 6: Results include dependsOn for flags with implied dependencies
   test('results include dependsOn for flags with implied dependencies', async () => {
     const mod = await loadFlagHealthModule()
-    const results = await mod.scanAllFlags()
+    const results = await mod.scanAllFlags(testFlags)
     // EXTRACT_MEMORIES implies dependency on memory-related modules
     const extractMemoriesResult = results.find(r => r.flag === 'EXTRACT_MEMORIES')
     expect(extractMemoriesResult).toBeDefined()
@@ -125,7 +125,7 @@ describe('flagHealth', () => {
   // Test 7: Non-existent module dependencies are marked missing-dep
   test('flags with non-existent module dependencies are marked missing-dep', async () => {
     const mod = await loadFlagHealthModule()
-    const results = await mod.scanAllFlags()
+    const results = await mod.scanAllFlags(testFlags)
     // Find a flag that implies a module that doesn't exist
     const missingDepResults = results.filter(r => r.status === 'missing-dep')
     // This test verifies the classification logic exists
@@ -136,7 +136,7 @@ describe('flagHealth', () => {
   // Test 8: Known operational flags return operational status
   test('known working module paths return operational status', async () => {
     const mod = await loadFlagHealthModule()
-    const results = await mod.scanAllFlags()
+    const results = await mod.scanAllFlags(testFlags)
     // EXTRACT_MEMORIES has a known module path
     const result = results.find(r => r.flag === 'EXTRACT_MEMORIES')
     expect(result).toBeDefined()
