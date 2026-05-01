@@ -91,6 +91,32 @@ console.log(JSON.stringify({ toolNames: getTools(toolPermissionContext).map(tool
     expect(result.toolNames).toEqual(['Edit', 'Read'])
   }, 15_000)
 
+  test('--tools custom restrictions deny tools even if isEnabled throws during setup', async () => {
+    const result = await runToolRestrictionScenario(setupScript + String.raw`
+const { initializeToolPermissionContext } = await import('./src/utils/permissions/permissionSetup.js')
+const toolsModule = await import('./src/tools.js')
+const webSearchTool = toolsModule.getAllBaseTools().find(tool => tool.name === 'WebSearch')
+if (!webSearchTool) throw new Error('WebSearch tool missing')
+webSearchTool.isEnabled = () => { throw new Error('auth state not ready') }
+const { toolPermissionContext } = await initializeToolPermissionContext({
+  allowedToolsCli: [],
+  disallowedToolsCli: [],
+  baseToolsCli: ['Read'],
+  permissionMode: 'default',
+  allowDangerouslySkipPermissions: false,
+  addDirs: [],
+})
+webSearchTool.isEnabled = () => true
+console.log(JSON.stringify({
+  toolNames: toolsModule.getTools(toolPermissionContext).map(tool => tool.name).sort(),
+  denyRules: toolPermissionContext.alwaysDenyRules.cliArg,
+}))
+` + teardownScript)
+
+    expect(result.toolNames).toEqual(['Read'])
+    expect(result.denyRules).toContain('WebSearch')
+  }, 15_000)
+
   test('--tools default preset keeps the default tool set available', async () => {
     const result = await runToolRestrictionScenario(setupScript + String.raw`
 const { initializeToolPermissionContext } = await import('./src/utils/permissions/permissionSetup.js')

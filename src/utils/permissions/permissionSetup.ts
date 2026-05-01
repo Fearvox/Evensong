@@ -52,7 +52,11 @@ import { AGENT_TOOL_NAME } from '../../tools/AgentTool/constants.js'
 import { BASH_TOOL_NAME } from '../../tools/BashTool/toolName.js'
 /* eslint-enable @typescript-eslint/no-require-imports */
 import { POWERSHELL_TOOL_NAME } from '../../tools/PowerShellTool/toolName.js'
-import { getToolsForDefaultPreset, parseToolPreset } from '../../tools.js'
+import {
+  getAllRestrictableBuiltInToolNames,
+  getToolsForDefaultPreset,
+  parseToolPreset,
+} from '../../tools.js'
 import {
   getFsImplementation,
   safeResolvePath,
@@ -910,7 +914,10 @@ export async function initializeToolPermissionContext({
     // Normalize legacy tool names (e.g., 'Task' → 'Agent') so user-provided
     // base tool lists using old names still match canonical names.
     const baseToolsSet = new Set(baseToolsResult.map(normalizeLegacyToolName))
-    const allToolNames = getToolsForDefaultPreset()
+    const isPresetExpansion = parseToolPreset(baseToolsCli.join(' ').trim())
+    const allToolNames = isPresetExpansion
+      ? getToolsForDefaultPreset()
+      : getAllRestrictableBuiltInToolNames()
     const toolsToDisallow = allToolNames.filter(tool => !baseToolsSet.has(tool))
     parsedDisallowedToolsCli = [...parsedDisallowedToolsCli, ...toolsToDisallow]
   }
