@@ -135,4 +135,13 @@ describe('featureFlag', () => {
     process.env.CLAUDE_FEATURE_KAIROS = 'true'
     expect(mod.feature('KAIROS')).toBe(true)
   })
+
+  // Test 10: getAllFlags() includes boolean env overrides for health scans
+  test('getAllFlags() includes CLAUDE_FEATURE_ env overrides', async () => {
+    const mod = await loadFeatureFlagModule()
+    process.env.CLAUDE_FEATURE_EXTRACT_MEMORIES = 'true'
+    process.env.CLAUDE_FEATURE_BAD = 'not-bool'
+    expect(mod.getAllFlags()).toMatchObject({ EXTRACT_MEMORIES: true })
+    expect(mod.getAllFlags()).not.toHaveProperty('BAD')
+  })
 })
