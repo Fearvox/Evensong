@@ -26,7 +26,7 @@ import { execFileNoThrow } from '../utils/execFileNoThrow.js'
 import { logError } from '../utils/log.js'
 import { extractTextContent } from '../utils/messages.js'
 import { getDefaultOpusModel } from '../utils/model/model.js'
-import { shellSingleQuote } from '../utils/shell.js'
+import { shellSingleQuote } from '../utils/shellQuote.js'
 import {
   getProjectsDir,
   getSessionFilesWithMtime,
