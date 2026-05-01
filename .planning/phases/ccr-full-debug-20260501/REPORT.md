@@ -41,7 +41,7 @@ Source checkout `<operator-main-checkout>` was not edited. Work was performed on
 - `scripts/__tests__/dense-rar-evidence-boundaries.test.ts` — accepts absent local planning evidence while keeping tracked publishable surfaces mandatory.
 - `src/cli/handlers/plugins.ts` — rejects `plugin list --available` unless `--json` is also requested, matching the option contract and avoiding silent no-op human output.
 - `tests/plugin-cli.test.ts` — temp-HOME CLI parity coverage for `plugin list --json` and the `--available`/`--json` contract.
-- `tests/auth-cli.test.ts` — temp-HOME CLI parity coverage for unauthenticated `auth status` JSON default and `--text` output.
+- `tests/auth-cli.test.ts` — temp-HOME CLI parity coverage for unauthenticated `auth status` JSON default and `--text` output; idempotent credential-free logout; and login selector validation before OAuth startup.
 - `src/utils/settings/settings.test.ts` — subprocess-isolated settings source parity coverage for user/project/local/flag precedence and `--setting-sources` filtering while preserving flag settings.
 - `src/utils/permissions/__tests__/toolRestrictions.test.ts` — subprocess-isolated tool restriction parity coverage for `--tools`, default tool preset, and allowed/disallowed tool-list parsing.
 - `src/tools.ts` — tool enablement checks now fail closed when a tool's `isEnabled()` throws, so unauthenticated/default-preset restriction setup does not crash before the auth gate.
@@ -53,7 +53,7 @@ Source checkout `<operator-main-checkout>` was not edited. Work was performed on
 
 - Plugin RED: `bun test tests/plugin-cli.test.ts` failed before the plugin fix because `plugin list --available` exited 0 without JSON.
 - Plugin GREEN focused: `bun test tests/plugin-cli.test.ts`: PASS, 2 pass, 0 fail.
-- Auth focused: `bun test tests/auth-cli.test.ts`: PASS, 2 pass, 0 fail.
+- Auth focused: `bun test tests/auth-cli.test.ts`: PASS, 4 pass, 0 fail.
 - Settings focused: `bun test src/utils/settings/settings.test.ts`: PASS, 2 pass, 0 fail.
 - Tool restriction RED: `bun test src/utils/permissions/__tests__/toolRestrictions.test.ts` initially failed because `getToolsForDefaultPreset()` evaluated unauthenticated `WebSearchTool.isEnabled()` and threw a required-auth-env error before restriction setup could complete.
 - Tool restriction GREEN focused: `bun test src/utils/permissions/__tests__/toolRestrictions.test.ts`: PASS, 3 pass, 0 fail.
@@ -75,6 +75,8 @@ Confirmed parity:
 - `plugin list --json` returns machine-readable JSON with clean temp HOME/no installed plugins.
 - `auth status` defaults to JSON and exits non-zero when unauthenticated.
 - `auth status --text` prints a human unauthenticated message and exits non-zero.
+- `auth logout` is regression-covered as idempotent and credential-free in temp HOME.
+- `auth login --console --claudeai` is regression-covered to fail before any OAuth/browser flow.
 - Settings source merge precedence is regression-covered for user -> project -> local -> flag settings, including deep object merge and permission rule array concatenation.
 - `--setting-sources` behavior is regression-covered for filtering user/project/local sources while still preserving always-on `--settings` flag input.
 - `--tools` behavior is regression-covered for exposing only requested built-in tools to the model tool list without requiring auth during restriction setup.
@@ -108,10 +110,10 @@ Not implemented or not exposed compared with current official docs:
 - Official installed `claude` is unavailable on this host, so official help/version comparison relies on Anthropic docs and npm metadata.
 - Live print-mode behavior is blocked by missing login/credentials; no API call was attempted with secrets.
 - Plugin command is implemented enough for basic list/marketplace/install subcommands, but interactive marketplace/plugin UI remains not fully parity-smoked.
-- Auth status is covered; auth login/logout flows are not fully exercised because live OAuth/token flows need operator credentials or mock seams.
+- Auth status/logout and login argument validation are covered; auth login live OAuth/token success flows are not fully exercised because they need operator credentials or broader mock seams.
 - Current feature flag posture is intentionally conservative; disabled private/native/background surfaces were documented rather than revived.
 - Project purge, remote-control, ultrareview, and auto-mode subcommands remain larger parity gaps that need separate design/safety passes.
 
 ## Next action
 
-Repo is at a better verified checkpoint with green build, green full suite, clean fixtures, refreshed report, and refreshed bundle. Next continuation should either add focused temp-HOME tests for deeper permission-mode behavior / auth login/logout mock seams, or plan a bounded dry-run-only `project purge` parity implementation before any destructive behavior.
+Repo is at a better verified checkpoint with green build, green full suite, clean fixtures, refreshed report, and refreshed bundle. Next continuation should either add focused temp-HOME tests for deeper permission-mode behavior / auth login OAuth mock seams, or plan a bounded dry-run-only `project purge` parity implementation before any destructive behavior.
