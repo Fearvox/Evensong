@@ -11,7 +11,7 @@ Source checkout `<operator-main-checkout>` was not edited. Work was performed on
 - Before worktree creation: source checkout was divergent from `origin/main` and left untouched.
 - Isolated worktree was created from latest `origin/main` on branch `codex/ccr-full-debug-20260501`.
 - A generated `fixtures/6597bb.json` scratch VCR fixture was inspected. It contained only synthetic unauthenticated print-mode output and was removed; no ignore rule was added because no tracked source fixture set exists at that path.
-- Phase B plugin CLI tests now route test fixture writes into temp HOME so they do not regenerate root-level `fixtures/` scratch files.
+- Phase B plugin/auth CLI tests route test fixture writes into temp HOME so they do not regenerate root-level `fixtures/` scratch files.
 
 ## Commit list on branch
 
@@ -25,7 +25,9 @@ Source checkout `<operator-main-checkout>` was not edited. Work was performed on
 - 52d07a6 `test(benchmarks): tolerate absent local dense-rar planning reports`
 - 7e71856 `docs(report): refresh full-debug evidence checkpoint`
 - d321118 `fix(plugin): require json for available list output`
-- this commit `docs(report): record plugin parity checkpoint`
+- 5875e9e `docs(report): record plugin parity checkpoint`
+- 7dd1191 `test(auth): cover unauthenticated status output`
+- this commit `docs(report): record auth parity checkpoint`
 
 ## Changed files
 
@@ -38,21 +40,23 @@ Source checkout `<operator-main-checkout>` was not edited. Work was performed on
 - `scripts/__tests__/dense-rar-evidence-boundaries.test.ts` — accepts absent local planning evidence while keeping tracked publishable surfaces mandatory.
 - `src/cli/handlers/plugins.ts` — rejects `plugin list --available` unless `--json` is also requested, matching the option contract and avoiding silent no-op human output.
 - `tests/plugin-cli.test.ts` — temp-HOME CLI parity coverage for `plugin list --json` and the `--available`/`--json` contract.
+- `tests/auth-cli.test.ts` — temp-HOME CLI parity coverage for unauthenticated `auth status` JSON default and `--text` output.
 - `.planning/phases/ccr-full-debug-20260501/PARITY-MATRIX.md` — official/CCR parity map.
 - `.planning/phases/ccr-full-debug-20260501/FEATURE-FLAGS.md` — disabled feature/stub inventory.
 - `.planning/phases/ccr-full-debug-20260501/REPORT.md` — this handoff report.
 
 ## Final verification checkpoint
 
-- RED: `bun test tests/plugin-cli.test.ts` failed before the plugin fix because `plugin list --available` exited 0 without JSON.
-- GREEN focused: `bun test tests/plugin-cli.test.ts`: PASS, 2 pass, 0 fail.
+- Plugin RED: `bun test tests/plugin-cli.test.ts` failed before the plugin fix because `plugin list --available` exited 0 without JSON.
+- Plugin GREEN focused: `bun test tests/plugin-cli.test.ts`: PASS, 2 pass, 0 fail.
+- Auth focused: `bun test tests/auth-cli.test.ts`: PASS, 2 pass, 0 fail.
 - `bun run build`: PASS. Bundle output: `cli.js` about 27.15 MB.
-- `bun test`: PASS. 2242 pass, 1 skip, 0 fail, 5520 expect calls, 152 files.
+- `bun test`: PASS. 2244 pass, 1 skip, 0 fail, 5471 expect calls, 153 files.
 - `bun run src/entrypoints/cli.tsx --help >/tmp/ccr-help.txt`: PASS. 68 help lines; first line is `Usage: dash-shatter [options] [command] [prompt]`.
 - `git diff --check`: PASS.
 - Compact privacy scan over branch-touched public docs/reports/source: PASS. Checked for raw key-shaped strings, private endpoints, private overlay-network details, and operator-local absolute paths.
-- Independent reviewer subagent attempt: blocked by provider quota (HTTP 429), so no external reviewer verdict was available. Static scan and full verification passed locally.
-- `fixtures/6597bb.json`: removed as generated scratch after inspection and not regenerated after test env isolation.
+- Independent reviewer subagent attempt during plugin fix: blocked by provider quota (HTTP 429), so no external reviewer verdict was available. Static scan and full verification passed locally.
+- `fixtures/`: clean. Root-level scratch fixture was removed and was not regenerated.
 
 ## Parity status summary
 
@@ -61,13 +65,16 @@ Confirmed parity:
 - `--version` works from earlier checkpoint.
 - Major official CLI flags are present in CCR help: print, output format, model, permission modes, tools, settings, bare, worktree, update/install, auth, mcp, plugins, agents.
 - `plugin list --json` returns machine-readable JSON with clean temp HOME/no installed plugins.
+- `auth status` defaults to JSON and exits non-zero when unauthenticated.
+- `auth status --text` prints a human unauthenticated message and exits non-zero.
 
 Improved in Phase B:
 - `plugin list --available` now fails fast unless `--json` is present, matching its documented option contract.
+- Auth status unauthenticated behavior is now regression-covered with temp HOME and scrubbed auth env.
 
 Partial parity:
 - Print mode reaches auth gate but cannot complete without credentials.
-- Auth, MCP, plugins interactive UI, permissions UI, slash commands, settings precedence, worktree, bare mode, context loading, and tool restriction behavior need focused behavioral tests.
+- Auth login/logout flows, MCP, plugins interactive UI, permissions UI, slash commands, settings precedence, worktree, bare mode, context loading, and tool restriction behavior need focused behavioral tests.
 
 Not implemented or not exposed compared with current official docs:
 - `claude project purge [path]`.
@@ -89,9 +96,10 @@ Not implemented or not exposed compared with current official docs:
 - Official installed `claude` is unavailable on this host, so official help/version comparison relies on Anthropic docs and npm metadata.
 - Live print-mode behavior is blocked by missing login/credentials; no API call was attempted with secrets.
 - Plugin command is implemented enough for basic list/marketplace/install subcommands, but interactive marketplace/plugin UI remains not fully parity-smoked.
+- Auth status is covered; auth login/logout flows are not fully exercised because live OAuth/token flows need operator credentials or mock seams.
 - Current feature flag posture is intentionally conservative; disabled private/native/background surfaces were documented rather than revived.
 - Project purge, remote-control, ultrareview, and auto-mode subcommands remain larger parity gaps that need separate design/safety passes.
 
 ## Next action
 
-No additional small, high-confidence runtime-breaking cleanup remains in this pass after the green plugin CLI fix. Next safe continuation: add focused temp-HOME tests for auth status text/json and settings precedence, or plan a bounded dry-run-only `project purge` parity implementation before any destructive behavior.
+Repo is at a better verified checkpoint with green build, green full suite, clean fixtures, refreshed report, and refreshed bundle. Next continuation should either add focused temp-HOME tests for settings precedence/tool restriction behavior, or plan a bounded dry-run-only `project purge` parity implementation before any destructive behavior.
