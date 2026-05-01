@@ -53,6 +53,25 @@ describe('hermes ops runbook', () => {
     expect(text).not.toContain('token-lane')
   })
 
+
+  test('rendered runbook treats common credential labels as secret-like input', () => {
+    const secretInputs = [
+      'access_token=abc12345',
+      'client_secret=abc12345',
+      'credential=abc12345',
+      'jwt=abc12345',
+      'auth=abc12345',
+      'authorization: bearer abc12345',
+    ]
+
+    for (const value of secretInputs) {
+      const text = renderHermesOpsRunbook({ sessionName: value, repoRoot: value })
+      expect(text).toContain('Session: `hermes-harness`')
+      expect(text).toContain('Repo: `<operator-local-repo-root>`')
+      expect(text).not.toContain(value)
+    }
+  })
+
   test('rendered shell commands quote repo paths with spaces', () => {
     const text = renderHermesOpsRunbook({ repoRoot: './ccr ops' })
 

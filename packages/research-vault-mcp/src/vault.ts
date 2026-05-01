@@ -103,7 +103,7 @@ export function matchesVaultQuery(
 
   const haystackTokens = new Set(tokenizeQueryText(haystack))
   const queryTokens = tokenizeQueryText(query)
-  if (queryTokens.length === 0) return true
+  if (queryTokens.length === 0) return false
   return queryTokens.every(token => haystackTokens.has(token))
 }
 

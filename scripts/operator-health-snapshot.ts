@@ -112,8 +112,13 @@ export function assessSnapshot(snapshot: Omit<HealthSnapshot, 'level'>, threshol
   return level
 }
 
-async function run(command: string, args: string[], timeoutMs = 1500): Promise<{ ok: boolean; stdout: string; stderr: string }> {
-  const proc = Bun.spawn([command, ...args], { stdout: 'pipe', stderr: 'pipe' })
+export async function runHealthCommand(command: string, args: string[], timeoutMs = 1500): Promise<{ ok: boolean; stdout: string; stderr: string }> {
+  let proc
+  try {
+    proc = Bun.spawn([command, ...args], { stdout: 'pipe', stderr: 'pipe' })
+  } catch (err) {
+    return { ok: false, stdout: '', stderr: err instanceof Error ? err.message : String(err) }
+  }
   const timer = setTimeout(() => proc.kill(), timeoutMs)
   try {
     const [stdout, stderr, exitCode] = await Promise.all([new Response(proc.stdout).text(), new Response(proc.stderr).text(), proc.exited])
@@ -124,7 +129,7 @@ async function run(command: string, args: string[], timeoutMs = 1500): Promise<{
 }
 
 async function getTmux(required: string[]): Promise<{ total: number; required: Record<string, boolean> }> {
-  const result = await run('tmux', ['list-sessions', '-F', '#S'])
+  const result = await runHealthCommand('tmux', ['list-sessions', '-F', '#S'])
   const sessions = result.ok ? result.stdout.split('\n').filter(Boolean) : []
   return { total: sessions.length, required: Object.fromEntries(required.map(name => [name, sessions.includes(name)])) }
 }
@@ -132,7 +137,7 @@ async function getTmux(required: string[]): Promise<{ total: number; required: R
 async function getUnits(units: string[]): Promise<Record<string, string>> {
   const entries: Array<[string, string]> = []
   for (const unit of units) {
-    const result = await run('systemctl', ['is-active', unit])
+    const result = await runHealthCommand('systemctl', ['is-active', unit])
     entries.push([unit, result.ok ? result.stdout.trim() || 'active' : result.stdout.trim() || 'inactive'])
   }
   return Object.fromEntries(entries)
@@ -173,7 +178,8 @@ export async function collectHealthSnapshot(env: NodeJS.ProcessEnv = process.env
   const loadRaw = (await Bun.file('/proc/loadavg').text()).trim().split(/\s+/)[0]
   const load1 = Number(loadRaw) || 0
   const cpuCount = navigator.hardwareConcurrency || 1
-  const df = parseDfPk((await run('df', ['-Pk', '/'])).stdout)
+  const dfResult = await runHealthCommand('df', ['-Pk', '/'])
+  const df = dfResult.ok ? parseDfPk(dfResult.stdout) : { usedPct: 100, mount: '/' }
   const requiredTmux = splitList(env.OPERATOR_HEALTH_REQUIRED_TMUX)
   const units = splitList(env.OPERATOR_HEALTH_UNITS)
   const endpoints = splitList(env.OPERATOR_HEALTH_ENDPOINTS)
@@ -192,6 +198,7 @@ export async function collectHealthSnapshot(env: NodeJS.ProcessEnv = process.env
     notes: [
       'thresholds: load/cpu warn>=1.5 block>=2.5; mem_avail warn<=20% block<=10%; swap warn>=40% block>=70%; disk warn>=80% block>=90%',
       'observation-only: no services restarted, no pane text captured, endpoint bodies and raw URLs omitted',
+      ...(!dfResult.ok ? [`df-unavailable: ${dfResult.stderr || 'command failed'}`] : []),
     ],
   }
   return { ...partial, level: assessSnapshot(partial) }

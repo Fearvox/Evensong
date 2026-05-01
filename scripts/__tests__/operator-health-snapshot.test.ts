@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'bun:test'
-import { assessSnapshot, parseDfPk, parseMeminfo, renderCompact, type HealthSnapshot } from '../operator-health-snapshot'
+import { assessSnapshot, parseDfPk, parseMeminfo, renderCompact, runHealthCommand, type HealthSnapshot } from '../operator-health-snapshot'
 
 function snapshot(overrides: Partial<HealthSnapshot> = {}): HealthSnapshot {
   return {
@@ -36,6 +36,19 @@ describe('operator health snapshot', () => {
     expect(assessSnapshot(snapshot({ memAvailPct: 15 }))).toBe('warn')
     expect(assessSnapshot(snapshot({ memAvailPct: 8 }))).toBe('block')
     expect(assessSnapshot(snapshot({ tmux: { total: 2, required: { 'hermes-sixpack': false } } }))).toBe('block')
+  })
+
+
+  test('treats sentinel disk-used-pct=100 (df unavailable) as block', () => {
+    expect(assessSnapshot(snapshot({ diskUsedPct: 100 }))).toBe('block')
+  })
+
+  test('command runner degrades when optional command is missing', async () => {
+    const result = await runHealthCommand('__evensong_missing_health_command__', [])
+
+    expect(result.ok).toBe(false)
+    expect(result.stdout).toBe('')
+    expect(result.stderr.length).toBeGreaterThan(0)
   })
 
   test('compact output omits raw endpoint URLs and pane text', () => {

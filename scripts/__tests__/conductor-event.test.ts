@@ -3,6 +3,9 @@ import { mkdtempSync, readFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import {
+  CONDUCTOR_EVENT_KINDS,
+  CONDUCTOR_EVENT_SEVERITIES,
+  CONDUCTOR_EVENT_SOURCES,
   appendConductorEvent,
   createBenchmarkRunEvent,
   createOperatorHealthEvent,
@@ -10,6 +13,13 @@ import {
 } from '../conductor-event'
 
 describe('conductor event envelope', () => {
+
+  test('exports runtime validation enums from the same source as event types', () => {
+    expect(CONDUCTOR_EVENT_SOURCES).toContain('operator-health')
+    expect(CONDUCTOR_EVENT_KINDS).toContain('handoff')
+    expect(CONDUCTOR_EVENT_SEVERITIES).toEqual(['info', 'warn', 'blocker'])
+  })
+
   test('creates compact operator health event with evidence keys only', () => {
     const event = createOperatorHealthEvent({
       ok: false,

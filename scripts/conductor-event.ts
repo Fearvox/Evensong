@@ -11,8 +11,13 @@ import { dirname, isAbsolute, relative } from 'node:path'
 import { parseArgs } from 'node:util'
 import type { OperatorHealthResult } from './operator-health-snapshot'
 
-export type ConductorEventKind = 'health' | 'benchmark-run' | 'benchmark-batch' | 'memory-preflight' | 'handoff'
-export type ConductorEventSeverity = 'info' | 'warn' | 'blocker'
+export const CONDUCTOR_EVENT_SOURCES = ['hermes', 'mimo', 'codex', 'operator-health', 'evensong-harness', 'research-vault', 'manual'] as const
+export const CONDUCTOR_EVENT_KINDS = ['health', 'benchmark-run', 'benchmark-batch', 'memory-preflight', 'handoff'] as const
+export const CONDUCTOR_EVENT_SEVERITIES = ['info', 'warn', 'blocker'] as const
+
+export type ConductorEventSource = typeof CONDUCTOR_EVENT_SOURCES[number]
+export type ConductorEventKind = typeof CONDUCTOR_EVENT_KINDS[number]
+export type ConductorEventSeverity = typeof CONDUCTOR_EVENT_SEVERITIES[number]
 
 export interface ConductorEventEvidence {
   keys?: string[]
@@ -25,7 +30,7 @@ export interface ConductorEventEvidence {
 export interface ConductorEvent {
   schemaVersion: 'evensong-conductor-event-v1'
   ts: string
-  source: 'hermes' | 'mimo' | 'codex' | 'operator-health' | 'evensong-harness' | 'research-vault' | 'manual'
+  source: ConductorEventSource
   kind: ConductorEventKind
   severity: ConductorEventSeverity
   status: string
@@ -52,9 +57,9 @@ const SECRET_PATTERNS: RegExp[] = [
 ]
 
 const PRIVATE_PATH_PATTERN = /(?:\/Users|\/home|\/root)\/[^\s"']+/g
-const SOURCES = new Set<ConductorEvent['source']>(['hermes', 'mimo', 'codex', 'operator-health', 'evensong-harness', 'research-vault', 'manual'])
-const KINDS = new Set<ConductorEventKind>(['health', 'benchmark-run', 'benchmark-batch', 'memory-preflight', 'handoff'])
-const SEVERITIES = new Set<ConductorEventSeverity>(['info', 'warn', 'blocker'])
+const SOURCES = new Set<ConductorEventSource>(CONDUCTOR_EVENT_SOURCES)
+const KINDS = new Set<ConductorEventKind>(CONDUCTOR_EVENT_KINDS)
+const SEVERITIES = new Set<ConductorEventSeverity>(CONDUCTOR_EVENT_SEVERITIES)
 
 function validateEventEnvelope(event: ConductorEvent): string[] {
   const violations: string[] = []
