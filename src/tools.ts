@@ -176,9 +176,17 @@ export function parseToolPreset(preset: string): ToolPreset | null {
  * @param preset The preset name
  * @returns Array of tool names
  */
+function isToolEnabledSafely(tool: Tool): boolean {
+  try {
+    return tool.isEnabled()
+  } catch {
+    return false
+  }
+}
+
 export function getToolsForDefaultPreset(): string[] {
   const tools = getAllBaseTools()
-  const isEnabled = tools.map(tool => tool.isEnabled())
+  const isEnabled = tools.map(tool => isToolEnabledSafely(tool))
   return tools.filter((_, i) => isEnabled[i]).map(tool => tool.name)
 }
 
@@ -322,7 +330,7 @@ export const getTools = (permissionContext: ToolPermissionContext): Tools => {
     }
   }
 
-  const isEnabled = allowedTools.map(_ => _.isEnabled())
+  const isEnabled = allowedTools.map(tool => isToolEnabledSafely(tool))
   return allowedTools.filter((_, i) => isEnabled[i])
 }
 

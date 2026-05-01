@@ -43,7 +43,8 @@ Source checkout `<operator-main-checkout>` was not edited. Work was performed on
 - `tests/plugin-cli.test.ts` — temp-HOME CLI parity coverage for `plugin list --json` and the `--available`/`--json` contract.
 - `tests/auth-cli.test.ts` — temp-HOME CLI parity coverage for unauthenticated `auth status` JSON default and `--text` output.
 - `src/utils/settings/settings.test.ts` — subprocess-isolated settings source parity coverage for user/project/local/flag precedence and `--setting-sources` filtering while preserving flag settings.
-- `.planning/phases/ccr-full-debug-20260501/GSD-QUICK-CONTINUATION-20260501.md` — bounded GSD continuation note for this settings parity pass.
+- `src/utils/permissions/__tests__/toolRestrictions.test.ts` — subprocess-isolated tool restriction parity coverage for `--tools`, default tool preset, and allowed/disallowed tool-list parsing.
+- `src/tools.ts` — tool enablement checks now fail closed when a tool's `isEnabled()` throws, so unauthenticated/default-preset restriction setup does not crash before the auth gate.
 - `.planning/phases/ccr-full-debug-20260501/PARITY-MATRIX.md` — official/CCR parity map.
 - `.planning/phases/ccr-full-debug-20260501/FEATURE-FLAGS.md` — disabled feature/stub inventory.
 - `.planning/phases/ccr-full-debug-20260501/REPORT.md` — this handoff report.
@@ -54,6 +55,9 @@ Source checkout `<operator-main-checkout>` was not edited. Work was performed on
 - Plugin GREEN focused: `bun test tests/plugin-cli.test.ts`: PASS, 2 pass, 0 fail.
 - Auth focused: `bun test tests/auth-cli.test.ts`: PASS, 2 pass, 0 fail.
 - Settings focused: `bun test src/utils/settings/settings.test.ts`: PASS, 2 pass, 0 fail.
+- Tool restriction RED: `bun test src/utils/permissions/__tests__/toolRestrictions.test.ts` initially failed because `getToolsForDefaultPreset()` evaluated unauthenticated `WebSearchTool.isEnabled()` and threw a required-auth-env error before restriction setup could complete.
+- Tool restriction GREEN focused: `bun test src/utils/permissions/__tests__/toolRestrictions.test.ts`: PASS, 3 pass, 0 fail.
+- Tool registry/restriction focused: `bun test tests/tools-registry.test.ts src/utils/permissions/__tests__/toolRestrictions.test.ts`: PASS, 7 pass, 0 fail.
 - `bun run build`: PASS. Bundle output: `cli.js` about 27.15 MB.
 - `bun test`: PASS. 2246 pass, 1 skip, 0 fail, 5506 expect calls, 154 files.
 - `bun run src/entrypoints/cli.tsx --help >/tmp/ccr-help.txt`: PASS. 68 help lines; first line is `Usage: dash-shatter [options] [command] [prompt]`.
@@ -73,6 +77,8 @@ Confirmed parity:
 - `auth status --text` prints a human unauthenticated message and exits non-zero.
 - Settings source merge precedence is regression-covered for user -> project -> local -> flag settings, including deep object merge and permission rule array concatenation.
 - `--setting-sources` behavior is regression-covered for filtering user/project/local sources while still preserving always-on `--settings` flag input.
+- `--tools` behavior is regression-covered for exposing only requested built-in tools to the model tool list without requiring auth during restriction setup.
+- `--allowed-tools` and `--disallowed-tools` comma/space parsing is regression-covered, including Bash rule contents.
 
 Improved in Phase B:
 - `plugin list --available` now fails fast unless `--json` is present, matching its documented option contract.
@@ -80,7 +86,7 @@ Improved in Phase B:
 
 Partial parity:
 - Print mode reaches auth gate but cannot complete without credentials.
-- Auth login/logout flows, MCP, plugins interactive UI, permissions UI, slash commands, worktree, bare mode, context loading, and tool restriction behavior need focused behavioral tests.
+- Auth login/logout flows, MCP, plugins interactive UI, permissions UI, slash commands, worktree, bare mode, context loading, and deeper permission-mode behavior need focused behavioral tests.
 
 Not implemented or not exposed compared with current official docs:
 - `claude project purge [path]`.
@@ -108,4 +114,4 @@ Not implemented or not exposed compared with current official docs:
 
 ## Next action
 
-Repo is at a better verified checkpoint with green build, green full suite, clean fixtures, refreshed report, and refreshed bundle. Next continuation should either add focused temp-HOME tests for tool restriction / permission-mode behavior, or plan a bounded dry-run-only `project purge` parity implementation before any destructive behavior.
+Repo is at a better verified checkpoint with green build, green full suite, clean fixtures, refreshed report, and refreshed bundle. Next continuation should either add focused temp-HOME tests for deeper permission-mode behavior / auth login/logout mock seams, or plan a bounded dry-run-only `project purge` parity implementation before any destructive behavior.
