@@ -14,7 +14,7 @@
  * T-04-04-03: each test creates a fresh AbortController (no shared state)
  * T-04-04-04: PERM-03 test verifies alwaysAllowRules is tool-specific
  */
-import { describe, test, expect } from 'bun:test'
+import { describe, test, expect, beforeEach, afterEach } from 'bun:test'
 import { z } from 'zod'
 import { query } from 'src/query.js'
 import type { QueryDeps } from 'src/query/deps.js'
@@ -74,6 +74,7 @@ function makeAppState(overrides: Partial<AppState> = {}): AppState {
     fastMode: undefined,
     effortValue: undefined,
     advisorModel: undefined,
+    sessionHooks: new Map(),
     ...overrides,
   } as unknown as AppState
 }
@@ -146,7 +147,7 @@ function createMockQueryTool(name = 'MockTool'): Tool {
     }),
     isEnabled: () => true,
     isReadOnly: () => false,
-    isConcurrencySafe: () => true,
+    isConcurrencySafe: () => false,
     maxResultSizeChars: 100_000,
     call: async () => ({
       type: 'result',
@@ -238,6 +239,26 @@ const noopMicrocompact: QueryDeps['microcompact'] = async (messages) => ({
 // ============================================================================
 
 describe('query loop', () => {
+  const savedFcOverrides = process.env.CLAUDE_INTERNAL_FC_OVERRIDES
+
+  beforeEach(() => {
+    // Keep query-loop tests on the standard post-stream runTools path. Operator
+    // workstations may have cached GrowthBook/local flag values enabling
+    // streaming tool execution, which changes permission timing and makes these
+    // tests order/environment dependent.
+    process.env.CLAUDE_INTERNAL_FC_OVERRIDES = JSON.stringify({
+      tengu_streaming_tool_execution2: false,
+    })
+  })
+
+  afterEach(() => {
+    if (savedFcOverrides === undefined) {
+      delete process.env.CLAUDE_INTERNAL_FC_OVERRIDES
+    } else {
+      process.env.CLAUDE_INTERNAL_FC_OVERRIDES = savedFcOverrides
+    }
+  })
+
   describe('QUERY-01: multi-tool batch execution', () => {
     test('two tool_use blocks cause canUseTool to be called at least twice', async () => {
       // T-04-04-03: fresh AbortController per test

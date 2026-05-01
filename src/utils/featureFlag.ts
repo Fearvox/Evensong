@@ -34,7 +34,18 @@ export function feature(name: string): boolean {
 }
 
 export function getAllFlags(): Record<string, boolean> {
-  return { ..._flagCache }
+  const flags = { ..._flagCache }
+  for (const [key, value] of Object.entries(process.env)) {
+    if (!key.startsWith('CLAUDE_FEATURE_') || key === 'CLAUDE_FEATURE_ALL') {
+      continue
+    }
+    if (value === 'true' || value === '1') {
+      flags[key.slice('CLAUDE_FEATURE_'.length)] = true
+    } else if (value === 'false' || value === '0') {
+      flags[key.slice('CLAUDE_FEATURE_'.length)] = false
+    }
+  }
+  return flags
 }
 
 /**
