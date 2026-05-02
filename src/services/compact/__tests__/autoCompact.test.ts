@@ -1,4 +1,4 @@
-import { describe, test, expect, afterEach } from 'bun:test'
+import { describe, test, expect, afterEach, beforeEach } from 'bun:test'
 import {
   calculateTokenWarningState,
   getAutoCompactThreshold,
@@ -11,6 +11,10 @@ const TEST_MODEL = 'claude-sonnet-4-5-20250514'
 describe('autoCompact', () => {
   // Snapshot env before each suite so afterEach restores it correctly
   const savedEnv = { ...process.env }
+
+  beforeEach(() => {
+    process.env.NODE_ENV = 'test'
+  })
 
   afterEach(() => {
     // Restore every env var to its pre-test state

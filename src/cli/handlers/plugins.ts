@@ -160,6 +160,9 @@ export async function pluginListHandler(options: {
   cowork?: boolean
 }): Promise<void> {
   if (options.cowork) setUseCoworkPlugins(true)
+  if (options.available && !options.json) {
+    cliError(`${figures.cross} --available requires --json`)
+  }
   logEvent('tengu_plugin_list_command', {})
 
   const installedData = loadInstalledPluginsV2()

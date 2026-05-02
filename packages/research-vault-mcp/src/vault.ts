@@ -81,6 +81,32 @@ function loadTaxonomy(): string {
   }
 }
 
+const QUERY_STOPWORDS = new Set(['a', 'an', 'and', 'for', 'in', 'of', 'or', 'the', 'to', 'with'])
+
+function tokenizeQueryText(value: string): string[] {
+  return value
+    .toLowerCase()
+    .split(/[^\p{L}\p{N}]+/u)
+    .map(token => token.trim())
+    .filter(token => token.length > 1 && !QUERY_STOPWORDS.has(token))
+}
+
+export function matchesVaultQuery(
+  item: Pick<VaultEntry, 'title' | 'id' | 'category'>,
+  query: string,
+): boolean {
+  const q = query.toLowerCase().trim()
+  if (!q) return true
+
+  const haystack = `${item.title} ${item.id} ${item.category}`.toLowerCase()
+  if (haystack.includes(q)) return true
+
+  const haystackTokens = new Set(tokenizeQueryText(haystack))
+  const queryTokens = tokenizeQueryText(query)
+  if (queryTokens.length === 0) return false
+  return queryTokens.every(token => haystackTokens.has(token))
+}
+
 function loadFileMeta(filePath: string): { title: string; modified: string; size: number } {
   try {
     const content = readFileSync(filePath, 'utf-8')
@@ -202,12 +228,7 @@ const vaultTools = [
       }
 
       if (query) {
-        const q = query.toLowerCase()
-        items = items.filter(item =>
-          item.title.toLowerCase().includes(q) ||
-          item.id.toLowerCase().includes(q) ||
-          item.category.toLowerCase().includes(q)
-        )
+        items = items.filter(item => matchesVaultQuery(item, query))
       }
 
       const results = items.slice(0, limit).map(item => {

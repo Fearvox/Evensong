@@ -13,6 +13,56 @@ export class AllProvidersFailedError extends Error {
   }
 }
 
+function normalizeTopK(topK: number | undefined): number {
+  if (topK === undefined || !Number.isFinite(topK)) return Number.POSITIVE_INFINITY
+  return Math.max(0, Math.floor(topK))
+}
+
+function sanitizeResult(
+  result: VaultRetrievalResult,
+  request: VaultRetrievalRequest,
+): VaultRetrievalResult {
+  const knownPaths = new Set(request.manifest.map(entry => entry.path))
+  const limit = normalizeTopK(request.topK)
+  const rankedPaths: string[] = []
+  const scores: number[] | undefined = result.scores ? [] : undefined
+  const droppedPaths: string[] = []
+  const seen = new Set<string>()
+
+  if (limit === 0) {
+    return {
+      ...result,
+      rankedPaths,
+      scores,
+    }
+  }
+
+  for (const [index, path] of result.rankedPaths.entries()) {
+    if (!knownPaths.has(path) || seen.has(path)) {
+      droppedPaths.push(path)
+      continue
+    }
+    seen.add(path)
+    if (rankedPaths.length < limit) {
+      rankedPaths.push(path)
+      if (scores && result.scores?.[index] !== undefined) scores.push(result.scores[index]!)
+    }
+  }
+
+  if (result.rankedPaths.length > 0 && rankedPaths.length === 0) {
+    throw new Error(`provider returned only stale or duplicate paths (${droppedPaths.length} dropped)`)
+  }
+
+  return {
+    ...result,
+    rankedPaths,
+    scores,
+    diagnostics: droppedPaths.length > 0
+      ? { ...result.diagnostics, droppedPaths }
+      : result.diagnostics,
+  }
+}
+
 export async function vaultRetrieve(
   request: VaultRetrievalRequest,
   options: VaultRetrieveOptions,
@@ -31,7 +81,7 @@ export async function vaultRetrieve(
       continue
     }
     try {
-      return await provider.retrieve(request)
+      return sanitizeResult(await provider.retrieve(request), request)
     } catch (err) {
       attempts.push({ provider: provider.name, error: err instanceof Error ? err.message : String(err) })
       continue

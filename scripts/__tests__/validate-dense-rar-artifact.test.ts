@@ -14,6 +14,22 @@ const okRows = [
   { pipeline: 'dense-rar', queryId: 1, resultStatus: 'ok', top1Hit: true, top5Hit: true },
   { pipeline: 'dense-adaptive', queryId: 1, resultStatus: 'ok', top1Hit: true, top5Hit: true },
 ]
+const wave3Meta = {
+  ...baseMeta,
+  inputs: { querySuite: { name: 'wave3-adversarial-retrieval' } },
+}
+const wave3Rows = ['dense', 'dense-rar', 'dense-adaptive'].flatMap(pipeline =>
+  Array.from({ length: 24 }, (_, i) => ({
+    pipeline,
+    queryId: 101 + i,
+    category: 'near_neighbor_memory',
+    query: `query ${i}`,
+    ideal: `knowledge/doc-${i}.md`,
+    resultStatus: 'ok',
+    top1Hit: true,
+    top5Hit: true,
+  })),
+)
 const PRIVATE_BGE_URL = `http://${['10', '0', '0', '5'].join('.')}:8080/v1`
 const PRIVATE_VAULT_ROOT = ['', 'home', 'operator', 'research-vault'].join('/')
 
@@ -75,6 +91,23 @@ describe('dense RAR artifact trust validator', () => {
     expect(rows[0].resultStatus).toBe('ok')
     expect(rows[1].resultStatus).toBe('error')
     expect(rows[1].error).toContain('JSONL parse error')
+  })
+
+  test('rejects incomplete Wave 3 hard-suite evidence when hard-suite checking is required', () => {
+    const truncated = wave3Rows.slice(0, 71)
+    const result = assessDenseRarArtifactTrust(wave3Meta, truncated, { requireWave3HardSuite: true })
+
+    expect(result.formalEligible).toBe(false)
+    expect(result.blockers).toContain('wave3 hard-suite row count is 71, not 72')
+    expect(result.blockers).toContain('dense-adaptive row count is 23, not 24')
+    expect(result.blockers).toContain('dense-adaptive unique numeric queryId count is 23, not 24')
+  })
+
+  test('accepts complete Wave 3 hard-suite evidence when hard-suite checking is required', () => {
+    const result = assessDenseRarArtifactTrust(wave3Meta, wave3Rows, { requireWave3HardSuite: true })
+
+    expect(result.formalEligible).toBe(true)
+    expect(result.evidence.wave3HardSuiteChecked).toBe(true)
   })
 
   test('rejects publishable artifacts with private paths or IPs when required', () => {

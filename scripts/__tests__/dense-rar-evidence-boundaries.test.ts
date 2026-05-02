@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'bun:test'
-import { readFileSync } from 'node:fs'
+import { existsSync, readFileSync } from 'node:fs'
 import { findPublishableLeaks } from '../dense-rar-privacy'
 import { assessDenseRarArtifactTrust, parseJsonlRows } from '../validate-dense-rar-artifact'
 
@@ -16,6 +16,7 @@ describe('canonical Dense RAR evidence boundaries', () => {
     const rows = parseJsonlRows(read(`${PREFIX}.jsonl`))
     const trust = assessDenseRarArtifactTrust(meta, rows, {
       requirePublishableEvidence: true,
+      requireWave3HardSuite: true,
     })
 
     expect(trust.formalEligible).toBe(true)
@@ -52,9 +53,25 @@ describe('canonical Dense RAR evidence boundaries', () => {
       `${PREFIX}.md`,
       `${PREFIX}.meta.json`,
     ]
+    const optionalLocalPlanningReports = [
+      '.planning/phases/15.0-stage1topk50-formal-rerun/report.md',
+      '.planning/phases/15.1-canonical-dense-rar-reporting/report.md',
+    ]
 
     for (const file of publishableFiles) {
       expect({ file, leaks: findPublishableLeaks(read(file)) }).toEqual({ file, leaks: [] })
+    }
+
+    // These phase reports are intentionally local planning artifacts in clean
+    // worktrees. If an operator has them present, keep scanning them; otherwise
+    // their absence must not make publishable-surface privacy tests depend on
+    // gitignored state.
+    for (const file of optionalLocalPlanningReports) {
+      if (existsSync(file)) {
+        expect({ file, leaks: findPublishableLeaks(read(file)) }).toEqual({ file, leaks: [] })
+      } else {
+        expect(existsSync(file)).toBe(false)
+      }
     }
   })
 

@@ -1,34 +1,29 @@
+import { execFileSync } from 'node:child_process'
 import { describe, expect, test } from 'bun:test'
-import { spawnSync } from 'child_process'
 
 function gitLsFiles(): string[] {
-  const result = spawnSync('git', ['ls-files'], {
-    encoding: 'utf8',
-  })
-
-  expect(result.status).toBe(0)
-
-  return result.stdout
+  return execFileSync('git', ['ls-files'], { encoding: 'utf8' })
     .split('\n')
-    .map(line => line.trim())
     .filter(Boolean)
 }
 
 describe('git tracked paths', () => {
-  test('does not contain case-insensitive path collisions', () => {
+  test('do not collide on case-insensitive filesystems', () => {
     const paths = gitLsFiles()
-    const byLowercase = new Map<string, string[]>()
+    const seen = new Map<string, string>()
+    const collisions: string[] = []
 
     for (const path of paths) {
       const key = path.toLowerCase()
-      const existing = byLowercase.get(key) ?? []
-      existing.push(path)
-      byLowercase.set(key, existing)
-    }
+      const existing = seen.get(key)
 
-    const collisions = [...byLowercase.values()].filter(
-      group => new Set(group).size > 1,
-    )
+      if (existing && existing !== path) {
+        collisions.push(`${existing} <-> ${path}`)
+        continue
+      }
+
+      seen.set(key, path)
+    }
 
     expect(collisions).toEqual([])
   })

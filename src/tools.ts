@@ -102,6 +102,7 @@ export {
   COORDINATOR_MODE_ALLOWED_TOOLS,
 } from './constants/tools.js'
 import { feature } from 'src/utils/featureFlag.js'
+import { logForDebugging } from './utils/debug.js'
 // Conditional tool imports — feature() reads from ~/.claude/feature-flags.json
 /* eslint-disable custom-rules/no-process-env-top-level, @typescript-eslint/no-require-imports */
 const OverflowTestTool = feature('OVERFLOW_TEST_TOOL')
@@ -176,10 +177,40 @@ export function parseToolPreset(preset: string): ToolPreset | null {
  * @param preset The preset name
  * @returns Array of tool names
  */
+function isToolEnabledSafely(tool: Tool): boolean {
+  try {
+    return tool.isEnabled()
+  } catch (error) {
+    const message =
+      error instanceof Error ? `${error.name}: ${error.message}` : String(error)
+    logForDebugging(
+      `Tool ${tool.name} isEnabled() failed during tool enumeration; disabling for this pass: ${message}`,
+      { level: 'warn' },
+    )
+    return false
+  }
+}
+
 export function getToolsForDefaultPreset(): string[] {
   const tools = getAllBaseTools()
-  const isEnabled = tools.map(tool => tool.isEnabled())
+  const isEnabled = tools.map(tool => isToolEnabledSafely(tool))
   return tools.filter((_, i) => isEnabled[i]).map(tool => tool.name)
+}
+
+const MODEL_HIDDEN_BUILT_IN_TOOL_NAMES = new Set([
+  ListMcpResourcesTool.name,
+  ReadMcpResourceTool.name,
+  SYNTHETIC_OUTPUT_TOOL_NAME,
+])
+
+export function getAllRestrictableBuiltInToolNames(): string[] {
+  return [
+    ...new Set(
+      getAllBaseTools()
+        .filter(tool => !MODEL_HIDDEN_BUILT_IN_TOOL_NAMES.has(tool.name))
+        .map(tool => tool.name),
+    ),
+  ]
 }
 
 /**
@@ -298,13 +329,9 @@ export const getTools = (permissionContext: ToolPermissionContext): Tools => {
   }
 
   // Get all base tools and filter out special tools that get added conditionally
-  const specialTools = new Set([
-    ListMcpResourcesTool.name,
-    ReadMcpResourceTool.name,
-    SYNTHETIC_OUTPUT_TOOL_NAME,
-  ])
-
-  const tools = getAllBaseTools().filter(tool => !specialTools.has(tool.name))
+  const tools = getAllBaseTools().filter(
+    tool => !MODEL_HIDDEN_BUILT_IN_TOOL_NAMES.has(tool.name),
+  )
 
   // Filter out tools that are denied by the deny rules
   let allowedTools = filterToolsByDenyRules(tools, permissionContext)
@@ -322,7 +349,7 @@ export const getTools = (permissionContext: ToolPermissionContext): Tools => {
     }
   }
 
-  const isEnabled = allowedTools.map(_ => _.isEnabled())
+  const isEnabled = allowedTools.map(tool => isToolEnabledSafely(tool))
   return allowedTools.filter((_, i) => isEnabled[i])
 }
 

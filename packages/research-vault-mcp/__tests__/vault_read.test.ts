@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'bun:test'
-import { normalizeDecayScoresStore } from '../src/vault.ts'
+import { matchesVaultQuery, normalizeDecayScoresStore } from '../src/vault.ts'
 
 describe('vault read metadata', () => {
   test('normalizes legacy object-shaped decay score stores', () => {
@@ -31,5 +31,18 @@ describe('vault read metadata', () => {
       summaryLevel: 'deep',
       accessCount: 3,
     })
+  })
+
+  test('matches punctuation-heavy memory queries by meaningful terms', () => {
+    const item = {
+      id: 'memory-layer-embodied-self-model',
+      title: 'Memory Layer: Embodied Self Model',
+      category: 'ai-agents/memory',
+    }
+
+    expect(matchesVaultQuery(item, 'Memory-Layer and Embodied Self-Model')).toBe(true)
+    expect(matchesVaultQuery(item, 'unrelated planning trace')).toBe(false)
+    expect(matchesVaultQuery(item, 'the and to')).toBe(false)
+    expect(matchesVaultQuery(item, '!!!')).toBe(false)
   })
 })

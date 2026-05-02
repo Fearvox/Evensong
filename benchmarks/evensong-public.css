@@ -42,6 +42,12 @@ a {
   color: inherit;
 }
 
+a:focus-visible,
+.btn:focus-visible {
+  outline: 2px solid oklch(0.47 0.11 245 / 0.72);
+  outline-offset: 3px;
+}
+
 img {
   max-width: 100%;
 }
@@ -156,6 +162,7 @@ h1 {
   letter-spacing: 0;
   margin-bottom: 1.25rem;
   max-width: 780px;
+  text-wrap: balance;
 }
 
 h2 {
@@ -163,6 +170,7 @@ h2 {
   line-height: 1.1;
   letter-spacing: 0;
   margin-bottom: 0.7rem;
+  text-wrap: balance;
 }
 
 h3 {
@@ -176,6 +184,7 @@ h3 {
   font-size: clamp(1.04rem, 1.6vw, 1.24rem);
   max-width: 660px;
   margin-bottom: 1.7rem;
+  text-wrap: pretty;
 }
 
 .actions {
@@ -324,6 +333,7 @@ h3 {
 
 .card {
   padding: 1.15rem;
+  min-height: 100%;
 }
 
 .metric {
@@ -347,10 +357,16 @@ h3 {
 .card p {
   font-size: 0.92rem;
   margin-bottom: 0;
+  text-wrap: pretty;
+}
+
+.stacked-cards {
+  grid-template-columns: 1fr;
 }
 
 .status {
   display: inline-flex;
+  align-items: center;
   width: fit-content;
   margin-bottom: 0.7rem;
   padding: 0.18rem 0.5rem;
@@ -358,6 +374,7 @@ h3 {
   font-family: var(--font-mono);
   font-size: 0.67rem;
   font-weight: 700;
+  line-height: 1.35;
   text-transform: uppercase;
   letter-spacing: 0.04em;
 }
@@ -487,6 +504,10 @@ tr:last-child td {
   color: var(--accent-red);
 }
 
+.scope-note {
+  margin-top: 1rem;
+}
+
 .evidence-list {
   display: grid;
   gap: 0.85rem;
@@ -500,11 +521,16 @@ tr:last-child td {
   padding: 1rem;
 }
 
+.evidence-row p {
+  margin-bottom: 0;
+}
+
 .evidence-row a {
   color: var(--accent-green);
   text-decoration: none;
   font-family: var(--font-mono);
   font-size: 0.8rem;
+  white-space: nowrap;
 }
 
 .footer {
@@ -540,6 +566,7 @@ tr:last-child td {
 
   .nav {
     justify-content: flex-start;
+    width: 100%;
   }
 
   .hero {
@@ -587,6 +614,33 @@ tr:last-child td {
 
   .nav a {
     padding-inline: 0.5rem;
+  }
+
+  .actions,
+  .btn {
+    width: 100%;
+  }
+
+  .nav {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    padding-bottom: 0.2rem;
+    scrollbar-width: thin;
+  }
+
+  .nav a {
+    flex: 0 0 auto;
+  }
+}
+
+@media (max-width: 480px) {
+  th,
+  td {
+    padding: 0.72rem 0.78rem;
+  }
+
+  table {
+    min-width: 620px;
   }
 }
 

@@ -228,9 +228,10 @@ function checkModuleStatus(flag: string, projectRoot: string): {
  * Scan all active feature flags and generate health results.
  * @returns Array of FlagHealthResult sorted alphabetically by flag name
  */
-export async function scanAllFlags(): Promise<FlagHealthResult[]> {
-  const flags = getAllFlags()
-  const activeFlags = Object.entries(flags)
+export async function scanAllFlags(
+  flagSource: Record<string, boolean> = getAllFlags(),
+): Promise<FlagHealthResult[]> {
+  const activeFlags = Object.entries(flagSource)
     .filter(([, enabled]) => enabled === true)
     .map(([name]) => name)
 
