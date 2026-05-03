@@ -195,6 +195,8 @@ npx @syndash/research-vault-mcp --transport=stdio
 # 或：bunx @syndash/research-vault-mcp --transport=stdio
 ```
 
+MCP package 运行时仍需要 Bun。`npx` 只是方便安装/启动，不代表 server 已经是纯 Node runtime。
+
 完整 Evensong repo：
 
 ```bash

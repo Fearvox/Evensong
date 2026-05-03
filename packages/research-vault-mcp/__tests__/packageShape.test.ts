@@ -90,4 +90,17 @@ describe('@syndash/research-vault-mcp package shape (npx publish readiness)', ()
     expect(Array.isArray(pkg.keywords)).toBe(true)
     expect(pkg.keywords).toContain('mcp')
   })
+
+  test('README documents Bun-native runtime contract', () => {
+    const readme = readFileSync(join(PKG_ROOT, 'README.md'), 'utf8')
+    expect(readme).toContain('Bun-native')
+    expect(readme).toContain('`npx` is supported as an install/launch shim')
+    expect(readme).toContain('must have `bun` available on `PATH`')
+  })
+
+  test('CHANGELOG is packaged and documents current version', () => {
+    expect(pkg.files).toContain('CHANGELOG.md')
+    const changelog = readFileSync(join(PKG_ROOT, 'CHANGELOG.md'), 'utf8')
+    expect(changelog).toContain(`## ${pkg.version}`)
+  })
 })

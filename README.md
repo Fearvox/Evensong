@@ -195,6 +195,8 @@ npx @syndash/research-vault-mcp --transport=stdio
 # or: bunx @syndash/research-vault-mcp --transport=stdio
 ```
 
+The MCP package still requires Bun at runtime. `npx` is a convenient launcher, not a Node-only runtime guarantee.
+
 For the full Evensong repo:
 
 ```bash

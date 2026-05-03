@@ -1,12 +1,13 @@
 {
-  "name": "claude-code",
+  "name": "evensong",
   "version": "1.0.0",
   "private": true,
   "type": "module",
   "workspaces": [
     "packages/@ant/*",
     "packages/*-napi",
-    "packages/research-vault-mcp"
+    "packages/research-vault-mcp",
+    "packages/creator-motion-storyboard"
   ],
   "scripts": {
     "build": "bun build src/entrypoints/cli.tsx --outdir dist --target bun",

@@ -1,10 +1,10 @@
 {
-  "name": "@syndash/research-vault-mcp",
-  "version": "1.1.2",
-  "description": "Evensong Research Vault MCP module — local-first semantic search, note persistence, and knowledge-base tools for MCP-compatible agents.",
+  "name": "@syndash/creator-motion-storyboard",
+  "version": "0.1.0",
+  "description": "Capsule-to-motion-storyboard controller — public-safe route with JSON contract, fixed-canvas HTML storyboard, and ledger retention.",
   "type": "module",
   "bin": {
-    "research-vault-mcp": "bin/research-vault-mcp.mjs"
+    "creator-motion-storyboard": "bin/creator-motion-storyboard.mjs"
   },
   "scripts": {
     "dev": "bun run src/server.ts",
@@ -15,9 +15,9 @@
   "repository": {
     "type": "git",
     "url": "git+https://github.com/Fearvox/Evensong.git",
-    "directory": "packages/research-vault-mcp"
+    "directory": "packages/creator-motion-storyboard"
   },
-  "homepage": "https://github.com/Fearvox/Evensong/tree/main/packages/research-vault-mcp",
+  "homepage": "https://github.com/Fearvox/Evensong/tree/main/packages/creator-motion-storyboard",
   "bugs": {
     "url": "https://github.com/Fearvox/Evensong/issues"
   },
@@ -34,16 +34,11 @@
     "package.json"
   ],
   "keywords": [
-    "mcp",
-    "model-context-protocol",
-    "research-vault",
-    "claude-code",
-    "evermind",
+    "storyboard",
+    "motion",
+    "capsule",
+    "creator",
     "dash-shatter",
     "syndash"
-  ],
-  "dependencies": {
-    "@anthropic-ai/sdk": "^0.92.0",
-    "markitdown": "latest"
-  }
+  ]
 }

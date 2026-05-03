@@ -17,6 +17,8 @@ bunx @syndash/research-vault-mcp --transport=stdio
 
 Default transport is `stdio`, because command-launched MCP servers are expected to speak JSON-RPC over stdin/stdout. Install [Bun](https://bun.sh) before using either `npx` or `bunx`; the server itself is Bun-native.
 
+**Runtime note:** `@syndash/research-vault-mcp` is Bun-native. `npx` is supported as an install/launch shim, but the target machine must have `bun` available on `PATH`. If you need a pure Node runtime, treat that as a separate compatibility track rather than assuming this package already provides it.
+
 Use HTTP only when you explicitly want a long-running remote MCP server. The HTTP server exposes both the current Streamable HTTP endpoint and the legacy SSE endpoint:
 
 ```bash
@@ -117,6 +119,14 @@ score(d, q, t) = lexical(q,d)
 
 The Evensong benchmark evidence for hybrid retrieval and Dense RAR lives in the parent repo under `benchmarks/`.
 
+## Node compatibility status
+
+The package is intentionally Bun-native today because the server uses Bun APIs and the parent Evensong repo is Bun-only. The npm bin is Node-compatible only as a launcher: it locates `dist/server.js` or `src/server.ts`, then delegates execution to `bun`. This keeps package installation convenient while avoiding a misleading claim that the MCP server itself runs under plain Node.js.
+
 ## License
 
 Apache-2.0 for package code. Research artifacts in the parent repo may use separate licenses; check the repository root license files.
+
+## Releases
+
+See [CHANGELOG.md](./CHANGELOG.md). Current npm release: `1.1.2`.
