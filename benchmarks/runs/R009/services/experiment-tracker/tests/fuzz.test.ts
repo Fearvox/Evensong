@@ -17,6 +17,12 @@ function randomString(minLen = 1, maxLen = 50): string {
   return Array.from({ length: len }, () => chars[Math.floor(Math.random() * chars.length)]).join('');
 }
 
+function randomKeyString(minLen = 1, maxLen = 50): string {
+  const len = minLen + Math.floor(Math.random() * (maxLen - minLen + 1));
+  const chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-_';
+  return Array.from({ length: len }, () => chars[Math.floor(Math.random() * chars.length)]).join('');
+}
+
 function randomFloat(min = -100, max = 100): number {
   return min + Math.random() * (max - min);
 }
@@ -42,7 +48,7 @@ function uniqueKeys(n: number): string[] {
   const keys = new Set<string>();
   let attempts = 0;
   while (keys.size < n && attempts < n * 10) {
-    keys.add(`hp_${randomString(2, 10)}_${keys.size}`);
+    keys.add(`hp_${randomKeyString(2, 10)}_${keys.size}`);
     attempts++;
   }
   return Array.from(keys);
@@ -105,7 +111,7 @@ describe('Fuzz: Random hyperparameters', () => {
     const allKeys = new Set<string>();
 
     for (let i = 0; i < 10; i++) {
-      const newKey = `round_${i}_${randomString(3, 8)}`;
+      const newKey = `round_${i}_${randomKeyString(3, 8)}`;
       if (allKeys.has(newKey)) continue;
       allKeys.add(newKey);
       const hp = randomHyperparameter(newKey);

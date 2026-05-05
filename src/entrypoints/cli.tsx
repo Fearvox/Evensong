@@ -89,6 +89,35 @@ async function main(): Promise<void> {
     const { profileCheckpoint } = await import("../utils/startupProfiler.js");
     profileCheckpoint("cli_entry");
 
+    // Fast-path for `claude auth` subcommands. These should never require the
+    // full interactive CLI to start (trust dialog, REPL, etc).
+    if (args[0] === "auth") {
+        profileCheckpoint("cli_auth_fast_path");
+        const { authFastPathMain } = await import("../cli/handlers/authFastPath.js");
+        const handled = await authFastPathMain(args.slice(1));
+        if (handled) {
+            return;
+        }
+    }
+
+    // Fast-path for `claude plugin list` / `claude plugins list` in headless contexts.
+    if (args[0] === "plugin" || args[0] === "plugins") {
+        profileCheckpoint("cli_plugin_fast_path");
+        const { pluginFastPathMain } = await import("../cli/handlers/pluginFastPath.js");
+        const handled = await pluginFastPathMain(args.slice(1));
+        if (handled) {
+            return;
+        }
+    }
+
+    // Fast-path for `claude activity`: show recent GitHub contribution activity.
+    if (args[0] === "activity") {
+        profileCheckpoint("cli_activity_path");
+        const { activityMain } = await import("../cli/handlers/activity.js");
+        await activityMain(args.slice(1));
+        return;
+    }
+
     // Fast-path for --dump-system-prompt: output the rendered system prompt and exit.
     // Used by prompt sensitivity evals to extract the system prompt at a specific commit.
     // Ant-only: eliminated from external builds via feature flag.

@@ -22,6 +22,7 @@ import { OAuthService } from '../../services/oauth/index.js'
 import type { OAuthTokens } from '../../services/oauth/types.js'
 import {
   clearOAuthTokenCache,
+  type ApiKeySource,
   getAnthropicApiKeyWithSource,
   getAuthTokenSource,
   getOauthAccountInfo,
@@ -234,11 +235,17 @@ export async function authStatus(opts: {
   text?: boolean
 }): Promise<void> {
   const { source: authTokenSource, hasToken } = getAuthTokenSource()
-  const { source: apiKeySource } = getAnthropicApiKeyWithSource()
+  // In CI/test environments, getAnthropicApiKeyWithSource() intentionally
+  // throws when no auth env vars are set to prevent accidental unauth'd calls.
+  // `claude auth status` should still work and report "not logged in".
+  let apiKeySource: ApiKeySource = 'none'
+  try {
+    apiKeySource = getAnthropicApiKeyWithSource().source
+  } catch {
+    apiKeySource = 'none'
+  }
   const hasApiKeyEnvVar =
     !!process.env.ANTHROPIC_API_KEY && !isRunningOnHomespace()
-  const oauthAccount = getOauthAccountInfo()
-  const subscriptionType = getSubscriptionType()
   const using3P = isUsing3PServices()
   const loggedIn =
     hasToken || apiKeySource !== 'none' || hasApiKeyEnvVar || using3P
@@ -260,6 +267,13 @@ export async function authStatus(opts: {
   }
 
   if (opts.text) {
+    if (!loggedIn) {
+      process.stdout.write(
+        'Not logged in. Run claude auth login to authenticate.\n',
+      )
+      process.exit(1)
+    }
+
     const properties = [
       ...buildAccountProperties(),
       ...buildAPIProviderProperties(),
@@ -285,11 +299,6 @@ export async function authStatus(opts: {
     if (!hasAuthProperty && hasApiKeyEnvVar) {
       process.stdout.write('API key: ANTHROPIC_API_KEY\n')
     }
-    if (!loggedIn) {
-      process.stdout.write(
-        'Not logged in. Run claude auth login to authenticate.\n',
-      )
-    }
   } else {
     const apiProvider = getAPIProvider()
     const resolvedApiKeySource =
@@ -307,6 +316,18 @@ export async function authStatus(opts: {
       output.apiKeySource = resolvedApiKeySource
     }
     if (authMethod === 'claude.ai') {
+      let oauthAccount: ReturnType<typeof getOauthAccountInfo> | null = null
+      try {
+        oauthAccount = getOauthAccountInfo()
+      } catch {
+        oauthAccount = null
+      }
+      let subscriptionType: ReturnType<typeof getSubscriptionType> | null = null
+      try {
+        subscriptionType = getSubscriptionType()
+      } catch {
+        subscriptionType = null
+      }
       output.email = oauthAccount?.emailAddress ?? null
       output.orgId = oauthAccount?.organizationUuid ?? null
       output.orgName = oauthAccount?.organizationName ?? null
