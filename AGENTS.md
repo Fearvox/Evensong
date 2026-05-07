@@ -1,14 +1,10 @@
-Here's the compressed version:
-
----
-
 # AGENTS.md
 
-Guidance for Codex (Codex.ai/code) in this repo.
+Guidance for agents working on Evensong / Claude Code Reimagine.
 
 ## Project Overview
 
-**Reverse-engineered / decompiled** Anthropic Codex CLI. Goal: restore core functionality, trim secondary capabilities. Many modules stubbed or feature-flagged off. ~1341 tsc errors from decompilation (mostly `unknown`/`never`/`{}` types) — do **not** block Bun runtime.
+**Reverse-engineered / decompiled** Anthropic Claude Code CLI. Goal: restore core functionality, trim secondary capabilities. Many modules stubbed or feature-flagged off. ~1341 tsc errors from decompilation (mostly `unknown`/`never`/`{}` types) — do **not** block Bun runtime.
 
 ## Commands
 
@@ -27,7 +23,7 @@ echo "say hello" | bun run src/entrypoints/cli.tsx -p
 bun run build
 ```
 
-No test runner configured. No linter configured.
+Test runner: `bun test`. No dedicated lint script is configured; Biome exists as a lint-only config and the formatter is disabled.
 
 ## Architecture
 
@@ -49,13 +45,13 @@ No test runner configured. No linter configured.
 
 ### Core Loop
 
-- **`src/query.ts`** — Main API query fn. Sends msgs to Codex API, handles streaming, processes tool calls, manages conversation turn loop.
+- **`src/query.ts`** — Main API query fn. Sends msgs to Claude API, handles streaming, processes tool calls, manages conversation turn loop.
 - **`src/QueryEngine.ts`** — Higher-level orchestrator wrapping `query()`. Manages conversation state, compaction, file history snapshots, attribution, turn bookkeeping. Used by REPL screen.
 - **`src/screens/REPL.tsx`** — Interactive REPL (React/Ink). Handles input, message display, tool permission prompts, keyboard shortcuts.
 
 ### API Layer
 
-- **`src/services/api/Codex.ts`** — Core API client. Builds request params (system prompt, messages, tools, betas), calls Anthropic SDK streaming endpoint, processes `BetaRawMessageStreamEvent` events.
+- **`src/services/api/claude.ts`** — Core API client. Builds request params (system prompt, messages, tools, betas), calls Anthropic SDK streaming endpoint, processes `BetaRawMessageStreamEvent` events.
 - Supports providers: Anthropic direct, AWS Bedrock, Google Vertex, Azure.
 - Provider selection: `src/utils/model/providers.ts`.
 
@@ -85,8 +81,8 @@ No test runner configured. No linter configured.
 
 ### Context & System Prompt
 
-- **`src/context.ts`** — Builds system/user context for API call (git status, date, AGENTS.md contents, memory files).
-- **`src/utils/claudemd.ts`** — Discovers + loads AGENTS.md files from project hierarchy.
+- **`src/context.ts`** — Builds system/user context for API call (git status, date, instruction files, memory files).
+- **`src/utils/claudemd.ts`** — Discovers + loads `CLAUDE.md`, `AGENTS.md`, `.claude/CLAUDE.md`, and `.claude/rules/*.md` files from project hierarchy.
 
 ### Feature Flag System
 
@@ -133,13 +129,13 @@ Trigger phrases: "evensong benchmark", "co-evolution loop", "dash-shatter handof
 <!-- GSD:project-start source:PROJECT.md -->
 ## Project
 
-**CCR (Codex Reimagine)**
+**CCR (Claude Code Reimagine)**
 
-Reverse-engineered/decompiled Anthropic Codex CLI. Goal: restore core into hackable, understandable codebase, trim secondary capabilities. Built on Bun runtime w/ ESM, TSX, Ink for terminal UI.
+Reverse-engineered/decompiled Anthropic Claude Code CLI. Goal: restore core into hackable, understandable codebase, trim secondary capabilities. Built on Bun runtime w/ ESM, TSX, Ink for terminal UI.
 
-> **CCR vs CCB**: This repo = **CCR** (`Codex-reimagine-for-learning`). Milestone/brand repo at `~/dash-shatter/` = **CCB** (DASH SHATTER product).
+> **Naming note**: GitHub repo = **Evensong**. Active project shorthand = **CCR / Claude Code Reimagine**. Historical local directory names may still say `claude-code-reimagine-for-learning`; do not rewrite the project as an OpenAI CLI fork.
 
-**Core Value:** Working, modifiable Codex CLI devs can study, extend, customize — bridging "decompiled and runs" to "engineered and maintainable."
+**Core Value:** Working, modifiable Claude Code CLI devs can study, extend, customize — bridging "decompiled and runs" to "engineered and maintainable."
 
 ### Constraints
 
@@ -253,7 +249,7 @@ Reverse-engineered/decompiled Anthropic Codex CLI. Goal: restore core into hacka
 Closes miromind → optimization feedback loop. All changes surgical, verifiable, GSD-compliant. (Signed: Grok CLI Agent + xai-fast)
 
 *(End of round — AGENTS.md remains living miromind core.)*
-- [Anthropic SDK connection error retry issue #37077](https://github.com/anthropics/Codex/issues/37077)
+- [Claude Code connection error retry issue #37077](https://github.com/anthropics/claude-code/issues/37077)
 - [Anthropic SDK streaming interrupted issue #842](https://github.com/anthropics/anthropic-sdk-typescript/issues/842)
 - [TypeScript strictness monotonicity article](https://huonw.github.io/blog/2025/12/typescript-monotonic/)
 - [TypeScript 6.0 announcement](https://devblogs.microsoft.com/typescript/announcing-typescript-6-0/)
@@ -276,10 +272,9 @@ Not yet mapped. Follow existing codebase patterns.
 
 | Skill | Description | Path |
 |-------|-------------|------|
-| everything-Codex-conventions | Dev conventions/patterns for everything-Codex. JavaScript project w/ conventional commits. | `.Codex/skills/everything-Codex/SKILL.md` |
-| startup-hook-skill | Creating startup hooks for Codex on web. Use when user wants to set up repo for Codex on web, create SessionStart hook for tests/linters during web sessions. | `.Codex/skills/session-start-hook/SKILL.md` |
-| benchmark-ingest | Post-benchmark workflow: ingest results to registry, update dashboard + research pages, sync i18n, deploy. Trigger on "benchmark done", "收尾", "录入". | `.Codex/skills/benchmark-ingest/SKILL.md` |
-| benchmark-preflight | Pre-flight for Evensong cross-model benchmarks. Commits dirty state, generates 16-dimension predictions (behavioral + emotional + integrity + quality), prints REPL execution card, creates observation scorecard. Trigger on "start benchmark", "preflight", "开跑", "run R0XX". | `.Codex/skills/benchmark-preflight/SKILL.md` |
+| repo-bootstrap-and-audit | Bootstrap a repo with skills/commands/plugins ecosystem, audit architecture, plan infrastructure, and verify build stability. | `skills/repo-bootstrap-and-audit/SKILL.md` |
+| self-evolution-coordinator | Coordinates Evensong-style self/co-evolution loops as internal reference only, with AgentTool spawning and vault side-loading. | `skills/self-evolution-coordinator/SKILL.md` |
+| tencent-meeting-mcp | Tencent Meeting MCP assistant for meeting, member, recording, and transcript workflows. | `skills/tencent-meeting-mcp/SKILL.md` |
 <!-- GSD:skills-end -->
 
 <!-- GSD:workflow-start source:GSD defaults -->
@@ -299,7 +294,7 @@ No direct repo edits outside GSD workflow unless user explicitly asks to bypass.
 ## Developer Profile
 
 > Not yet configured. Run `/gsd-profile-user` to generate.
-> Managed by `generate-Codex-profile` — don't edit manually.
+> Managed by `generate-claude-profile` — don't edit manually.
 <!-- GSD:profile-end -->
 
 ## Research Vault Handoffs & Evolution Anchors (2026-04-13 Update)
