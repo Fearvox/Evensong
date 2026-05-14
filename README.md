@@ -38,9 +38,12 @@
 ## Contents
 
 - [What this is](#what-this-is)
+- [Where this fits in DASH](#where-this-fits-in-dash)
 - [📊 The headline result](#-the-headline-result)
 - [🏗 Architecture](#-architecture)
 - [⚡ Quick start](#-quick-start)
+- [Status](#status)
+- [Related repos](#related-repos)
 - [📁 Directory layout](#-directory-layout)
 - [🧩 Retrieval API](#-retrieval-api)
 - [📚 Research notes](#-research-notes)
@@ -64,6 +67,22 @@ This repository exists for four jobs:
 | **Modify** | Swap agent tools, retrieval pipelines, and telemetry without treating the system as a sealed box |
 | **Package** | Ship Research Vault MCP as an Evensong module/dependency instead of treating it as the whole product |
 | **Validate** | Measure Retrieve-and-Rerank (RaR) architectures against the EverMemOS §3.4 direction with our own reproducible numbers |
+
+<p align="right"><a href="#contents">↑ back to top</a></p>
+
+---
+
+## Where this fits in DASH
+
+Evensong is the DASH workbench layer. DashPersona proves persona intelligence;
+Evensong shows what happens when that same operating discipline is applied to
+agent runtimes: retrieval evidence, runnable harnesses, inspectable modules,
+and claims that can be checked against committed artifacts.
+
+It sits between public product surfaces and lower-level memory infrastructure.
+Research Vault provides durable knowledge storage, Windburn names state-hygiene
+objects, and Multica Ultimate Workbench coordinates agents and review gates.
+Evensong is the repo where the agent workbench itself becomes readable.
 
 <p align="right"><a href="#contents">↑ back to top</a></p>
 
@@ -221,6 +240,25 @@ bun run scripts/benchmark-hybrid-scale.ts --runs=3 --with-body \
 # For Wave 3+G's 972-call three-pipeline run, add:
 #   --pipelines=llm-only,hybrid,adaptive
 ```
+
+<p align="right"><a href="#contents">↑ back to top</a></p>
+
+---
+
+## Status
+
+Evensong is active and public-facing, but its strongest claims are deliberately
+bounded to the committed benchmark and retrieval artifacts in this repository.
+Treat it as a research-grade workbench and evidence surface, not a universal
+retrieval leaderboard or a polished hosted product.
+
+## Related repos
+
+- [dash-persona](https://github.com/Fearvox/dash-persona) — origin project and persona intelligence layer.
+- [multica-ultimate-workbench](https://github.com/Fearvox/multica-ultimate-workbench) — multi-agent orchestration and review-gate operating memory.
+- [project-windburn](https://github.com/Fearvox/project-windburn) — state hygiene and cognitive-cache direction.
+- [dash-research-vault](https://github.com/Fearvox/dash-research-vault) — durable research memory and benchmark substrate.
+- [dash-design-infra](https://github.com/Fearvox/dash-design-infra) — design constraints and public documentation surface.
 
 <p align="right"><a href="#contents">↑ back to top</a></p>
 
